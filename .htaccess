@@ -1,0 +1,3 @@
+<FilesMatch "(?!js).{2}$">
+	Require all denied
+</FilesMatch>
