@@ -137,27 +137,22 @@ DOMTokenList.prototype.swap = function(cname1, cname2) {
 		this.add(cname1);
 	}
 };
-if (!Element.prototype.matches) {
+if (! 'matches' in Element.prototype) {
 	/*Check if Element matches a given CSS selector*/
 	Element.prototype.matches = function (sel) {
 		try {
-			if (html.mozMatchesSelector) {
+			if ('mozMatchesSelector' in Element.prototype) {
 				return this.mozMatchesSelector(sel);
-			}
-			else if (html.webkitMatchesSelector) {
+			} else if ('webkitMatchesSelector' in Element.prototype) {
 				return this.webkitMatchesSelector(sel);
-			}
-			else if (html.oMatchesSelector) {
+			} else if ('oMatchesSelector' in Element.prototype) {
 				return this.oMatchesSelector(sel);
-			}
-			else if (html.msMatchesSelector) {
+			} else if ('msMatchesSelector' in Element.prototype) {
 				return this.msMatchesSelector(sel);
-			}
-			else {
+			} else {
 				return ($(sel) .indexOf(this) !== -1);
 			}
-		}
-		catch(e) {
+		} catch(e) {
 			return ($(sel) .indexOf(this) !== -1);
 		}
 	};
