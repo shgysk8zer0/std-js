@@ -372,12 +372,20 @@ function notify(options) {
 		alert(options.title || document.title + '\n' + options.body);
 	}
 	if (!!notification) {
-		(!!options.onclick) ? notification.onclick = options.onclick : null;
-		(!!options.onshow) ? notification.onshow = options.onshow : null;
-		(!!options.onclose) ? notification.onclose = options.onclose : null;
-		(!!options.onerror) ? notification.onerror = options.onerror : notification.onerror = function (error) {
-			console.error(error);
-		};
+		if ('onclick' in options) {
+			notification.onclick = options.onclick;
+		}
+		if ('onshow' in options) {
+			notification.onshow = options.onshow;
+		}
+		if ('onclose' in options) {
+			notification.onclose = options.onclose;
+		}
+		if ('onerror' in options) {
+			notification.onerror = options.onerror;
+		} else {
+			notification.onerror = console.error;
+		}
 		return notification;
 	}
 }
@@ -419,13 +427,10 @@ function supports(type) {
 	* Defaults to testing support for an element of tag (type)
 	* Which works by testing if the browser considers it unknown element type
 	*/
-	type = type.toLowerCase();
-	if(sessionStorage.hasOwnProperty('Supports_' + type)) {
-		return sessionStorage.getItem('Supports_' + type) == 'true';
+	if (typeof type === 'undefined') {
+		return false;
 	}
-	var supports = false,
-	prefixes = [
-		/*Array of vendor prefixes*/
+	var prefixes = [
 		'',
 		'moz',
 		'webkit',
@@ -434,121 +439,142 @@ function supports(type) {
 	],
 	/*Shorten for CSS properties*/
 	style = document.documentElement.style;
-	supportsTest:
-	switch (type) {
-		case 'queryselectorall': {
-			supports = ('querySelectorAll' in document);
-		} break;
-		case 'svg': {
-			supports = (document.implementation.hasFeature('http://www.w3.org/TR/SVG11/feature#Shape', '1.1'));
-		} break;
-		case 'dataset': {
-			supports = ('DOMStringMap' in window);
-		} break;
-		case 'htmlimports' : {
-			supports = ('import' in document.createElement('link'));
-		} break;
-		case 'geolocation': {
-			supports = ('geolocation' in navigator);
-		} break;
-		case 'connectivity': {
-			supports = ('onLine' in navigator);
-		} break;
-		case 'visibility': {
-			supports = ('visibilityState' in document) || ('webkitVisibilityState' in document);
-		} break;
-		case 'validity': {
-			supports = ('validity' in document.createElement('input'));
-		} break;
-		case 'fonts': {
-			supports = ('CSSFontFaceRule' in window);
-		} break;
-		case 'csssupports': {
-			supports = ('supports' in CSS);
-		} break;
-		case 'listeners': {
-			supports = ('addEventListener' in window);
-		} break;
-		case 'animations': {
-			supports = ((('supports' in CSS) && CSS.supports('animation', 'name') ||
+	switch (type.toLowerCase()) {
+		case 'queryselectorall':
+			return ('querySelectorAll' in document);
+			break;
+
+		case 'svg':
+			return (document.implementation.hasFeature('http://www.w3.org/TR/SVG11/feature#Shape', '1.1'));
+			break;
+
+		case 'dataset':
+			return ('DOMStringMap' in window);
+			break;
+
+		case 'htmlimports':
+			return ('import' in document.createElement('link'));
+			break;
+
+		case 'geolocation':
+			return ('geolocation' in navigator);
+			break;
+
+		case 'connectivity':
+			return ('onLine' in navigator);
+			break;
+
+		case 'visibility':
+			return ('visibilityState' in document) || ('webkitVisibilityState' in document);
+			break;
+
+		case 'validity':
+			return ('validity' in document.createElement('input'));
+			break;
+
+		case 'fonts':
+			return ('CSSFontFaceRule' in window);
+			break;
+
+		case 'csssupports':
+			return ('supports' in CSS);
+			break;
+
+		case 'listeners':
+			return ('addEventListener' in window);
+			break;
+
+		case 'animations':
+			return ((('supports' in CSS) && CSS.supports('animation', 'name') ||
 				CSS.supports('-webkit-animation', 'name')) ||
-				style.animation !== undefined ||
-				style.webkitAnimation !== undefined ||
-				style.MozAnimation !== undefined ||
-				style.OAnimation !== undefined ||
-				style.MsAnimationn !== undefined
+				'animation' in document.body.style ||
+				'webkitAnimation' in document.body.style
 			);
-		} break;
-		case 'transitions': {
-			supports = ((('supports' in CSS) && CSS.supports('transition', 'none') ||
+			break;
+
+		case 'transitions':
+			return ((('supports' in CSS) && CSS.supports('transition', 'none') ||
 				CSS.supports('-webkit-transition', 'none')) ||
-				style.transition !== undefined ||
-				style.webkitTransition !== undefined ||
-				style.MozTransition !== undefined ||
-				style.OTransition !== undefined ||
-				style.MsTransition !== undefined
+				'transition' in document.body.style ||
+				'webkitTransition' in documnt.body.style
 			);
-		} break;
-		case 'cssgradients': {
-			supports = (('supports' in CSS) && CSS.supports('background-image', 'linear-gradient(red,red)')) || (function(){
+			break;
+
+		case 'cssgradients':
+			return (('supports' in CSS) && CSS.supports('background-image', 'linear-gradient(red,red)')) || (function(){
 				var el = document.createElement('a');
 				el.style.backgroundImage = 'linear-gradient(red, red)';
 				return (!!el.style.backgroundImage);
 			})();
-		} break;
-		case 'notifications':{
-			supports = ('notifications' in window || 'Notification' in window);
-		} break;
-		case 'applicationcache': {
-			supports = ('applicationCache' in window);
-		} break;
-		case 'indexeddb': {
-			supports = ('indexedDB' in window);
-		} break;
-		case 'fullscreen':
-			supports = ('cancelFullScreen' in document);
 			break;
-		case 'workers': {
-			supports = ('Worker' in window);
-		} break;
-		case 'promises': {
-			supports = ('Promise' in window);
-		} break;
-		case 'cssmatches': {
-			var matches = [':matches', ':any', ':-moz-any', ':-webkit-any'], i;
-			for(i = 0; i < matches.length; i++) {
+
+		case 'notifications':
+			return ('notifications' in window || 'Notification' in window);
+			break;
+
+		case 'applicationcache':
+			return ('applicationCache' in window);
+			break;
+
+		case 'indexeddb':
+			return ('indexedDB' in window);
+			break;
+
+		case 'fullscreen':
+			return ('cancelFullScreen' in document);
+			break;
+
+		case 'workers':
+			return ('Worker' in window);
+			break;
+
+		case 'promises':
+			return ('Promise' in window);
+			break;
+
+		case 'cssmatches':
+			return ('sessionStorage' in window && sessionStorage.hasOwnProperty('MatchesPre')) ||
+			[':matches', ':any', ':-moz-any', ':-webkit-any'].some(function (pre) {
 				try {
-					supports = Boolean(document.querySelector(matches[i] + '(body)') === document.body);
-					sessionStorage.setItem('MatchesPre', matches[i]);
-				} catch(e) {
-					null;
+					if (document.querySelector(pre + '(body)') === document.body) {
+						sessionStorage.setItem('MatchesPre', pre);
+						return true;
+					} else {
+						return false;
+					};
+				} catch (e) {
+					return false;
 				}
-			}
-		} break;
-		case 'ajax': {
-			supports = ('XMLHttpRequest' in window);
-		} break;
-		case 'cssvars': {
-			supports = (!!CSS.supports('--x','x'));
-		} break;
-		case 'formdata': {
-			supports = ('FormData' in window);
-		} break;
-		case 'classlist' : {
-			supports = ('DOMTokenList' in window);
-		} break;
-		case 'localstorage': {
-			supports = ('localStorage' in window);
-		} break;
-		case 'sessionstorage': {
-			supports = ('sessionStorage' in window);
-		} break;
-		default: {
-			supports = (document.createElement(type.toLowerCase()) .toString() !== document.createElement('DNE') .toString());
-		}
+			});
+			break;
+
+		case 'ajax':
+			return ('XMLHttpRequest' in window);
+			break;
+
+		case 'cssvars':
+			return (('supports' in CSS) && CSS.supports('--x','x'));
+			break;
+
+		case 'formdata':
+			return ('FormData' in window);
+			break;
+
+		case 'classlist':
+			return ('DOMTokenList' in window);
+			break;
+
+		case 'localstorage':
+			return ('localStorage' in window);
+			break;
+
+		case 'sessionstorage':
+			return ('sessionStorage' in window);
+			break;
+
+		default:
+			return (document.createElement(type.toLowerCase()) .toString() !== document.createElement('DNE') .toString());
 	}
-	sessionStorage.setItem('Supports_' + type, supports);
-	return supports;
 }
 Element.prototype.query = function(query) {
 	var els = [];
