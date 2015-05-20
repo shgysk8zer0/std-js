@@ -42,12 +42,12 @@ if(!('showModal' in Element.prototype)) {
 		}
 	};
 }
-if ( !String.prototype.contains ) {
+if (! 'contains' in String.prototype) {
 	String.prototype.contains = function() {
 		return String.prototype.indexOf.apply( this, arguments ) !== -1;
 	};
 }
-if (!String.prototype.startsWith) {
+if (! 'startsWith' in String.prototype) {
 	Object.defineProperty(String.prototype, 'startsWith', {
 		enumerable: false,
 		configurable: false,
@@ -58,7 +58,7 @@ if (!String.prototype.startsWith) {
 		}
 	});
 }
-if (!String.prototype.endsWith) {
+if (! 'endsWith' in String.prototype) {
 	Object.defineProperty(String.prototype, 'endsWith', {
 		value: function (searchString, position) {
 			var subjectString = this.toString();
@@ -81,14 +81,14 @@ if (!String.prototype.endsWith) {
 	};
 	InvalidCharacterError.prototype = new Error;
 	InvalidCharacterError.prototype.name = 'InvalidCharacterError';
-	if(!CSS.supports) {
+	if(! 'supports' in CSS) {
 		CSS.supports = function (prop, value) {
 			var el = document.createElement('div');
 			el.style = prop + ":" + value;
 			return (getComputedStyle(el)[prop] === value);
 		};
 	}
-	if (!CSS.escape) {
+	if (! 'escape' in CSS) {
 		CSS.escape = function(value) {
 			var string = String(value), length = string.length, index = -1, codeUnit, result = '', firstCodeUnit = string.charCodeAt(0);
 			while (++index < length) {
@@ -124,11 +124,6 @@ if (!String.prototype.endsWith) {
 			return result;
 		};
 	}
-	CSS.supports = function (prop, value) {
-		var el = document.createElement('div');
-		el.style = prop + ":" + value;
-		return (getComputedStyle(el)[prop] === value);
-	};
 }(typeof global != 'undefined' ? global : this));
 DOMTokenList.prototype.pick = function(cname1, cname2, condition) {
 	(condition) ? this.add(cname1) : this.add(cname2);
@@ -137,8 +132,7 @@ DOMTokenList.prototype.swap = function(cname1, cname2) {
 	if(this.contains(cname1)) {
 		this.remove(cname1);
 		this.add(cname2);
-	}
-	else {
+	} else {
 		this.remove(cname2);
 		this.add(cname1);
 	}
@@ -394,7 +388,7 @@ window.addEventListener('load', function () {
 	*TODO Should I check for manifest on anything but <html>?
 	*		Could use (!!$('[manifest]').length) instead.
 	*/
-	if ((!!window.applicationCache) && typeof html.getAttribute('manifest') === 'string') {
+	if (('applicationCache' in window) && ('manifest' in document.documentElement)) {
 		var appCache = window.applicationCache;
 		$(appCache) .updateready(function (e) {
 			if (appCache.status == appCache.UPDATEREADY) {
@@ -464,7 +458,7 @@ function supports(type) {
 			supports = ('visibilityState' in document) || ('webkitVisibilityState' in document);
 		} break;
 		case 'validity': {
-			supports = (!!document.createElement('input') .validity);
+			supports = ('validity' in document.createElement('input'));
 		} break;
 		case 'fonts': {
 			supports = ('CSSFontFaceRule' in window);
@@ -512,7 +506,7 @@ function supports(type) {
 			supports = ('indexedDB' in window);
 		} break;
 		case 'fullscreen':
-			supports = (!!document.cancelFullScreen);
+			supports = ('cancelFullScreen' in document);
 			break;
 		case 'workers': {
 			supports = ('Worker' in window);
@@ -526,8 +520,7 @@ function supports(type) {
 				try {
 					supports = Boolean(document.querySelector(matches[i] + '(body)') === document.body);
 					sessionStorage.setItem('MatchesPre', matches[i]);
-				}
-				catch(e) {
+				} catch(e) {
 					null;
 				}
 			}
