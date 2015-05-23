@@ -66,15 +66,19 @@ function supports(type) {
 			break;
 
 		case 'transitions':
-			return ((supports('csssupports') && CSS.supports('transition', 'none') ||
-				CSS.supports('-webkit-transition', 'none')) ||
+			return ((supports('csssupports')
+			&& (CSS.supports('transition', 'none') ||
+				CSS.supports('-webkit-transition', 'none'))
+			) ||
 				'transition' in document.body.style ||
 				'webkitTransition' in documnt.body.style
 			);
 			break;
 
 		case 'cssgradients':
-			return (supports('csssupports') && CSS.supports('background-image', 'linear-gradient(red,red)')) || (function() {
+			return (supports('csssupports')
+				&& CSS.supports('background-image', 'linear-gradient(red,red)'))
+				|| (function() {
 				var el = document.createElement('a');
 				el.style.backgroundImage = 'linear-gradient(red, red)';
 				return (!!el.style.backgroundImage);
