@@ -7,107 +7,107 @@ if (! 'CSS' in window) {
 	window.CSS = {};
 	CSS.prototype = Object.prototype;
 }
-(function(root) {
-	if(! 'show' in Element.prototype) {
-		Element.prototype.show = function() {
-			this.setAttribute('open', '');
-		};
-	}
-	if(! 'showModal' in Element.prototype) {
-		Element.prototype.showModal = function() {
-			var backdrop = document.createElement('div');
-			backdrop.classList.add('backdrop');
-			$('dialog[open]').each(function(dialog) {
-				dialog.close();
-			});
-			this.after(backdrop);
-			this.classList.add('modal');
-			this.show();
-		};
-	}
-	if(! 'close' in Element.prototype) {
-		Element.prototype.close = function() {
-			this.removeAttribute('open');
-			this.classList.remove('modal');
-			if(this.nextElementSibling.classList.contains('backdrop')) {
-				this.nextElementSibling.parentElement.removeChild(this.nextElementSibling);
-			}
-		};
-	}
-	if (! 'HTMLimport' in Element.prototype) {
-		Element.prototype.HTMLimport = function() {
-			if (supports('HTMLimports')) {
-				var imported = document.querySelector(
-					'link[rel=import][name="' + this.dataset.import + '"]'
-				);
+if(! 'show' in Element.prototype) {
+	Element.prototype.show = function() {
+		this.setAttribute('open', '');
+	};
+}
+if(! 'showModal' in Element.prototype) {
+	Element.prototype.showModal = function() {
+		var backdrop = document.createElement('div');
+		backdrop.classList.add('backdrop');
+		$('dialog[open]').each(function(dialog) {
+			dialog.close();
+		});
+		this.after(backdrop);
+		this.classList.add('modal');
+		this.show();
+	};
+}
+if(! 'close' in Element.prototype) {
+	Element.prototype.close = function() {
+		this.removeAttribute('open');
+		this.classList.remove('modal');
+		if(this.nextElementSibling.classList.contains('backdrop')) {
+			this.nextElementSibling.parentElement.removeChild(this.nextElementSibling);
+		}
+	};
+}
+if (! 'HTMLimport' in Element.prototype) {
+	Element.prototype.HTMLimport = function() {
+		if (supports('HTMLimports')) {
+			var imported = document.querySelector(
+				'link[rel=import][name="' + this.dataset.import + '"]'
+			);
 
-				if (this.hasAttribute('data-selector')) {
-					this.appendChild(imported.import.querySelector(this.dataset.selector));
-				} else {
-					this.appendChild(imported.import.body.firstChild);
-				}
-			}
-		};
-	}
-	if (! 'matches' in Element.prototype) {
-		/*Check if Element matches a given CSS selector*/
-		if ('mozMatchesSelector' in Element.prototype) {
-			Element.prototype.matches = Element.prototype.mozMatchesSelector;
-		} else if ('webkitMatchesSelector' in Element.prototype) {
-			Element.prototype.matches = Element.prototype.webkitMatchesSelector;
-		} else if ('oMatchesSelector' in Element.prototype) {
-			Element.prototype.matches = Element.prototype.oMatchesSelector;
-		} else if ('msMatchesSelector' in Element.prototype) {
-			Element.prototype.matches = Element.prototype.msMatchesSelector;
-		} else {
-			Element.prototype.matches = function(sel) {
-				return ($(sel) .indexOf(this) !== -1);
+			if (this.hasAttribute('data-selector')) {
+				this.appendChild(imported.import.querySelector(this.dataset.selector));
+			} else {
+				this.appendChild(imported.import.body.firstChild);
 			}
 		}
+	};
+}
+if (! 'matches' in Element.prototype) {
+	/*Check if Element matches a given CSS selector*/
+	if ('mozMatchesSelector' in Element.prototype) {
+		Element.prototype.matches = Element.prototype.mozMatchesSelector;
+	} else if ('webkitMatchesSelector' in Element.prototype) {
+		Element.prototype.matches = Element.prototype.webkitMatchesSelector;
+	} else if ('oMatchesSelector' in Element.prototype) {
+		Element.prototype.matches = Element.prototype.oMatchesSelector;
+	} else if ('msMatchesSelector' in Element.prototype) {
+		Element.prototype.matches = Element.prototype.msMatchesSelector;
+	} else {
+		Element.prototype.matches = function(sel) {
+			return ($(sel) .indexOf(this) !== -1);
+		}
 	}
-	if (! 'contains' in String.prototype) {
-		String.prototype.contains = function() {
-			return String.prototype.indexOf.apply( this, arguments ) !== -1;
-		};
-	}
-	if (! 'startsWith' in String.prototype) {
-		Object.defineProperty(String.prototype, 'startsWith', {
-			enumerable: false,
-			configurable: false,
-			writable: false,
-			value: function (searchString, position) {
-				position = position || 0;
-				return this.lastIndexOf(searchString, position) === position;
+}
+if (! 'contains' in String.prototype) {
+	String.prototype.contains = function() {
+		return String.prototype.indexOf.apply( this, arguments ) !== -1;
+	};
+}
+if (! 'startsWith' in String.prototype) {
+	Object.defineProperty(String.prototype, 'startsWith', {
+		enumerable: false,
+		configurable: false,
+		writable: false,
+		value: function (searchString, position) {
+			position = position || 0;
+			return this.lastIndexOf(searchString, position) === position;
+		}
+	});
+}
+if (! 'endsWith' in String.prototype) {
+	Object.defineProperty(String.prototype, 'endsWith', {
+		value: function (searchString, position) {
+			var subjectString = this.toString();
+			if (position === undefined || position > subjectString.length) {
+				position = subjectString.length;
 			}
-		});
-	}
-	if (! 'endsWith' in String.prototype) {
-		Object.defineProperty(String.prototype, 'endsWith', {
-			value: function (searchString, position) {
-				var subjectString = this.toString();
-				if (position === undefined || position > subjectString.length) {
-					position = subjectString.length;
-				}
-				position -= searchString.length;
-				var lastIndex = subjectString.indexOf(searchString, position);
-				return lastIndex !== -1 && lastIndex === position;
-			}
-		});
-	}
+			position -= searchString.length;
+			var lastIndex = subjectString.indexOf(searchString, position);
+			return lastIndex !== -1 && lastIndex === position;
+		}
+	});
+}
+if(! 'supports' in CSS) {
+	CSS.supports = function (prop, value) {
+		var el = document.createElement('div');
+		el.style = prop + ":" + value;
+		return (getComputedStyle(el)[prop] === value);
+	};
+}
+(function(root) {
 	var CSS =  root.CSS;
 	var InvalidCharacterError = function(message) {
 		this.message = message;
 	};
 	InvalidCharacterError.prototype = new Error;
 	InvalidCharacterError.prototype.name = 'InvalidCharacterError';
-	if(! 'supports' in CSS) {
-		CSS.supports = function (prop, value) {
-			var el = document.createElement('div');
-			el.style = prop + ":" + value;
-			return (getComputedStyle(el)[prop] === value);
-		};
-	}
-	if (! 'escape' in CSS) {
+	if (('CSS' in root) && (! 'escape' in CSS)) {
 		CSS.escape = function(value) {
 			var string = String(value), length = string.length, index = -1, codeUnit, result = '', firstCodeUnit = string.charCodeAt(0);
 			while (++index < length) {
