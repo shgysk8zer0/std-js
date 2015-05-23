@@ -1,9 +1,9 @@
 if (! 'Element' in window) {
 	/*Fix IE not allowing Element.prototype*/
-	window.Element = function () {};
+	Element = function () {};
 }
 if (! 'CSS' in window) {
-	window.CSS = {};
+	CSS = {};
 }
 (function(root) {
 	if(! 'show' in Element.prototype) {
@@ -96,7 +96,7 @@ if (! 'CSS' in window) {
 			}
 		});
 	}
-	var CSS = root.CSS;
+	var CSS = ('CSS' in root) ? root.CSS : {};
 	var InvalidCharacterError = function(message) {
 		this.message = message;
 	};

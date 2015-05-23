@@ -48,7 +48,7 @@ function supports(type) {
 			break;
 
 		case 'csssupports':
-			return ('supports' in CSS);
+			return (('CSS' in window) && ('supports' in CSS));
 			break;
 
 		case 'listeners':
@@ -56,7 +56,7 @@ function supports(type) {
 			break;
 
 		case 'animations':
-			return ((('supports' in CSS) && CSS.supports('animation', 'name') ||
+			return (('CSS' in window) && (('supports' in CSS) && CSS.supports('animation', 'name') ||
 				CSS.supports('-webkit-animation', 'name')) ||
 				'animation' in document.body.style ||
 				'webkitAnimation' in document.body.style
@@ -64,7 +64,7 @@ function supports(type) {
 			break;
 
 		case 'transitions':
-			return ((('supports' in CSS) && CSS.supports('transition', 'none') ||
+			return ((('CSS' in window) && ('supports' in CSS) && CSS.supports('transition', 'none') ||
 				CSS.supports('-webkit-transition', 'none')) ||
 				'transition' in document.body.style ||
 				'webkitTransition' in documnt.body.style
@@ -72,7 +72,7 @@ function supports(type) {
 			break;
 
 		case 'cssgradients':
-			return (('supports' in CSS) && CSS.supports('background-image', 'linear-gradient(red,red)')) || (function() {
+			return (('CSS' in window) && ('supports' in CSS) && CSS.supports('background-image', 'linear-gradient(red,red)')) || (function() {
 				var el = document.createElement('a');
 				el.style.backgroundImage = 'linear-gradient(red, red)';
 				return (!!el.style.backgroundImage);
