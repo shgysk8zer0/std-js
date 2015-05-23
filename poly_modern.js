@@ -1,11 +1,12 @@
-if (! 'Element' in window) {
-	/*Fix IE not allowing Element.prototype*/
-	Element = function () {};
-}
-if (! 'CSS' in window) {
-	CSS = {};
-}
 (function(root) {
+	if (! 'Element' in root) {
+		/*Fix IE not allowing Element.prototype*/
+		root.Element = function () {};
+	}
+	if (! 'CSS' in root) {
+		root.CSS = {};
+		CSS.prototype = Object.prototype;
+	}
 	if(! 'show' in Element.prototype) {
 		Element.prototype.show = function() {
 			this.setAttribute('open', '');
@@ -49,20 +50,11 @@ if (! 'CSS' in window) {
 	}
 	if (! 'matches' in Element.prototype) {
 		/*Check if Element matches a given CSS selector*/
-		Element.prototype.matches = function (sel) {
-			try {
-				if ('mozMatchesSelector' in Element.prototype) {
-					return this.mozMatchesSelector(sel);
-				} else if ('webkitMatchesSelector' in Element.prototype) {
-					return this.webkitMatchesSelector(sel);
-				} else if ('oMatchesSelector' in Element.prototype) {
-					return this.oMatchesSelector(sel);
-				} else if ('msMatchesSelector' in Element.prototype) {
-					return this.msMatchesSelector(sel);
-				} else {
-					return ($(sel) .indexOf(this) !== -1);
-				}
-			} catch(e) {
+		Element.prototype.matches = Element.prototype.mozMatchesSelector
+			|| Element.prototype.webkitMatchesSelector
+			|| Element.prototype.oMatchesSelector
+			|| Element.prototype.msMatchesSelector
+			|| function(sel) {
 				return ($(sel) .indexOf(this) !== -1);
 			}
 		};
@@ -96,7 +88,7 @@ if (! 'CSS' in window) {
 			}
 		});
 	}
-	var CSS = ('CSS' in root) ? root.CSS : {};
+	var CSS =  root.CSS;
 	var InvalidCharacterError = function(message) {
 		this.message = message;
 	};
