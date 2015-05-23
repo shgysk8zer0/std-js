@@ -56,7 +56,7 @@ function supports(type) {
 			break;
 
 		case 'animations':
-			return (('CSS' in window) && (('supports' in CSS) && CSS.supports('animation', 'name') ||
+			return (supports('csssupports') && CSS.supports('animation', 'name') ||
 				CSS.supports('-webkit-animation', 'name')) ||
 				'animation' in document.body.style ||
 				'webkitAnimation' in document.body.style
@@ -64,7 +64,7 @@ function supports(type) {
 			break;
 
 		case 'transitions':
-			return ((('CSS' in window) && ('supports' in CSS) && CSS.supports('transition', 'none') ||
+			return ((supports('csssupports') && CSS.supports('transition', 'none') ||
 				CSS.supports('-webkit-transition', 'none')) ||
 				'transition' in document.body.style ||
 				'webkitTransition' in documnt.body.style
@@ -72,7 +72,7 @@ function supports(type) {
 			break;
 
 		case 'cssgradients':
-			return (('CSS' in window) && ('supports' in CSS) && CSS.supports('background-image', 'linear-gradient(red,red)')) || (function() {
+			return (supports('csssupports') && CSS.supports('background-image', 'linear-gradient(red,red)')) || (function() {
 				var el = document.createElement('a');
 				el.style.backgroundImage = 'linear-gradient(red, red)';
 				return (!!el.style.backgroundImage);
@@ -124,7 +124,7 @@ function supports(type) {
 			break;
 
 		case 'cssvars':
-			return (('supports' in CSS) && CSS.supports('--x','x'));
+			return (supports('csssupports') && CSS.supports('--x','x'));
 			break;
 
 		case 'formdata':
