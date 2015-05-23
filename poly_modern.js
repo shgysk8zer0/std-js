@@ -50,14 +50,19 @@
 	}
 	if (! 'matches' in Element.prototype) {
 		/*Check if Element matches a given CSS selector*/
-		Element.prototype.matches = Element.prototype.mozMatchesSelector
-			|| Element.prototype.webkitMatchesSelector
-			|| Element.prototype.oMatchesSelector
-			|| Element.prototype.msMatchesSelector
-			|| function(sel) {
+		if ('mozMatchesSelector' in Element.prototype) {
+			Element.prototype.matches = Element.prototype.mozMatchesSelector;
+		} else if ('webkitMatchesSelector' in Element.prototype) {
+			Element.prototype.matches = Element.prototype.webkitMatchesSelector;
+		} else if ('oMatchesSelector' in Element.prototype) {
+			Element.prototype.matches = Element.prototype.oMatchesSelector;
+		} else if ('msMatchesSelector' in Element.prototype) {
+			Element.prototype.matches = Element.prototype.msMatchesSelector;
+		} else {
+			Element.prototype.matches = function(sel) {
 				return ($(sel) .indexOf(this) !== -1);
 			}
-		};
+		}
 	}
 	if (! 'contains' in String.prototype) {
 		String.prototype.contains = function() {
