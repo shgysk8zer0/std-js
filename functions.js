@@ -172,8 +172,8 @@ function notify(options) {
 			body: options
 		};
 	}
-	if(!options.icon) {
-		options.icon = 'images/icons/info.png';
+	if(typeof options.icon !== 'string') {
+		options.icon = 'images/octicons/svg/megaphone.svg';
 	}
 	if ('Notification' in window) {
 		if (Notification.permission.toLowerCase() === 'default') {
