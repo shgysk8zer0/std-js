@@ -1,12 +1,13 @@
+if (! 'Element' in window) {
+	/*Fix IE not allowing Element.prototype*/
+	window.Element = function () {};
+	Element.prototype = Object.prototype;
+}
+if (! 'CSS' in window) {
+	window.CSS = {};
+	CSS.prototype = Object.prototype;
+}
 (function(root) {
-	if (! 'Element' in root) {
-		/*Fix IE not allowing Element.prototype*/
-		root.Element = function () {};
-	}
-	if (! 'CSS' in root) {
-		root.CSS = {};
-		CSS.prototype = Object.prototype;
-	}
 	if(! 'show' in Element.prototype) {
 		Element.prototype.show = function() {
 			this.setAttribute('open', '');
