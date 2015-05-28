@@ -1,35 +1,3 @@
-"use strict";
-window.addEventListener('load', function ()
-{
-	/**
-	*TODO Should I check for manifest on anything but <html>?
-	*		Could use (!!$('[manifest]').length) instead.
-	*/
-	if (('applicationCache' in window) && ('manifest' in document.documentElement)) {
-		var appCache = window.applicationCache;
-		$(appCache) .updateready(function (e) {
-			if (appCache.status == appCache.UPDATEREADY) {
-				appCache.update() && appCache.swapCache();
-				if (confirm('A new version of this site is available. Load it?')) {
-					window.location.reload();
-				}
-			}
-		});
-	}
-});
-window.addEventListener('popstate', function()
-{
-	ajax({
-		url: location.pathname,
-		type: 'GET'
-	}).then(
-		handleJSON,
-		function(err)
-		{
-			console.error(err);
-		}
-	);
-});
 function isOnline()
 {
 	return (! 'onLine' in navigator) || navigator.onLine;
