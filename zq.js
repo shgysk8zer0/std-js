@@ -149,7 +149,7 @@ zQ.prototype.pause = function() {
 
 zQ.prototype.on = function (event, callback) {
 	this.each(function (e) {
-		(html.addEventListener) ? e.addEventListener(event, callback, true)  : e['on' + event] = callback;
+		('addEventListener' in Element.prototype) ? e.addEventListener(event, callback, true)  : e['on' + event] = callback;
 	});
 	return this;
 };
