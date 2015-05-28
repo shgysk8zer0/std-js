@@ -1,5 +1,6 @@
 
-function supports(type) {
+function supports(type)
+{
 	/*Feature detection. Returns boolean value of suport for type*/
 	/**
 	* A series of tests to determine support for a given feature
@@ -79,7 +80,8 @@ function supports(type) {
 			case 'cssgradients':
 				return (supports('csssupports')
 					&& CSS.supports('background-image', 'linear-gradient(red,red)'))
-					|| (function() {
+					|| (function()
+					{
 					var el = document.createElement('a');
 					el.style.backgroundImage = 'linear-gradient(red, red)';
 					return (!!el.style.backgroundImage);
@@ -112,7 +114,8 @@ function supports(type) {
 
 			case 'cssmatches':
 				return ('sessionStorage' in window && sessionStorage.hasOwnProperty('MatchesPre')) ||
-				[':matches', ':any', ':-moz-any', ':-webkit-any'].some(function (pre) {
+				[':matches', ':any', ':-moz-any', ':-webkit-any'].some(function (pre)
+				{
 					try {
 						if (document.querySelector(pre + '(body)') === document.body) {
 							sessionStorage.setItem('MatchesPre', pre);
