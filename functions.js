@@ -54,6 +54,7 @@ function ajax(data)
 			if (typeof data.request === 'string') {
 				req.setRequestHeader('Content-type', data.contentType);
 			}
+			req.setRequestHeader('Accept', 'application/json');
 			req.setRequestHeader('Request-Type', 'AJAX');
 			req.addEventListener('progress', function(event)
 			{
