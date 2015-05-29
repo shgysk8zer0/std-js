@@ -22,9 +22,15 @@ function ajax(data)
 		data.request = new FormData(data.form);
 		data.request.append('form', data.form.name);
 		data.request.append('nonce', sessionStorage.getItem('nonce'));
-		data.form.querySelectorAll('[data-input-name]').forEach(function(input) {
+		data.form.querySelectorAll('[data-input-name]').forEach(function(input)
+		{
 			data.request.append(input.data('input-name'), input.innerHTML);
 		});
+	}
+	if (typeof data.headers !== 'object') {
+		data.headers = {Accept: 'application/json'};
+	} else if (! 'Accept' in data.headers) {
+		data.headers.Accept = 'application/json';
 	}
 	return new Promise(function (success, fail)
 	{
@@ -38,7 +44,7 @@ function ajax(data)
 		} else if (typeof navigator.onLine !== 'boolean' || navigator.onLine) {
 			var req = new XMLHttpRequest(),
 				progress = document.createElement('progress');
-			if (("withCredentials" in req) && ('withCredentials' in data)) {
+			if (('withCredentials' in req) && ('withCredentials' in data)) {
 				req.withCredentials = data.withCredentials;
 
 			}
@@ -54,7 +60,7 @@ function ajax(data)
 			if (typeof data.request === 'string') {
 				req.setRequestHeader('Content-type', data.contentType);
 			}
-			req.setRequestHeader('Accept', 'application/json');
+			req.setRequestHeader('Accept', data.headers.Accept);
 			req.setRequestHeader('Request-Type', 'AJAX');
 			req.addEventListener('progress', function(event)
 			{
