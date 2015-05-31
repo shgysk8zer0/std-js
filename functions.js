@@ -107,8 +107,8 @@ function ajax(data)
 			});
 			req.addEventListener('error', function ()
 			{
-				fail(Error('Network Error'));
 				progress.parentElement.removeChild(progress);
+				fail(Error('Network Error'));
 			});
 			if (typeof data.request !== 'undefined') {
 				req.send(data.request);
