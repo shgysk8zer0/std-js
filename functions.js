@@ -72,20 +72,25 @@ function ajax(data)
 			{
 				switch (req.getResponseHeader('Content-Type')) {
 					case 'application/json':
-						resp = JSON.parse(req.response.trim());
+						resp = JSON.parse(req.response);
 						break;
 
+					case 'application/xml':
 					case 'text/xml':
-						resp = new DOMParser().parseFromString(req.response.trim(), "text/xml");
+						resp = new DOMParser().parseFromString(req.response, "application/xml");
 						break;
 
 					case 'text/html':
-						resp = document.createDocumentFragment();
-						resp.innerHTML = req.response.trim();
+						resp = new DOMParser().parseFromString(req.response, "text/html");
 						break;
 
-					default:
-						resp = req.response.trim();
+						case 'image/svg':
+							resp = new DOMParser().parseFromString(req.response, "image/svg+xml");
+							break;
+
+						case 'text/plain':
+							resp = req.response;
+							break;
 				}
 				progress.parentElement.removeChild(progress);
 				if (req.status == 200) {
