@@ -1,10 +1,6 @@
 /*======================================================zQ Functions=========================================================*/
 Object.prototype.isZQ = false;
 zQ.prototype.isZQ = true;
-/*Add Array prototypes to NodeList*/
-['forEach', 'indexOf', 'some', 'every', 'map', 'filter'].forEach(function(feat) {
-	NodeList.prototype[feat] = Array.prototype[feat];
-});
 function $(q) {
 	if(typeof q === 'undefined') {
 		q = document.documentElement;

@@ -1,3 +1,17 @@
+/*Add Array prototypes to NodeList*/
+[
+	'forEach',
+	'indexOf',
+	'some',
+	'every',
+	'map',
+	'filter',
+	'reduce'
+].filter(function (method) {
+	return !(method in NodeList.prototype) && (method in Array.prototype);
+}).forEach(function (method) {
+	NodeList.prototype[method] = Array.prototype[method]
+});
 DOMTokenList.prototype.pick = function(cname1, cname2, condition)
 {
 	(condition) ? this.add(cname1) : this.add(cname2);
