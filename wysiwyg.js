@@ -1,6 +1,6 @@
 function WYSIWYG(menu)
 {
-	menu.querySelectorAll('menuitem[data-editor-command]').forEach(function(item)
+	menu.querySelectorAll('[data-editor-command]').forEach(function(item)
 	{
 		item.addEventListener('click', function()
 		{
@@ -17,7 +17,7 @@ function WYSIWYG(menu)
 			document.execCommand(this.dataset.editorCommand, null, arg);
 		});
 	});
-	menu.querySelectorAll('menuitem[label="Add Class"]').forEach(function(menuitem) {
+	menu.querySelectorAll('[label="Add Class"]').forEach(function(menuitem) {
 		menuitem.addEventListener('click', function() {
 			var addClass = prompt('Enter class name to add');
 			if (addClass.length !== 0) {
@@ -25,7 +25,7 @@ function WYSIWYG(menu)
 			}
 		});
 	});
-	menu.querySelectorAll('menuitem[label="Remove Class"]').forEach(function(menuitem) {
+	menu.querySelectorAll('[label="Remove Class"]').forEach(function(menuitem) {
 		menuitem.addEventListener('click', function() {
 			var removeClass = prompt('Enter class name to remove');
 			if (removeClass.length !== 0) {
@@ -37,7 +37,7 @@ function WYSIWYG(menu)
 			}
 		});
 	});
-	menu.querySelectorAll('menuitem[label="Set Attribute"]').forEach(function(menuitem) {
+	menu.querySelectorAll('[label="Set Attribute"]').forEach(function(menuitem) {
 		menuitem.addEventListener('click', function() {
 			var name = prompt('Enter attribute name');
 			if (name.length !== 0) {
@@ -46,7 +46,7 @@ function WYSIWYG(menu)
 			}
 		})
 	});
-	menu.querySelectorAll('menuitem[label="Remove Attribute"]').forEach(function(menuitem) {
+	menu.querySelectorAll('[label="Remove Attribute"]').forEach(function(menuitem) {
 		menuitem.addEventListener('click', function() {
 			var attr = prompt('Enter name of attribute to remove');
 			if (attr.length !== 0) {
