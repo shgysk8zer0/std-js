@@ -59,4 +59,16 @@ function WYSIWYG(menu)
 			}
 		});
 	});
+	menu.querySelectorAll('[label="Save Work"]').forEach(function(item) {
+		item.addEventListener('click', function(event) {
+			event.preventDefault();
+			localStorage.setItem('savedDoc', document.querySelector('[contenteditable]').innerHTML);
+		});
+	});
+	menu.querySelectorAll('[label="Restore Work"]').forEach(function(item) {
+		item.addEventListener('click', function(event) {
+			event.preventDefault();
+			document.querySelector('[contenteditable]').innerHTML = localStorage.getItem('savedDoc');
+		});
+	});
 }
