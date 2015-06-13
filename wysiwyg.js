@@ -5,7 +5,7 @@ function WYSIWYG(menu)
 		item.addEventListener('click', function(event)
 		{
 			event.preventDefault();
-			document.execCommand('styleWithCSS', null, this.dataset.hasOwnProperty('styleWithCSS'));
+			document.execCommand('styleWithCSS', null, this.dataset.hasOwnProperty('styleWithCss'));
 			var arg = null;
 			if (this.dataset.hasOwnProperty('editorValue')) {
 				arg = this.dataset.editorValue;
