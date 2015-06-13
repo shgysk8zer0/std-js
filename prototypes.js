@@ -253,7 +253,9 @@ Element.prototype.wordCount = function()
 HTMLElement.prototype.dataURI = function() {
 	var doc = new DOMParser().parseFromString('', 'text/html');
 	doc.head.appendChild(doc.createElement('meta')).setAttribute('charset', 'utf-8');
-	doc.body.appendChild(this.cloneNode(true));
+	this.childNodes.forEach(function(node) {
+		doc.body.appendChild(node.cloneNode(true));
+	});
 	return 'data:text/html,' + encodeURIComponent('<!DOCTYPE html>' + doc.documentElement.outerHTML);
 }
 Element.prototype.query = function(query)
