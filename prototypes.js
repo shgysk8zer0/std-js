@@ -184,9 +184,78 @@ Element.prototype.ajax = function(args) {
 Element.prototype.wordCount = function()
 {
 	return this.textContent.split(' ').length;
+};Element.prototype.DnD = function(sets) {
+	"use strict";
+	this.ondragover = function(event) {
+		this.classList.add('receiving');
+		return false;
+	};
+	this.ondragend = function(event) {
+		this.classList.remove('receiving');
+		return false;
+	};
+	this.ondrop = function(e) {
+		e.preventDefault();
+		this.classList.remove('receiving');
+		if (e.dataTransfer.files.length) {
+			for (var i=0; i < e.dataTransfer.files.length; i++) {
+				var file = e.dataTransfer.files[i],
+					reader = new FileReader(),
+					progress = document.createElement('progress');
+				progress.min = 0;
+				progress.max = 1;
+				progress.value= 0;
+				progress.classList.add('uploading');
+				sets.appendChild(progress);
+				if (/image\/*/.test(file.type)) {
+					reader.readAsDataURL(file);
+				} else if (/text\/*/.test(file.type)) {
+					reader.readAsText(file);
+				}
+				reader.addEventListener('progress', function(event) {
+					if (event.lengthComputable) {
+						progress.value = event.loaded / event.total;
+					}
+				});
+				reader.onload = function(event) {
+					progress.parentElement.removeChild(progress);
+					switch (file.type) {
+						case 'image/png':
+						case 'image/jpeg':
+						case 'image/svg':
+							document.execCommand('insertimage', null, event.target.result);
+							break;
+
+						case 'text/html':
+						case 'text/xml':
+							var content = new DOMParser().parseFromString(event.target.result, file.type);
+							var selection = getSelection().anchorNode;
+							var container = (selection.nodeType === 1) ? selection : selection.parentElement;
+							content.body.childNodes.forEach(function(node) {
+								container.appendChild(node.cloneNode(true));
+							});
+							break;
+
+						default:
+							console.error(new Error('Unhandled file type: ' + file.type));
+					}
+				};
+				reader.onerror = function(event) {
+					progress.parentElement.removeChild(progress);
+					console.error(event);
+				};
+			console.log(file);
+			}
+		}
+		return false;
+	};
 };
-/*AppCache updater*/
-/*$(window) .load(function (e) { *//*Check for appCache updates if there is a manifest set*/
+HTMLElement.prototype.dataURI = function() {
+	var doc = new DOMParser().parseFromString('', 'text/html');
+	doc.head.appendChild(doc.createElement('meta')).setAttribute('charset', 'utf-8');
+	doc.body.appendChild(this.cloneNode(true));
+	return 'data:text/html,' + encodeURIComponent('<!DOCTYPE html>' + doc.documentElement.outerHTML);
+}
 Element.prototype.query = function(query)
 {
 	var els = [];
