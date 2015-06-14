@@ -248,18 +248,28 @@ Element.prototype.DnD = function(sets) {
 	};
 };
 HTMLElement.prototype.dataURI = function() {
-	var doc = new DOMParser().parseFromString('', 'text/html');
+	var doc = this.toDocument();
 	var style = doc.createElement('link');
-	doc.head.appendChild(doc.createElement('meta')).setAttribute('charset', 'utf-8');
 	style.setAttribute('rel', 'stylesheet');
 	style.setAttribute('type', 'text/css');
 	style.setAttribute('href', 'https://fonts.googleapis.com/css?family=Acme|Ubuntu|Press+Start+2P|Alice|Comfortaa|Open+Sans|Droid+Serif');
 	doc.head.appendChild(style);
 
+	return doc.dataURI();
+}
+HTMLElement.prototype.toDocument = function (charset) {
+	if (typeof charset !== 'string') {
+		charset = 'utf-8';
+	}
+	var doc = new DOMParser().parseFromString('', 'text/html');
+	doc.head.appendChild(doc.createElement('meta')).setAttribute('charset', charset);
 	this.childNodes.forEach(function(node) {
 		doc.body.appendChild(node.cloneNode(true));
 	});
-	return 'data:text/html,' + encodeURIComponent('<!DOCTYPE html>' + doc.documentElement.outerHTML);
+	return doc;
+};
+HTMLDocument.prototype.dataURI = function() {
+	return 'data:text/html,' + encodeURIComponent('<!DOCTYPE html>' + this.documentElement.outerHTML);
 }
 Element.prototype.query = function(query)
 {
