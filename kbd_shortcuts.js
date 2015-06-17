@@ -54,7 +54,7 @@ window.addEventListener('keypress', function (event) {
                 if (!(event.altKey || event.shiftKey)) {
                     event.preventDefault();
                     event.stopPropagation();
-                    document.execCommand('styleWithCSS', null, true);
+                    document.execCommand('styleWithCSS', null, false);
                     document.execCommand('italic');
                 }
                 break;
@@ -62,7 +62,7 @@ window.addEventListener('keypress', function (event) {
                 if (!(event.altKey || event.shiftKey)) {
                     event.preventDefault();
                     event.stopPropagation();
-                    document.execCommand('styleWithCSS', null, true);
+                    document.execCommand('styleWithCSS', null, false);
                     document.execCommand('bold');
                 }
                 break;
@@ -70,7 +70,7 @@ window.addEventListener('keypress', function (event) {
                 if (!(event.altKey || event.shiftKey)) {
                     event.preventDefault();
                     event.stopPropagation();
-                    document.execCommand('styleWithCSS', null, true);
+                    document.execCommand('styleWithCSS', null, false);
                     document.execCommand('underline');
                 }
                 break;
@@ -78,7 +78,7 @@ window.addEventListener('keypress', function (event) {
                 if (!(event.altKey || event.shiftKey)) {
                     event.preventDefault();
                     event.stopPropagation();
-                    document.execCommand('styleWithCSS', null, true);
+                    document.execCommand('styleWithCSS', null, false);
                     document.execCommand('strikethrough');
                 }
                 break;
