@@ -87,9 +87,6 @@ window.addEventListener('keypress', function (event) {
                 event.stopPropagation();
                 (event.shiftKey) ? document.execCommand('outdent')  : document.execCommand('indent');
                 break;
-            default:
-                console.log(event, this);
-                break;
         }
     }
 },
