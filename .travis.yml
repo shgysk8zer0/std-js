@@ -1,2 +1,4 @@
-language: js
+language: node_js
+before_script:
+	sudo npm install -g eslint
 script: eslint .
