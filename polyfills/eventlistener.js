@@ -1,28 +1,46 @@
-;(function(win, doc){
-	if(win.addEventListener)return;
-
-	function docHijack(p){var old = doc[p];doc[p] = function(v){return addListen(old(v))}}
+/*eslint no-cond-assign: 0*/
+(function(win, doc){
+	if(win.addEventListener){
+		return;
+	}
+	function addListen(obj, i){
+		if(i = obj.length) {
+			while(i--) {
+				obj[i].addEventListener = addEvent;
+			}
+		} else {
+			obj.addEventListener = addEvent;
+		}
+		return obj;
+	}
+	function docHijack(p){
+		var old = doc[p];
+		doc[p] = function(v){
+			return addListen(old(v));
+		};
+	}
 	function addEvent(on, fn, self){
 		return (self = this).attachEvent('on' + on, function(e){
 			var e = e || win.event;
-			e.preventDefault  = e.preventDefault  || function(){e.returnValue = false}
-			e.stopPropagation = e.stopPropagation || function(){e.cancelBubble = true}
+			e.preventDefault = e.preventDefault || function(){
+				e.returnValue = false;
+			};
+			e.stopPropagation = e.stopPropagation || function(){
+				e.cancelBubble = true;
+			};
 			fn.call(self, e);
 		});
 	}
-	function addListen(obj, i){
-		if(i = obj.length)while(i--)obj[i].addEventListener = addEvent;
-		else obj.addEventListener = addEvent;
-		return obj;
-	}
-
 	addListen([doc, win]);
-	if('Element' in win)win.Element.prototype.addEventListener = addEvent;
-	else{
-		doc.attachEvent('onreadystatechange', function(){addListen(doc.all)});
+	if('Element' in win){
+		win.Element.prototype.addEventListener = addEvent;
+	} else{
+		doc.attachEvent('onreadystatechange', function(){
+			addListen(doc.all);
+		});
 		docHijack('getElementsByTagName');
 		docHijack('getElementById');
 		docHijack('createElement');
-		addListen(doc.all);	
+		addListen(doc.all);
 	}
 })(window, document);

@@ -1,5 +1,5 @@
 /*! https://mths.be/cssescape v0.2.1 by @mathias | MIT license */
-;(function(root) {
+(function(root) {
 
 	if (!root.CSS) {
 		root.CSS = {};
@@ -10,7 +10,7 @@
 	var InvalidCharacterError = function(message) {
 		this.message = message;
 	};
-	InvalidCharacterError.prototype = new Error;
+	InvalidCharacterError.prototype = new Error();
 	InvalidCharacterError.prototype.name = 'InvalidCharacterError';
 
 	if (!CSS.escape) {

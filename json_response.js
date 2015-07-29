@@ -1,4 +1,5 @@
 function handleJSON(json) {
+	'use strict';
 	if(typeof json === 'string') {
 		json = JSON.parse(json.trim());
 	} else if(typeof json !== 'object') {
@@ -78,10 +79,12 @@ function handleJSON(json) {
 				Object.keys(json.attributes[selector]).forEach(function(attribute)
 				{
 					if(typeof json.attributes[selector][attribute] === 'boolean') {
-						(json.attributes[selector][attribute]) ? el.setAttribute(attribute, '') : el.removeAttribute(attribute);
+						(json.attributes[selector][attribute])
+							? el.setAttribute(attribute, '')
+							: el.removeAttribute(attribute);
 					}
 					else {
-						(attribute in el) ? el[attribute] = json.attributes[selector][attribute] : el.setAttribute(attribute, json.attributes[selector][attribute]);
+						el.setAttribute(attribute, json.attributes[selector][attribute]);
 					}
 				});
 			});
@@ -94,13 +97,13 @@ function handleJSON(json) {
 			Object.keys(json.increment[selector]).forEach(function(attribute)
 			{
 				if(attribute in el) {
-					el[attribute] += json.increment[selector][attribute]
+					el[attribute] += json.increment[selector][attribute];
 				}
 				else {
 					el.setAttribute(attribute, parseFloat(el.getAttribute(attribute) + json.increment[selector][attribute]));
 				}
 			});
-		})
+		});
 	}
 	if('stepUp' in json) {
 		Object.keys(json.stepUp).forEach(function(selector)
@@ -204,8 +207,7 @@ function handleJSON(json) {
 		window.open(json.open.url, '_blank', specs.join(','), json.open.replace);
 	}
 	if('show' in json) {
-		document.querySelectorAll(json.show).forEach(function(el)
-		 {
+		document.querySelectorAll(json.show).forEach(function(el) {
 			el.show();
 		});
 	}

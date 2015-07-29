@@ -1,18 +1,19 @@
-if (! ('Element' in window)) {
+if (!('Element' in window)) {
 	/*Fix IE not allowing Element.prototype*/
 	window.Element = function () {};
 	Element.prototype = Object.prototype;
 }
-if (! ('CSS' in window)) {
+if (!('CSS' in window)) {
 	window.CSS = {};
 	CSS.prototype = Object.prototype;
 }
-if(! ('show' in Element.prototype)) {
+if (!('show' in Element.prototype)) {
 	Element.prototype.show = function() {
+		'use strict';
 		this.setAttribute('open', '');
 	};
 }
-if(! ('showModal' in Element.prototype)) {
+if (!('showModal' in Element.prototype)) {
 	Element.prototype.showModal = function() {
 		var backdrop = document.createElement('div');
 		backdrop.classList.add('backdrop');
@@ -24,16 +25,16 @@ if(! ('showModal' in Element.prototype)) {
 		this.show();
 	};
 }
-if(! ('close' in Element.prototype)) {
+if (!('close' in Element.prototype)) {
 	Element.prototype.close = function() {
 		this.removeAttribute('open');
 		this.classList.remove('modal');
-		if(this.nextElementSibling.classList.contains('backdrop')) {
+		if (this.nextElementSibling.classList.contains('backdrop')) {
 			this.nextElementSibling.parentElement.removeChild(this.nextElementSibling);
 		}
 	};
 }
-if (! ('HTMLimport' in Element.prototype)) {
+if (!('HTMLimport' in Element.prototype)) {
 	Element.prototype.HTMLimport = function() {
 		if (supports('HTMLimports')) {
 			var imported = document.querySelector(
@@ -48,7 +49,7 @@ if (! ('HTMLimport' in Element.prototype)) {
 		}
 	};
 }
-if (! ('matches' in Element.prototype)) {
+if (!('matches' in Element.prototype)) {
 	/*Check if Element matches a given CSS selector*/
 	if ('mozMatchesSelector' in Element.prototype) {
 		Element.prototype.matches = Element.prototype.mozMatchesSelector;
@@ -61,15 +62,15 @@ if (! ('matches' in Element.prototype)) {
 	} else {
 		Element.prototype.matches = function(sel) {
 			return ($(sel) .indexOf(this) !== -1);
-		}
+		};
 	}
 }
-if (! ('contains' in String.prototype)) {
+if (!('contains' in String.prototype)) {
 	String.prototype.contains = function() {
 		return String.prototype.indexOf.apply( this, arguments ) !== -1;
 	};
 }
-if (! ('startsWith' in String.prototype)) {
+if (!('startsWith' in String.prototype)) {
 	Object.defineProperty(String.prototype, 'startsWith', {
 		enumerable: false,
 		configurable: false,
@@ -80,7 +81,7 @@ if (! ('startsWith' in String.prototype)) {
 		}
 	});
 }
-if (! ('endsWith' in String.prototype)) {
+if (!('endsWith' in String.prototype)) {
 	Object.defineProperty(String.prototype, 'endsWith', {
 		value: function (searchString, position) {
 			var subjectString = this.toString();
@@ -93,21 +94,21 @@ if (! ('endsWith' in String.prototype)) {
 		}
 	});
 }
-if(! ('supports' in CSS)) {
+if (!('supports' in CSS)) {
 	CSS.supports = function (prop, value) {
 		var el = document.createElement('div');
-		el.style = prop + ":" + value;
+		el.style = prop + ':' + value;
 		return (getComputedStyle(el)[prop] === value);
 	};
 }
 (function(root) {
-	var CSS =  root.CSS;
+	var CSS = root.CSS;
 	var InvalidCharacterError = function(message) {
 		this.message = message;
 	};
-	InvalidCharacterError.prototype = new Error;
+	InvalidCharacterError.prototype = new Error();
 	InvalidCharacterError.prototype.name = 'InvalidCharacterError';
-	if (! ('escape' in CSS)) {
+	if (!('escape' in CSS)) {
 		CSS.escape = function(value) {
 			var string = String(value), length = string.length, index = -1, codeUnit, result = '', firstCodeUnit = string.charCodeAt(0);
 			while (++index < length) {

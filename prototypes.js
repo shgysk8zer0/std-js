@@ -42,7 +42,7 @@ Array.prototype.end = function()
 HTMLCollection.prototype.indexOf = Array.prototype.indexOf;
 RegExp.prototype.escape = function()
 {
-	return this.source.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+	return this.source.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
 };
 
 Object.prototype.isaN = function ()
@@ -129,7 +129,7 @@ Element.prototype.data = function(set, value)
 	if (supports('dataset')) {
 		(typeof value !== 'undefined') ? this.dataset[set.camelCase()] = value : val = this.dataset[set.camelCase()];
 	} else {
-		(typeof value !== 'undefined') ? this.setAttribute('data-' + set, value): val = this.getAttribute('data-' + set);
+		(typeof value !== 'undefined') ? this.setAttribute('data-' + set, value) : val = this.getAttribute('data-' + set);
 	}
 	return val;
 };
@@ -139,12 +139,10 @@ Element.prototype.attr = function(attr, val)
 		case 'string':
 			this.setAttribute(attr, val);
 			return this;
-			break;
 
 		case 'boolean':
 			(val) ? this.setAttribute(attr, '') : this.removeAttribute(attr);
 			return this;
-			break;
 
 		default:
 			return this.getAttribute(attr);
@@ -186,7 +184,7 @@ Element.prototype.wordCount = function()
 	return this.textContent.split(' ').length;
 };
 Element.prototype.DnD = function(sets) {
-	"use strict";
+	'use strict';
 	this.ondragover = function(event) {
 		this.classList.add('receiving');
 		return false;
@@ -199,7 +197,7 @@ Element.prototype.DnD = function(sets) {
 		e.preventDefault();
 		this.classList.remove('receiving');
 		if (e.dataTransfer.files.length) {
-			for (var i=0; i < e.dataTransfer.files.length; i++) {
+			for (var i = 0; i < e.dataTransfer.files.length; i++) {
 				var file = e.dataTransfer.files[i],
 					reader = new FileReader(),
 					progress = document.createElement('progress');
@@ -256,7 +254,7 @@ HTMLElement.prototype.dataURI = function() {
 	doc.head.appendChild(style);
 
 	return doc.dataURI();
-}
+};
 HTMLElement.prototype.toDocument = function (charset) {
 	if (typeof charset !== 'string') {
 		charset = 'utf-8';
@@ -270,7 +268,7 @@ HTMLElement.prototype.toDocument = function (charset) {
 };
 HTMLDocument.prototype.dataURI = function() {
 	return 'data:text/html,' + encodeURIComponent('<!DOCTYPE html>' + this.documentElement.outerHTML);
-}
+};
 Element.prototype.query = function(query)
 {
 	var els = [];
@@ -287,9 +285,9 @@ Object.prototype.keys = function()
 {
 	return Object.keys(this) || [];
 };
-Object.prototype.isArray  = false;
+Object.prototype.isArray = false;
 Object.prototype.isString = false;
 Object.prototype.isNumber = false;
-Array.prototype.isArray   = true;
+Array.prototype.isArray = true;
 String.prototype.isString = true;
 Number.prototype.isNumber = true;

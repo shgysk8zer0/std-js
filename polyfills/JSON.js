@@ -1,3 +1,4 @@
+/*eslint quotes: 0, curly: 0, no-extra-semi: 0*/
 if (!window.JSON) {
 	window.JSON = {
 		parse: function (sJSON) { return eval("(" + sJSON + ")"); },

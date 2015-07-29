@@ -1,3 +1,141 @@
+/*! https://mths.be/cssescape v0.2.1 by @mathias | MIT license */
+(function(root) {
+
+	if (!root.CSS) {
+		root.CSS = {};
+	}
+
+	var CSS = root.CSS;
+
+	var InvalidCharacterError = function(message) {
+		this.message = message;
+	};
+	InvalidCharacterError.prototype = new Error();
+	InvalidCharacterError.prototype.name = 'InvalidCharacterError';
+
+	if (!CSS.escape) {
+		// http://dev.w3.org/csswg/cssom/#serialize-an-identifier
+		CSS.escape = function(value) {
+			var string = String(value);
+			var length = string.length;
+			var index = -1;
+			var codeUnit;
+			var result = '';
+			var firstCodeUnit = string.charCodeAt(0);
+			while (++index < length) {
+				codeUnit = string.charCodeAt(index);
+				// Note: there’s no need to special-case astral symbols, surrogate
+				// pairs, or lone surrogates.
+
+				// If the character is NULL (U+0000), then throw an
+				// `InvalidCharacterError` exception and terminate these steps.
+				if (codeUnit == 0x0000) {
+					throw new InvalidCharacterError(
+						'Invalid character: the input contains U+0000.'
+					);
+				}
+
+				if (
+					// If the character is in the range [\1-\1F] (U+0001 to U+001F) or is
+					// U+007F, […]
+					(codeUnit >= 0x0001 && codeUnit <= 0x001F) || codeUnit == 0x007F ||
+					// If the character is the first character and is in the range [0-9]
+					// (U+0030 to U+0039), […]
+					(index == 0 && codeUnit >= 0x0030 && codeUnit <= 0x0039) ||
+					// If the character is the second character and is in the range [0-9]
+					// (U+0030 to U+0039) and the first character is a `-` (U+002D), […]
+					(
+						index == 1 &&
+						codeUnit >= 0x0030 && codeUnit <= 0x0039 &&
+						firstCodeUnit == 0x002D
+					)
+				) {
+					// http://dev.w3.org/csswg/cssom/#escape-a-character-as-code-point
+					result += '\\' + codeUnit.toString(16) + ' ';
+					continue;
+				}
+
+				// If the character is not handled by one of the above rules and is
+				// greater than or equal to U+0080, is `-` (U+002D) or `_` (U+005F), or
+				// is in one of the ranges [0-9] (U+0030 to U+0039), [A-Z] (U+0041 to
+				// U+005A), or [a-z] (U+0061 to U+007A), […]
+				if (
+					codeUnit >= 0x0080 ||
+					codeUnit == 0x002D ||
+					codeUnit == 0x005F ||
+					codeUnit >= 0x0030 && codeUnit <= 0x0039 ||
+					codeUnit >= 0x0041 && codeUnit <= 0x005A ||
+					codeUnit >= 0x0061 && codeUnit <= 0x007A
+				) {
+					// the character itself
+					result += string.charAt(index);
+					continue;
+				}
+
+				// Otherwise, the escaped character.
+				// http://dev.w3.org/csswg/cssom/#escape-a-character
+				result += '\\' + string.charAt(index);
+
+			}
+			return result;
+		};
+	}
+
+}(typeof global != 'undefined' ? global : this));
+/*! CSS.supports() Polyfill
+* https://gist.github.com/codler/03a0995195aa2859465f
+* Copyright (c) 2014 Han Lin Yap http://yap.nu; MIT license */
+/*eslint no-inner-declarations: 0, no-return-assign: 0*/
+if (!('CSS' in window)) {
+	window.CSS = {};
+}
+
+if (!('supports' in window.CSS)) {
+	window.CSS._cacheSupports = {};
+	window.CSS.supports = function(propertyName, value) {
+		var key = [propertyName, value].toString();
+		if (key in window.CSS._cacheSupports) {
+			return window.CSS._cacheSupports[key];
+		}
+
+		function cssSupports(propertyName, value) {
+			var style = document.createElement('div').style;
+
+			// 1 argument
+			if (typeof value === 'undefined') {
+				function mergeOdd(propertyName, reg) {
+					var arr = propertyName.split(reg);
+
+					if (arr.length > 1) {
+						return arr.map(function(value, index, arr) {
+							return (index % 2 === 0) ? value + arr[index + 1] : '';
+						}).filter(Boolean);
+					}
+				}
+
+				// The regex will do this '( a:b ) or ( c:d )' => ["( a:b ", ")", "(", " c:d )"]
+				var arrOr = mergeOdd(propertyName, /([)])\s*or\s*([(])/gi);
+				if (arrOr) {
+					return arrOr.some(function(supportsCondition) { return window.CSS.supports(supportsCondition); });
+				}
+				var arrAnd = mergeOdd(propertyName, /([)])\s*and\s*([(])/gi);
+				if (arrAnd) {
+					return arrAnd.every(function(supportsCondition) { return window.CSS.supports(supportsCondition); });
+				}
+
+				// Remove the first and last parentheses
+				style.cssText = propertyName.replace('(', '').replace(/[)]$/, '');
+			// 2 arguments
+			} else {
+				style.cssText = propertyName + ':' + value;
+			}
+
+			return !!style.length;
+		}
+
+		return window.CSS._cacheSupports[key] = cssSupports(propertyName, value);
+	};
+}
 if (!document.documentElement.dataset &&
 	(!Object.getOwnPropertyDescriptor(Element.prototype, 'dataset') ||
 		!Object.getOwnPropertyDescriptor(Element.prototype, 'dataset').get)
@@ -58,39 +196,57 @@ if (!document.documentElement.dataset &&
 		Object.defineProperty(Element.prototype, 'dataset', propDescriptor);
 	}
 }
-;(function(win, doc){
-	if(win.addEventListener)return;
-
-	function docHijack(p){var old = doc[p];doc[p] = function(v){return addListen(old(v))}}
+/*eslint no-cond-assign: 0*/
+(function(win, doc){
+	if(win.addEventListener){
+		return;
+	}
+	function addListen(obj, i){
+		if(i = obj.length) {
+			while(i--) {
+				obj[i].addEventListener = addEvent;
+			}
+		} else {
+			obj.addEventListener = addEvent;
+		}
+		return obj;
+	}
+	function docHijack(p){
+		var old = doc[p];
+		doc[p] = function(v){
+			return addListen(old(v));
+		};
+	}
 	function addEvent(on, fn, self){
 		return (self = this).attachEvent('on' + on, function(e){
 			var e = e || win.event;
-			e.preventDefault  = e.preventDefault  || function(){e.returnValue = false}
-			e.stopPropagation = e.stopPropagation || function(){e.cancelBubble = true}
+			e.preventDefault = e.preventDefault || function(){
+				e.returnValue = false;
+			};
+			e.stopPropagation = e.stopPropagation || function(){
+				e.cancelBubble = true;
+			};
 			fn.call(self, e);
 		});
 	}
-	function addListen(obj, i){
-		if(i = obj.length)while(i--)obj[i].addEventListener = addEvent;
-		else obj.addEventListener = addEvent;
-		return obj;
-	}
-
 	addListen([doc, win]);
-	if('Element' in win)win.Element.prototype.addEventListener = addEvent;
-	else{
-		doc.attachEvent('onreadystatechange', function(){addListen(doc.all)});
+	if('Element' in win){
+		win.Element.prototype.addEventListener = addEvent;
+	} else{
+		doc.attachEvent('onreadystatechange', function(){
+			addListen(doc.all);
+		});
 		docHijack('getElementsByTagName');
 		docHijack('getElementById');
 		docHijack('createElement');
-		addListen(doc.all);	
+		addListen(doc.all);
 	}
 })(window, document);
 (function() {
   'use strict';
 
   if (self.fetch) {
-    return
+    return;
   }
 
   function normalizeName(name) {
@@ -98,338 +254,335 @@ if (!document.documentElement.dataset &&
       name = name.toString();
     }
     if (/[^a-z0-9\-#$%&'*+.\^_`|~]/i.test(name)) {
-      throw new TypeError('Invalid character in header field name')
+      throw new TypeError('Invalid character in header field name');
     }
-    return name.toLowerCase()
+    return name.toLowerCase();
   }
 
   function normalizeValue(value) {
     if (typeof value !== 'string') {
       value = value.toString();
     }
-    return value
+    return value;
   }
 
   function Headers(headers) {
-    this.map = {}
+    this.map = {};
 
-    var self = this
+    var self = this;
     if (headers instanceof Headers) {
       headers.forEach(function(name, values) {
         values.forEach(function(value) {
-          self.append(name, value)
-        })
-      })
+          self.append(name, value);
+      });
+  });
 
     } else if (headers) {
       Object.getOwnPropertyNames(headers).forEach(function(name) {
-        self.append(name, headers[name])
-      })
+        self.append(name, headers[name]);
+    });
     }
   }
 
   Headers.prototype.append = function(name, value) {
-    name = normalizeName(name)
-    value = normalizeValue(value)
-    var list = this.map[name]
+    name = normalizeName(name);
+    value = normalizeValue(value);
+    var list = this.map[name];
     if (!list) {
-      list = []
-      this.map[name] = list
+      list = [];
+      this.map[name] = list;
     }
-    list.push(value)
-  }
+    list.push(value);
+};
 
-  Headers.prototype['delete'] = function(name) {
-    delete this.map[normalizeName(name)]
-  }
+  Headers.prototype.delete = function(name) {
+    delete this.map[normalizeName(name)];
+};
 
   Headers.prototype.get = function(name) {
-    var values = this.map[normalizeName(name)]
-    return values ? values[0] : null
-  }
+    var values = this.map[normalizeName(name)];
+    return values ? values[0] : null;
+};
 
   Headers.prototype.getAll = function(name) {
-    return this.map[normalizeName(name)] || []
-  }
+    return this.map[normalizeName(name)] || [];
+};
 
   Headers.prototype.has = function(name) {
-    return this.map.hasOwnProperty(normalizeName(name))
-  }
+    return this.map.hasOwnProperty(normalizeName(name));
+};
 
   Headers.prototype.set = function(name, value) {
-    this.map[normalizeName(name)] = [normalizeValue(value)]
-  }
+    this.map[normalizeName(name)] = [normalizeValue(value)];
+};
 
   // Instead of iterable for now.
   Headers.prototype.forEach = function(callback) {
-    var self = this
+    var self = this;
     Object.getOwnPropertyNames(this.map).forEach(function(name) {
-      callback(name, self.map[name])
-    })
-  }
+      callback(name, self.map[name]);
+  });
+  };
 
   function consumed(body) {
     if (body.bodyUsed) {
-      return Promise.reject(new TypeError('Already read'))
+      return Promise.reject(new TypeError('Already read'));
     }
-    body.bodyUsed = true
+    body.bodyUsed = true;
   }
 
   function fileReaderReady(reader) {
     return new Promise(function(resolve, reject) {
       reader.onload = function() {
-        resolve(reader.result)
-      }
+        resolve(reader.result);
+    };
       reader.onerror = function() {
-        reject(reader.error)
-      }
-    })
+        reject(reader.error);
+    };
+});
   }
 
   function readBlobAsArrayBuffer(blob) {
-    var reader = new FileReader()
-    reader.readAsArrayBuffer(blob)
-    return fileReaderReady(reader)
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(blob);
+    return fileReaderReady(reader);
   }
 
   function readBlobAsText(blob) {
-    var reader = new FileReader()
-    reader.readAsText(blob)
-    return fileReaderReady(reader)
+    var reader = new FileReader();
+    reader.readAsText(blob);
+    return fileReaderReady(reader);
   }
 
   var support = {
     blob: 'FileReader' in self && 'Blob' in self && (function() {
       try {
         new Blob();
-        return true
+        return true;
       } catch(e) {
-        return false
+        return false;
       }
     })(),
     formData: 'FormData' in self
-  }
+};
 
   function Body() {
-    this.bodyUsed = false
-
+    this.bodyUsed = false;
+      function decode(body) {
+        var form = new FormData();
+        body.trim().split('&').forEach(function(bytes) {
+          if (bytes) {
+            var split = bytes.split('=');
+            var name = split.shift().replace(/\+/g, ' ');
+            var value = split.join('=').replace(/\+/g, ' ');
+            form.append(decodeURIComponent(name), decodeURIComponent(value));
+          }
+      });
+        return form;
+      }
     if (support.blob) {
       this._initBody = function(body) {
-        this._bodyInit = body
+        this._bodyInit = body;
         if (typeof body === 'string') {
-          this._bodyText = body
+          this._bodyText = body;
         } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
-          this._bodyBlob = body
+          this._bodyBlob = body;
         } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
-          this._bodyFormData = body
+          this._bodyFormData = body;
         } else if (!body) {
-          this._bodyText = ''
+          this._bodyText = '';
         } else {
-          throw new Error('unsupported BodyInit type')
+          throw new Error('unsupported BodyInit type');
         }
-      }
+    };
 
       this.blob = function() {
-        var rejected = consumed(this)
+        var rejected = consumed(this);
         if (rejected) {
-          return rejected
+          return rejected;
         }
 
         if (this._bodyBlob) {
-          return Promise.resolve(this._bodyBlob)
+          return Promise.resolve(this._bodyBlob);
         } else if (this._bodyFormData) {
-          throw new Error('could not read FormData body as blob')
+          throw new Error('could not read FormData body as blob');
         } else {
-          return Promise.resolve(new Blob([this._bodyText]))
+          return Promise.resolve(new Blob([this._bodyText]));
         }
-      }
+    };
 
       this.arrayBuffer = function() {
-        return this.blob().then(readBlobAsArrayBuffer)
-      }
+        return this.blob().then(readBlobAsArrayBuffer);
+    };
 
       this.text = function() {
-        var rejected = consumed(this)
+        var rejected = consumed(this);
         if (rejected) {
-          return rejected
+          return rejected;
         }
 
         if (this._bodyBlob) {
-          return readBlobAsText(this._bodyBlob)
+          return readBlobAsText(this._bodyBlob);
         } else if (this._bodyFormData) {
-          throw new Error('could not read FormData body as text')
+          throw new Error('could not read FormData body as text');
         } else {
-          return Promise.resolve(this._bodyText)
+          return Promise.resolve(this._bodyText);
         }
-      }
+    };
     } else {
       this._initBody = function(body) {
-        this._bodyInit = body
+        this._bodyInit = body;
         if (typeof body === 'string') {
-          this._bodyText = body
+          this._bodyText = body;
         } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
-          this._bodyFormData = body
+          this._bodyFormData = body;
         } else if (!body) {
-          this._bodyText = ''
+          this._bodyText = '';
         } else {
-          throw new Error('unsupported BodyInit type')
+          throw new Error('unsupported BodyInit type');
         }
-      }
+    };
 
       this.text = function() {
-        var rejected = consumed(this)
-        return rejected ? rejected : Promise.resolve(this._bodyText)
-      }
+        var rejected = consumed(this);
+        return rejected ? rejected : Promise.resolve(this._bodyText);
+    };
     }
 
     if (support.formData) {
       this.formData = function() {
-        return this.text().then(decode)
-      }
+        return this.text().then(decode);
+    };
     }
 
     this.json = function() {
-      return this.text().then(JSON.parse)
-    }
+      return this.text().then(JSON.parse);
+  };
 
-    return this
+    return this;
   }
 
   // HTTP methods whose capitalization should be normalized
-  var methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT']
+  var methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT'];
 
   function normalizeMethod(method) {
-    var upcased = method.toUpperCase()
-    return (methods.indexOf(upcased) > -1) ? upcased : method
+    var upcased = method.toUpperCase();
+    return (methods.indexOf(upcased) > -1) ? upcased : method;
   }
+  function Response(bodyInit, options) {
+    if (!options) {
+      options = {};
+    }
 
+    this._initBody(bodyInit);
+    this.type = 'default';
+    this.url = null;
+    this.status = options.status;
+    this.ok = this.status >= 200 && this.status < 300;
+    this.statusText = options.statusText;
+    this.headers = options.headers instanceof Headers ? options.headers : new Headers(options.headers);
+    this.url = options.url || '';
+  }
   function Request(url, options) {
-    options = options || {}
-    this.url = url
+    options = options || {};
+    this.url = url;
 
-    this.credentials = options.credentials || 'omit'
-    this.headers = new Headers(options.headers)
-    this.method = normalizeMethod(options.method || 'GET')
-    this.mode = options.mode || null
-    this.referrer = null
+    this.credentials = options.credentials || 'omit';
+    this.headers = new Headers(options.headers);
+    this.method = normalizeMethod(options.method || 'GET');
+    this.mode = options.mode || null;
+    this.referrer = null;
 
     if ((this.method === 'GET' || this.method === 'HEAD') && options.body) {
-      throw new TypeError('Body not allowed for GET or HEAD requests')
+      throw new TypeError('Body not allowed for GET or HEAD requests');
     }
-    this._initBody(options.body)
-  }
-
-  function decode(body) {
-    var form = new FormData()
-    body.trim().split('&').forEach(function(bytes) {
-      if (bytes) {
-        var split = bytes.split('=')
-        var name = split.shift().replace(/\+/g, ' ')
-        var value = split.join('=').replace(/\+/g, ' ')
-        form.append(decodeURIComponent(name), decodeURIComponent(value))
-      }
-    })
-    return form
+    this._initBody(options.body);
   }
 
   function headers(xhr) {
-    var head = new Headers()
-    var pairs = xhr.getAllResponseHeaders().trim().split('\n')
+    var head = new Headers();
+    var pairs = xhr.getAllResponseHeaders().trim().split('\n');
     pairs.forEach(function(header) {
-      var split = header.trim().split(':')
-      var key = split.shift().trim()
-      var value = split.join(':').trim()
-      head.append(key, value)
-    })
-    return head
+      var split = header.trim().split(':');
+      var key = split.shift().trim();
+      var value = split.join(':').trim();
+      head.append(key, value);
+  });
+    return head;
   }
 
   Request.prototype.fetch = function() {
-    var self = this
+    var self = this;
 
     return new Promise(function(resolve, reject) {
-      var xhr = new XMLHttpRequest()
+      var xhr = new XMLHttpRequest();
       if (self.credentials === 'cors') {
         xhr.withCredentials = true;
       }
 
       function responseURL() {
         if ('responseURL' in xhr) {
-          return xhr.responseURL
+          return xhr.responseURL;
         }
 
         // Avoid security warnings on getResponseHeader when not allowed by CORS
         if (/^X-Request-URL:/m.test(xhr.getAllResponseHeaders())) {
-          return xhr.getResponseHeader('X-Request-URL')
+          return xhr.getResponseHeader('X-Request-URL');
         }
 
         return;
       }
 
       xhr.onload = function() {
-        var status = (xhr.status === 1223) ? 204 : xhr.status
+        var status = (xhr.status === 1223) ? 204 : xhr.status;
         if (status < 100 || status > 599) {
-          reject(new TypeError('Network request failed'))
-          return
+          reject(new TypeError('Network request failed'));
+          return;
         }
         var options = {
           status: status,
           statusText: xhr.statusText,
           headers: headers(xhr),
           url: responseURL()
-        }
+      };
         var body = 'response' in xhr ? xhr.response : xhr.responseText;
-        resolve(new Response(body, options))
-      }
+        resolve(new Response(body, options));
+    };
 
       xhr.onerror = function() {
-        reject(new TypeError('Network request failed'))
-      }
+        reject(new TypeError('Network request failed'));
+    };
 
-      xhr.open(self.method, self.url, true)
+      xhr.open(self.method, self.url, true);
 
       if ('responseType' in xhr && support.blob) {
-        xhr.responseType = 'blob'
+        xhr.responseType = 'blob';
       }
 
       self.headers.forEach(function(name, values) {
         values.forEach(function(value) {
-          xhr.setRequestHeader(name, value)
-        })
-      })
+          xhr.setRequestHeader(name, value);
+      });
+  });
 
-      xhr.send(typeof self._bodyInit === 'undefined' ? null : self._bodyInit)
-    })
-  }
+      xhr.send(typeof self._bodyInit === 'undefined' ? null : self._bodyInit);
+  });
+  };
 
-  Body.call(Request.prototype)
+  Body.call(Request.prototype);
 
-  function Response(bodyInit, options) {
-    if (!options) {
-      options = {}
-    }
-
-    this._initBody(bodyInit)
-    this.type = 'default'
-    this.url = null
-    this.status = options.status
-    this.ok = this.status >= 200 && this.status < 300
-    this.statusText = options.statusText
-    this.headers = options.headers instanceof Headers ? options.headers : new Headers(options.headers)
-    this.url = options.url || ''
-  }
-
-  Body.call(Response.prototype)
+  Body.call(Response.prototype);
 
   self.Headers = Headers;
   self.Request = Request;
   self.Response = Response;
 
   self.fetch = function (url, options) {
-    return new Request(url, options).fetch()
-  }
-  self.fetch.polyfill = true
+    return new Request(url, options).fetch();
+};
+  self.fetch.polyfill = true;
 })();
+/*eslint quotes: 0, curly: 0, no-extra-semi: 0*/
 if (!window.JSON) {
 	window.JSON = {
 		parse: function (sJSON) { return eval("(" + sJSON + ")"); },
@@ -451,8 +604,9 @@ if (!window.JSON) {
 			return typeof vContent === "string" ? "\"" + vContent.replace(/"/g, "\\$&") + "\"" : String(vContent);
 		}
 	};
-};
-(function (global) {
+}
+/*eslint no-return-assign: 0, no-fallthrough: 0*/
+(function(global) {
     var registrationsTable = new WeakMap();
     var setImmediate = window.msSetImmediate;
     if (!setImmediate) {
@@ -475,14 +629,26 @@ if (!window.JSON) {
         };
     }
     var isScheduled = false;
-    var scheduledObservers = [
-    ];
+    var scheduledObservers = [];
     function scheduleCallback(observer) {
         scheduledObservers.push(observer);
         if (!isScheduled) {
             isScheduled = true;
             setImmediate(dispatchCallbacks);
         }
+    }
+    function removeTransientObserversFor(observer) {
+        observer.nodes_.forEach(function (node) {
+            var registrations = registrationsTable.get(node);
+            if (!registrations) {
+                return;
+            }
+            registrations.forEach(function (registration) {
+                if (registration.observer === observer) {
+                    registration.removeTransientObservers();
+                }
+            });
+        });
     }
     function wrapIfNeeded(node) {
         return window.ShadowDOMPolyfill && window.ShadowDOMPolyfill.wrapIfNeeded(node) || node;
@@ -504,16 +670,9 @@ if (!window.JSON) {
                 anyNonEmpty = true;
             }
         });
-        if (anyNonEmpty) dispatchCallbacks();
-    }
-    function removeTransientObserversFor(observer) {
-        observer.nodes_.forEach(function (node) {
-            var registrations = registrationsTable.get(node);
-            if (!registrations) return ;
-            registrations.forEach(function (registration) {
-                if (registration.observer === observer) registration.removeTransientObservers();
-            });
-        });
+        if (anyNonEmpty) {
+            dispatchCallbacks();
+        }
     }
     function forEachAncestorAndObserverEnqueueRecord(target, callback) {
         for (var node = target; node; node = node.parentNode) {
@@ -522,9 +681,13 @@ if (!window.JSON) {
                 for (var j = 0; j < registrations.length; j++) {
                     var registration = registrations[j];
                     var options = registration.options;
-                    if (node !== target && !options.subtree) continue;
+                    if (node !== target && !options.subtree) {
+                        continue;
+                    }
                     var record = callback(options);
-                    if (record) registration.enqueue(record);
+                    if (record) {
+                        registration.enqueue(record);
+                    }
                 }
             }
         }
@@ -545,8 +708,9 @@ if (!window.JSON) {
                 throw new SyntaxError();
             }
             var registrations = registrationsTable.get(target);
-            if (!registrations) registrationsTable.set(target, registrations = [
-            ]);
+            if (!registrations) {
+                registrationsTable.set(target, registrations = []);
+            }
             var registration;
             for (var i = 0; i < registrations.length; i++) {
                 if (registrations[i].observer === this) {
@@ -608,14 +772,16 @@ if (!window.JSON) {
         record.attributeNamespace = original.attributeNamespace;
         record.oldValue = original.oldValue;
         return record;
-    };
+    }
     var currentRecord,
     recordWithOldValue;
     function getRecord(type, target) {
         return currentRecord = new MutationRecord(type, target);
     }
     function getRecordWithOldValue(oldValue) {
-        if (recordWithOldValue) return recordWithOldValue;
+        if (recordWithOldValue) {
+            return recordWithOldValue;
+        }
         recordWithOldValue = copyMutationRecord(currentRecord);
         recordWithOldValue.oldValue = oldValue;
         return recordWithOldValue;
@@ -627,8 +793,12 @@ if (!window.JSON) {
         return record === recordWithOldValue || record === currentRecord;
     }
     function selectRecord(lastRecord, newRecord) {
-        if (lastRecord === newRecord) return lastRecord;
-        if (recordWithOldValue && recordRepresentsCurrentMutation(lastRecord)) return recordWithOldValue;
+        if (lastRecord === newRecord) {
+            return lastRecord;
+        }
+        if (recordWithOldValue && recordRepresentsCurrentMutation(lastRecord)) {
+            return recordWithOldValue;
+        }
         return null;
     }
     function Registration(observer, target, options) {
@@ -647,7 +817,7 @@ if (!window.JSON) {
                 var recordToReplaceLast = selectRecord(lastRecord, record);
                 if (recordToReplaceLast) {
                     records[length - 1] = recordToReplaceLast;
-                    return ;
+                    return;
                 }
             } else {
                 scheduleCallback(this.observer);
@@ -659,28 +829,47 @@ if (!window.JSON) {
         },
         addListeners_: function (node) {
             var options = this.options;
-            if (options.attributes) node.addEventListener('DOMAttrModified', this, true);
-            if (options.characterData) node.addEventListener('DOMCharacterDataModified', this, true);
-            if (options.childList) node.addEventListener('DOMNodeInserted', this, true);
-            if (options.childList || options.subtree) node.addEventListener('DOMNodeRemoved', this, true);
+            if (options.attributes) {
+                node.addEventListener('DOMAttrModified', this, true);
+            }
+            if (options.characterData) {
+                node.addEventListener('DOMCharacterDataModified', this, true);
+            }
+            if (options.childList) {
+                node.addEventListener('DOMNodeInserted', this, true);
+            }
+            if (options.childList || options.subtree) {
+                node.addEventListener('DOMNodeRemoved', this, true);
+            }
         },
         removeListeners: function () {
             this.removeListeners_(this.target);
         },
         removeListeners_: function (node) {
             var options = this.options;
-            if (options.attributes) node.removeEventListener('DOMAttrModified', this, true);
-            if (options.characterData) node.removeEventListener('DOMCharacterDataModified', this, true);
-            if (options.childList) node.removeEventListener('DOMNodeInserted', this, true);
-            if (options.childList || options.subtree) node.removeEventListener('DOMNodeRemoved', this, true);
+            if (options.attributes) {
+                node.removeEventListener('DOMAttrModified', this, true);
+            }
+            if (options.characterData) {
+                node.removeEventListener('DOMCharacterDataModified', this, true);
+            }
+            if (options.childList) {
+                node.removeEventListener('DOMNodeInserted', this, true);
+            }
+            if (options.childList || options.subtree) {
+                node.removeEventListener('DOMNodeRemoved', this, true);
+            }
         },
         addTransientObserver: function (node) {
-            if (node === this.target) return ;
+            if (node === this.target) {
+                return;
+            }
             this.addListeners_(node);
             this.transientObservedNodes.push(node);
             var registrations = registrationsTable.get(node);
-            if (!registrations) registrationsTable.set(node, registrations = [
-            ]);
+            if (!registrations) {
+                registrationsTable.set(node, registrations = []);
+        }
             registrations.push(this);
         },
         removeTransientObservers: function () {
@@ -710,11 +899,15 @@ if (!window.JSON) {
                 record.attributeNamespace = namespace;
                 var oldValue = e.attrChange === MutationEvent.ADDITION ? null : e.prevValue;
                 forEachAncestorAndObserverEnqueueRecord(target, function (options) {
-                    if (!options.attributes) return ;
-                    if (options.attributeFilter && options.attributeFilter.length && options.attributeFilter.indexOf(name) === - 1 && options.attributeFilter.indexOf(namespace) === - 1) {
-                        return ;
+                    if (!options.attributes) {
+                        return;
                     }
-                    if (options.attributeOldValue) return getRecordWithOldValue(oldValue);
+                    if (options.attributeFilter && options.attributeFilter.length && options.attributeFilter.indexOf(name) === -1 && options.attributeFilter.indexOf(namespace) === -1) {
+                        return;
+                    }
+                    if (options.attributeOldValue) {
+                        return getRecordWithOldValue(oldValue);
+                    }
                     return record;
                 });
                 break;
@@ -723,8 +916,12 @@ if (!window.JSON) {
                 var record = getRecord('characterData', target);
                 var oldValue = e.prevValue;
                 forEachAncestorAndObserverEnqueueRecord(target, function (options) {
-                    if (!options.characterData) return ;
-                    if (options.characterDataOldValue) return getRecordWithOldValue(oldValue);
+                    if (!options.characterData) {
+                        return;
+                    }
+                    if (options.characterDataOldValue) {
+                        return getRecordWithOldValue(oldValue);
+                    }
                     return record;
                 });
                 break;
@@ -756,7 +953,9 @@ if (!window.JSON) {
                 record.previousSibling = previousSibling;
                 record.nextSibling = nextSibling;
                 forEachAncestorAndObserverEnqueueRecord(target, function (options) {
-                    if (!options.childList) return ;
+                    if (!options.childList) {
+                        return;
+                    }
                     return record;
                 });
             }
@@ -764,8 +963,11 @@ if (!window.JSON) {
         }
     };
     global.JsMutationObserver = JsMutationObserver;
-    if (!global.MutationObserver) global.MutationObserver = JsMutationObserver;
-}) (this);
+    if (!global.MutationObserver) {
+        global.MutationObserver = JsMutationObserver;
+    }
+})(this);
+/*eslint quotes: [1, "double"], no-return-assign: 0, no-use-before-define: 0*/
 (function() {
 var define, requireModule, require, requirejs;
 
@@ -792,8 +994,8 @@ var define, requireModule, require, requirejs;
         reified = [],
         exports;
 
-    for (var i=0, l=deps.length; i<l; i++) {
-      if (deps[i] === 'exports') {
+    for (var i = 0, l = deps.length; i < l; i++) {
+      if (deps[i] === "exports") {
         reified.push(exports = {});
       } else {
         reified.push(requireModule(resolve(deps[i])));
@@ -804,15 +1006,15 @@ var define, requireModule, require, requirejs;
     return seen[name] = exports || value;
 
     function resolve(child) {
-      if (child.charAt(0) !== '.') { return child; }
+      if (child.charAt(0) !== ".") { return child; }
       var parts = child.split("/");
       var parentBase = name.split("/").slice(0, -1);
 
-      for (var i=0, l=parts.length; i<l; i++) {
+      for (var i = 0, l = parts.length; i < l; i++) {
         var part = parts[i];
 
-        if (part === '..') { parentBase.pop(); }
-        else if (part === '.') { continue; }
+        if (part === "..") { parentBase.pop(); }
+        else if (part === ".") { continue; }
         else { parentBase.push(part); }
       }
 
@@ -822,7 +1024,7 @@ var define, requireModule, require, requirejs;
 })();
 
 define("promise/all",
-  ["./utils","exports"],
+  ["./utils", "exports"],
   function(__dependency1__, __exports__) {
     "use strict";
     /* global toString */
@@ -880,7 +1082,7 @@ define("promise/all",
       var Promise = this;
 
       if (!isArray(promises)) {
-        throw new TypeError('You must pass an array to all.');
+        throw new TypeError("You must pass an array to all.");
       }
 
       return new Promise(function(resolve, reject) {
@@ -922,9 +1124,9 @@ define("promise/asap",
   ["exports"],
   function(__exports__) {
     "use strict";
-    var browserGlobal = (typeof window !== 'undefined') ? window : {};
+    var browserGlobal = (typeof window !== "undefined") ? window : {};
     var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
-    var local = (typeof global !== 'undefined') ? global : (this === undefined? window:this);
+    var local = (typeof global !== "undefined") ? global : (this === undefined ? window : this);
 
     // node
     function useNextTick() {
@@ -936,7 +1138,7 @@ define("promise/asap",
     function useMutationObserver() {
       var iterations = 0;
       var observer = new BrowserMutationObserver(flush);
-      var node = document.createTextNode('');
+      var node = document.createTextNode("");
       observer.observe(node, { characterData: true });
 
       return function() {
@@ -963,7 +1165,7 @@ define("promise/asap",
     var scheduleFlush;
 
     // Decide what async method to use to triggering processing of queued callbacks:
-    if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
+    if (typeof process !== "undefined" && {}.toString.call(process) === "[object process]") {
       scheduleFlush = useNextTick();
     } else if (BrowserMutationObserver) {
       scheduleFlush = useMutationObserver();
@@ -1003,7 +1205,7 @@ define("promise/config",
     __exports__.configure = configure;
   });
 define("promise/polyfill",
-  ["./promise","./utils","exports"],
+  ["./promise", "./utils", "exports"],
   function(__dependency1__, __dependency2__, __exports__) {
     "use strict";
     /*global self*/
@@ -1013,9 +1215,9 @@ define("promise/polyfill",
     function polyfill() {
       var local;
 
-      if (typeof global !== 'undefined') {
+      if (typeof global !== "undefined") {
         local = global;
-      } else if (typeof window !== 'undefined' && window.document) {
+      } else if (typeof window !== "undefined" && window.document) {
         local = window;
       } else {
         local = self;
@@ -1045,7 +1247,7 @@ define("promise/polyfill",
     __exports__.polyfill = polyfill;
   });
 define("promise/promise",
-  ["./config","./utils","./all","./race","./resolve","./reject","./asap","exports"],
+  ["./config", "./utils", "./all", "./race", "./resolve", "./reject", "./asap", "exports"],
   function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __dependency6__, __dependency7__, __exports__) {
     "use strict";
     var config = __dependency1__.config;
@@ -1065,7 +1267,7 @@ define("promise/promise",
 
     function Promise(resolver) {
       if (!isFunction(resolver)) {
-        throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
+        throw new TypeError("You must pass a resolver function as the first argument to the promise constructor");
       }
 
       if (!(this instanceof Promise)) {
@@ -1123,10 +1325,10 @@ define("promise/promise",
       }
     }
 
-    var PENDING   = void 0;
-    var SEALED    = 0;
+    var PENDING = void 0;
+    var SEALED = 0;
     var FULFILLED = 1;
-    var REJECTED  = 2;
+    var REJECTED = 2;
 
     function subscribe(parent, child, onFulfillment, onRejection) {
       var subscribers = parent._subscribers;
@@ -1134,7 +1336,7 @@ define("promise/promise",
 
       subscribers[length] = child;
       subscribers[length + FULFILLED] = onFulfillment;
-      subscribers[length + REJECTED]  = onRejection;
+      subscribers[length + REJECTED] = onRejection;
     }
 
     function publish(promise, settled) {
@@ -1174,7 +1376,7 @@ define("promise/promise",
         return thenPromise;
       },
 
-      'catch': function(onRejection) {
+      "catch": function(onRejection) {
         return this.then(null, onRejection);
       }
     };
@@ -1260,7 +1462,7 @@ define("promise/promise",
     __exports__.Promise = Promise;
   });
 define("promise/race",
-  ["./utils","exports"],
+  ["./utils", "exports"],
   function(__dependency1__, __exports__) {
     "use strict";
     /* global toString */
@@ -1333,7 +1535,7 @@ define("promise/race",
       var Promise = this;
 
       if (!isArray(promises)) {
-        throw new TypeError('You must pass an array to race.');
+        throw new TypeError("You must pass an array to race.");
       }
       return new Promise(function(resolve, reject) {
         var results = [], promise;
@@ -1341,7 +1543,7 @@ define("promise/race",
         for (var i = 0; i < promises.length; i++) {
           promise = promises[i];
 
-          if (promise && typeof promise.then === 'function') {
+          if (promise && typeof promise.then === "function") {
             promise.then(resolve, reject);
           } else {
             resolve(promise);
@@ -1409,7 +1611,7 @@ define("promise/resolve",
     "use strict";
     function resolve(value) {
       /*jshint validthis:true */
-      if (value && typeof value === 'object' && value.constructor === this) {
+      if (value && typeof value === "object" && value.constructor === this) {
         return value;
       }
 
@@ -1448,7 +1650,24 @@ define("promise/utils",
     __exports__.isArray = isArray;
     __exports__.now = now;
   });
-requireModule('promise/polyfill').polyfill();
-}());if(!document.querySelectorAll){
-	(function(d,s){d=document,s=d.createStyleSheet();d.querySelectorAll=function(r,c,i,j,a){a=d.all,c=[],r=r.replace(/\[for\b/gi,'[htmlFor').split(',');for(i=r.length;i--;){s.addRule(r[i],'k:v');for(j=a.length;j--;)a[j].currentStyle.k&&c.push(a[j]);s.removeRule(0)}return c}})()
+requireModule("promise/polyfill").polyfill();
+}());
+if (!document.querySelectorAll) {
+  (function (d, s) {
+    d = document;
+    s = d.createStyleSheet();
+    d.querySelectorAll = function (r, c, i, j, a) {
+      a = d.all;
+      c = [];
+      r = r.replace(/\[for\b/gi, '[htmlFor').split(',');
+      for (i = r.length; i--; ) {
+        s.addRule(r[i], 'k:v');
+        for (j = a.length; j--; ) {
+			a[j].currentStyle.k && c.push(a[j]);
+		}
+        s.removeRule(0);
+      }
+      return c;
+  };
+})();
 }

@@ -1,0 +1,58 @@
+{
+	"ecmaFeatures": {
+		"arrowFunctions": true,
+		"blockBindings": true,
+		"classes": true,
+		"destructuring": true,
+		"forOf": true,
+		"generators": true,
+		"templateStrings": true,
+		"unicodeCodePointEscapes": true,
+		"jsx": false
+	},
+	"rules": {
+		"semi": 2,
+		"quotes": [1, "single"],
+		"strict": 0,
+		"comma-spacing": 1,
+		"new-cap": 0,
+		"no-new": 0,
+		"camelcase": 0,
+		"no-underscore-dangle": 0,
+		"no-negated-in-lhs": 0,
+		"no-extra-boolean-cast": 0,
+		"no-redeclare": 0,
+		"no-shadow": 0,
+		"consistent-return": 0,
+		"eqeqeq": 0,
+		"no-extend-native": 0,
+		"no-undef": 0,
+		"no-unused-expressions": 0,
+		"no-console": 0,
+		"no-alert": 0,
+		"no-unused-vars": 0,
+		"no-loop-func": 0,
+		"no-eval": 0
+	},
+	"env": {
+		"browser": true,
+		"node": false,
+		"worker": true,
+		"amd": false,
+		"mocha": false,
+		"jasmine": false,
+		"phantom": false,
+		"jquery": false,
+		"prototypejs": false,
+		"shelljs": false,
+		"meteor": false,
+		"mongo": false,
+		"applescript": false,
+		"es6": true
+	},
+	"globals": {
+		"document": false,
+		"window": false,
+		"ga": true
+	}
+}
