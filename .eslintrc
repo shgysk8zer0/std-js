@@ -1,0 +1,38 @@
+{
+	"ecmaFeatures": {
+		"arrowFunctions": true,
+		"blockBindings": true,
+		"classes": true,
+		"destructuring": true,
+		"forOf": true,
+		"generators": true,
+		"templateStrings": true,
+		"unicodeCodePointEscapes": true,
+		"jsx": false
+	},
+	"rules": {
+		"semi": 2,
+		"strict": 1,
+		"no-console": 0
+	},
+	"env": {
+		"browser": true,
+		"node": false,
+		"worker": true,
+		"amd": false,
+		"mocha": false,
+		"jasmine": false,
+		"phantom": false,
+		"jquery": false,
+		"prototypejs": false,
+		"shelljs": false,
+		"meteor": false,
+		"mongo": false,
+		"applescript": false,
+		"es6": true
+	},
+	"globals": {
+		"document": false,
+		"window": false
+	}
+}
