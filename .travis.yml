@@ -1,6 +1,7 @@
 language: node_js
 node_js:
-    - "stable"
-after_install:
-    npm install eslint .
+    - stable
+cache: bundler
+before_script:
+    npm install eslint
 script: eslint .
