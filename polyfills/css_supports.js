@@ -1,6 +1,7 @@
 /*! CSS.supports() Polyfill
 * https://gist.github.com/codler/03a0995195aa2859465f
 * Copyright (c) 2014 Han Lin Yap http://yap.nu; MIT license */
+/*eslint no-inner-declarations: 0, no-return-assign: 0*/
 if (!('CSS' in window)) {
 	window.CSS = {};
 }
@@ -17,13 +18,13 @@ if (!('supports' in window.CSS)) {
 			var style = document.createElement('div').style;
 
 			// 1 argument
-			if (typeof value == 'undefined') {
+			if (typeof value === 'undefined') {
 				function mergeOdd(propertyName, reg) {
 					var arr = propertyName.split(reg);
 
 					if (arr.length > 1) {
 						return arr.map(function(value, index, arr) {
-							return (index % 2 == 0) ? value + arr[index+1] : '';
+							return (index % 2 === 0) ? value + arr[index + 1] : '';
 						}).filter(Boolean);
 					}
 				}
@@ -39,7 +40,7 @@ if (!('supports' in window.CSS)) {
 				}
 
 				// Remove the first and last parentheses
-				style.cssText = propertyName.replace('(','').replace(/[)]$/, '');
+				style.cssText = propertyName.replace('(', '').replace(/[)]$/, '');
 			// 2 arguments
 			} else {
 				style.cssText = propertyName + ':' + value;

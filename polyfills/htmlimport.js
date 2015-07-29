@@ -1,4 +1,4 @@
-if (! ('import' in HTMLLinkElement.prototype)) {
+if (!('import' in HTMLLinkElement.prototype)) {
 	Object.defineProperty(HTMLLinkElement.prototype, 'import', {
 		get: function() {
 			var xhr = new XMLHttpRequest();

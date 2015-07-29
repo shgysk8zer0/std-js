@@ -1,17 +1,15 @@
-function isOnline()
-{
-	return (! 'onLine' in navigator) || navigator.onLine;
+function cache() {}
+function isOnline() {
+	return (!'onLine' in navigator) || navigator.onLine;
 }
-function isInternalLink(link)
-{
+function isInternalLink(link) {
 	if ('URL' in window) {
 		return new URL(link.href, document.baseURI).host === location.host;
 	} else {
 		return new RegExp(document.location.origin).test(link.href);
 	}
 }
-function ajax(data)
-{
+function ajax(data) {
 	if ((typeof data.type !== 'undefined' && data.type.toLowerCase() === 'get') && (typeof data.request === 'string')) {
 		data.url += '?' + data.request;
 	}
@@ -29,11 +27,10 @@ function ajax(data)
 	}
 	if (typeof data.headers !== 'object') {
 		data.headers = {Accept: 'application/json'};
-	} else if (! 'Accept' in data.headers) {
+	} else if (!'Accept' in data.headers) {
 		data.headers.Accept = 'application/json';
 	}
-	return new Promise(function (success, fail)
-	{
+	return new Promise(function (success, fail) 	{
 		var resp;
 		/*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise*/
 		if (('cache' in data) && cache.has(data.cache)) {
@@ -68,8 +65,7 @@ function ajax(data)
 					progress.value = event.loaded / event.total;
 				}
 			});
-			req.addEventListener('load', function (event)
-			{
+			req.addEventListener('load', function(event) {
 				switch (req.getResponseHeader('Content-Type')) {
 					case 'application/json':
 						resp = JSON.parse(req.response);
@@ -77,15 +73,15 @@ function ajax(data)
 
 					case 'application/xml':
 					case 'text/xml':
-						resp = new DOMParser().parseFromString(req.response, "application/xml");
+						resp = new DOMParser().parseFromString(req.response, 'application/xml');
 						break;
 
 					case 'text/html':
-						resp = new DOMParser().parseFromString(req.response, "text/html");
+						resp = new DOMParser().parseFromString(req.response, 'text/html');
 						break;
 
 						case 'image/svg':
-							resp = new DOMParser().parseFromString(req.response, "image/svg+xml");
+							resp = new DOMParser().parseFromString(req.response, 'image/svg+xml');
 							break;
 
 						case 'text/plain':
@@ -105,8 +101,7 @@ function ajax(data)
 					fail(Error(req.statusText));
 				}
 			});
-			req.addEventListener('error', function ()
-			{
+			req.addEventListener('error', function () {
 				progress.parentElement.removeChild(progress);
 				fail(Error('Network Error'));
 			});
@@ -125,26 +120,20 @@ function ajax(data)
 		}
 	});
 }
-function cache()
-{
-	return this;
-}
-function getLocation(options)
-{
+
+function getLocation(options) {
 	/*https://developer.mozilla.org/en-US/docs/Web/API/Geolocation.getCurrentPosition*/
 	if (typeof options === 'undefined') {
 		options = {};
 	}
-	return new Promise(function(success, fail)
-	{
+	return new Promise(function(success, fail) {
 		if (!('geolocation' in navigator)) {
 			fail('Your browser does not support GeoLocation');
 		}
 		navigator.geolocation.getCurrentPosition(success, fail, options);
 	});
 }
-function notify(options)
-{
+function notify(options) {
 	/*Creates a notification, with alert fallback*/
 	var notification;
 	if (typeof options === 'string') {
@@ -190,8 +179,7 @@ function notify(options)
 		return notification;
 	}
 }
-function selection()
-{
+function selection() {
 	var selected = getSelection();
 	//this.target = selected.focusNode;
 	this.start = selected.anchorOffset;
@@ -203,44 +191,34 @@ function selection()
 	this.text = selected.focusNode.textContent.substring(this.start, this.end);
 }
 selection.prototype.constructor = selection;
-selection.prototype.replace = function(rep)
-{
+selection.prototype.replace = function(rep) {
 	this.parent.innerHTML = this.before + rep + this.after;
 };
 cache.prototype.constructor = cache;
-cache.prototype.has = function(key)
-{
+cache.prototype.has = function(key) {
 	return localStorage.keys().indexOf(('cache ' + key).camelCase()) !== -1;
 };
-cache.prototype.get = function(key)
-{
+cache.prototype.get = function(key) {
 	return localStorage.getItem(('cache ' + key).camelCase()) || false;
 };
-cache.prototype.set = function(key, value)
-{
+cache.prototype.set = function(key, value) {
 	localStorage.setItem(('cache ' + key).camelCase(), value);
 	return this;
 };
-cache.prototype.unset = function(key)
-{
+cache.prototype.unset = function(key) {
 	localStorage.removeItem(('cache ' + key).camelCase());
 	return this;
 };
-cache.prototype.keys = function()
-{
-	return localStorage.keys().filter(function(key)
-	{
+cache.prototype.keys = function() {
+	return localStorage.keys().filter(function(key) {
 		return /^cache/.test(key);
 	});
 };
-cache.prototype.each = function(callback)
-{
+cache.prototype.each = function(callback) {
 	return this.keys().forEach(callback.bind(this));
 };
-cache.prototype.clear = function()
-{
-	this.each(function(key)
-	{
+cache.prototype.clear = function() {
+	this.each(function(key) {
 		localStorage.removeItem(key);
 	});
 	return this;

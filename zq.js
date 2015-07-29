@@ -1,15 +1,4 @@
 /*======================================================zQ Functions=========================================================*/
-Object.prototype.isZQ = false;
-zQ.prototype.isZQ = true;
-function $(q) {
-	if(typeof q === 'undefined') {
-		q = document.documentElement;
-	} else if(q.isZQ) {
-		return q;
-	}
-	return new zQ(q);
-}
-zQ.prototype.constructor = zQ;
 function zQ(q) {
 	if(typeof q === 'undefined') {
 		q = document.documentElement;
@@ -18,7 +7,7 @@ function zQ(q) {
 	try {
 		switch(typeof this.query) {
 			case 'string':
-				 this.results = document.querySelectorAll(this.query);
+				this.results = document.querySelectorAll(this.query);
 				break;
 
 			default:
@@ -33,6 +22,17 @@ function zQ(q) {
 	this.filters = [];
 	return this;
 }
+Object.prototype.isZQ = false;
+zQ.prototype.isZQ = true;
+function $(q) {
+	if(typeof q === 'undefined') {
+		q = document.documentElement;
+	} else if(q.isZQ) {
+		return q;
+	}
+	return new zQ(q);
+}
+zQ.prototype.constructor = zQ;
 zQ.prototype.get = function(n) {
 	return this.results.item(n);
 };
@@ -88,7 +88,7 @@ zQ.prototype.hasClass = function(cname) {
 	});
 };
 zQ.prototype.toggleClass = function(cname, condition) {
-	if(typeof condition ==='undefined') {
+	if (typeof condition === 'undefined') {
 		this.each(function(el) {
 			el.classList.toggle(cname);
 		});
@@ -145,7 +145,7 @@ zQ.prototype.pause = function() {
 
 zQ.prototype.on = function (event, callback) {
 	this.each(function (e) {
-		('addEventListener' in Element.prototype) ? e.addEventListener(event, callback, true)  : e['on' + event] = callback;
+		('addEventListener' in Element.prototype) ? e.addEventListener(event, callback, true) : e['on' + event] = callback;
 	});
 	return this;
 };
@@ -247,9 +247,9 @@ zQ.prototype.watch = function(watching, options, attributeFilter) {
 	return this;
 };
 /*====================================================================================================================*/
-zQ.prototype.$ = function (q) {
+zQ.prototype.$ = function (selector) {
 	return $(this.query.split(',').map(function(str) {
-		return q.split(',').map(function(q) {
+		return selector.split(',').map(function(q) {
 			return str.trim() + ' ' + q.trim();
 		});
 	}).join(', '));
@@ -277,6 +277,6 @@ zQ.prototype.css = function (args) { /*Set style using CSS syntax*/
 		});
 	}*/
 	var style = document.styleSheets[document.styleSheets.length - 1];
-	style.insertRule(this.query + '{' + args +'}', style.cssRules.length);
+	style.insertRule(this.query + '{' + args + '}', style.cssRules.length);
 	return this;
 };

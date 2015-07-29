@@ -1,3 +1,4 @@
+/*eslint quotes: [1, "double"], no-return-assign: 0, no-use-before-define: 0*/
 (function() {
 var define, requireModule, require, requirejs;
 
@@ -24,8 +25,8 @@ var define, requireModule, require, requirejs;
         reified = [],
         exports;
 
-    for (var i=0, l=deps.length; i<l; i++) {
-      if (deps[i] === 'exports') {
+    for (var i = 0, l = deps.length; i < l; i++) {
+      if (deps[i] === "exports") {
         reified.push(exports = {});
       } else {
         reified.push(requireModule(resolve(deps[i])));
@@ -36,15 +37,15 @@ var define, requireModule, require, requirejs;
     return seen[name] = exports || value;
 
     function resolve(child) {
-      if (child.charAt(0) !== '.') { return child; }
+      if (child.charAt(0) !== ".") { return child; }
       var parts = child.split("/");
       var parentBase = name.split("/").slice(0, -1);
 
-      for (var i=0, l=parts.length; i<l; i++) {
+      for (var i = 0, l = parts.length; i < l; i++) {
         var part = parts[i];
 
-        if (part === '..') { parentBase.pop(); }
-        else if (part === '.') { continue; }
+        if (part === "..") { parentBase.pop(); }
+        else if (part === ".") { continue; }
         else { parentBase.push(part); }
       }
 
@@ -54,7 +55,7 @@ var define, requireModule, require, requirejs;
 })();
 
 define("promise/all",
-  ["./utils","exports"],
+  ["./utils", "exports"],
   function(__dependency1__, __exports__) {
     "use strict";
     /* global toString */
@@ -112,7 +113,7 @@ define("promise/all",
       var Promise = this;
 
       if (!isArray(promises)) {
-        throw new TypeError('You must pass an array to all.');
+        throw new TypeError("You must pass an array to all.");
       }
 
       return new Promise(function(resolve, reject) {
@@ -154,9 +155,9 @@ define("promise/asap",
   ["exports"],
   function(__exports__) {
     "use strict";
-    var browserGlobal = (typeof window !== 'undefined') ? window : {};
+    var browserGlobal = (typeof window !== "undefined") ? window : {};
     var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
-    var local = (typeof global !== 'undefined') ? global : (this === undefined? window:this);
+    var local = (typeof global !== "undefined") ? global : (this === undefined ? window : this);
 
     // node
     function useNextTick() {
@@ -168,7 +169,7 @@ define("promise/asap",
     function useMutationObserver() {
       var iterations = 0;
       var observer = new BrowserMutationObserver(flush);
-      var node = document.createTextNode('');
+      var node = document.createTextNode("");
       observer.observe(node, { characterData: true });
 
       return function() {
@@ -195,7 +196,7 @@ define("promise/asap",
     var scheduleFlush;
 
     // Decide what async method to use to triggering processing of queued callbacks:
-    if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
+    if (typeof process !== "undefined" && {}.toString.call(process) === "[object process]") {
       scheduleFlush = useNextTick();
     } else if (BrowserMutationObserver) {
       scheduleFlush = useMutationObserver();
@@ -235,7 +236,7 @@ define("promise/config",
     __exports__.configure = configure;
   });
 define("promise/polyfill",
-  ["./promise","./utils","exports"],
+  ["./promise", "./utils", "exports"],
   function(__dependency1__, __dependency2__, __exports__) {
     "use strict";
     /*global self*/
@@ -245,9 +246,9 @@ define("promise/polyfill",
     function polyfill() {
       var local;
 
-      if (typeof global !== 'undefined') {
+      if (typeof global !== "undefined") {
         local = global;
-      } else if (typeof window !== 'undefined' && window.document) {
+      } else if (typeof window !== "undefined" && window.document) {
         local = window;
       } else {
         local = self;
@@ -277,7 +278,7 @@ define("promise/polyfill",
     __exports__.polyfill = polyfill;
   });
 define("promise/promise",
-  ["./config","./utils","./all","./race","./resolve","./reject","./asap","exports"],
+  ["./config", "./utils", "./all", "./race", "./resolve", "./reject", "./asap", "exports"],
   function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __dependency6__, __dependency7__, __exports__) {
     "use strict";
     var config = __dependency1__.config;
@@ -297,7 +298,7 @@ define("promise/promise",
 
     function Promise(resolver) {
       if (!isFunction(resolver)) {
-        throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
+        throw new TypeError("You must pass a resolver function as the first argument to the promise constructor");
       }
 
       if (!(this instanceof Promise)) {
@@ -355,10 +356,10 @@ define("promise/promise",
       }
     }
 
-    var PENDING   = void 0;
-    var SEALED    = 0;
+    var PENDING = void 0;
+    var SEALED = 0;
     var FULFILLED = 1;
-    var REJECTED  = 2;
+    var REJECTED = 2;
 
     function subscribe(parent, child, onFulfillment, onRejection) {
       var subscribers = parent._subscribers;
@@ -366,7 +367,7 @@ define("promise/promise",
 
       subscribers[length] = child;
       subscribers[length + FULFILLED] = onFulfillment;
-      subscribers[length + REJECTED]  = onRejection;
+      subscribers[length + REJECTED] = onRejection;
     }
 
     function publish(promise, settled) {
@@ -406,7 +407,7 @@ define("promise/promise",
         return thenPromise;
       },
 
-      'catch': function(onRejection) {
+      "catch": function(onRejection) {
         return this.then(null, onRejection);
       }
     };
@@ -492,7 +493,7 @@ define("promise/promise",
     __exports__.Promise = Promise;
   });
 define("promise/race",
-  ["./utils","exports"],
+  ["./utils", "exports"],
   function(__dependency1__, __exports__) {
     "use strict";
     /* global toString */
@@ -565,7 +566,7 @@ define("promise/race",
       var Promise = this;
 
       if (!isArray(promises)) {
-        throw new TypeError('You must pass an array to race.');
+        throw new TypeError("You must pass an array to race.");
       }
       return new Promise(function(resolve, reject) {
         var results = [], promise;
@@ -573,7 +574,7 @@ define("promise/race",
         for (var i = 0; i < promises.length; i++) {
           promise = promises[i];
 
-          if (promise && typeof promise.then === 'function') {
+          if (promise && typeof promise.then === "function") {
             promise.then(resolve, reject);
           } else {
             resolve(promise);
@@ -641,7 +642,7 @@ define("promise/resolve",
     "use strict";
     function resolve(value) {
       /*jshint validthis:true */
-      if (value && typeof value === 'object' && value.constructor === this) {
+      if (value && typeof value === "object" && value.constructor === this) {
         return value;
       }
 
@@ -680,5 +681,5 @@ define("promise/utils",
     __exports__.isArray = isArray;
     __exports__.now = now;
   });
-requireModule('promise/polyfill').polyfill();
+requireModule("promise/polyfill").polyfill();
 }());

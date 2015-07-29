@@ -49,7 +49,7 @@ function WYSIWYG(menu)
 				var value = prompt('Enter attribute value');
 				getSelection().anchorNode.parentElement.setAttribute(name, value.toString());
 			}
-		})
+		});
 	});
 	menu.querySelectorAll('[label="Remove Attribute"]').forEach(function(menuitem) {
 		menuitem.addEventListener('click', function(event) {

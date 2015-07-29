@@ -1,5 +1,5 @@
 window.addEventListener('popstate', function() {
-	"use strict";
+	'use strict';
 	ajax({
 		url: location.pathname,
 		type: 'GET'
