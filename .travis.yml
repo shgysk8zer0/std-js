@@ -2,5 +2,5 @@ language: node_js
 node_js:
     - "stable"
 after_install:
-    npm i eslint .
+    npm install eslint .
 script: eslint .
