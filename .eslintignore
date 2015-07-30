@@ -1,5 +1,5 @@
 .eslintrc
 .eslintignore
-lint.bash
 .travis.yml
+README.md
 polyfills.js
