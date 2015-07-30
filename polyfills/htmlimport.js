@@ -4,7 +4,7 @@ if (!('import' in HTMLLinkElement.prototype)) {
 			var xhr = new XMLHttpRequest();
 			xhr.open('GET', this.href, false);
 			xhr.send();
-			return new DOMParser().parseFromString(xhr.response, "text/html");
+			return new DOMParser().parseFromString(xhr.response, 'text/html');
 		}
 	});
 }
