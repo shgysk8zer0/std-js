@@ -1,11 +1,34 @@
+if (typeof Object.create != 'function') {
+	Object.create = (function() {
+		function Temp() {}
+		var hasOwn = Object.prototype.hasOwnProperty;
+		return function (O) {
+			if (typeof O != 'object') {
+				throw TypeError('Object prototype may only be an Object or null');
+			}
+			Temp.prototype = O;
+			var obj = new Temp();
+			Temp.prototype = null;
+			if (arguments.length > 1) {
+				var Properties = Object(arguments[1]);
+				for (var prop in Properties) {
+					if (hasOwn.call(Properties, prop)) {
+						obj[prop] = Properties[prop];
+					}
+				}
+			}
+			return obj;
+		};
+	})();
+}
 if (!('Element' in window)) {
 	/*Fix IE not allowing Element.prototype*/
 	window.Element = function () {};
-	Element.prototype = Object.prototype;
+	Element.prototype = Object.create(Object.prototype);
 }
 if (!('CSS' in window)) {
 	window.CSS = {};
-	CSS.prototype = Object.prototype;
+	CSS.prototype = object.create(Object.prototype);
 }
 if (!('show' in Element.prototype)) {
 	Element.prototype.show = function() {
@@ -60,14 +83,36 @@ if (!('matches' in Element.prototype)) {
 	} else if ('msMatchesSelector' in Element.prototype) {
 		Element.prototype.matches = Element.prototype.msMatchesSelector;
 	} else {
-		Element.prototype.matches = function(sel) {
-			return ($(sel) .indexOf(this) !== -1);
+		Element.prototype.matches = function (selector) {
+			var element = this;
+			var matches = (element.document || element.ownerDocument).querySelectorAll(selector);
+			var i = 0;
+			while (matches[i] && matches[i] !== element) {
+				i++;
+			}
+			return matches[i] ? true : false;
 		};
 	}
 }
-if (!('contains' in String.prototype)) {
-	String.prototype.contains = function() {
-		return String.prototype.indexOf.apply( this, arguments ) !== -1;
+if(!('closest' in Element.prototype)) {
+	Element.prototype.closest = function(selector) {
+		if (this.parentElement.matches(selector)) {
+			return this.parentElement;
+		} else if (this === document.body) {
+			return null;
+		} else {
+			return this.parentElement.closest(selector);
+		}
+	};
+}
+if(!('remove' in Element.prototype)) {
+	Element.prototype.remove = function() {
+		this.parentElement.removeChild(this);
+	};
+}
+if (!('includes' in String.prototype)) {
+	String.prototype.includes = function() {
+		return String.prototype.indexOf.apply(this, arguments) !== -1;
 	};
 }
 if (!('startsWith' in String.prototype)) {
@@ -106,7 +151,7 @@ if (!('supports' in CSS)) {
 	var InvalidCharacterError = function(message) {
 		this.message = message;
 	};
-	InvalidCharacterError.prototype = new Error();
+	InvalidCharacterError.prototype = Object.create(Error.prototype);
 	InvalidCharacterError.prototype.name = 'InvalidCharacterError';
 	if (!('escape' in CSS)) {
 		CSS.escape = function(value) {
