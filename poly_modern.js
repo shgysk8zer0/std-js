@@ -53,7 +53,7 @@ if (!('close' in Element.prototype)) {
 		this.removeAttribute('open');
 		this.classList.remove('modal');
 		if (this.nextElementSibling.classList.contains('backdrop')) {
-			this.nextElementSibling.parentElement.removeChild(this.nextElementSibling);
+			this.nextElementSibling.remove();
 		}
 	};
 }
