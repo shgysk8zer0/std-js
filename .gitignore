@@ -3,6 +3,7 @@
 *.remote
 *.patch
 *~
+/node_modules/
 #################
 ## Eclipse
 #################
