@@ -9,6 +9,26 @@ function isInternalLink(link) {
 		return new RegExp(document.location.origin).test(link.href);
 	}
 }
+function parseResponse(resp) {
+	if (resp.ok) {
+		var type = resp.headers.get('Content-Type');
+		if (type.startsWith('application/json')) {
+			return resp.json();
+		} else if (type.startsWith('application/xml')) {
+			return new DOMParser().parseFromString(resp.text(), 'application/xml');
+		} else if (type.startsWith('image/svg+xml')) {
+			return new DOMParser().parseFromString(resp.text(), 'image/svg+xml');
+		} else if (type.startsWith('text/html')) {
+			return new DOMParser().parseFromString(resp.text(), 'text/html');
+		} else if (type.startsWith('text/plain')) {
+			return resp.text();
+		} else {
+			throw 'Unsupported Content-Type';
+		}
+	} else {
+		throw 'Invalid request';
+	}
+}
 function ajax(data) {
 	if ((typeof data.type !== 'undefined' && data.type.toLowerCase() === 'get') && (typeof data.request === 'string')) {
 		data.url += '?' + data.request;
