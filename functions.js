@@ -90,9 +90,8 @@ function ajax(data) {
 		data.request = new FormData(data.form);
 		data.request.append('form', data.form.name);
 		data.request.append('nonce', sessionStorage.getItem('nonce'));
-		data.form.querySelectorAll('[data-input-name]').forEach(function(input)
-		{
-			data.request.append(input.data('input-name'), input.innerHTML);
+		data.form.querySelectorAll('[data-input-name]').forEach(function(input) {
+			data.request.append(input.dataset.inputName, input.innerHTML);
 		});
 	}
 	if (typeof data.headers !== 'object') {
