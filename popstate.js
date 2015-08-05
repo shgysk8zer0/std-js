@@ -1,13 +1,7 @@
 window.addEventListener('popstate', function() {
 	'use strict';
-	ajax({
-		url: location.pathname,
-		type: 'GET'
-	}).then(
-		handleJSON
-	).catch(
-		function(err) {
-		$('body > progress').delete();
-		console.error(err);
-	});
+	fetch(location.pathname, {
+		method: 'GET',
+		headers: new Headers({Accept: 'application/json'})
+	}).then(parseResponse).then(handleJSON).catch(reportError);
 });
