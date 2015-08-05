@@ -13,6 +13,6 @@
 })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 window.addEventListener('load', function () {
 	'use strict';
-  ga('create', document.body.data('ga'), 'auto');
-  ga('send', 'pageview');
+	ga('create', document.body.dataset.ga, 'auto');
+	ga('send', 'pageview');
 });
