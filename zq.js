@@ -32,7 +32,6 @@ function $(q) {
 	}
 	return new zQ(q);
 }
-zQ.prototype.constructor = zQ;
 zQ.prototype.get = function(n) {
 	return this.results.item(n);
 };
@@ -69,6 +68,12 @@ zQ.prototype.filter = function(callback) {
 };
 zQ.prototype.map = function(callback) {
 	return this.results.map(callback);
+};
+zQ.prototype.reduce = function(callback, initial) {
+	if (typeof initial === 'undefined') {
+		initial = null;
+	}
+	return this.results.reduce(callback, initial);
 };
 zQ.prototype.addClass = function(cname) {
 	this.each(function(el) {
