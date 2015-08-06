@@ -2,11 +2,81 @@ function cache() {}
 function isOnline() {
 	return (!'onLine' in navigator) || navigator.onLine;
 }
-function isInternalLink(link) {
-	if ('URL' in window) {
-		return new URL(link.href, document.baseURI).host === location.host;
+function notify(options) {
+	/*Creates a notification, with alert fallback*/
+	var notification;
+	if (typeof options === 'string') {
+		options = {
+			body: options
+		};
+	}
+	if (typeof options.icon !== 'string') {
+		options.icon = 'images/octicons/svg/megaphone.svg';
+	}
+	if ('Notification' in window) {
+		if (Notification.permission.toLowerCase() === 'default') {
+			Notification.requestPermission(function () {
+				(Notification.permission.toLowerCase() === 'granted')
+					? notification = notify(options)
+					: alert(options.title || document.title + '\n' + options.body);
+			});
+		}
+		notification = new Notification(options.title || document.title, options);
+	} else if ('notifications' in window) {
+		if (window.notifications.checkPermission != 1) {
+			window.notifications.requestPermission();
+		}
+		notification = window.notifications.createNotification(options.icon, options.title || document.title, options.body) .show();
 	} else {
-		return new RegExp(document.location.origin).test(link.href);
+		alert(options.title || document.title + '\n' + options.body);
+	}
+	if (!!notification) {
+		if ('onclick' in options) {
+			notification.onclick = options.onclick;
+		}
+		if ('onshow' in options) {
+			notification.onshow = options.onshow;
+		}
+		if ('onclose' in options) {
+			notification.onclose = options.onclose;
+		}
+		if ('onerror' in options) {
+			notification.onerror = options.onerror;
+		} else {
+			notification.onerror = console.error;
+		}
+		return notification;
+	}
+}
+function reportError(err) {
+	console.error(err);
+	notify({
+		title: err.name,
+		body: err.message,
+		icon: 'images/octicons/svg/bug.svg'
+	});
+}
+function isInternalLink(link) {
+	return link.origin === location.origin;
+}
+function parseResponse(resp) {
+	if (resp.ok) {
+		var type = resp.headers.get('Content-Type');
+		if (type.startsWith('application/json')) {
+			return resp.json();
+		} else if (type.startsWith('application/xml')) {
+			return new DOMParser().parseFromString(resp.text(), 'application/xml');
+		} else if (type.startsWith('image/svg+xml')) {
+			return new DOMParser().parseFromString(resp.text(), 'image/svg+xml');
+		} else if (type.startsWith('text/html')) {
+			return new DOMParser().parseFromString(resp.text(), 'text/html');
+		} else if (type.startsWith('text/plain')) {
+			return resp.text();
+		} else {
+			throw 'Unsupported Content-Type';
+		}
+	} else {
+		throw 'Invalid request';
 	}
 }
 function ajax(data) {
@@ -20,9 +90,8 @@ function ajax(data) {
 		data.request = new FormData(data.form);
 		data.request.append('form', data.form.name);
 		data.request.append('nonce', sessionStorage.getItem('nonce'));
-		data.form.querySelectorAll('[data-input-name]').forEach(function(input)
-		{
-			data.request.append(input.data('input-name'), input.innerHTML);
+		data.form.querySelectorAll('[data-input-name]').forEach(function(input) {
+			data.request.append(input.dataset.inputName, input.innerHTML);
 		});
 	}
 	if (typeof data.headers !== 'object') {
@@ -132,52 +201,6 @@ function getLocation(options) {
 		}
 		navigator.geolocation.getCurrentPosition(success, fail, options);
 	});
-}
-function notify(options) {
-	/*Creates a notification, with alert fallback*/
-	var notification;
-	if (typeof options === 'string') {
-		options = {
-			body: options
-		};
-	}
-	if (typeof options.icon !== 'string') {
-		options.icon = 'images/octicons/svg/megaphone.svg';
-	}
-	if ('Notification' in window) {
-		if (Notification.permission.toLowerCase() === 'default') {
-			Notification.requestPermission(function () {
-				(Notification.permission.toLowerCase() === 'granted')
-					? notification = notify(options)
-					: alert(options.title || document.title + '\n' + options.body);
-			});
-		}
-		notification = new Notification(options.title || document.title, options);
-	} else if ('notifications' in window) {
-		if (window.notifications.checkPermission != 1) {
-			window.notifications.requestPermission();
-		}
-		notification = window.notifications.createNotification(options.icon, options.title || document.title, options.body) .show();
-	} else {
-		alert(options.title || document.title + '\n' + options.body);
-	}
-	if (!!notification) {
-		if ('onclick' in options) {
-			notification.onclick = options.onclick;
-		}
-		if ('onshow' in options) {
-			notification.onshow = options.onshow;
-		}
-		if ('onclose' in options) {
-			notification.onclose = options.onclose;
-		}
-		if ('onerror' in options) {
-			notification.onerror = options.onerror;
-		} else {
-			notification.onerror = console.error;
-		}
-		return notification;
-	}
 }
 function selection() {
 	var selected = getSelection();
