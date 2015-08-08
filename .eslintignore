@@ -1,5 +1,6 @@
 .eslintrc
 .eslintignore
 .travis.yml
+zq.js
 README.md
 polyfills.js
