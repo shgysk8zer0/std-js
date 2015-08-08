@@ -1,20 +1,22 @@
 /*eslint no-use-before-define: 0*/
 /*============================ zQ Functions =======================*/
 class zQ {
-	constructor(q) {
-		if (typeof q === 'undefined') {
-			q = document.documentElement;
-		}
-		this.query = q;
+	constructor(selector) {
 		try {
-			switch(typeof this.query) {
+			switch(typeof selector) {
 				case 'string':
-					this.results = document.querySelectorAll(this.query);
+					this.results = document.querySelectorAll(selector);
 					break;
 
-				default:
-					this.results = [this.query];
+				case 'object':
+					this.results = [selector];
+					break;
+
+				case 'undefined':
+					this.results = [document.documentElement];
+					break;
 			}
+			this.query = selector || ':root';
 		} catch (error) {
 			console.error(error, this);
 			console.error(`No results for ${this.query}`);
@@ -57,7 +59,7 @@ class zQ {
 		return this.results.map(callback);
 	}
 	addClass(cname) {
-		this.each(el => el.classList.remove(cname));
+		this.each(el => el.classList.add(cname));
 		return this;
 	}
 	removeClass(cname) {
@@ -83,8 +85,12 @@ class zQ {
 		(condition) ? this.addClass(cname1) : this.addClass(cname2);
 		return this;
 	}
-	delete() {
+	remove() {
 		this.each(el => el.remove());
+		return this;
+	}
+	delete() {
+		return this.remove();
 	}
 	hasAttribute(attr) {
 		return this.some(el => el.hasAttribute(attr));
@@ -253,21 +259,22 @@ class zQ {
 		if (typeof options === 'undefined') {
 			options = [];
 		}
-		var watcher = new MutationObserver(function(mutations) {
+		/*var watcher = new MutationObserver(function(mutations) {
 			mutations.forEach(function(mutation) {
 				watching[mutation.type].call(mutation);
 			});
-		}),
+		})*/
+		var watcher = new MutationObserver(
+			mutations => mutations.forEach(mutation =>
+				watching[mutation.type].call(mutation)
+			)
+		),
 		watches = {};
-		Object.keys(watching).concat(options).forEach(function(event) {
-			watches[event] = true;
-		});
+		Object.keys(watching).concat(options).forEach(event => watches[event] = true);
 		if (typeof attributeFilter !== 'undefined' && attributeFilter.isArray) {
 			watches.attributeFilter = attributeFilter;
 		}
-		this.each(function(el) {
-			watcher.observe(el, watches);
-		});
+		this.each(el => watcher.observe(el, watches));
 		return this;
 	}
 	/*====================================================================================================================*/
