@@ -9,7 +9,7 @@ class zQ {
 					break;
 
 				case 'object':
-					this.results = [selector];
+					this.results = (selector instanceof zQ) ? selector.results : [selector];
 					break;
 
 				case 'undefined':
@@ -20,10 +20,11 @@ class zQ {
 		} catch (error) {
 			console.error(error, this);
 			console.error(`No results for ${this.query}`);
+		} finally {
+			this.length = this.results.length;
+			this.found = (this.results.length !== 0);
+			this.filters = [];
 		}
-		this.length = this.results.length;
-		this.found = (this.results.length !== 0);
-		this.filters = [];
 	}
 	item(n) {
 		return this.results.item(n);
