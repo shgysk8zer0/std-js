@@ -21,9 +21,7 @@ DOMTokenList.prototype.swap = function(cname1, cname2) {
 	}
 };
 Array.prototype.unique = function() {
-	return this.filter(function(val, i, arr){
-		return (i <= arr.indexOf(val));
-	});
+	return this.filter((val, i, arr) => i <= arr.indexOf(val));
 };
 Array.prototype.end = function() {
 	return this[this.length - 1];
@@ -36,10 +34,11 @@ RegExp.prototype.escape = function() {
 Object.prototype.isaN = function () {
 	return parseFloat(this) == this;
 };
-Object.prototype.camelCase = function () {
-	return this.toLowerCase() .replace(/\ /g, '-').replace(/-(.)/g, function (match, group1) 	{
-		return group1.toUpperCase();
-	});
+String.prototype.camelCase = function () {
+	return this.toLowerCase().replace(/\ /g, '-').replace(
+		/-(.)/g,
+		(match, group1) => group1.toUpperCase()
+	);
 };
 /*Replaced by Element.remove*/
 Element.prototype.delete = function() {
@@ -92,7 +91,7 @@ Element.prototype.html = function(html) {
 };
 /*Replaced by Element.closest*/
 Element.prototype.ancestor = function(sel) {
-	return this.closes(sel);
+	return this.closest(sel);
 };
 Element.prototype.data = function(set, value) {
 	var val = null;
@@ -102,8 +101,8 @@ Element.prototype.data = function(set, value) {
 			: val = this.dataset[set.camelCase()];
 	} else {
 		(typeof value !== 'undefined')
-			? this.setAttribute('data-' + set, value)
-			: val = this.getAttribute('data-' + set);
+			? this.setAttribute(`data-${set}`, value)
+			: val = this.getAttribute(`data-${set}`);
 	}
 	return val;
 };
@@ -132,7 +131,7 @@ Element.prototype.uniqueSelector = function () {
 			path.unshift('body');
 			break;
 		} else if (current.hasAttribute('id')) {
-			path.unshift('#' + current.id);
+			path.unshift(`#${current.id}`);
 			break;
 		} else {
 			path.unshift(`${current.tagName.toLowerCase()}:nth-child(${current.parentElement.children.indexOf(current) + 1})`);
@@ -176,9 +175,9 @@ Element.prototype.DnD = function(sets) {
 				progress.value = 0;
 				progress.classList.add('uploading');
 				sets.appendChild(progress);
-				if (/image\/*/.test(file.type)) {
+				if (file.type.startsWith('image/')) {
 					reader.readAsDataURL(file);
-				} else if (/text\/*/.test(file.type)) {
+				} else if (file.type.startsWith('text/')) {
 					reader.readAsText(file);
 				}
 				reader.addEventListener('progress', function(event) {
@@ -236,17 +235,25 @@ HTMLElement.prototype.toDocument = function (charset) {
 	});
 	return doc;
 };
+DocumentType.prototype.toString = function() {
+	var doctype = `<!DOCTYPE ${this.name}`;
+	if (this.publicId) {
+		doctype += ` PUBLIC "${this.publicId}"`;
+	}
+	if (this.systemId) {
+		doctype += ` "${this.systemId}"`;
+	}
+	doctype += '>';
+	return doctype;
+};
 HTMLDocument.prototype.dataURI = function() {
-	return 'data:text/html,' + encodeURIComponent('<!DOCTYPE html>' + this.documentElement.outerHTML);
+	return `data:text/html,${encodeURIComponent(`${this.doctype || document.doctype}${this.documentElement.outerHTML}`)}`;
 };
 Element.prototype.query = function(query) {
-	var els = [];
+	var els = Array.prototype.slice.call(this.querySelectorAll(query), 0);
 	if (this.matches(query)) {
-		els.push(this);
+		els.unshift(this);
 	}
-	this.querySelectorAll(query).forEach(function(el) {
-		els.push(el);
-	});
 	return els;
 };
 Object.prototype.keys = function() {
