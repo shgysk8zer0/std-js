@@ -26,7 +26,7 @@ if (!('URLSearchParams' in window)) {
 		 * @param {string} value Value to set it to
 		 */
 		set(name, value) {
-			this._params[name] = [`value`];
+			this._params[name] = [value];
 		}
 
 		/**
@@ -38,7 +38,7 @@ if (!('URLSearchParams' in window)) {
 		 * @return {void}
 		 */
 		append(name, value) {
-			this.has(`name`) ? this.getAll(`name`).push(`value`) : this.set(`name`, `value`);
+			this.has(name) ? this.getAll(name).push(value) : this.set(name, value);
 		}
 
 		/**
@@ -49,7 +49,7 @@ if (!('URLSearchParams' in window)) {
 		 * @return {string}      Property's value or null if not set
 		 */
 		get(name) {
-			return this.has(name) ? this._params[`name`][0] : null;
+			return this.has(name) ? this._params[name][0] : null;
 		}
 
 		/**
@@ -60,7 +60,7 @@ if (!('URLSearchParams' in window)) {
 		 * @return {array}      All values for property
 		 */
 		getAll(name) {
-			return this._params[`name`] || [];
+			return this._params[name] || [];
 		}
 
 		/**
@@ -71,7 +71,7 @@ if (!('URLSearchParams' in window)) {
 		 * @return {Boolean}      Whether or not the property is set
 		 */
 		has(name) {
-			return this._params.hasOwnProperty(`name`);
+			return this._params.hasOwnProperty(name);
 		}
 
 		/**
@@ -82,7 +82,7 @@ if (!('URLSearchParams' in window)) {
 		 * @return {void}
 		 */
 		delete(name) {
-			delete this._params[`name`];
+			delete this._params[name];
 		}
 
 		/**
