@@ -1,10 +1,27 @@
-/*Add Array prototypes to NodeList*/
-['forEach', 'indexOf', 'some', 'every', 'map', 'filter', 'reduce' ]
-.filter(method =>
-	!(method in NodeList.prototype) && (method in Array.prototype)
-).forEach(function (method) {
-	NodeList.prototype[method] = Array.prototype[method];
-});
+NodeList.prototype.forEach = function(callback) {
+	return Array.prototype.forEach.call(this, callback);
+};
+NodeList.prototype.indexOf = function(callback) {
+	return Array.prototype.indexOf.call(this, callback);
+};
+NodeList.prototype.some = function(callback) {
+	return Array.prototype.some.call(this, callback);
+};
+NodeList.prototype.every = function(callback) {
+	return Array.prototype.every.call(this, callback);
+};
+NodeList.prototype.map = function(callback) {
+	return Array.prototype.map.call(this, callback);
+};
+NodeList.prototype.filter = function(callback) {
+	return Array.prototype.filter.call(this, callback);
+};
+NodeList.prototype.reduce = function(callback, initial) {
+	if (typeof initial === 'undefined') {
+		initial = null;
+	}
+	return Array.prototype.reduce.call(this, callback, initial);
+};
 DOMStringMap.prototype.has = function(name) {
 	return this.hasOwnProperty(name);
 };
