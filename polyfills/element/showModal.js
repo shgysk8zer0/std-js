@@ -7,6 +7,6 @@ if (!('showModal' in Element.prototype)) {
 		});
 		this.after(backdrop);
 		this.classList.add('modal');
-		this.show();
+		this.setAttribute('open', '');
 	};
 }
