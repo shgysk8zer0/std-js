@@ -17,7 +17,7 @@ class URLx {
 				search: '',
 				hash: '',
 				origin: '',
-				searchParams: {}
+				searchParams: new URLSearchParams()
 			};
 		}
 		/*https://user:pass@host.com:444/path?foo=bar#frag*/
@@ -62,7 +62,7 @@ if (!('URLSearchParams' in window)) {
 				search.split('&').forEach(function (param) {
 					param = param.split('=');
 					var name = param.shift();
-					param.map(function (value) {
+					param.forEach(function (value) {
 						this.append(name, value);
 					}.bind(this));
 				}.bind(this));
