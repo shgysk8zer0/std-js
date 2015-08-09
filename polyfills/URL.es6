@@ -59,13 +59,9 @@ if (!('URLSearchParams' in window)) {
 		constructor(search) {
 			this._params = {};
 			if (typeof search === 'string') {
-				search.split('&').forEach(function (param) {
-					param = param.split('=');
-					var name = param.shift();
-					param.forEach(function (value) {
-						this.append(name, value);
-					}.bind(this));
-				}.bind(this));
+				search.split('&').map(param => param.split('=', 2)).forEach(
+					item => this.append(item.shift(), item.shift())
+				);
 			}
 		}
 
