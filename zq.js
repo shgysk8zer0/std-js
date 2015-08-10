@@ -114,11 +114,12 @@ zQ.prototype.pickClass = function(cname1, cname2, condition) {
 	(condition) ? this.addClass(cname1) : this.addClass(cname2);
 	return this;
 };
-zQ.prototype.delete = function() {
+zQ.prototype.remove = function() {
 	this.each(function(el) {
-		el.parentElement.removeChild(el);
+		el.remove();
 	});
 };
+zQ.prototype.delete = zQ.prototype.remove;
 zQ.prototype.hasAttribute = function(attr) {
 	return this.some(function(el) {
 		return el.hasAttribute(attr);
