@@ -22,6 +22,12 @@ NodeList.prototype.reduce = function(callback, initial) {
 	}
 	return Array.prototype.reduce.call(this, callback, initial);
 };
+NodeList.prototype.includes = function(element, fromIndex) {
+	if (typeof fromIndex !== 'number') {
+		fromIndex = 0;
+	}
+	return Array.prototype.includes.call(this, element, fromIndex);
+};
 DOMStringMap.prototype.has = function(name) {
 	return this.hasOwnProperty(name);
 };
