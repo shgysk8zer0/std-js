@@ -28,7 +28,7 @@ function notify(options) {
 		}
 		notification = window.notifications.createNotification(options.icon, options.title || document.title, options.body) .show();
 	} else {
-		alert(options.title || document.title + '\n' + options.body);
+		alert(options.title || `${document.title}\n${options.body}`);
 	}
 	if (!!notification) {
 		if ('onclick' in options) {
@@ -61,6 +61,9 @@ function isInternalLink(link) {
 }
 function parseResponse(resp) {
 	if (resp.ok) {
+		if (!resp.headers.has('Content-type')) {
+			throw new Error(`No Content-Type header in request to "${resp.url}"`);
+		}
 		var type = resp.headers.get('Content-Type');
 		if (type.startsWith('application/json')) {
 			return resp.json();
@@ -76,7 +79,7 @@ function parseResponse(resp) {
 			throw new TypeError(`Unsupported Content-Type: ${type}`);
 		}
 	} else {
-		throw new Error(`${resp.url} -> ${resp.status}:${resp.statusText}`);
+		throw new Error(`"${resp.url}" -> ${resp.status}:${resp.statusText}`);
 	}
 }
 function ajax(data) {
