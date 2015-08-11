@@ -8,7 +8,7 @@ if (!('hidden' in document)) {
 	document.hidden = document.webkitHidden || document.msHidden || document.mozHidden || false;
 }
 if (!('visibilityState' in document)) {
-	document.visibilityState = document.webkitVisibilityState || document.msVisibilityState || document.mozVisibilityState || false;
+	document.visibilityState = document.webkitVisibilityState || document.msVisibilityState || document.mozVisibilityState || 'visible';
 }
 if (!('fullScreenElement' in document)) {
 	document.fullScreenElement = document.mozFullScreenElement || document.webkitFullscreenElement || false;
