@@ -116,7 +116,7 @@ class zQ {
 		this.each(function (e) {
 			('addEventListener' in Element.prototype)
 				? e.addEventListener(event, callback, true)
-				: e['on' + event] = callback;
+				: e[`on${event}`] = callback;
 		});
 		return this;
 	}
@@ -142,7 +142,7 @@ class zQ {
 				'webkit',
 				'ms'
 			].forEach(function (pre) {
-				$(e).on(pre + 'visibilitychange', callback);
+				$(e).on(`${pre}visibilitychange`, callback);
 			});
 		});
 		return this;
