@@ -1,7 +1,7 @@
 /*eslint no-use-before-define: 0*/
 /*============================ zQ Functions =======================*/
 class zQ {
-	constructor(selector) {
+	constructor(selector = document) {
 		try {
 			switch(typeof selector) {
 				case 'string':
@@ -121,6 +121,10 @@ class zQ {
 		return this;
 	}
 	ready(callback) {
+		if (document.readyState !== 'loading') {
+			callback();
+			return this;
+		}
 		return this.on('DOMContentLoaded', callback);
 	}
 	networkChange(callback) {
@@ -220,6 +224,10 @@ class zQ {
 		return this.on('DOMContentLoaded', callback);
 	}
 	load(callback) {
+		if (document.readyState === 'complete') {
+			callback();
+			return this;
+		}
 		return this.on('load', callback);
 	}
 	unload(callback) {
@@ -301,11 +309,6 @@ Object.prototype.$ = function(q) {
 };
 Object.prototype.isZQ = false;
 zQ.prototype.isZQ = true;
-function $(q) {
-	if (typeof q === 'undefined') {
-		q = document.documentElement;
-	} else if (q.isZQ) {
-		return q;
-	}
-	return new zQ(q);
+function $(q = document) {
+	return q.isZQ ? q : new zQ(q);
 }

@@ -7,29 +7,34 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 var zQ = (function () {
-	function zQ(q) {
+	function zQ() {
+		var selector = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+
 		_classCallCheck(this, zQ);
 
-		if (typeof q === 'undefined') {
-			q = document.documentElement;
-		}
-		this.query = q;
 		try {
-			switch (typeof this.query) {
+			switch (typeof selector) {
 				case 'string':
-					this.results = document.querySelectorAll(this.query);
+					this.results = document.querySelectorAll(selector);
 					break;
 
-				default:
-					this.results = [this.query];
+				case 'object':
+					this.results = selector instanceof zQ ? selector.results : [selector];
+					break;
+
+				case 'undefined':
+					this.results = [document.documentElement];
+					break;
 			}
+			this.query = selector || ':root';
 		} catch (error) {
 			console.error(error, this);
 			console.error('No results for ' + this.query);
+		} finally {
+			this.length = this.results.length;
+			this.found = this.results.length !== 0;
+			this.filters = [];
 		}
-		this.length = this.results.length;
-		this.found = this.results.length !== 0;
-		this.filters = [];
 	}
 
 	_createClass(zQ, [{
@@ -85,7 +90,7 @@ var zQ = (function () {
 		key: 'addClass',
 		value: function addClass(cname) {
 			this.each(function (el) {
-				return el.classList.remove(cname);
+				return el.classList.add(cname);
 			});
 			return this;
 		}
@@ -133,11 +138,17 @@ var zQ = (function () {
 			return this;
 		}
 	}, {
-		key: 'delete',
-		value: function _delete() {
+		key: 'remove',
+		value: function remove() {
 			this.each(function (el) {
 				return el.remove();
 			});
+			return this;
+		}
+	}, {
+		key: 'delete',
+		value: function _delete() {
+			return this.remove();
 		}
 	}, {
 		key: 'hasAttribute',
@@ -184,6 +195,10 @@ var zQ = (function () {
 	}, {
 		key: 'ready',
 		value: function ready(callback) {
+			if (document.readyState !== 'loading') {
+				callback();
+				return this;
+			}
 			return this.on('DOMContentLoaded', callback);
 		}
 	}, {
@@ -340,6 +355,10 @@ var zQ = (function () {
 	}, {
 		key: 'load',
 		value: function load(callback) {
+			if (document.readyState === 'complete') {
+				callback();
+				return this;
+			}
 			return this.on('load', callback);
 		}
 	}, {
@@ -403,20 +422,25 @@ var zQ = (function () {
 			if (typeof options === 'undefined') {
 				options = [];
 			}
+			/*var watcher = new MutationObserver(function(mutations) {
+   	mutations.forEach(function(mutation) {
+   		watching[mutation.type].call(mutation);
+   	});
+   })*/
 			var watcher = new MutationObserver(function (mutations) {
-				mutations.forEach(function (mutation) {
-					watching[mutation.type].call(mutation);
+				return mutations.forEach(function (mutation) {
+					return watching[mutation.type].call(mutation);
 				});
 			}),
 			    watches = {};
 			Object.keys(watching).concat(options).forEach(function (event) {
-				watches[event] = true;
+				return watches[event] = true;
 			});
 			if (typeof attributeFilter !== 'undefined' && attributeFilter.isArray) {
 				watches.attributeFilter = attributeFilter;
 			}
 			this.each(function (el) {
-				watcher.observe(el, watches);
+				return watcher.observe(el, watches);
 			});
 			return this;
 		}
@@ -461,12 +485,8 @@ Object.prototype.$ = function (q) {
 };
 Object.prototype.isZQ = false;
 zQ.prototype.isZQ = true;
-function $(q) {
-	if (typeof q === 'undefined') {
-		q = document.documentElement;
-	} else if (q.isZQ) {
-		return q;
-	}
-	return new zQ(q);
-}
+function $() {
+	var q = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
+	return q.isZQ ? q : new zQ(q);
+}
