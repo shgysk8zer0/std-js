@@ -8,7 +8,8 @@
 		"generators": true,
 		"templateStrings": true,
 		"unicodeCodePointEscapes": true,
-		"jsx": false
+		"jsx": false,
+		"modules": true
 	},
 	"rules": {
 		"semi": 2,
