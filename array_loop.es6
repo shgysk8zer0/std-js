@@ -1,9 +1,7 @@
-Array.prototype.loop = function* () {
-	var n = 0;
-	for(;;) {
-		while(n < this.length) {
-			yield this[n++];
+Array.prototype.loop = function*(times = Infinity) {
+	while(times-- > 0) {
+		for (let el of this) {
+			yield el;
 		}
-		n = 0;
 	}
 };
