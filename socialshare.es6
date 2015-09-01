@@ -2,7 +2,7 @@ class SocialShare {
 	static getFacebook(href = location.href) {
 		let url = new URL('https://www.facebook.com/sharer/sharer.php');
 		url.searchParams.set('u', href);
-		return window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=600,height=600');
+		return url;
 	}
 	static getTwitter(href = location.href, text = '', via = null, hashtags = []) {
 		let url = new URL('https://twitter.com/intent/tweet');
@@ -27,6 +27,7 @@ class SocialShare {
 		url.searchParams.set('url', href);
 		url.searchParams.set('title', title);
 		url.searchParams.set('summary', summary);
+		return url;
 	}
 	static getPintrest(href = location.href, media = null, description = '', hashtags = []) {
 		let url = new URL('https://www.pinterest.com/pin/create/button/');
