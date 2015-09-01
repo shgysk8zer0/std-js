@@ -112,11 +112,11 @@ class zQ {
 		return this;
 	}
 	/*==================== Listener Functions =================================*/
-	on(event, callback) {
+	on(event, callback, useCapture = false) {
 		this.each(function (e) {
 			('addEventListener' in Element.prototype)
-				? e.addEventListener(event, callback, true)
-				: e[`on${event}`] = callback;
+				? e.addEventListener(event, callback, useCapture)
+				: e.attachEvent(`on${event}`, callback);
 		});
 		return this;
 	}
@@ -263,27 +263,23 @@ class zQ {
 	pagehide(callback) {
 		return this.on('pagehide', callback);
 	}
-	watch(watching, options, attributeFilter) {
+	watch(watching, options = [], attributeFilter = []) {
 		/*https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver*/
-		if (typeof options === 'undefined') {
-			options = [];
-		}
-		/*var watcher = new MutationObserver(function(mutations) {
-			mutations.forEach(function(mutation) {
+		var watcher = new MutationObserver(mutations => {
+			mutations.forEach(mutation => {
 				watching[mutation.type].call(mutation);
 			});
-		})*/
-		var watcher = new MutationObserver(
-			mutations => mutations.forEach(mutation =>
-				watching[mutation.type].call(mutation)
-			)
-		),
-		watches = {};
-		Object.keys(watching).concat(options).forEach(event => watches[event] = true);
-		if (typeof attributeFilter !== 'undefined' && attributeFilter.isArray) {
+		});
+		var watches = {};
+		Object.keys(watching).concat(options).forEach(event => {
+			watches[event] = true;
+		});
+		if (attributeFilter.length > 0) {
 			watches.attributeFilter = attributeFilter;
 		}
-		this.each(el => watcher.observe(el, watches));
+		this.each(el => {
+			watcher.observe(el, watches);
+		});
 		return this;
 	}
 	/*====================================================================================================================*/
