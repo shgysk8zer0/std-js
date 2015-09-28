@@ -42,7 +42,6 @@
 		"amd": false,
 		"mocha": false,
 		"jasmine": false,
-		"phantom": false,
 		"jquery": false,
 		"prototypejs": false,
 		"shelljs": false,
