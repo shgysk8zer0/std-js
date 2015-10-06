@@ -1,5 +1,5 @@
-function WYSIWYG(menu)
-{
+function WYSIWYG(menu) {
+	'use strict';
 	menu.querySelectorAll('[data-editor-command]').forEach(item =>  {
 		item.addEventListener('click', event =>  {
 			event.preventDefault();
@@ -10,7 +10,7 @@ function WYSIWYG(menu)
 			} else if (this.dataset.hasOwnProperty('prompt')) {
 				arg = prompt(this.dataset.prompt.toString());
 			} else if (this.dataset.hasOwnProperty('selectionTo')) {
-				var createdEl = document.createElement(this.dataset.selectionTo);
+				let createdEl = document.createElement(this.dataset.selectionTo);
 				createdEl.textContent = getSelection().toString();
 				arg = createdEl.outerHTML;
 			}
