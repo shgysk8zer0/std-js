@@ -167,7 +167,7 @@ function handleJSON(json) {
 	if('reload' in json) {
 		window.location.reload();
 	}
-	if('clear' in json) {
+	if(('clear' in json) && (json.clear in document.forms)) {
 		document.forms[json.clear].reset();
 	}
 	if('open' in json) {
