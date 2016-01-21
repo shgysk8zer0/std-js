@@ -5,7 +5,7 @@ class zQ {
 		try {
 			switch(typeof selector) {
 				case 'string':
-					this.results = document.querySelectorAll(selector);
+					this.results = Array.from(document.querySelectorAll(selector));
 					break;
 
 				case 'object':
@@ -26,19 +26,14 @@ class zQ {
 			this.filters = [];
 		}
 	}
+	toString() {
+		return this.query;
+	}
 	item(n) {
-		return this.results.item(n);
+		return this.results[n];
 	}
 	each(callback) {
-		if (this.found) {
-			this.results.forEach(callback);
-		}
-		return this;
-	}
-	toArray() {
-		if (!this.results.isArray) {
-			this.results = Array.prototype.slice.call(this.results, 0);
-		}
+		this.results.forEach(callback);
 		return this;
 	}
 	indexOf(i) {
@@ -60,11 +55,11 @@ class zQ {
 		return this.results.map(callback);
 	}
 	addClass(cname) {
-		this.each(el => el.classList.add(cname));
+		this.results.forEach(el => el.classList.add(cname));
 		return this;
 	}
 	removeClass(cname) {
-		this.each(el => el.classList.remove(cname));
+		this.results.forEach(el => el.classList.remove(cname));
 		return this;
 	}
 	hasClass(cname) {
@@ -72,14 +67,14 @@ class zQ {
 	}
 	toggleClass(cname, condition) {
 		if (typeof condition === 'undefined') {
-			this.each(el => el.classList.toggle(cname));
+			this.results.forEach(el => el.classList.toggle(cname));
 		} else {
-			this.each(el => el.classList.toggle(cname, condition));
+			this.results.forEach(el => el.classList.toggle(cname, condition));
 		}
 		return this;
 	}
 	swapClass(cname1, cname2) {
-		this.each(el => el.classList.swap(cname1, cname2));
+		this.results.forEach(el => el.classList.swap(cname1, cname2));
 		return this;
 	}
 	pickClass(cname1, cname2, condition) {
@@ -87,33 +82,33 @@ class zQ {
 		return this;
 	}
 	remove() {
-		this.each(el => el.remove());
+		this.results.forEach(el => el.remove());
 		return this;
 	}
 	delete() {
 		return this.remove();
 	}
 	hasAttribute(attr) {
-		return this.some(el => el.hasAttribute(attr));
+		return this.results.some(el => el.hasAttribute(attr));
 	}
 	attr(attr, val) {
 		if (typeof val == 'undefined' || val === true) {
 			val = '';
 		}
 		if (val === false) {
-			this.each(el => el.removeAttribute(attr));
+			this.results.forEach(el => el.removeAttribute(attr));
 		} else {
-			this.each(el => el.setAttribute(attr, val));
+			this.results.forEach(el => el.setAttribute(attr, val));
 		}
 		return this;
 	}
 	pause() {
-		this.each(media => media.pause());
+		this.results.forEach(media => media.pause());
 		return this;
 	}
 	/*==================== Listener Functions =================================*/
 	on(event, callback, useCapture = false) {
-		this.each(function (e) {
+		this.results.forEach(function (e) {
 			('addEventListener' in Element.prototype)
 				? e.addEventListener(event, callback, useCapture)
 				: e.attachEvent(`on${event}`, callback);
@@ -131,15 +126,15 @@ class zQ {
 		return this.online(callback) .offline(callback);
 	}
 	playing(callback) {
-		this.each(e => e.onplay = callback);
+		this.results.forEach(e => e.onplay = callback);
 		return this;
 	}
 	paused(callback) {
-		this.each(e => e.onpause = callback);
+		this.results.forEach(e => e.onpause = callback);
 		return this;
 	}
 	visibilitychange(callback) {
-		this.each(function (e) {
+		this.results.forEach(function (e) {
 			[
 				'',
 				'moz',
@@ -277,7 +272,7 @@ class zQ {
 		if (attributeFilter.length > 0) {
 			watches.attributeFilter = attributeFilter;
 		}
-		this.each(el => {
+		this.results.forEach(el => {
 			watcher.observe(el, watches);
 		});
 		return this;
