@@ -3,23 +3,19 @@
 class zQ {
 	constructor(selector = document) {
 		try {
-			switch(typeof selector) {
-				case 'string':
-					this.results = Array.from(document.querySelectorAll(selector));
-					break;
-
-				case 'object':
-					this.results = (selector instanceof zQ) ? selector.results : [selector];
-					break;
-
-				case 'undefined':
-					this.results = [document.documentElement];
-					break;
+			this.results = [];
+			if (typeof selector === 'string') {
+				this.results = Array.from(document.querySelectorAll(selector));
+			} else if (selector instanceof NodeList || selector instanceof HTMLCollection) {
+				this.results = Array.from(selector);
+			} else if (typeof selector === 'object') {
+				this.results = [selector];
+			} else {
+				throw new TypeError(`Expected a string or Nodelist but got a ${typeof selector}: ${selector}.`);
 			}
 			this.query = selector || ':root';
 		} catch (error) {
-			console.error(error, this);
-			console.error(`No results for ${this.query}`);
+			console.error(error);
 		} finally {
 			this.length = this.results.length;
 			this.found = (this.results.length !== 0);
@@ -85,8 +81,38 @@ class zQ {
 		this.results.forEach(el => el.remove());
 		return this;
 	}
+	hide() {
+		this.results.forEach(el => el.hidden = true);
+		return this;
+	}
+	unhide() {
+		this.results.forEach(el => el.hidden = false);
+		return this;
+	}
 	delete() {
 		return this.remove();
+	}	
+	append(node) {
+		this.results.forEach(el => {
+			el.appendChild(document.importNode(node.cloneNode(true), true));
+		});
+		return this;
+	}
+	afterBegin(text) {
+		this.results.forEach(el => el.insertAdjacentHTML('afterbegin', text));
+		return this;
+	}
+	afterEnd(text) {
+		this.results.forEach(el => el.insertAdjacentHTML('afterend', text));
+		return this;
+	}
+	beforeBegin(text) {
+		this.results.forEach(el => el.insertAdjacentHTML('beforebegin', text));
+		return this;
+	}
+	beforeEnd(text) {
+		this.results.forEach(el => el.insertAdjacentHTML('beforeend', text));
+		return this;
 	}
 	hasAttribute(attr) {
 		return this.results.some(el => el.hasAttribute(attr));
