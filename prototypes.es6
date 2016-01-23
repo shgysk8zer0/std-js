@@ -1,3 +1,4 @@
+/* All of these are to be considered deprecated */
 NodeList.prototype.forEach = function(callback) {
 	return Array.prototype.forEach.call(this, callback);
 };
@@ -67,40 +68,40 @@ String.prototype.camelCase = function () {
 Element.prototype.delete = function() {
 	this.remove();
 };
-Element.prototype.after = function() {
-	for (var i = 0; i < arguments.length; i++) {
-		(typeof arguments[i] === 'string')
-			? this.insertAdjacentHTML('afterend', arguments[i])
-			: this.parentElement.insertBefore(arguments[i], this.nextSibling);
-	}
+Element.prototype.after = function(...args) {
+	args.forEach(arg => {
+		(typeof arg === 'string')
+			? this.insertAdjacentHTML('afterend', arg)
+			: this.parentElement.insertBefore(arg, this.nextSibling);
+	});
 	return this;
 };
-Element.prototype.before = function() {
-	for (var i = 0; i < arguments.length; i++) {
-		(typeof arguments[i] === 'string')
-			? this.insertAdjacentHTML('beforebegin', arguments[i])
-			: this.parentElement.insertBefore(arguments[i], this);
-	}
+Element.prototype.before = function(...args) {
+	args.forEach(arg => {
+		(typeof arg === 'string')
+			? this.insertAdjacentHTML('beforebegin', arg)
+			: this.parentElement.insertBefore(arg, this);
+	});
 	return this;
 };
-Element.prototype.prepend = function() {
-	for (var i = 0; i < arguments.length; i++) {
-		(typeof arguments[i] === 'string')
-			? this.insertAdjacentHTML('afterbegin', arguments[i])
-			: this.insertBefore(arguments[i], this.firstChild);
-	}
+Element.prototype.prepend = function(...args) {
+	args.forEach(arg => {
+		(typeof arg === 'string')
+			? this.insertAdjacentHTML('afterbegin', arg)
+			: this.insertBefore(arg, this.firstChild);
+	});
 	return this;
 };
-Element.prototype.append = function() {
-	for (var i = 0; i < arguments.length; i++) {
-		(typeof arguments[i] === 'string')
-			? this.insertAdjacentHTML('beforeend', arguments[i])
-			: this.appendChild(arguments[i]);
-	}
+Element.prototype.append = function(...args) {
+	args.forEach(arg => {
+		(typeof arg === 'string')
+			? this.insertAdjacentHTML('beforeend', arg)
+			: this.appendChild(arg);
+	});
 	return this;
 };
-Element.prototype.clone = function() {
-	return this.cloneNode(true);
+Element.prototype.clone = function(deep = true) {
+	return this.cloneNode(deep);
 };
 Element.prototype.next = function() {
 	return this.nextSibling;
@@ -273,7 +274,7 @@ HTMLDocument.prototype.dataURI = function() {
 	return `data:text/html,${encodeURIComponent(`${this.doctype || document.doctype}${this.documentElement.outerHTML}`)}`;
 };
 Element.prototype.query = function(query) {
-	var els = Array.prototype.slice.call(this.querySelectorAll(query), 0);
+	let els = Array.from(this.querySelectorAll(query));
 	if (this.matches(query)) {
 		els.unshift(this);
 	}
