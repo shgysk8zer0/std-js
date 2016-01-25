@@ -1,4 +1,5 @@
-function handleJSON(json) {
+import {notify as notify} from './functions.es6';
+export default function handleJSON(json) {
 	'use strict';
 	if(typeof json === 'string') {
 		json = JSON.parse(json.trim());

@@ -1,6 +1,4 @@
-
-function supports(type)
-{
+export default function supports(type) {
 	/*Feature detection. Returns boolean value of suport for type*/
 	/**
 	* A series of tests to determine support for a given feature

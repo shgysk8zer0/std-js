@@ -1,4 +1,4 @@
-function WYSIWYG(menu) {
+export default function WYSIWYG(menu) {
 	'use strict';
 	menu.querySelectorAll('[data-editor-command]').forEach(item =>  {
 		item.addEventListener('click', event =>  {

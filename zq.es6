@@ -1,6 +1,6 @@
 /*eslint no-use-before-define: 0*/
 /*============================ zQ Functions =======================*/
-class zQ {
+export class zQ {
 	constructor(selector = document) {
 		try {
 			this.results = [];
@@ -50,6 +50,11 @@ class zQ {
 	map(callback) {
 		return this.results.map(callback);
 	}
+	/* *getResults() {
+		for (let result of this.results) {
+			yield result;
+		}
+	}*/
 	addClass(cname) {
 		this.results.forEach(el => el.classList.add(cname));
 		return this;
@@ -91,7 +96,7 @@ class zQ {
 	}
 	delete() {
 		return this.remove();
-	}	
+	}
 	append(node) {
 		this.results.forEach(el => {
 			el.appendChild(document.importNode(node.cloneNode(true), true));
@@ -318,14 +323,6 @@ class zQ {
 		return this;
 	}
 }
-Object.prototype.$ = function(q) {
-	if (this === document || this === window) {
-		return $(q);
-	}
-	return $(this).$(q);
-};
-Object.prototype.isZQ = false;
-zQ.prototype.isZQ = true;
-function $(q = document) {
-	return q.isZQ ? q : new zQ(q);
+export default function $(q = document) {
+	return q instanceof zQ ? q : new zQ(q);
 }
