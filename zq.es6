@@ -1,13 +1,15 @@
 /*eslint no-use-before-define: 0*/
 /*============================ zQ Functions =======================*/
 class zQ {
-	constructor(selector = document) {
+	constructor(selector = ':root', base = document) {
 		try {
 			this.results = [];
 			if (typeof selector === 'string') {
-				this.results = Array.from(document.querySelectorAll(selector));
+				this.results = Array.from(base.querySelectorAll(selector));
 			} else if (selector instanceof NodeList || selector instanceof HTMLCollection) {
-				this.results = Array.from(selector);
+				this.results = Array.from(selector).filter(item => item.nodeType === 1);
+			} else if (selector instanceof Array) {
+				this.results = selector.filter(item => item instanceof Element);
 			} else if (typeof selector === 'object') {
 				this.results = [selector];
 			} else {
@@ -91,7 +93,7 @@ class zQ {
 	}
 	delete() {
 		return this.remove();
-	}	
+	}
 	append(node) {
 		this.results.forEach(el => {
 			el.appendChild(document.importNode(node.cloneNode(true), true));
@@ -304,12 +306,19 @@ class zQ {
 		return this;
 	}
 	/*====================================================================================================================*/
-	$(selector) {
-		return $(this.query.split(',').map(
-			str => selector.split(',').map(
-				q => `${str.trim()} ${q.trim()}`
-			)
-		)).join(', ');
+	query(selector) {
+		if (typeof this.query === 'string') {
+			return $(this.query.split(',').map(
+				str => selector.split(',').map(
+					q => `${str.trim()} ${q.trim()}`
+				)
+			).join(', '));
+		} else {
+			let found = this.results.reduce((list, el) => {
+				return list.concat(Array.from(el.querySelectorAll(selector)));
+			}, []);
+			return new zQ(this.results.filter(el => el.matches(selector)).concat(found));
+		}
 	}
 
 	css(args) {
@@ -327,5 +336,5 @@ Object.prototype.$ = function(q) {
 Object.prototype.isZQ = false;
 zQ.prototype.isZQ = true;
 function $(q = document) {
-	return q.isZQ ? q : new zQ(q);
+	return q instanceof zQ ? q : new zQ(q);
 }
