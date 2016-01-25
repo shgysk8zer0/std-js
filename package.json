@@ -20,9 +20,10 @@
 	},
 	"dependencies": {},
 	"devDependencies": {
-		"babel": "^6.4.5",
+		"babel": "^5.8",
 		"myth": "^1.5.0",
 		"webpack": "^1.12.12",
+		"babel-core": "*",
 		"babel-preset-es2015": "*",
 		"babel-loader": "*"
 	},
