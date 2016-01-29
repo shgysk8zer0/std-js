@@ -1,4 +1,3 @@
-var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
@@ -11,7 +10,8 @@ module.exports = {
         loaders: [
             {
                 loader: 'babel-loader',
-                test: path.join(__dirname, 'es6'),
+                test: /\.es6$/,
+                exclude: /node_modules/,
                 query: {
                   presets: 'es2015',
                 },
@@ -27,5 +27,5 @@ module.exports = {
         colors: true
     },
     // Create Sourcemaps for the bundle
-    devtool: 'source-map',
+    devtool: 'source-map'
 };
