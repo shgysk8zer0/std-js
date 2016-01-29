@@ -1,5 +1,5 @@
-export default function WYSIWYG(menu) {
-	'use strict';
+export default  menu => {
+	/* Do not use NodeList.forEach */
 	menu.querySelectorAll('[data-editor-command]').forEach(item =>  {
 		item.addEventListener('click', event =>  {
 			event.preventDefault();
