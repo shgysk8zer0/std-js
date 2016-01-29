@@ -1,3 +1,4 @@
+export {default as elementClassList} from './classList.es6';
 export {default as elementClose} from './close.es6';
 export {default as elementClosest} from './closest.es6';
 export {default as elementDataset} from './dataset.es6';
