@@ -1,5 +1,8 @@
 language: node_js
 notifications:
+    slack:
+        rooms:
+          - superuserteam:JFhqd32NFLOYs4q3jHjos2Ph#std-js
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/ceab9ef2e26f90953028
