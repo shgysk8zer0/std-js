@@ -21,11 +21,10 @@
 	"dependencies": {},
 	"devDependencies": {
 		"eslint": "*",
-		"babel": "*",
-		"webpack": "*",
+		"webpack": "^1.0.0",
 		"babel-core": "*",
 		"babel-preset-es2015": "*",
-		"babel-loader": "*"
+		"babel-loader": "^6.2.1"
 	},
 	"babel": {
 		"presets": ["es2015"],
