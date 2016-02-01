@@ -11,9 +11,9 @@ notifications:
     on_start: never     # options: [always|never|change] default: always
 node_js:
   - "0.10.36"
-npm:
-  - "3.5.4"
 cache: bundler
 before_script:
-    npm install eslint webpack babel-core babel-loader babel-preset-es2015
-script: eslint -c .eslintrc . && webpack
+  npm install eslint webpack babel-core babel-loader babel-preset-es2015
+script:
+  eslint -c .eslintrc .
+  webpack
