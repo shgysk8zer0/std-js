@@ -20,9 +20,9 @@
 	},
 	"dependencies": {},
 	"devDependencies": {
-		"eslint": "^1.10.3",
-		"babel": "^6.4.5",
-		"webpack": "^1.12.12",
+		"eslint": "*",
+		"babel": "*",
+		"webpack": "*",
 		"babel-core": "*",
 		"babel-preset-es2015": "*",
 		"babel-loader": "*"
