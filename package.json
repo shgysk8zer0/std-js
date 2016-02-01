@@ -2,7 +2,7 @@
 	"name": "std-js",
 	"version": "1.0.0",
 	"description": "A JavaScript library for making front-end development sane!",
-	"keywords": ["ECMAScript2015", "ES6", "modules"],
+	"keywords": ["ECMAScript2015", "ES6", "modules", "front-end"],
 	"author": {
 		"name": "Chris Zuber",
 		"email": "shgysk8zer0@gmail.com",
@@ -20,8 +20,8 @@
 	},
 	"dependencies": {},
 	"devDependencies": {
-		"eslint": "*",
-		"babel": "^5.8",
+		"eslint": "^1.10.3",
+		"babel": "^6.4.5",
 		"webpack": "^1.12.12",
 		"babel-core": "*",
 		"babel-preset-es2015": "*",
