@@ -1,6 +1,4 @@
-
-function supports(type)
-{
+export default function supports(type) {
 	/*Feature detection. Returns boolean value of suport for type*/
 	/**
 	* A series of tests to determine support for a given feature
@@ -129,5 +127,14 @@ function supports(type)
 		}
 	} catch(e) {
 		return false;
+	}
+}
+export function supportsAsClasses(...feats) {
+	if (feats instanceof Array) {
+		feats.forEach(feat => {
+			supports(feat)
+				? document.documentElement.classList.add(feat)
+				: document.documentElement.classList.add(`no-${feat}`);
+		})
 	}
 }

@@ -1,4 +1,4 @@
-(function(i, s, o, g, r, a, m) {
+export default (i, s, o, g, r, a, m) => {
 	'use strict';
   i.GoogleAnalyticsObject = r;
   i[r] = i[r] || function() {
@@ -15,4 +15,4 @@ window.addEventListener('load', () => {
 	'use strict';
 	ga('create', document.body.dataset.ga, 'auto');
 	ga('send', 'pageview');
-});
+}

@@ -1,8 +1,8 @@
-function cache() {}
-function isOnline() {
+import {default as $} from './zq.es6';
+export function isOnline() {
 	return (!'onLine' in navigator) || navigator.onLine;
 }
-function notify(options) {
+export function notify(options) {
 	/*Creates a notification, with alert fallback*/
 	var notification;
 	if (typeof options === 'string') {
@@ -48,7 +48,7 @@ function notify(options) {
 		return notification;
 	}
 }
-function reportError(err) {
+export function reportError(err) {
 	console.error(err);
 	notify({
 		title: err.name,
@@ -56,10 +56,10 @@ function reportError(err) {
 		icon: 'images/octicons/svg/bug.svg'
 	});
 }
-function isInternalLink(link) {
+export function isInternalLink(link) {
 	return link.origin === location.origin;
 }
-function parseResponse(resp) {
+export function parseResponse(resp) {
 	if (resp.ok) {
 		if (!resp.headers.has('Content-type')) {
 			throw new Error(`No Content-Type header in request to "${resp.url}"`);
@@ -82,7 +82,7 @@ function parseResponse(resp) {
 		throw new Error(`"${resp.url}" -> ${resp.status}:${resp.statusText}`);
 	}
 }
-function ajax(data) {
+export function ajax(data) {
 	if ((typeof data.type !== 'undefined' && data.type.toLowerCase() === 'get') && (typeof data.request === 'string')) {
 		data.url += '?' + data.request;
 	}
@@ -105,12 +105,7 @@ function ajax(data) {
 	return new Promise(function (success, fail) 	{
 		var resp;
 		/*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise*/
-		if (('cache' in data) && cache.has(data.cache)) {
-			if (typeof data.history === 'string') {
-				history.pushState({}, document.title, data.history);
-			}
-			success(cache.get(data.cache));
-		} else if (typeof navigator.onLine !== 'boolean' || navigator.onLine) {
+		if (typeof navigator.onLine !== 'boolean' || navigator.onLine) {
 			var req = new XMLHttpRequest(),
 				progress = document.createElement('progress');
 			if (('withCredentials' in req) && ('withCredentials' in data)) {
@@ -162,9 +157,6 @@ function ajax(data) {
 				}
 				progress.parentElement.removeChild(progress);
 				if (req.status == 200) {
-					if (data.cache) {
-						cache.set(data.cache, req.response.trim());
-					}
 					if (typeof data.history === 'string') {
 						history.pushState({}, document.title, data.history);
 					}
@@ -193,7 +185,7 @@ function ajax(data) {
 	});
 }
 
-function getLocation(options) {
+export function getLocation(options) {
 	/*https://developer.mozilla.org/en-US/docs/Web/API/Geolocation.getCurrentPosition*/
 	if (typeof options === 'undefined') {
 		options = {};
@@ -219,33 +211,4 @@ function selection() {
 selection.prototype.constructor = selection;
 selection.prototype.replace = function(rep) {
 	this.parent.innerHTML = this.before + rep + this.after;
-};
-cache.prototype.constructor = cache;
-cache.prototype.has = function(key) {
-	return localStorage.keys().indexOf(('cache ' + key).camelCase()) !== -1;
-};
-cache.prototype.get = function(key) {
-	return localStorage.getItem(('cache ' + key).camelCase()) || false;
-};
-cache.prototype.set = function(key, value) {
-	localStorage.setItem(('cache ' + key).camelCase(), value);
-	return this;
-};
-cache.prototype.unset = function(key) {
-	localStorage.removeItem(('cache ' + key).camelCase());
-	return this;
-};
-cache.prototype.keys = function() {
-	return localStorage.keys().filter(function(key) {
-		return /^cache/.test(key);
-	});
-};
-cache.prototype.each = function(callback) {
-	return this.keys().forEach(callback.bind(this));
-};
-cache.prototype.clear = function() {
-	this.each(function(key) {
-		localStorage.removeItem(key);
-	});
-	return this;
 };

@@ -1,15 +1,13 @@
 /*eslint no-use-before-define: 0*/
 /*============================ zQ Functions =======================*/
-class zQ {
-	constructor(selector = ':root', base = document) {
+export class zQ {
+	constructor(selector = document) {
 		try {
 			this.results = [];
 			if (typeof selector === 'string') {
-				this.results = Array.from(base.querySelectorAll(selector));
+				this.results = Array.from(document.querySelectorAll(selector));
 			} else if (selector instanceof NodeList || selector instanceof HTMLCollection) {
-				this.results = Array.from(selector).filter(item => item.nodeType === 1);
-			} else if (selector instanceof Array) {
-				this.results = selector.filter(item => item instanceof Element);
+				this.results = Array.from(selector);
 			} else if (typeof selector === 'object') {
 				this.results = [selector];
 			} else {
@@ -52,6 +50,11 @@ class zQ {
 	map(callback) {
 		return this.results.map(callback);
 	}
+	/* *getResults() {
+		for (let result of this.results) {
+			yield result;
+		}
+	}*/
 	addClass(cname) {
 		this.results.forEach(el => el.classList.add(cname));
 		return this;
@@ -306,19 +309,12 @@ class zQ {
 		return this;
 	}
 	/*====================================================================================================================*/
-	query(selector) {
-		if (typeof this.query === 'string') {
-			return $(this.query.split(',').map(
-				str => selector.split(',').map(
-					q => `${str.trim()} ${q.trim()}`
-				)
-			).join(', '));
-		} else {
-			let found = this.results.reduce((list, el) => {
-				return list.concat(Array.from(el.querySelectorAll(selector)));
-			}, []);
-			return new zQ(this.results.filter(el => el.matches(selector)).concat(found));
-		}
+	$(selector) {
+		return $(this.query.split(',').map(
+			str => selector.split(',').map(
+				q => `${str.trim()} ${q.trim()}`
+			)
+		)).join(', ');
 	}
 
 	css(args) {
@@ -327,14 +323,6 @@ class zQ {
 		return this;
 	}
 }
-Object.prototype.$ = function(q) {
-	if (this === document || this === window) {
-		return $(q);
-	}
-	return $(this).$(q);
-};
-Object.prototype.isZQ = false;
-zQ.prototype.isZQ = true;
-function $(q = document) {
+export default function $(q = document) {
 	return q instanceof zQ ? q : new zQ(q);
 }

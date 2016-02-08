@@ -2,7 +2,7 @@
  * Class for getting weather data using OpenWeatherMap
  * @see http://openweathermap.org/current
  */
-class OpenWeatherMap {
+export default class OpenWeatherMap {
 	/**
 	 * Creates new instance and sets class properties
 	 *

@@ -1,4 +1,4 @@
-class SocialShare {
+export default class SocialShare {
 	static getFacebook(href = location.href) {
 		let url = new URL('https://www.facebook.com/sharer/sharer.php');
 		url.searchParams.set('u', href);
