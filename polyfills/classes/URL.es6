@@ -1,7 +1,7 @@
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/API/URL
  */
-class URLx {
+export default class {
 	constructor(urlString, baseURL) {
 		if (typeof baseURL === 'string') {
 			baseURL = new URL(baseURL);
