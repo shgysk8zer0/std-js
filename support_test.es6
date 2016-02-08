@@ -129,7 +129,7 @@ export default function supports(type) {
 		return false;
 	}
 }
-export function supportsAsClasses(feats) {
+export function supportsAsClasses(...feats) {
 	if (feats instanceof Array) {
 		feats.forEach(feat => {
 			supports(feat)

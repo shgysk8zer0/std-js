@@ -6,12 +6,12 @@ import {supportsAsClasses} from "./support_test.es6";
 import {default as popState} from "./popstate.es6";
 import {default as $} from './zq.es6';
 polyfill();
-supportsAsClasses(['svg', 'audio', 'video', 'picture', 'canvas', 'menuitem',
+supportsAsClasses('svg', 'audio', 'video', 'picture', 'canvas', 'menuitem',
 'details', 'dialog', 'dataset', 'HTMLimports', 'classList', 'connectivity',
 'visibility', 'notifications', 'ApplicationCache', 'indexedDB',
 'localStorage', 'sessionStorage', 'CSSgradients', 'transitions',
 'animations', 'CSSvars', 'CSSsupports', 'CSSmatches', 'querySelectorAll',
-'workers', 'promises', 'ajax', 'FormData']);
+'workers', 'promises', 'ajax', 'FormData');
 
 popState();
 $(self).load(load => {
