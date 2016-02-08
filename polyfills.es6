@@ -1,7 +1,5 @@
 import * as classes from './polyfills/allClasses.es6';
-export {default as dePrefix} from './deprefixer.es6';
-export {default as promise} from './polyfills/promises.es6';
-export {default as fetch} from './polyfills/fetch.es6';
+import {default as dePrefix} from './deprefixer.es6';
 
 export function checkFunction(functionName, functionObj) {
 	if ((functionObj instanceof Function) && ! (functionName in window)) {
@@ -32,5 +30,16 @@ export function checkClass(className, classObj) {
 		}
 	}
 }
+export default function() {
+	dePrefix();
+	for (let shim in classes) {
+		try {
+			checkClass(shim, classes[shim]);
+		} catch (e) {
+			console.error(e);
+			continue;
+		}
+	}
+}
 // export {MutationObserver} from './polyfills/MutationObserver.es6';
-export {classes};
+export {classes, dePrefix};
