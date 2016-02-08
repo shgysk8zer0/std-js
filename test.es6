@@ -10,7 +10,7 @@ for (let shim in polyfills.classes) {
 		polyfills.checkClass(shim, polyfills.classes[shim]);
 	} catch (e) {
 		console.error(e);
-		continue;z
+		continue;
 	}
 }
 ['svg', 'audio', 'video', 'picture', 'canvas', 'menuitem', 'details',
