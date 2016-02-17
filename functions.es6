@@ -1,10 +1,11 @@
-import {default as $} from './zq.es6';
+import $ from './qsaArray.es6';
+
 export function isOnline() {
 	return (!'onLine' in navigator) || navigator.onLine;
 }
 export function notify(options) {
 	/*Creates a notification, with alert fallback*/
-	var notification;
+	let notification;
 	if (typeof options === 'string') {
 		options = {
 			body: options
@@ -93,7 +94,7 @@ export function ajax(data) {
 		data.request = new FormData(data.form);
 		data.request.append('form', data.form.name);
 		data.request.append('nonce', sessionStorage.getItem('nonce'));
-		data.form.querySelectorAll('[data-input-name]').forEach(function(input) {
+		$('[data-input-name]').forEach(input => {
 			data.request.append(input.dataset.inputName, input.innerHTML);
 		});
 	}
@@ -126,13 +127,12 @@ export function ajax(data) {
 			}
 			req.setRequestHeader('Accept', data.headers.Accept);
 			req.setRequestHeader('Request-Type', 'AJAX');
-			req.addEventListener('progress', function(event)
-			{
+			req.addEventListener('progress', event => {
 				if (event.lengthComputable) {
 					progress.value = event.loaded / event.total;
 				}
 			});
-			req.addEventListener('load', function(event) {
+			req.addEventListener('load', evnet => {
 				switch (req.getResponseHeader('Content-Type')) {
 					case 'application/json':
 						resp = JSON.parse(req.response);
@@ -147,13 +147,13 @@ export function ajax(data) {
 						resp = new DOMParser().parseFromString(req.response, 'text/html');
 						break;
 
-						case 'image/svg':
-							resp = new DOMParser().parseFromString(req.response, 'image/svg+xml');
-							break;
+					case 'image/svg':
+						resp = new DOMParser().parseFromString(req.response, 'image/svg+xml');
+						break;
 
-						case 'text/plain':
-							resp = req.response;
-							break;
+					case 'text/plain':
+						resp = req.response;
+						break;
 				}
 				progress.parentElement.removeChild(progress);
 				if (req.status == 200) {
@@ -166,7 +166,7 @@ export function ajax(data) {
 				}
 			});
 			req.addEventListener('error', function () {
-				progress.parentElement.removeChild(progress);
+				progress.remove();
 				fail(Error('Network Error'));
 			});
 			if (typeof data.request !== 'undefined') {
@@ -197,18 +197,3 @@ export function getLocation(options) {
 		navigator.geolocation.getCurrentPosition(success, fail, options);
 	});
 }
-function selection() {
-	var selected = getSelection();
-	//this.target = selected.focusNode;
-	this.start = selected.anchorOffset;
-	this.end = selected.focusOffset;
-	this.length = this.end - this.start;
-	this.parent = selected.anchorNode;
-	this.before = this.parent.textContent.substring(0, this.start);
-	this.after = this.parent.textContent.substring(this.end);
-	this.text = selected.focusNode.textContent.substring(this.start, this.end);
-}
-selection.prototype.constructor = selection;
-selection.prototype.replace = function(rep) {
-	this.parent.innerHTML = this.before + rep + this.after;
-};
