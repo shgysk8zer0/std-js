@@ -1,5 +1,5 @@
 import * as classes from './polyfills/allClasses.es6';
-import {default as dePrefix} from './deprefixer.es6';
+import dePrefix from './deprefixer.es6';
 
 export function checkFunction(functionName, functionObj) {
 	if ((functionObj instanceof Function) && ! (functionName in window)) {
