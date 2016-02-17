@@ -1,7 +1,7 @@
 import {notify} from './functions.es6';
 import $ from './qsaArray.es6';
 
-export default function handleJSON(json) => {
+export default function handleJSON(json) {
 	if(typeof json === 'string') {
 		json = JSON.parse(json.trim());
 	} else if(typeof json !== 'object') {
