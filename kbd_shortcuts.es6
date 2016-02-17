@@ -1,5 +1,7 @@
-window.addEventListener('keypress', function (event) {
-	'use strict';
+/*
+Add this as a listener on keypress events
+*/
+export default event => {
 	if (event.target.matches('[contenteditable="true"], [contenteditable="true"] *')) {
 		switch (event.key.toLowerCase()) {
 			case 'y':
@@ -86,9 +88,8 @@ window.addEventListener('keypress', function (event) {
 			case 'tab':
 				event.preventDefault();
 				event.stopPropagation();
-				(event.shiftKey) ? document.execCommand('outdent') : document.execCommand('indent');
+				document.execCommand(event.shiftKey ? 'outdent' : 'indent');
 				break;
 		}
 	}
-},
-true);
+}
