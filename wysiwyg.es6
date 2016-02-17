@@ -1,23 +1,25 @@
+import $ from './qsaArray.es6';
+
 export default  menu => {
 	/* Do not use NodeList.forEach */
-	menu.querySelectorAll('[data-editor-command]').forEach(item =>  {
+	$('[data-editor-command]', menu).forEach(item =>  {
 		item.addEventListener('click', event =>  {
 			event.preventDefault();
-			document.execCommand('styleWithCSS', null, this.dataset.hasOwnProperty('styleWithCss'));
+			document.execCommand('styleWithCSS', null, item.dataset.hasOwnProperty('styleWithCss'));
 			let arg = null;
-			if (this.dataset.hasOwnProperty('editorValue')) {
-				arg = this.dataset.editorValue;
-			} else if (this.dataset.hasOwnProperty('prompt')) {
-				arg = prompt(this.dataset.prompt.toString());
-			} else if (this.dataset.hasOwnProperty('selectionTo')) {
-				let createdEl = document.createElement(this.dataset.selectionTo);
+			if (item.dataset.hasOwnProperty('editorValue')) {
+				arg = item.dataset.editorValue;
+			} else if (item.dataset.hasOwnProperty('prompt')) {
+				arg = prompt(item.dataset.prompt.toString());
+			} else if (item.dataset.hasOwnProperty('selectionTo')) {
+				let createdEl = document.createElement(item.dataset.selectionTo);
 				createdEl.textContent = getSelection().toString();
 				arg = createdEl.outerHTML;
 			}
-			document.execCommand(this.dataset.editorCommand, null, arg);
+			document.execCommand(item.dataset.editorCommand, null, arg);
 		});
 	});
-	menu.querySelectorAll('[label="Add Class"]').forEach(menuitem => {
+	$('[label="Add Class"]', menu).forEach(menuitem => {
 		menuitem.addEventListener('click', event => {
 			event.preventDefault();
 			let addClass = prompt('Enter class name to add');
@@ -39,7 +41,7 @@ export default  menu => {
 			}
 		});
 	});
-	menu.querySelectorAll('[label="Set Attribute"]').forEach(menuitem => {
+	$('[label="Set Attribute"]' menu,).forEach(menuitem => {
 		menuitem.addEventListener('click', event => {
 			event.preventDefault();
 			let name = prompt('Enter attribute name');
@@ -49,8 +51,8 @@ export default  menu => {
 			}
 		});
 	});
-	menu.querySelectorAll('[label="Remove Attribute"]').forEach(menuitem => {
-		menuitem.addEventListener('click', function(event) {
+	$('[label="Remove Attribute"]', menu).forEach(menuitem => {
+		menuitem.addEventListener('click',event => {
 			event.preventDefault();
 			let attr = prompt('Enter name of attribute to remove');
 			if (attr.length !== 0) {
@@ -58,13 +60,13 @@ export default  menu => {
 			}
 		});
 	});
-	menu.querySelectorAll('[label="Save Work"]').forEach(item => {
+	$('[label="Save Work"]', menu).forEach(item => {
 		item.addEventListener('click', event => {
 			event.preventDefault();
 			localStorage.setItem('savedDoc', document.querySelector('[contenteditable="true"]').innerHTML);
 		});
 	});
-	menu.querySelectorAll('[label="Restore Work"]').forEach(item => {
+	$('[label="Restore Work"]', menu).forEach(item => {
 		item.addEventListener('click', event => {
 			event.preventDefault();
 			document.querySelector('[contenteditable="true"]').innerHTML = localStorage.getItem('savedDoc');
