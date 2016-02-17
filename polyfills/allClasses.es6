@@ -1,4 +1,10 @@
+export {default as Object} from './classes/Object.es6';
+export {default as JSON} from './classes/JSON.es6';
 export {default as String} from './classes/String.es6';
 export {default as Array} from './classes/Array.es6';
 export {default as Element} from './classes/Element.es6';
 export {default as CSS} from './classes/CSS.es6';
+// export {default as Promise} from './classes/Promise.es6';
+// export {default as Headers} from './classes/Headers.es6';
+// export {default as Request} from './classes/Request.es6';
+// export {default as Response} from './classes/Response.es6';
