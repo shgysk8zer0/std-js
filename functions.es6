@@ -1,4 +1,10 @@
-import $ from './qsaArray.es6';
+export function query(selector, node = document.documentElement) {
+	let results = Array.from(node.querySelectorAll(selector));
+	if (node.matches(selector)) {
+		results.unshift(node);
+	}
+	return results;
+}
 
 export function isOnline() {
 	return (!'onLine' in navigator) || navigator.onLine;

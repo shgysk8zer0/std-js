@@ -1,4 +1,4 @@
-import $ from './qsaArray.es6';
+import {query as $} from './functions.es6';
 
 export default  menu => {
 	/* Do not use NodeList.forEach */
@@ -28,7 +28,7 @@ export default  menu => {
 			}
 		});
 	});
-	menu.querySelectorAll('[label="Remove Class"]').forEach(menuitem => {
+	$('[label="Remove Class"]', menu).forEach(menuitem => {
 		menuitem.addEventListener('click', event => {
 			event.preventDefault();
 			let removeClass = prompt('Enter class name to remove');

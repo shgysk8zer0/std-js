@@ -1,5 +1,4 @@
-import {notify} from './functions.es6';
-import $ from './qsaArray.es6';
+import {notify, query as $} from './functions.es6';
 
 export default function handleJSON(json) {
 	if(typeof json === 'string') {
