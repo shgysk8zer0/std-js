@@ -16,7 +16,8 @@ export function decode(body) {
 	  var value = split.join('=').replace(/\+/g, ' ');
 	  form.append(decodeURIComponent(name), decodeURIComponent(value));
 	}
-});
+  });
+}
 
 export function normalizeValue(value) {
   if (typeof value !== 'string') {

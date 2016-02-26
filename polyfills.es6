@@ -1,13 +1,13 @@
 import * as classes from './polyfills/allClasses.es6';
-import {default as dePrefix} from './deprefixer.es6';
+import dePrefix from './deprefixer.es6';
 
-export function checkFunction(functionName, functionObj) {
+function checkFunction(functionName, functionObj) {
 	if ((functionObj instanceof Function) && ! (functionName in window)) {
 		window[functionName] = functionObj;
 	}
 }
 
-export function checkClass(className, classObj) {
+function checkClass(className, classObj) {
 	if (! (classObj instanceof Function)) {
 		throw new Error(`${className} is not a class.`);
 		return;
@@ -40,6 +40,14 @@ export default function() {
 			continue;
 		}
 	}
+	// for (let shim in functions) {
+	// 	try {
+	// 		checkFunction(shim, functions[shim]);
+	// 	} catch (e) {
+	// 		console.error(e);
+	// 		continue;
+	// 	}
+	// }
 }
 // export {MutationObserver} from './polyfills/MutationObserver.es6';
-export {classes, dePrefix};
+// export {classes, dePrefix};

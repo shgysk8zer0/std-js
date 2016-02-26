@@ -1,13 +1,14 @@
-import {notify} from './functions.es6';
-export default json => {
+import {notify, query as $} from './functions.es6';
+
+export default function handleJSON(json) {
 	if(typeof json === 'string') {
 		json = JSON.parse(json.trim());
 	} else if(typeof json !== 'object') {
 		return false;
 	}
 	if ('remove' in json) {
-		document.querySelectorAll(json.remove).forEach(el => {
-			el.parentElement.removeChild(el);
+		$(json.remove).forEach(el => {
+			el.remove();
 		});
 	}
 	if('text' in json) {
@@ -42,7 +43,7 @@ export default json => {
 	}
 	if('addClass' in json) {
 		Object.keys(json.addClass).forEach(selector => {
-			document.querySelectorAll(selector).forEach(el => {
+			$(selector).forEach(el => {
 				json.addClass[selector].split(',').forEach(cname => {
 					el.classList.add(cname);
 				});
@@ -51,7 +52,7 @@ export default json => {
 	}
 	if('removeClass' in json) {
 		Object.keys(json.removeClass).forEach(selector => {
-			document.querySelectorAll(selector).forEach(el => {
+			$(selector).forEach(el => {
 				json.removeClass[selector].split(',').forEach(cname => {
 					el.classList.remove(cname);
 				});
@@ -60,7 +61,7 @@ export default json => {
 	}
 	if('attributes' in json) {
 		Object.keys(json.attributes).forEach(selector => {
-			document.querySelectorAll(selector).forEach(el => {
+			$(selector).forEach(el => {
 				Object.keys(json.attributes[selector]).forEach(attribute => {
 					if(typeof json.attributes[selector][attribute] === 'boolean') {
 						(json.attributes[selector][attribute])
@@ -75,7 +76,7 @@ export default json => {
 	}
 	if('increment' in json) {
 		Object.keys(json.increment).forEach(selector => {
-			var el = document.querySelector(selector);
+			let el = document.querySelector(selector);
 			Object.keys(json.increment[selector]).forEach(attribute => {
 				if(attribute in el) {
 					el[attribute] += json.increment[selector][attribute];
@@ -87,21 +88,21 @@ export default json => {
 	}
 	if('stepUp' in json) {
 		Object.keys(json.stepUp).forEach(selector => {
-			document.querySelectorAll(selector).forEach(el => {
+			$(selector).forEach(el => {
 				el.stepUp(json.stepUp[selector]);
 			});
 		});
 	}
 	if('stepDown' in json) {
 		Object.keys(json.stepDown).forEach(selector => {
-			document.querySelectorAll(selector).forEach(el => {
+			$(selector).forEach(el => {
 				el.stepDown(json.stepDown[selector]);
 			});
 		});
 	}
 	if('style' in json) {
 		Object.keys(json.style).forEach(sel => {
-			document.querySelectorAll(sel).forEach(el => {
+			$(sel).forEach(el => {
 				Object.keys(json.style[sel]).forEach(prop => {
 					el.style[prop.camelCase()] = json.style[sel][prop];
 				});
@@ -110,7 +111,7 @@ export default json => {
 	}
 	if('dataset' in json) {
 		Object.keys(json.dataset).forEach(sel => {
-			document.querySelectorAll(sel).forEach(function(el) {
+			$(sel).forEach(el => {
 				Object.keys(json.dataset[sel]).forEach(prop => {
 					el.dataset[prop] = json.dataset[sel][prop];
 				});
@@ -175,13 +176,13 @@ export default json => {
 		if(typeof json.open.specs !== 'object') {
 			json.open.specs = {};
 		}
-		json.open.specs.keys().forEach(spec => {
+		Object.keys(json.open.specs).forEach(spec => {
 			specs.push(`${spec}=${json.open.specs[spec]}`);
 		});
 		window.open(json.open.url, '_blank', specs.join(','), json.open.replace);
 	}
 	if('show' in json) {
-		document.querySelectorAll(json.show).forEach(el => {
+		$(json.show).forEach(el => {
 			el.show();
 		});
 	}
@@ -189,14 +190,14 @@ export default json => {
 		document.querySelector(json.showModal).showModal();
 	}
 	if('close' in json) {
-		document.querySelectorAll(json.close).forEach(el => {
+		$(json.close).forEach(el => {
 			el.close();
 		});
 	}
 	if('triggerEvent' in json) {
 		Object.keys(json.triggerEvent).forEach(selector => {
-			document.querySelectorAll(selector).forEach(target => {
-				var event = json.triggerEvent[selector].toLowerCase();
+			$(selector).forEach(target => {
+				let event = json.triggerEvent[selector].toLowerCase();
 				if(event === 'click') {
 					target.dispatchEvent(new MouseEvent(event));
 				} else {

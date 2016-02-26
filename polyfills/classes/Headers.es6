@@ -1,50 +1,51 @@
 import {normalizeName, normalizeValue} from '../../_helpers/fetch.es6';
-export default class {
+import Map from './Map.es6';
+export default class extends Map {
 	constructor(headers = {}) {
-		this.map = {};
-
+		super();
 		if (headers instanceof Headers) {
-			headers.forEach(function(value, name) {
-			this.append(name, value);
-		}, this);
-
-		} else if (headers) {
+			headers.forEach((value, name) => {
+				this.append(name, value);
+			});
+		} else {
 			Object.getOwnPropertyNames(headers).forEach(name => {
 				this.append(name, headers[name]);
 			});
 		}
 	}
 	append(name, value) {
-		name = normalizeName(name);
-		value = normalizeValue(value);
-		var list = this.map[name];
-		if (!list) {
-			list = [];
-			this.map[name] = list;
+		if (this.has(name)) {
+			let values = this.getAll(name);
+			name = normalizeName(name);
+			value = normalizeValue(value);
+			values.push(normalizeValue(value));
+			super.set(name, values);
+		} else {
+			this.set(name, value);
 		}
-		list.push(value);
 	}
 	delete(name) {
-		delete this.map[normalizeName(name)];
+		return super.delete(normalizeName(name));
 	}
 	get(name) {
-		var values = this.map[normalizeName(name)];
+		let values = super.get(normalizeName(name));
 		return values ? values[0] : null;
 	}
-	getAllfunction(name) {
-		return this.map[normalizeName(name)] || [];
+	getAll(name) {
+		return super.get(normalizeName(name));
 	}
 	has(name) {
-		return this.map.hasOwnProperty(normalizeName(name));
+		return super.has(normalizeName(name));
 	}
 	set(name, value) {
-		this.map[normalizeName(name)] = [normalizeValue(value)];
+		super.set(normalizeName(name), [normalizeValue(value)]);
 	}
-	forEach(callback, thisArg) {
-		Object.getOwnPropertyNames(this.map).forEach(name => {
-			this.map[name].forEach(value => {
-			callback.call(thisArg, value, name, this);
-			});
-		});
-	}
+	// `forEach` is not in the documentation on MDN
+	// forEach(callback, thisArg) {
+	// 	Object.getOwnPropertyNames(this).forEach(name => {
+	// 		this.getAll(name).forEach(value => {
+	// 			callback.call(thisArg, value, name, this);
+	// 		});
+	// 	});
+	// }
 }
