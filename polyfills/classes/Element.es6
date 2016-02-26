@@ -82,8 +82,13 @@ export default class {
 		for (let dialog of document.querySelectorAll('dialog[open]')) {
 			dialog.close();
 		}
-		this.after(backdrop);
-		this.classList.add('modal');
-		this.setAttribute('open', '');
+		try {
+			this.parentElement.insertBefore(backdrop, this.nextElementSibling);
+		} catch(e) {
+			this.parentElement.appendChild(backdrop);
+		} finally {
+			this.classList.add('modal');
+			this.setAttribute('open', '');
+		}
 	}
 }
