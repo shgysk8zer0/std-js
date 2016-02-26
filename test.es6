@@ -1,10 +1,10 @@
 import polyfill from './polyfills.es6';
+import $ from './zq.es6';
 import {notify, reportError, parseResponse} from './functions.es6';
 import handleJSON from './json_response.es6';
 import SocialShare from './socialshare.es6'
 import {supportsAsClasses} from "./support_test.es6";
 import popState from "./popstate.es6";
-import $ from './zq.es6';
 import query from './query.es6';
 import kbdShortcuts from './kbd_shortcuts.es6';
 polyfill();
@@ -16,7 +16,6 @@ supportsAsClasses('svg', 'audio', 'video', 'picture', 'canvas', 'menuitem',
 'localStorage', 'sessionStorage', 'CSSgradients', 'transitions',
 'animations', 'CSSvars', 'CSSsupports', 'CSSmatches', 'querySelectorAll',
 'workers', 'promises', 'ajax', 'FormData');
-
 // if ('serviceWorker' in navigator) {
 // 	try {
 // 		let url = new URL('serviceWorker.es6', location.origin);
