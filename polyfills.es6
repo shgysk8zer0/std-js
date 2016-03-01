@@ -1,33 +1,32 @@
 import * as classes from './polyfills/allClasses.es6';
 import dePrefix from './deprefixer.es6';
 
-function checkFunction(functionName, functionObj) {
-	if ((functionObj instanceof Function) && ! (functionName in window)) {
-		window[functionName] = functionObj;
-	}
-}
+// function checkFunction(functionName, functionObj) {
+// 	if ((functionObj instanceof Function) && ! (functionName in window)) {
+// 		window[functionName] = functionObj;
+// 	}
+// }
 
 function checkClass(className, classObj) {
 	if (! (classObj instanceof Function)) {
 		throw new Error(`${className} is not a class.`);
-		return;
 	} else if (! (className in window)) {
 		window[className] = classObj;
 	} else {
-		for (let method of Object.getOwnPropertyNames(classObj.prototype)) {
+		Object.getOwnPropertyNames(classObj.prototype).forEach(method => {
 			if (classObj.prototype[method] instanceof Function) {
-				if (! (method in window[className]['prototype'])) {
-					window[className]['prototype'][method] = classObj.prototype[method];
+				if (! (method in window[className].prototype)) {
+					window[className].prototype[method] = classObj.prototype[method];
 				}
 			}
-		}
-		for (let method of Object.getOwnPropertyNames(classObj)) {
+		});
+		Object.getOwnPropertyNames(classObj) (method => {
 			if (classObj[method] instanceof Function) {
 				if (! (method in window[className])) {
 					window[className][method] = classObj[method];
 				}
 			}
-		}
+		});
 	}
 }
 export default function() {

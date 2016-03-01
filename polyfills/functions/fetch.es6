@@ -30,4 +30,4 @@ export default (url, init = {}) => {
 		}
 		xhr.send(('body' in init) ? init.body : null);
 	});
-}
+};

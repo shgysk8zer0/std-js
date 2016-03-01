@@ -10,7 +10,7 @@ export default class {
 		if (form instanceof HTMLFormElement) {
 			$('input[name]', this).forEach(input => {
 				if (input.type === 'checkbox' && input.checked) {
-					this.append(input.name, input.value)
+					this.append(input.name, input.value);
 				} else {
 					this.append(input.name, input.value);
 				}

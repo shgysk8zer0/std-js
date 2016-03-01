@@ -1,3 +1,5 @@
+import {$} from './zq.es6';
+
 export function query(selector, node = document.documentElement) {
 	let results = Array.from(node.querySelectorAll(selector));
 	if (node.matches(selector)) {
@@ -7,7 +9,7 @@ export function query(selector, node = document.documentElement) {
 }
 
 export function isOnline() {
-	return (!'onLine' in navigator) || navigator.onLine;
+	return (!('onLine' in navigator)) || navigator.onLine;
 }
 export function notify(options) {
 	/*Creates a notification, with alert fallback*/
@@ -37,7 +39,7 @@ export function notify(options) {
 	} else {
 		alert(options.title || `${document.title}\n${options.body}`);
 	}
-	if (!!notification) {
+	if (notification) {
 		if ('onclick' in options) {
 			notification.onclick = options.onclick;
 		}
@@ -106,7 +108,7 @@ export function ajax(data) {
 	}
 	if (typeof data.headers !== 'object') {
 		data.headers = {Accept: 'application/json'};
-	} else if (!'Accept' in data.headers) {
+	} else if (!('Accept' in data.headers)) {
 		data.headers.Accept = 'application/json';
 	}
 	return new Promise(function (success, fail) 	{
@@ -138,28 +140,28 @@ export function ajax(data) {
 					progress.value = event.loaded / event.total;
 				}
 			});
-			req.addEventListener('load', evnet => {
+			req.addEventListener('load', () => {
 				switch (req.getResponseHeader('Content-Type')) {
-					case 'application/json':
-						resp = JSON.parse(req.response);
-						break;
+				case 'application/json':
+					resp = JSON.parse(req.response);
+					break;
 
-					case 'application/xml':
-					case 'text/xml':
-						resp = new DOMParser().parseFromString(req.response, 'application/xml');
-						break;
+				case 'application/xml':
+				case 'text/xml':
+					resp = new DOMParser().parseFromString(req.response, 'application/xml');
+					break;
 
-					case 'text/html':
-						resp = new DOMParser().parseFromString(req.response, 'text/html');
-						break;
+				case 'text/html':
+					resp = new DOMParser().parseFromString(req.response, 'text/html');
+					break;
 
-					case 'image/svg':
-						resp = new DOMParser().parseFromString(req.response, 'image/svg+xml');
-						break;
+				case 'image/svg':
+					resp = new DOMParser().parseFromString(req.response, 'image/svg+xml');
+					break;
 
-					case 'text/plain':
-						resp = req.response;
-						break;
+				case 'text/plain':
+					resp = req.response;
+					break;
 				}
 				progress.parentElement.removeChild(progress);
 				if (req.status == 200) {

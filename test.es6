@@ -1,11 +1,13 @@
 import polyfill from './polyfills.es6';
 import $ from './zq.es6';
-import {notify, reportError, parseResponse, query} from './functions.es6';
+import {reportError, parseResponse, query} from './functions.es6';
 import handleJSON from './json_response.es6';
-import SocialShare from './socialshare.es6'
-import {supportsAsClasses} from "./support_test.es6";
-import popState from "./popstate.es6";
+// import SocialShare from './socialshare.es6';
+import {supportsAsClasses} from './support_test.es6';
+import popState from './popstate.es6';
 import kbdShortcuts from './kbd_shortcuts.es6';
+import * as pattern from './patterns.es6';
+window.pattern = pattern;
 polyfill();
 popState();
 addEventListener('keypress', kbdShortcuts);
@@ -27,7 +29,7 @@ supportsAsClasses('svg', 'audio', 'video', 'picture', 'canvas', 'menuitem',
 // 		console.error(error);
 // 	}
 // }
-$(self).load(load => {
+$(self).load(() => {
 	console.log(query('*', document.body));
 	let url = new URL('fetch.json', location.origin);
 	let headers = new Headers();

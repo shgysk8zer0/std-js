@@ -1,4 +1,5 @@
 import {MutationRecord} from '../polyfills/MutationRecord.es6';
+/* eslint no-redeclare: 0 no-fallthrough: 0*/
 export var registrationsTable = new WeakMap();
 var setImmediate = window.msSetImmediate;
 if (!setImmediate) {
@@ -233,17 +234,14 @@ export class Registration {
 			});
 			break;
 		case 'DOMCharacterDataModified':
-			var target = e.target;
-			var record = getRecord('characterData', target);
-			var oldValue = e.prevValue;
-			forEachAncestorAndObserverEnqueueRecord(target, function (options) {
+			forEachAncestorAndObserverEnqueueRecord(e.target, options => {
 				if (!options.characterData) {
 					return;
 				}
 				if (options.characterDataOldValue) {
-					return getRecordWithOldValue(oldValue);
+					return getRecordWithOldValue(e.prevValue);
 				}
-				return record;
+				return getRecord('characterData', e.target);
 			});
 			break;
 		case 'DOMNodeRemoved':
@@ -252,19 +250,14 @@ export class Registration {
 			var target = e.relatedNode;
 			var changedNode = e.target;
 			var addedNodes,
-			removedNodes;
+				removedNodes;
 			if (e.type === 'DOMNodeInserted') {
-				addedNodes = [
-					changedNode
-				];
+				addedNodes = [changedNode];
 				removedNodes = [
 				];
 			} else {
-				addedNodes = [
-				];
-				removedNodes = [
-					changedNode
-				];
+				addedNodes = [];
+				removedNodes = [changedNode];
 			}
 			var previousSibling = changedNode.previousSibling;
 			var nextSibling = changedNode.nextSibling;

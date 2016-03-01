@@ -13,4 +13,4 @@ export default () => {
 	if (('applicationCache' in window) && document.documentElement.hasAttribute('manifest')) {
 		applicationCache.addEventListener('updateready', updateHandler);
 	}
-}
+};
