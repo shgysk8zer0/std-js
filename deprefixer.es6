@@ -47,4 +47,4 @@ export default () => {
 	if (!('requestFullScreen' in HTMLElement.prototype)) {
 		HTMLElement.prototype.requestFullScreen = HTMLElement.prototype.mozRequestFullScreen || HTMLElement.prototype.webkitRequestFullScreen || false;
 	}
-}
+};

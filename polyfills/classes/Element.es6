@@ -1,19 +1,19 @@
 var eventListeners = [];
 export default class {
 	addEventListener(type, listener /*,  useCapture (will be ignored) */) {
-	  var self = this;
-	  var wrapper = function(e) {
+	  				var self = this;
+	  				var wrapper = function(e) {
 		e.target = e.srcElement;
 		e.currentTarget = self;
 		if (listener.handleEvent) {
-		  listener.handleEvent(e);
+		  				listener.handleEvent(e);
 		} else {
-		  listener.call(self, e);
+		  				listener.call(self, e);
 		}
 	  };
-	  if (type === 'DOMContentLoaded') {
+	  				if (type === 'DOMContentLoaded') {
 		var wrapper2 = function(e) {
-		  if (document.readyState == 'complete') {
+		  				if (document.readyState == 'complete') {
 			wrapper(e);
 		  }
 		};
@@ -21,9 +21,9 @@ export default class {
 		eventListeners.push({object: this, type: type, listener: listener, wrapper: wrapper2});
 
 		if (document.readyState == 'complete') {
-		  var e = new Event();
-		  e.srcElement = window;
-		  wrapper2(e);
+		  				var e = new Event();
+		  				e.srcElement = window;
+		  				wrapper2(e);
 		}
 	  } else {
 		this.attachEvent('on' + type, wrapper);
@@ -31,17 +31,17 @@ export default class {
 	  }
 	}
 	removeEventListener(type, listener /*,  useCapture (will be ignored) */) {
-	  var counter = 0;
-	  while (counter < eventListeners.length) {
+	  				var counter = 0;
+	  				while (counter < eventListeners.length) {
 		var eventListener = eventListeners[counter];
 		if (eventListener.object == this && eventListener.type == type && eventListener.listener == listener) {
-		  if (type == 'DOMContentLoaded') {
+		  				if (type == 'DOMContentLoaded') {
 			this.detachEvent('onreadystatechange', eventListener.wrapper);
 		  } else {
 			this.detachEvent('on' + type, eventListener.wrapper);
 		  }
-		  eventListeners.splice(counter, 1);
-		  break;
+		  				eventListeners.splice(counter, 1);
+		  				break;
 		}
 		++counter;
 	  }

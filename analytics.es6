@@ -16,4 +16,4 @@ export default (trackingCode) => {
 		ga('create', trackingCode, 'auto');
 		ga('send', 'pageview');
 	});
-}
+};

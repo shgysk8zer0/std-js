@@ -9,11 +9,11 @@ function editorCommand(click) {
 	} else if (click.target.dataset.hasOwnProperty('prompt')) {
 		arg = prompt(click.target.dataset.prompt.toString());
 	} else if (click.target.dataset.hasOwnProperty('selectionTo')) {
-		let createdEl = document.createElement(item.dataset.selectionTo);
+		let createdEl = document.createElement(this.dataset.selectionTo);
 		createdEl.textContent = getSelection().toString();
 		arg = createdEl.outerHTML;
 	}
-	document.execCommand(item.dataset.editorCommand, null, arg);
+	document.execCommand(this.dataset.editorCommand, null, arg);
 }
 
 function addClass(click) {
@@ -74,7 +74,7 @@ export default  menu => {
 	$('[label="Remove Class"]', menu).forEach(menuitem => {
 		menuitem.addEventListener('click', removeClass);
 	});
-	$('[label="Set Attribute"]' menu,).forEach(menuitem => {
+	$('[label="Set Attribute"]', menu).forEach(menuitem => {
 		menuitem.addEventListener('click', setAttribute);
 	});
 	$('[label="Remove Attribute"]', menu).forEach(menuitem => {
@@ -86,4 +86,4 @@ export default  menu => {
 	$('[label="Restore Work"]', menu).forEach(item => {
 		item.addEventListener('click', restoreWork);
 	});
-}
+};

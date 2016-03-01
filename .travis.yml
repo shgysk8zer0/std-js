@@ -12,8 +12,4 @@ notifications:
 node_js:
   - "0.10.36"
 cache: bundler
-before_script:
-  npm install --save-dev "babel-loader" "babel-core" "babel-preset-es2015" "webpack" "eslint"
-script:
-  eslint -c .eslintrc .
-  webpack
+script: npm test

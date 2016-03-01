@@ -16,7 +16,7 @@ export default class {
 		return this.has(name) ? this._data[name] : undefined;
 	}
 	delete(name) {
-		return delete this._data[name]
+		return delete this._data[name];
 	}
 	clear() {
 		return this._data = {};
@@ -39,7 +39,7 @@ export default class {
 	forEach(callback, thisArg) {
 		Object.getOwnPropertyNames(this._data).forEach(name => {
 			this._data[name].forEach(value => {
-			callback.call(thisArg, value, name, this);
+				callback.call(thisArg, value, name, this);
 			});
 		});
 	}

@@ -7,7 +7,7 @@ export default class JSON {
 		if (vContent instanceof Object) {
 			let sOutput = "";
 			if (vContent.constructor === Array) {
-			for (let nId = 0; nId < vContent.length; sOutput += this.stringify(vContent[nId]) + ",", nId++);
+				for (let nId = 0; nId < vContent.length; sOutput += this.stringify(vContent[nId]) + ",", nId++);
 				return `[${sOutput.substr(0, sOutput.length - 1)}]`;
 			}
 			if (vContent.toString !== Object.prototype.toString) {

@@ -1,364 +1,364 @@
 /*eslint no-return-assign: 0, no-fallthrough: 0*/
 export default () => {
-    (function(global) {
-        var registrationsTable = new WeakMap();
-        var setImmediate = window.msSetImmediate;
-        if (!setImmediate) {
-            var setImmediateQueue = [
+    				(function(global) {
+        				var registrationsTable = new WeakMap();
+        				var setImmediate = window.msSetImmediate;
+        				if (!setImmediate) {
+            				var setImmediateQueue = [
             ];
-            var sentinel = String(Math.random());
-            window.addEventListener('message', function (e) {
-                if (e.data === sentinel) {
-                    var queue = setImmediateQueue;
-                    setImmediateQueue = [
+            				var sentinel = String(Math.random());
+            				window.addEventListener('message', function (e) {
+                				if (e.data === sentinel) {
+                    				var queue = setImmediateQueue;
+                    				setImmediateQueue = [
                     ];
-                    queue.forEach(function (func) {
-                        func();
+                    				queue.forEach(function (func) {
+                        				func();
                     });
                 }
             });
-            setImmediate = function (func) {
-                setImmediateQueue.push(func);
-                window.postMessage(sentinel, '*');
+            				setImmediate = function (func) {
+                				setImmediateQueue.push(func);
+                				window.postMessage(sentinel, '*');
             };
         }
-        var isScheduled = false;
-        var scheduledObservers = [];
-        function scheduleCallback(observer) {
-            scheduledObservers.push(observer);
-            if (!isScheduled) {
-                isScheduled = true;
-                setImmediate(dispatchCallbacks);
+        				var isScheduled = false;
+        				var scheduledObservers = [];
+        				function scheduleCallback(observer) {
+            				scheduledObservers.push(observer);
+            				if (!isScheduled) {
+                				isScheduled = true;
+                				setImmediate(dispatchCallbacks);
             }
         }
-        function removeTransientObserversFor(observer) {
-            observer.nodes_.forEach(function (node) {
-                var registrations = registrationsTable.get(node);
-                if (!registrations) {
-                    return;
+        				function removeTransientObserversFor(observer) {
+            				observer.nodes_.forEach(function (node) {
+                				var registrations = registrationsTable.get(node);
+                				if (!registrations) {
+                    				return;
                 }
-                registrations.forEach(function (registration) {
-                    if (registration.observer === observer) {
-                        registration.removeTransientObservers();
+                				registrations.forEach(function (registration) {
+                    				if (registration.observer === observer) {
+                        				registration.removeTransientObservers();
                     }
                 });
             });
         }
-        function wrapIfNeeded(node) {
-            return window.ShadowDOMPolyfill && window.ShadowDOMPolyfill.wrapIfNeeded(node) || node;
+        				function wrapIfNeeded(node) {
+            				return window.ShadowDOMPolyfill && window.ShadowDOMPolyfill.wrapIfNeeded(node) || node;
         }
-        function dispatchCallbacks() {
-            isScheduled = false;
-            var observers = scheduledObservers;
-            scheduledObservers = [
+        				function dispatchCallbacks() {
+            				isScheduled = false;
+            				var observers = scheduledObservers;
+            				scheduledObservers = [
             ];
-            observers.sort(function (o1, o2) {
-                return o1.uid_ - o2.uid_;
+            				observers.sort(function (o1, o2) {
+                				return o1.uid_ - o2.uid_;
             });
-            var anyNonEmpty = false;
-            observers.forEach(function (observer) {
-                var queue = observer.takeRecords();
-                removeTransientObserversFor(observer);
-                if (queue.length) {
-                    observer.callback_(queue, observer);
-                    anyNonEmpty = true;
+            				var anyNonEmpty = false;
+            				observers.forEach(function (observer) {
+                				var queue = observer.takeRecords();
+                				removeTransientObserversFor(observer);
+                				if (queue.length) {
+                    				observer.callback_(queue, observer);
+                    				anyNonEmpty = true;
                 }
             });
-            if (anyNonEmpty) {
-                dispatchCallbacks();
+            				if (anyNonEmpty) {
+                				dispatchCallbacks();
             }
         }
-        function forEachAncestorAndObserverEnqueueRecord(target, callback) {
-            for (var node = target; node; node = node.parentNode) {
-                var registrations = registrationsTable.get(node);
-                if (registrations) {
-                    for (var j = 0; j < registrations.length; j++) {
-                        var registration = registrations[j];
-                        var options = registration.options;
-                        if (node !== target && !options.subtree) {
-                            continue;
+        				function forEachAncestorAndObserverEnqueueRecord(target, callback) {
+            				for (var node = target; node; node = node.parentNode) {
+                				var registrations = registrationsTable.get(node);
+                				if (registrations) {
+                    				for (var j = 0; j < registrations.length; j++) {
+                        				var registration = registrations[j];
+                        				var options = registration.options;
+                        				if (node !== target && !options.subtree) {
+                            				continue;
                         }
-                        var record = callback(options);
-                        if (record) {
-                            registration.enqueue(record);
+                        				var record = callback(options);
+                        				if (record) {
+                            				registration.enqueue(record);
                         }
                     }
                 }
             }
         }
-        var uidCounter = 0;
-        function JsMutationObserver(callback) {
-            this.callback_ = callback;
-            this.nodes_ = [
+        				var uidCounter = 0;
+        				function JsMutationObserver(callback) {
+            				this.callback_ = callback;
+            				this.nodes_ = [
             ];
-            this.records_ = [
+            				this.records_ = [
             ];
-            this.uid_ = ++uidCounter;
+            				this.uid_ = ++uidCounter;
         }
-        JsMutationObserver.prototype = {
-            observe: function (target, options) {
-                target = wrapIfNeeded(target);
-                if (!options.childList && !options.attributes && !options.characterData || options.attributeOldValue && !options.attributes || options.attributeFilter && options.attributeFilter.length && !options.attributes || options.characterDataOldValue && !options.characterData) {
-                    throw new SyntaxError();
+        				JsMutationObserver.prototype = {
+            				observe: function (target, options) {
+                				target = wrapIfNeeded(target);
+                				if (!options.childList && !options.attributes && !options.characterData || options.attributeOldValue && !options.attributes || options.attributeFilter && options.attributeFilter.length && !options.attributes || options.characterDataOldValue && !options.characterData) {
+                    				throw new SyntaxError();
                 }
-                var registrations = registrationsTable.get(target);
-                if (!registrations) {
-                    registrationsTable.set(target, registrations = []);
+                				var registrations = registrationsTable.get(target);
+                				if (!registrations) {
+                    				registrationsTable.set(target, registrations = []);
                 }
-                var registration;
-                for (var i = 0; i < registrations.length; i++) {
-                    if (registrations[i].observer === this) {
-                        registration = registrations[i];
-                        registration.removeListeners();
-                        registration.options = options;
-                        break;
+                				var registration;
+                				for (var i = 0; i < registrations.length; i++) {
+                    				if (registrations[i].observer === this) {
+                        				registration = registrations[i];
+                        				registration.removeListeners();
+                        				registration.options = options;
+                        				break;
                     }
                 }
-                if (!registration) {
-                    registration = new Registration(this, target, options);
-                    registrations.push(registration);
-                    this.nodes_.push(target);
+                				if (!registration) {
+                    				registration = new Registration(this, target, options);
+                    				registrations.push(registration);
+                    				this.nodes_.push(target);
                 }
-                registration.addListeners();
+                				registration.addListeners();
             },
-            disconnect: function () {
-                this.nodes_.forEach(function (node) {
-                    var registrations = registrationsTable.get(node);
-                    for (var i = 0; i < registrations.length; i++) {
-                        var registration = registrations[i];
-                        if (registration.observer === this) {
-                            registration.removeListeners();
-                            registrations.splice(i, 1);
-                            break;
+            				disconnect: function () {
+                				this.nodes_.forEach(function (node) {
+                    				var registrations = registrationsTable.get(node);
+                    				for (var i = 0; i < registrations.length; i++) {
+                        				var registration = registrations[i];
+                        				if (registration.observer === this) {
+                            				registration.removeListeners();
+                            				registrations.splice(i, 1);
+                            				break;
                         }
                     }
                 }, this);
-                this.records_ = [
+                				this.records_ = [
                 ];
             },
-            takeRecords: function () {
-                var copyOfRecords = this.records_;
-                this.records_ = [
+            				takeRecords: function () {
+                				var copyOfRecords = this.records_;
+                				this.records_ = [
                 ];
-                return copyOfRecords;
+                				return copyOfRecords;
             }
         };
-        function MutationRecord(type, target) {
-            this.type = type;
-            this.target = target;
-            this.addedNodes = [
+        				function MutationRecord(type, target) {
+            				this.type = type;
+            				this.target = target;
+            				this.addedNodes = [
             ];
-            this.removedNodes = [
+            				this.removedNodes = [
             ];
-            this.previousSibling = null;
-            this.nextSibling = null;
-            this.attributeName = null;
-            this.attributeNamespace = null;
-            this.oldValue = null;
+            				this.previousSibling = null;
+            				this.nextSibling = null;
+            				this.attributeName = null;
+            				this.attributeNamespace = null;
+            				this.oldValue = null;
         }
-        function copyMutationRecord(original) {
-            var record = new MutationRecord(original.type, original.target);
-            record.addedNodes = original.addedNodes.slice();
-            record.removedNodes = original.removedNodes.slice();
-            record.previousSibling = original.previousSibling;
-            record.nextSibling = original.nextSibling;
-            record.attributeName = original.attributeName;
-            record.attributeNamespace = original.attributeNamespace;
-            record.oldValue = original.oldValue;
-            return record;
+        				function copyMutationRecord(original) {
+            				var record = new MutationRecord(original.type, original.target);
+            				record.addedNodes = original.addedNodes.slice();
+            				record.removedNodes = original.removedNodes.slice();
+            				record.previousSibling = original.previousSibling;
+            				record.nextSibling = original.nextSibling;
+            				record.attributeName = original.attributeName;
+            				record.attributeNamespace = original.attributeNamespace;
+            				record.oldValue = original.oldValue;
+            				return record;
         }
-        var currentRecord,
-        recordWithOldValue;
-        function getRecord(type, target) {
-            return currentRecord = new MutationRecord(type, target);
+        				var currentRecord,
+        				recordWithOldValue;
+        				function getRecord(type, target) {
+            				return currentRecord = new MutationRecord(type, target);
         }
-        function getRecordWithOldValue(oldValue) {
-            if (recordWithOldValue) {
-                return recordWithOldValue;
+        				function getRecordWithOldValue(oldValue) {
+            				if (recordWithOldValue) {
+                				return recordWithOldValue;
             }
-            recordWithOldValue = copyMutationRecord(currentRecord);
-            recordWithOldValue.oldValue = oldValue;
-            return recordWithOldValue;
+            				recordWithOldValue = copyMutationRecord(currentRecord);
+            				recordWithOldValue.oldValue = oldValue;
+            				return recordWithOldValue;
         }
-        function clearRecords() {
-            currentRecord = recordWithOldValue = undefined;
+        				function clearRecords() {
+            				currentRecord = recordWithOldValue = undefined;
         }
-        function recordRepresentsCurrentMutation(record) {
-            return record === recordWithOldValue || record === currentRecord;
+        				function recordRepresentsCurrentMutation(record) {
+            				return record === recordWithOldValue || record === currentRecord;
         }
-        function selectRecord(lastRecord, newRecord) {
-            if (lastRecord === newRecord) {
-                return lastRecord;
+        				function selectRecord(lastRecord, newRecord) {
+            				if (lastRecord === newRecord) {
+                				return lastRecord;
             }
-            if (recordWithOldValue && recordRepresentsCurrentMutation(lastRecord)) {
-                return recordWithOldValue;
+            				if (recordWithOldValue && recordRepresentsCurrentMutation(lastRecord)) {
+                				return recordWithOldValue;
             }
-            return null;
+            				return null;
         }
-        function Registration(observer, target, options) {
-            this.observer = observer;
-            this.target = target;
-            this.options = options;
-            this.transientObservedNodes = [
+        				function Registration(observer, target, options) {
+            				this.observer = observer;
+            				this.target = target;
+            				this.options = options;
+            				this.transientObservedNodes = [
             ];
         }
-        Registration.prototype = {
-            enqueue: function (record) {
-                var records = this.observer.records_;
-                var length = records.length;
-                if (records.length > 0) {
-                    var lastRecord = records[length - 1];
-                    var recordToReplaceLast = selectRecord(lastRecord, record);
-                    if (recordToReplaceLast) {
-                        records[length - 1] = recordToReplaceLast;
-                        return;
+        				Registration.prototype = {
+            				enqueue: function (record) {
+                				var records = this.observer.records_;
+                				var length = records.length;
+                				if (records.length > 0) {
+                    				var lastRecord = records[length - 1];
+                    				var recordToReplaceLast = selectRecord(lastRecord, record);
+                    				if (recordToReplaceLast) {
+                        				records[length - 1] = recordToReplaceLast;
+                        				return;
                     }
                 } else {
-                    scheduleCallback(this.observer);
+                    				scheduleCallback(this.observer);
                 }
-                records[length] = record;
+                				records[length] = record;
             },
-            addListeners: function () {
-                this.addListeners_(this.target);
+            				addListeners: function () {
+                				this.addListeners_(this.target);
             },
-            addListeners_: function (node) {
-                var options = this.options;
-                if (options.attributes) {
-                    node.addEventListener('DOMAttrModified', this, true);
+            				addListeners_: function (node) {
+                				var options = this.options;
+                				if (options.attributes) {
+                    				node.addEventListener('DOMAttrModified', this, true);
                 }
-                if (options.characterData) {
-                    node.addEventListener('DOMCharacterDataModified', this, true);
+                				if (options.characterData) {
+                    				node.addEventListener('DOMCharacterDataModified', this, true);
                 }
-                if (options.childList) {
-                    node.addEventListener('DOMNodeInserted', this, true);
+                				if (options.childList) {
+                    				node.addEventListener('DOMNodeInserted', this, true);
                 }
-                if (options.childList || options.subtree) {
-                    node.addEventListener('DOMNodeRemoved', this, true);
-                }
-            },
-            removeListeners: function () {
-                this.removeListeners_(this.target);
-            },
-            removeListeners_: function (node) {
-                var options = this.options;
-                if (options.attributes) {
-                    node.removeEventListener('DOMAttrModified', this, true);
-                }
-                if (options.characterData) {
-                    node.removeEventListener('DOMCharacterDataModified', this, true);
-                }
-                if (options.childList) {
-                    node.removeEventListener('DOMNodeInserted', this, true);
-                }
-                if (options.childList || options.subtree) {
-                    node.removeEventListener('DOMNodeRemoved', this, true);
+                				if (options.childList || options.subtree) {
+                    				node.addEventListener('DOMNodeRemoved', this, true);
                 }
             },
-            addTransientObserver: function (node) {
-                if (node === this.target) {
-                    return;
+            				removeListeners: function () {
+                				this.removeListeners_(this.target);
+            },
+            				removeListeners_: function (node) {
+                				var options = this.options;
+                				if (options.attributes) {
+                    				node.removeEventListener('DOMAttrModified', this, true);
                 }
-                this.addListeners_(node);
-                this.transientObservedNodes.push(node);
-                var registrations = registrationsTable.get(node);
-                if (!registrations) {
-                    registrationsTable.set(node, registrations = []);
+                				if (options.characterData) {
+                    				node.removeEventListener('DOMCharacterDataModified', this, true);
+                }
+                				if (options.childList) {
+                    				node.removeEventListener('DOMNodeInserted', this, true);
+                }
+                				if (options.childList || options.subtree) {
+                    				node.removeEventListener('DOMNodeRemoved', this, true);
+                }
+            },
+            				addTransientObserver: function (node) {
+                				if (node === this.target) {
+                    				return;
+                }
+                				this.addListeners_(node);
+                				this.transientObservedNodes.push(node);
+                				var registrations = registrationsTable.get(node);
+                				if (!registrations) {
+                    				registrationsTable.set(node, registrations = []);
             }
-                registrations.push(this);
+                				registrations.push(this);
             },
-            removeTransientObservers: function () {
-                var transientObservedNodes = this.transientObservedNodes;
-                this.transientObservedNodes = [
+            				removeTransientObservers: function () {
+                				var transientObservedNodes = this.transientObservedNodes;
+                				this.transientObservedNodes = [
                 ];
-                transientObservedNodes.forEach(function (node) {
-                    this.removeListeners_(node);
-                    var registrations = registrationsTable.get(node);
-                    for (var i = 0; i < registrations.length; i++) {
-                        if (registrations[i] === this) {
-                            registrations.splice(i, 1);
-                            break;
+                				transientObservedNodes.forEach(function (node) {
+                    				this.removeListeners_(node);
+                    				var registrations = registrationsTable.get(node);
+                    				for (var i = 0; i < registrations.length; i++) {
+                        				if (registrations[i] === this) {
+                            				registrations.splice(i, 1);
+                            				break;
                         }
                     }
                 }, this);
             },
-            handleEvent: function (e) {
-                e.stopImmediatePropagation();
-                switch (e.type) {
+            				handleEvent: function (e) {
+                				e.stopImmediatePropagation();
+                				switch (e.type) {
                 case 'DOMAttrModified':
-                    var name = e.attrName;
-                    var namespace = e.relatedNode.namespaceURI;
-                    var target = e.target;
-                    var record = new getRecord('attributes', target);
-                    record.attributeName = name;
-                    record.attributeNamespace = namespace;
-                    var oldValue = e.attrChange === MutationEvent.ADDITION ? null : e.prevValue;
-                    forEachAncestorAndObserverEnqueueRecord(target, function (options) {
-                        if (!options.attributes) {
-                            return;
+                    				var name = e.attrName;
+                    				var namespace = e.relatedNode.namespaceURI;
+                    				var target = e.target;
+                    				var record = new getRecord('attributes', target);
+                    				record.attributeName = name;
+                    				record.attributeNamespace = namespace;
+                    				var oldValue = e.attrChange === MutationEvent.ADDITION ? null : e.prevValue;
+                    				forEachAncestorAndObserverEnqueueRecord(target, function (options) {
+                        				if (!options.attributes) {
+                            				return;
                         }
-                        if (options.attributeFilter && options.attributeFilter.length && options.attributeFilter.indexOf(name) === -1 && options.attributeFilter.indexOf(namespace) === -1) {
-                            return;
+                        				if (options.attributeFilter && options.attributeFilter.length && options.attributeFilter.indexOf(name) === -1 && options.attributeFilter.indexOf(namespace) === -1) {
+                            				return;
                         }
-                        if (options.attributeOldValue) {
-                            return getRecordWithOldValue(oldValue);
+                        				if (options.attributeOldValue) {
+                            				return getRecordWithOldValue(oldValue);
                         }
-                        return record;
+                        				return record;
                     });
-                    break;
+                    				break;
                 case 'DOMCharacterDataModified':
-                    var target = e.target;
-                    var record = getRecord('characterData', target);
-                    var oldValue = e.prevValue;
-                    forEachAncestorAndObserverEnqueueRecord(target, function (options) {
-                        if (!options.characterData) {
-                            return;
+                    				var target = e.target;
+                    				var record = getRecord('characterData', target);
+                    				var oldValue = e.prevValue;
+                    				forEachAncestorAndObserverEnqueueRecord(target, function (options) {
+                        				if (!options.characterData) {
+                            				return;
                         }
-                        if (options.characterDataOldValue) {
-                            return getRecordWithOldValue(oldValue);
+                        				if (options.characterDataOldValue) {
+                            				return getRecordWithOldValue(oldValue);
                         }
-                        return record;
+                        				return record;
                     });
-                    break;
+                    				break;
                 case 'DOMNodeRemoved':
-                    this.addTransientObserver(e.target);
+                    				this.addTransientObserver(e.target);
                 case 'DOMNodeInserted':
-                    var target = e.relatedNode;
-                    var changedNode = e.target;
-                    var addedNodes,
-                    removedNodes;
-                    if (e.type === 'DOMNodeInserted') {
-                        addedNodes = [
-                            changedNode
+                    				var target = e.relatedNode;
+                    				var changedNode = e.target;
+                    				var addedNodes,
+                    				removedNodes;
+                    				if (e.type === 'DOMNodeInserted') {
+                        				addedNodes = [
+                            				changedNode
                         ];
-                        removedNodes = [
+                        				removedNodes = [
                         ];
                     } else {
-                        addedNodes = [
+                        				addedNodes = [
                         ];
-                        removedNodes = [
-                            changedNode
+                        				removedNodes = [
+                            				changedNode
                         ];
                     }
-                    var previousSibling = changedNode.previousSibling;
-                    var nextSibling = changedNode.nextSibling;
-                    var record = getRecord('childList', target);
-                    record.addedNodes = addedNodes;
-                    record.removedNodes = removedNodes;
-                    record.previousSibling = previousSibling;
-                    record.nextSibling = nextSibling;
-                    forEachAncestorAndObserverEnqueueRecord(target, function (options) {
-                        if (!options.childList) {
-                            return;
+                    				var previousSibling = changedNode.previousSibling;
+                    				var nextSibling = changedNode.nextSibling;
+                    				var record = getRecord('childList', target);
+                    				record.addedNodes = addedNodes;
+                    				record.removedNodes = removedNodes;
+                    				record.previousSibling = previousSibling;
+                    				record.nextSibling = nextSibling;
+                    				forEachAncestorAndObserverEnqueueRecord(target, function (options) {
+                        				if (!options.childList) {
+                            				return;
                         }
-                        return record;
+                        				return record;
                     });
                 }
-                clearRecords();
+                				clearRecords();
             }
         };
-        global.JsMutationObserver = JsMutationObserver;
-        if (!global.MutationObserver) {
-            global.MutationObserver = JsMutationObserver;
+        				global.JsMutationObserver = JsMutationObserver;
+        				if (!global.MutationObserver) {
+            				global.MutationObserver = JsMutationObserver;
         }
     })(this);
-}
+};
