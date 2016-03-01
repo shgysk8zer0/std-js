@@ -28,7 +28,6 @@
   },
   "scripts": {
     "build": "webpack",
-    "pretest": "npm install",
     "test": "eslint  --ext .es6 --fix ."
   },
   "devDependencies": {
