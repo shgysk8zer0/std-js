@@ -1,0 +1,14 @@
+export const TEXT         = '(\w+ ?)+';
+export const NAME         = '[A-Za-z]{3,30}';
+export const PASSWORD     = '(?=^.{8,35}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*';
+export const EMAIL        = '.+@.+\.+[\w]+';
+export const URL          = '(https?:\/\/)?[\S]+\.[\S]+';
+export const TEL          = '([+]?[1-9][-]?)?((\([\d]{3}\))|(\d{3}[-]?))\d{3}[-]?\d{4}';
+export const NUMBER       = '\d+(\.\d+)?';
+export const COLOR        = '#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})';
+export const DATE         = '((((0?)[1-9])|(1[0-2]))(-|/)(((0?)[1-9])|([1-2][\d])|3[0-1])(-|/)\d{4})|(\d{4}-(((0?)[1-9])|(1[0-2]))-(((0?)[1-9])|([1-2][\d])|3[0-1]))';
+export const TIME         = '(([0-1]?\d)|(2[0-3])):[0-5]\d';
+export const DATETIME     = '(19|20)\d{2}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d?|3[01])T([01]\d|2[0-3])(:[0-5]\d)+';
+export const WEEK         = '\d{4}-W\d{2}';
+export const CREDIT       = '\d{13,16}';
+export const HTML_COMMENT = '<!--(?!\s*(?:\[if [^\]]+]|<!|>))(?:(?!-->).)*-->';
