@@ -13,20 +13,29 @@ function checkClass(className, classObj) {
 	} else if (! (className in window)) {
 		window[className] = classObj;
 	} else {
-		Object.getOwnPropertyNames(classObj.prototype).forEach(method => {
-			if (classObj.prototype[method] instanceof Function) {
-				if (! (method in window[className].prototype)) {
+		if ('prototype' in classObj) {
+			Object.getOwnPropertyNames(classObj.prototype).forEach(method => {
+				if (
+					method !== 'constructor'
+					&& classObj.prototype[method] instanceof Function
+					&& ! (method in window[className].prototype)
+				) {
 					window[className].prototype[method] = classObj.prototype[method];
 				}
+			});
+		}
+		Object.getOwnPropertyNames(classObj).forEach(method => {
+			if (classObj[method] instanceof Function && ! (method in window[className])) {
+				window[className][method] = classObj[method];
 			}
-		});
-		Object.getOwnPropertyNames(classObj) (method => {
-			if (classObj[method] instanceof Function) {
-				if (! (method in window[className])) {
-					window[className][method] = classObj[method];
-				}
-			}
-		});
+		})
+		// for (let method of Object.getOwnPropertyNames(classObj)) {
+		// 	if (classObj[method] instanceof Function && method !== 'prototype') {
+		// 		if (! (method in window[className])) {
+		// 			window[className][method] = classObj[method];
+		// 		}
+		// 	}
+		// };
 	}
 }
 export default function() {
