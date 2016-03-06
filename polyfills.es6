@@ -28,7 +28,7 @@ function checkClass(className, classObj) {
 			if (classObj[method] instanceof Function && ! (method in window[className])) {
 				window[className][method] = classObj[method];
 			}
-		})
+		});
 		// for (let method of Object.getOwnPropertyNames(classObj)) {
 		// 	if (classObj[method] instanceof Function && method !== 'prototype') {
 		// 		if (! (method in window[className])) {
