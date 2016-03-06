@@ -31,7 +31,8 @@
   },
   "scripts": {
     "build": "webpack",
-    "test": "eslint  --ext .es6 ."
+    "test": "eslint  --ext .es6 .",
+    "git:hooks": "cp .git/hooks/pre-commit.sample .git/hooks/pre-commit && echo #!/bin/sh> .git/hooks/post-merge && echo npm run build>> .git/hooks/post-merge",
   },
   "devDependencies": {
     "babel-core": "^6.6.0",
