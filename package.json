@@ -5,8 +5,11 @@
   "keywords": [
     "ECMAScript2015",
     "ES6",
+    "JavaScript",
     "modules",
-    "front-end"
+    "front-end",
+    "polyfill",
+    "shim"
   ],
   "author": {
     "name": "Chris Zuber",
@@ -28,7 +31,7 @@
   },
   "scripts": {
     "build": "webpack",
-    "test": "eslint  --ext .es6 --fix ."
+    "test": "eslint  --ext .es6 ."
   },
   "devDependencies": {
     "babel-core": "^6.6.0",
