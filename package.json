@@ -32,9 +32,9 @@
   "scripts": {
     "build": "webpack",
     "test": "eslint  --ext .es6 .",
-    "hook:pre-commit": "cp .git/hooks/pre-commit.sample .git/hooks/pre-commit",
-    "hook:post-merge": "touch .git/hooks/post-merge && echo '#!/bin/sh' > .git/hooks/post-merge && echo 'webpack' >> .git/hooks/post-merge",
-    "hook:pre-push": "touch .git/hooks/pre-push && echo '#!/bin/sh' > .git/hooks/pre-push && echo 'npm test' >> .git/hooks/pre-push",
+    "hook:pre-commit": "cp .git/hooks/pre-commit.sample .git/hooks/pre-commit && chmod u+x .git/hooks/pre-commit",
+    "hook:post-merge": "touch .git/hooks/post-merge && echo '#!/bin/sh' > .git/hooks/post-merge && echo 'webpack' >> .git/hooks/post-merge && chmod u+x .git/hooks/post-merge",
+    "hook:pre-push": "touch .git/hooks/pre-push && echo '#!/bin/sh' > .git/hooks/pre-push && echo 'npm test' >> .git/hooks/pre-push && chmod u+x .git/hooks/pre-push",
     "git:hooks": "npm run hook:pre-commit && npm run hook:post-merge && npm run hook:pre-push",
     "postinstall": "npm run git:hooks && npm run build"
   },
