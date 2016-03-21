@@ -10,10 +10,11 @@ export default class OpenWeatherMap {
 	 * @param  {string}                   language code
 	 * @param  {float}                    API version number
 	 */
-	constructor(units = 'imperial', lang = 'en', version = 2.5) {
+	constructor(appid, units = 'imperial', lang = 'en', version = 2.5) {
 		this.url = new URL(`http://api.openweathermap.org/data/${version}/weather`);
 		this.url.searchParams.set('units', units);
 		this.url.searchParams.set('lang', lang);
+		this.url.searchParams.set('appid', appid);
 		this.units = {};
 		if (units === 'imperial') {
 			this.units.temp = 'F';
