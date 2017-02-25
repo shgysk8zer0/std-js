@@ -6,9 +6,16 @@ export default function handleJSON(json) {
 	} else if(typeof json !== 'object') {
 		return false;
 	}
-	if ('remove' in json) {
-		$(json.remove).forEach(el => {
-			el.remove();
+	if (('animate' in json) && Animation instanceof Function) {
+		Object.keys(json.animate).forEach(sel => {
+			try {
+				let els = Array.from(document.querySelectorAll(sel));
+				els.forEach(el => {
+					el.animate(json.animate[sel].keyframes, json.animate[sel].opts);
+				});
+			} catch (err) {
+				console.error(err);
+			}
 		});
 	}
 	if('text' in json) {
@@ -192,6 +199,11 @@ export default function handleJSON(json) {
 	if('close' in json) {
 		$(json.close).forEach(el => {
 			el.close();
+		});
+	}
+	if ('remove' in json) {
+		$(json.remove).forEach(el => {
+			el.remove();
 		});
 	}
 	if('triggerEvent' in json) {
