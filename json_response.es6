@@ -6,7 +6,7 @@ export default function handleJSON(json) {
 	} else if(typeof json !== 'object') {
 		return false;
 	}
-	if (('animate' in json) && Animation instanceof Function) {
+	if (('animate' in json) && ('animate' in Element.prototype)) {
 		Object.keys(json.animate).forEach(sel => {
 			try {
 				let els = Array.from(document.querySelectorAll(sel));
