@@ -16,28 +16,28 @@ export function notify(options) {
 	let notification;
 	if (typeof options === 'string') {
 		options = {
-			body: options
+			title: options,
+			body: '',
+			icon: '/images/octicons/lib/svg/megaphone.svg'
 		};
 	}
 	if (typeof options.icon !== 'string') {
-		options.icon = 'images/octicons/svg/megaphone.svg';
+		options.icon = '/images/octicons/lib/svg/megaphone.svg';
 	}
 	if ('Notification' in window) {
-		if (Notification.permission.toLowerCase() === 'default') {
-			Notification.requestPermission(function () {
-				(Notification.permission.toLowerCase() === 'granted')
-					? notification = notify(options)
-					: alert(options.title || document.title + '\n' + options.body);
+		if (Notification.permission === 'default') {
+			Notification.requestPermission().then(resp => {
+				if (resp === 'granted') {
+					notification = new Notification(options.title, options);
+				} else if (('fallback' in options) && options.fallback) {
+					alert(`${options.title}\n${options.body}`);
+				}
 			});
+		} else if (Notification.permission === 'granted') {
+			notification = new Notification(options.title, options);
+		} else if (('fallback' in options) && options.fallback) {
+			alert(`${options.title}\n${options.body}`);
 		}
-		notification = new Notification(options.title || document.title, options);
-	} else if ('notifications' in window) {
-		if (window.notifications.checkPermission != 1) {
-			window.notifications.requestPermission();
-		}
-		notification = window.notifications.createNotification(options.icon, options.title || document.title, options.body) .show();
-	} else {
-		alert(options.title || `${document.title}\n${options.body}`);
 	}
 	if (notification) {
 		if ('onclick' in options) {
