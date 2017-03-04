@@ -63,6 +63,25 @@ function restoreWork(click) {
 	document.querySelector('[contenteditable="true"]').innerHTML = localStorage.getItem('savedDoc');
 }
 
+function embedYouTube(click) {
+	click.preventDefault();
+	const yt = prompt('Enter YouTube video URL');
+	if (yt) {
+		const url = new URL(yt, 'https://www.youtube.com/watch');
+		if (url.searchParams.has('v')) {
+			const iframe = document.createElement('iframe');
+			url.pathname = `/embed/${url.searchParams.get('v')}`;
+			url.searchParams.delete('v');
+			iframe.width = 560;
+			iframe.height = 315;
+			iframe.src = url;
+			iframe.setAttribute('frameborder', '0');
+			iframe.setAttribute('allowfullscreen', '');
+			document.execCommand('inserthtml', null, iframe.outerHTML);
+		}
+	}
+}
+
 export default  menu => {
 	/* Do not use NodeList.forEach */
 	$('[data-editor-command]', menu).forEach(item =>  {
@@ -85,5 +104,8 @@ export default  menu => {
 	});
 	$('[label="Restore Work"]', menu).forEach(item => {
 		item.addEventListener('click', restoreWork);
+	});
+	$('[data-embed="youtube"]', menu).forEach(item => {
+		item.addEventListener('click', embedYouTube);
 	});
 };
