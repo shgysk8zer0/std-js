@@ -31,7 +31,9 @@ export function notify(options) {
 					try {
 						notification = new Notification(options.title, options);
 					} catch (e) {
-						alert(`${options.title}\n${options.body}`);
+						if (('fallback' in options) && options.fallback) {
+							alert(`${options.title}\n${options.body}`);
+						}
 					}
 				} else if (('fallback' in options) && options.fallback) {
 					alert(`${options.title}\n${options.body}`);
