@@ -28,7 +28,11 @@ export function notify(options) {
 		if (Notification.permission === 'default') {
 			Notification.requestPermission().then(resp => {
 				if (resp === 'granted') {
-					notification = new Notification(options.title, options);
+					try {
+						notification = new Notification(options.title, options);
+					} catch (e) {
+						alert(`${options.title}\n${options.body}`);
+					}
 				} else if (('fallback' in options) && options.fallback) {
 					alert(`${options.title}\n${options.body}`);
 				}
