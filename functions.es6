@@ -75,26 +75,24 @@ export function isInternalLink(link) {
 	return link.origin === location.origin;
 }
 export function parseResponse(resp) {
-	if (resp.ok) {
-		if (!resp.headers.has('Content-type')) {
-			throw new Error(`No Content-Type header in request to "${resp.url}"`);
-		}
-		var type = resp.headers.get('Content-Type');
-		if (type.startsWith('application/json')) {
-			return resp.json();
-		} else if (type.startsWith('application/xml')) {
-			return new DOMParser().parseFromString(resp.text(), 'application/xml');
-		} else if (type.startsWith('image/svg+xml')) {
-			return new DOMParser().parseFromString(resp.text(), 'image/svg+xml');
-		} else if (type.startsWith('text/html')) {
-			return new DOMParser().parseFromString(resp.text(), 'text/html');
-		} else if (type.startsWith('text/plain')) {
-			return resp.text();
-		} else {
-			throw new TypeError(`Unsupported Content-Type: ${type}`);
-		}
+	if (! resp.headers.has('Content-Type')) {
+		throw new Error(`No Content-Type header in request to "${resp.url}"`);
+	} else if (resp.headers.get('Content-Length') === 0) {
+		throw new Error(`No response body for "${resp.url}"`);
+	}
+	const type = resp.headers.get('Content-Type');
+	if (type.startsWith('application/json')) {
+		return resp.json();
+	} else if (type.startsWith('application/xml')) {
+		return new DOMParser().parseFromString(resp.text(), 'application/xml');
+	} else if (type.startsWith('image/svg+xml')) {
+		return new DOMParser().parseFromString(resp.text(), 'image/svg+xml');
+	} else if (type.startsWith('text/html')) {
+		return new DOMParser().parseFromString(resp.text(), 'text/html');
+	} else if (type.startsWith('text/plain')) {
+		return resp.text();
 	} else {
-		throw new Error(`"${resp.url}" -> ${resp.status}:${resp.statusText}`);
+		throw new TypeError(`Unsupported Content-Type: ${type}`);
 	}
 }
 export function ajax(data) {
