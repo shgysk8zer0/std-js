@@ -127,9 +127,6 @@ export default function handleJSON(json) {
 				: localStorage.setItem(key, json.localStorage[key]);
 		});
 	}
-	if ('notify' in json) {
-		notify(json.notify);
-	}
 	if('script' in json) {
 		eval(json.script);
 	}
@@ -231,5 +228,8 @@ export default function handleJSON(json) {
 			console.error(new Error(error));
 			console.error(error);
 		});
+	}
+	if ('notify' in json) {
+		notify(json.notify);
 	}
 }
