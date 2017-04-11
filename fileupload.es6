@@ -1,4 +1,4 @@
-export default class {
+export default class FileUpload {
 	constructor(event) {
 		event.preventDefault();
 	}

@@ -1,6 +1,6 @@
 /*eslint no-use-before-define: 0*/
 /*============================ zQ Functions =======================*/
-export class zQ {
+export default class zQ {
 	constructor(selector = document) {
 		try {
 			this.results = [];
@@ -172,7 +172,7 @@ export class zQ {
 				'webkit',
 				'ms'
 			].forEach(function (pre) {
-				$(e).on(`${pre}visibilitychange`, callback);
+				e.addEventListener(`${pre}visibilitychange`, callback);
 			});
 		});
 		return this;
@@ -310,7 +310,7 @@ export class zQ {
 	}
 	/*====================================================================================================================*/
 	$(selector) {
-		return $(this.query.split(',').map(
+		return new zQ(this.query.split(',').map(
 			str => selector.split(',').map(
 				q => `${str.trim()} ${q.trim()}`
 			)
@@ -322,7 +322,4 @@ export class zQ {
 		style.insertRule(`${this.query} {${args}}`, style.cssRules.length);
 		return this;
 	}
-}
-export default function $(q = document) {
-	return q instanceof zQ ? q : new zQ(q);
 }

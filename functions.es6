@@ -1,4 +1,8 @@
-import {$} from './zq.es6';
+import zQ from './zq.es6';
+
+export function $(selector) {
+	return new zQ(selector);
+}
 
 export function query(selector, node = document.documentElement) {
 	let results = Array.from(node.querySelectorAll(selector));
@@ -95,107 +99,107 @@ export function parseResponse(resp) {
 		throw new TypeError(`Unsupported Content-Type: ${type}`);
 	}
 }
-export function ajax(data) {
-	if ((typeof data.type !== 'undefined' && data.type.toLowerCase() === 'get') && (typeof data.request === 'string')) {
-		data.url += '?' + data.request;
-	}
-	if (typeof data.form !== 'undefined') {
-		if (typeof data.form === 'string') {
-			data.form = document.forms[data.form];
-		}
-		data.request = new FormData(data.form);
-		data.request.append('form', data.form.name);
-		data.request.append('nonce', sessionStorage.getItem('nonce'));
-		$('[data-input-name]').forEach(input => {
-			data.request.append(input.dataset.inputName, input.innerHTML);
-		});
-	}
-	if (typeof data.headers !== 'object') {
-		data.headers = {Accept: 'application/json'};
-	} else if (!('Accept' in data.headers)) {
-		data.headers.Accept = 'application/json';
-	}
-	return new Promise(function (success, fail) 	{
-		var resp;
-		/*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise*/
-		if (typeof navigator.onLine !== 'boolean' || navigator.onLine) {
-			var req = new XMLHttpRequest(),
-				progress = document.createElement('progress');
-			if (('withCredentials' in req) && ('withCredentials' in data)) {
-				req.withCredentials = data.withCredentials;
-
-			}
-			if (typeof data.contentType !== 'string') {
-				data.contentType = 'application/x-www-form-urlencoded';
-			}
-			document.body.appendChild(progress);
-			req.open(
-				data.type || 'POST',
-				data.url || document.baseURI,
-				data.async || true
-			);
-			if (typeof data.request === 'string') {
-				req.setRequestHeader('Content-type', data.contentType);
-			}
-			req.setRequestHeader('Accept', data.headers.Accept);
-			req.setRequestHeader('Request-Type', 'AJAX');
-			req.addEventListener('progress', event => {
-				if (event.lengthComputable) {
-					progress.value = event.loaded / event.total;
-				}
-			});
-			req.addEventListener('load', () => {
-				switch (req.getResponseHeader('Content-Type')) {
-				case 'application/json':
-					resp = JSON.parse(req.response);
-					break;
-
-				case 'application/xml':
-				case 'text/xml':
-					resp = new DOMParser().parseFromString(req.response, 'application/xml');
-					break;
-
-				case 'text/html':
-					resp = new DOMParser().parseFromString(req.response, 'text/html');
-					break;
-
-				case 'image/svg':
-					resp = new DOMParser().parseFromString(req.response, 'image/svg+xml');
-					break;
-
-				case 'text/plain':
-					resp = req.response;
-					break;
-				}
-				progress.parentElement.removeChild(progress);
-				if (req.status == 200) {
-					if (typeof data.history === 'string') {
-						history.pushState({}, document.title, data.history);
-					}
-					success(resp);
-				} else {
-					fail(Error(req.statusText));
-				}
-			});
-			req.addEventListener('error', function () {
-				progress.remove();
-				fail(Error('Network Error'));
-			});
-			if (typeof data.request !== 'undefined') {
-				req.send(data.request);
-			} else {
-				req.send();
-			}
-		} else {
-			notify({
-				title: 'Network:',
-				body: 'offline',
-				icon: 'images/icons/network-server.png'
-			});
-			fail('No Internet Connection');
-		}
-	});
-}
+// export function ajax(data) {
+// 	if ((typeof data.type !== 'undefined' && data.type.toLowerCase() === 'get') && (typeof data.request === 'string')) {
+// 		data.url += '?' + data.request;
+// 	}
+// 	if (typeof data.form !== 'undefined') {
+// 		if (typeof data.form === 'string') {
+// 			data.form = document.forms[data.form];
+// 		}
+// 		data.request = new FormData(data.form);
+// 		data.request.append('form', data.form.name);
+// 		data.request.append('nonce', sessionStorage.getItem('nonce'));
+// 		$('[data-input-name]').forEach(input => {
+// 			data.request.append(input.dataset.inputName, input.innerHTML);
+// 		});
+// 	}
+// 	if (typeof data.headers !== 'object') {
+// 		data.headers = {Accept: 'application/json'};
+// 	} else if (!('Accept' in data.headers)) {
+// 		data.headers.Accept = 'application/json';
+// 	}
+// 	return new Promise(function (success, fail) 	{
+// 		var resp;
+// 		/*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise*/
+// 		if (typeof navigator.onLine !== 'boolean' || navigator.onLine) {
+// 			var req = new XMLHttpRequest(),
+// 				progress = document.createElement('progress');
+// 			if (('withCredentials' in req) && ('withCredentials' in data)) {
+// 				req.withCredentials = data.withCredentials;
+//
+// 			}
+// 			if (typeof data.contentType !== 'string') {
+// 				data.contentType = 'application/x-www-form-urlencoded';
+// 			}
+// 			document.body.appendChild(progress);
+// 			req.open(
+// 				data.type || 'POST',
+// 				data.url || document.baseURI,
+// 				data.async || true
+// 			);
+// 			if (typeof data.request === 'string') {
+// 				req.setRequestHeader('Content-type', data.contentType);
+// 			}
+// 			req.setRequestHeader('Accept', data.headers.Accept);
+// 			req.setRequestHeader('Request-Type', 'AJAX');
+// 			req.addEventListener('progress', event => {
+// 				if (event.lengthComputable) {
+// 					progress.value = event.loaded / event.total;
+// 				}
+// 			});
+// 			req.addEventListener('load', () => {
+// 				switch (req.getResponseHeader('Content-Type')) {
+// 				case 'application/json':
+// 					resp = JSON.parse(req.response);
+// 					break;
+//
+// 				case 'application/xml':
+// 				case 'text/xml':
+// 					resp = new DOMParser().parseFromString(req.response, 'application/xml');
+// 					break;
+//
+// 				case 'text/html':
+// 					resp = new DOMParser().parseFromString(req.response, 'text/html');
+// 					break;
+//
+// 				case 'image/svg':
+// 					resp = new DOMParser().parseFromString(req.response, 'image/svg+xml');
+// 					break;
+//
+// 				case 'text/plain':
+// 					resp = req.response;
+// 					break;
+// 				}
+// 				progress.parentElement.removeChild(progress);
+// 				if (req.status == 200) {
+// 					if (typeof data.history === 'string') {
+// 						history.pushState({}, document.title, data.history);
+// 					}
+// 					success(resp);
+// 				} else {
+// 					fail(Error(req.statusText));
+// 				}
+// 			});
+// 			req.addEventListener('error', function () {
+// 				progress.remove();
+// 				fail(Error('Network Error'));
+// 			});
+// 			if (typeof data.request !== 'undefined') {
+// 				req.send(data.request);
+// 			} else {
+// 				req.send();
+// 			}
+// 		} else {
+// 			notify({
+// 				title: 'Network:',
+// 				body: 'offline',
+// 				icon: 'images/icons/network-server.png'
+// 			});
+// 			fail('No Internet Connection');
+// 		}
+// 	});
+// }
 
 export function getLocation(options) {
 	/*https://developer.mozilla.org/en-US/docs/Web/API/Geolocation.getCurrentPosition*/
