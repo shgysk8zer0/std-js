@@ -1,4 +1,8 @@
-import {$} from './zq.es6';
+import zQ from './zq.es6';
+
+export function $(selector) {
+	return new zQ(selector);
+}
 
 export function query(selector, node = document.documentElement) {
 	let results = Array.from(node.querySelectorAll(selector));

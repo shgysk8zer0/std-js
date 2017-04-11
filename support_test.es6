@@ -1,4 +1,4 @@
-export default function supports(type) {
+export function supports(type) {
 	/*Feature detection. Returns boolean value of suport for type*/
 	/**
 	* A series of tests to determine support for a given feature
@@ -48,19 +48,19 @@ export default function supports(type) {
 			return ((supports('csssupports')
 					&& (CSS.supports('animation', 'name')
 					|| CSS.supports('-webkit-animation', 'name'))
-				) ||
-					'animation' in document.body.style ||
-					'webkitAnimation' in document.body.style
-				);
+				)
+					|| 'animation' in document.body.style
+					|| 'webkitAnimation' in document.body.style
+			);
 
 		case 'transitions':
 			return ((supports('csssupports')
-				&& (CSS.supports('transition', 'none') ||
-					CSS.supports('-webkit-transition', 'none'))
-				) ||
-					'transition' in document.body.style ||
-					'webkitTransition' in document.body.style
-				);
+				&& (CSS.supports('transition', 'none')
+					|| CSS.supports('-webkit-transition', 'none'))
+				)
+				|| 'transition' in document.body.style
+				|| 'webkitTransition' in document.body.style
+			);
 
 		case 'cssgradients':
 			return (supports('csssupports')
@@ -123,7 +123,7 @@ export default function supports(type) {
 			return ('sessionStorage' in window);
 
 		default:
-			return (document.createElement(type.toLowerCase()) .toString() !== document.createElement('DNE') .toString());
+			return document.createElement(type) instanceof HTMLUnknownElement;
 		}
 	} catch(e) {
 		return false;
