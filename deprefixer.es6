@@ -1,4 +1,4 @@
-export default () => {
+export default function() {
 	if (!('Notification' in window)) {
 		window.Notification = window.notifications || window.webkitNotifications || window.oNotifications || window.msNotifications || false;
 	}
@@ -47,4 +47,4 @@ export default () => {
 	if (!('requestFullScreen' in HTMLElement.prototype)) {
 		HTMLElement.prototype.requestFullScreen = HTMLElement.prototype.mozRequestFullScreen || HTMLElement.prototype.webkitRequestFullScreen || false;
 	}
-};
+}

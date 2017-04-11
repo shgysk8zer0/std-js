@@ -1,4 +1,4 @@
-import {handleJSON} from './json_response.es6';
+import handleJSON from './json_response.es6';
 import {parseResponse, reportError} from './functions.es6';
 
 function popStateHandler() {
