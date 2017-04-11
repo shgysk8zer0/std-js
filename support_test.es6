@@ -123,7 +123,7 @@ export function supports(type) {
 			return ('sessionStorage' in window);
 
 		default:
-			return document.createElement(type) instanceof HTMLUnknownElement;
+			return ! (document.createElement(type) instanceof HTMLUnknownElement);
 		}
 	} catch(e) {
 		return false;
