@@ -1,2 +1,4 @@
-*.js
 /polyfills/
+/webpack.config.js
+*.min.js
+*.map

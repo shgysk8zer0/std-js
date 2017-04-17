@@ -1,16 +1,15 @@
 var webpack = require('webpack');
 
 module.exports = {
-    entry: './test.es6',
+    entry: './test.js',
     output: {
         path: __dirname,
-        filename: 'bundle.js'
+        filename: 'bundle.min.js'
     },
     module: {
         loaders: [
             {
                 loader: 'babel-loader',
-                test: /\.es6$/,
                 exclude: /node_modules/,
                 query: {
                   presets: 'es2015',

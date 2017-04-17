@@ -3,8 +3,8 @@
 *.remote
 *.patch
 *~
-/bundle.js
-/bundle.js.map
+*.min.js
+*.map
 /node_modules/
 #################
 ## Eclipse
