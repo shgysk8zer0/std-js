@@ -1,6 +1,6 @@
 /*eslint no-return-assign: 0, no-fallthrough: 0*/
-import {MutationRecord} from './MutationRecord.es6';
-import {Registration, wrapIfNeeded, registrationsTable} from '../../_helpers/mutations.es6';
+import {MutationRecord} from './MutationRecord.js';
+import {Registration, wrapIfNeeded, registrationsTable} from '../../_helpers/mutations.js';
 export class MutationObserver {
 	constructor(callback) {
 		this.callback_ = callback;

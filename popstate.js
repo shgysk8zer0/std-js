@@ -1,5 +1,5 @@
-import handleJSON from './json_response.es6';
-import {parseResponse, reportError} from './functions.es6';
+import handleJSON from './json_response.js';
+import {parseResponse, reportError} from './functions.js';
 
 function popStateHandler() {
 	fetch(location).then(parseResponse).then(handleJSON).catch(reportError);

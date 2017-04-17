@@ -1,4 +1,4 @@
-import {query as $} from './functions.es6';
+import {query as $} from './functions.js';
 
 function editorCommand(click) {
 	click.preventDefault();

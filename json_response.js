@@ -1,4 +1,4 @@
-import {notify, query as $} from './functions.es6';
+import {notify, query as $} from './functions.js';
 
 export default function handleJSON(json) {
 	if(typeof json === 'string') {

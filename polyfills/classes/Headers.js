@@ -1,5 +1,5 @@
-import {normalizeName, normalizeValue} from '../../_helpers/fetch.es6';
-import Map from './Map.es6';
+import {normalizeName, normalizeValue} from '../../_helpers/fetch.js';
+import Map from './Map.js';
 export default class extends Map {
 	constructor(headers = {}) {
 		super();

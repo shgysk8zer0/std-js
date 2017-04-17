@@ -1,4 +1,4 @@
-import {MutationRecord} from '../polyfills/MutationRecord.es6';
+import {MutationRecord} from '../polyfills/MutationRecord.js';
 /* eslint no-redeclare: 0 no-fallthrough: 0*/
 export var registrationsTable = new WeakMap();
 var setImmediate = window.msSetImmediate;

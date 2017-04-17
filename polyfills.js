@@ -1,5 +1,5 @@
-import * as classes from './polyfills/allClasses.es6';
-import dePrefix from './deprefixer.es6';
+import * as classes from './polyfills/allClasses.js';
+import dePrefix from './deprefixer.js';
 
 // function checkFunction(functionName, functionObj) {
 // 	if ((functionObj instanceof Function) && ! (functionName in window)) {
@@ -57,5 +57,5 @@ export default function() {
 	// 	}
 	// }
 }
-// export {MutationObserver} from './polyfills/MutationObserver.es6';
+// export {MutationObserver} from './polyfills/MutationObserver.js';
 // export {classes, dePrefix};
