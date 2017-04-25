@@ -1,3 +1,4 @@
+
 const ENDPOINT = 'https://keybase.io';
 const VERSION = '1.0';
 
@@ -31,11 +32,8 @@ export default class KeyBase {
 		return get(url);
 	}
 
-	static async searchUsers(users) {
+	static async searchUsers(...users) {
 		const url = new URL(`/_/api/${VERSION}/user/lookup.json`, ENDPOINT);
-		if (users instanceof Array) {
-			users = users.join(',');
-		}
 		url.searchParams.set('usernames', users);
 		return get(url);
 	}
