@@ -17,10 +17,31 @@ export default class zQ {
 		} catch (error) {
 			console.error(error);
 		} finally {
-			this.length = this.results.length;
-			this.found = (this.results.length !== 0);
 			this.filters = [];
 		}
+	}
+
+	get length() {
+		return this.results.length;
+	}
+
+	get found() {
+		return this.results.length !== 0;
+	}
+
+	get text() {
+		return this.results.map(node => node.textContent);
+	}
+
+	set text(str) {
+		this.results.forEach(node => node.textContent = str);
+	}
+
+	get html() {
+		return this.results.map(node => node.innerHTML);
+	}
+	set html(html) {
+		this.results.forEach(node => node.innerHTML = html);
 	}
 	toString() {
 		return this.query;
