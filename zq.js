@@ -65,7 +65,6 @@ export default class zQ {
 	filter(callback) {
 		this.filters.push(callback.toString());
 		this.results = this.results.filter(callback);
-		this.length = this.results.length;
 		return this;
 	}
 	map(callback) {
