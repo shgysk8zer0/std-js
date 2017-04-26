@@ -1,8 +1,8 @@
-
 const ENDPOINT = 'https://keybase.io';
 const VERSION = '1.0';
 
 async function get(url) {
+	console.info(url);
 	try {
 		const resp = await fetch(url, {
 			mode: 'cors'
@@ -10,7 +10,9 @@ async function get(url) {
 		if (resp.ok) {
 			const type = resp.headers.get('Content-Type');
 			if (type.includes('application/json')) {
-				return resp.json();
+				let json = await resp.json();
+				console.log(json);
+				return json;
 			} else if (type.includes('text/html')) {
 				let html = await resp.html();
 				let parser = new DOMParser();
@@ -29,13 +31,15 @@ async function get(url) {
 export default class KeyBase {
 	static async getKey(user) {
 		const url = new URL(`/${user}/pgp_keys.asc`, ENDPOINT);
-		return get(url);
+		let resp = await get(url);
+		return resp;
 	}
 
 	static async searchUsers(...users) {
 		const url = new URL(`/_/api/${VERSION}/user/lookup.json`, ENDPOINT);
 		url.searchParams.set('usernames', users);
-		return get(url);
+		let resp = await get(url);
+		return resp;
 	}
 	static async searchTwitter(user) {
 		const url = new URL(`/_/api/${VERSION}/user/lookup.json`, ENDPOINT);
