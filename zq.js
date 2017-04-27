@@ -1,11 +1,11 @@
 /*eslint no-use-before-define: 0*/
 /*============================ zQ Functions =======================*/
 export default class zQ {
-	constructor(selector = document) {
+	constructor(selector, parent = document) {
 		try {
 			this.results = [];
 			if (typeof selector === 'string') {
-				this.results = Array.from(document.querySelectorAll(selector));
+				this.results = Array.from(parent.querySelectorAll(selector));
 			} else if (selector instanceof NodeList || selector instanceof HTMLCollection) {
 				this.results = Array.from(selector);
 			} else if (typeof selector === 'object') {
