@@ -1,7 +1,7 @@
 import zQ from './zq.js';
 
-export function $(selector) {
-	return new zQ(selector);
+export function $(selector, parent = document) {
+	return new zQ(selector, parent);
 }
 
 export function query(selector, node = document.documentElement) {

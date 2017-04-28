@@ -6,6 +6,9 @@ export default class zQ {
 			this.results = [];
 			if (typeof selector === 'string') {
 				this.results = Array.from(parent.querySelectorAll(selector));
+				if (parent instanceof HTMLElement && parent.matches(selector)) {
+					this.results.push(parent);
+				}
 			} else if (selector instanceof NodeList || selector instanceof HTMLCollection) {
 				this.results = Array.from(selector);
 			} else if (typeof selector === 'object') {
