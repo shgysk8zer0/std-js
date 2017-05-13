@@ -5,16 +5,18 @@
 		<meta charset="utf-8"/>
 		<link rel="icon" type="image/svg+xml" href="./javascript.svg" sizes="any"/>
 		<script type="application/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js" crossorigin="annonymous" async></script>
-		<script type="module" src="test.js" async></script>
+		<script type="module" src="index.js" async></script>
+		<link rel="stylesheet" type="text/css" href="index.css" />
 	</head>
 	<body class="no-js">
 		<header>
 			<h1>JavaScript module testing</h1>
 			<button type="button" data-show-modal="#keybase-dialog">Show form</button>
 		</header>
-		<main></main>
-		<footer>
-		</footer>
+		<nav>Nav</nav>
+		<main>Main</main>
+		<aside>Aside</aside>
+		<footer>footer</footer>
 		<noscript>You obviously need JavaScript enabled to test a JavaScript library.</noscript>
 		<dialog id="keybase-dialog">
 			<button data-close="#keybase-dialog">x</button>
@@ -32,5 +34,18 @@
 				<button type="submit">Search</button>
 			</form>
 		</dialog>
+		<template id="image-template">
+			<figure itemtype="http://schema.org/ImageObject">
+				<img itemprop="contentUrl" src="" width="64" height="64"/>
+				<blockquote itemprop="caption"></blockquote>
+			</figure>
+		</template>
+		<template id="person-template">
+			<div itemtype="http://schema.org/Person">
+				<span itemprop="image" data-schema-template="image-template"></span>
+				<span itemprop="givenName"></span>
+				<span itemprop="familyName"></span>
+			</div>
+		</template>
 	</body>
 </html>
