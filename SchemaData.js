@@ -16,12 +16,6 @@ export default class SchemaData extends Map {
 			super();
 			Object.keys(data).forEach(key => this.set(key, data[key]));
 		}
-		/*if (valid(data)) {
-			super();
-			Object.keys(data).forEach(key => this.set(key, data[key]));
-		} else {
-			throw new Error('Invalid data given to SchemaData');
-		}*/
 	}
 
 	toString() {
@@ -37,6 +31,6 @@ export default class SchemaData extends Map {
 	}
 
 	get itemtype() {
-		return `${new URL(this.type, this.context)}`;
+		return new URL(this.type, this.context).toString();
 	}
 }
