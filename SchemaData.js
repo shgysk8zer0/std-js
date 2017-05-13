@@ -3,9 +3,6 @@ const REQUIRED = [
 	'@context'
 ];
 
-function valid(data) {
-	return ((typeof data === 'object') && REQUIRED.every(data.hasOwnProperty));
-}
 export default class SchemaData extends Map {
 	constructor(data) {
 		if (! typeof data === 'object') {
