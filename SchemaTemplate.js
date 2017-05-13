@@ -62,7 +62,7 @@ export default class SchemaTemplate extends DocumentFragment {
 				} else if(node.hasAttribute('src')) {
 					node.setAttribute('src', data[prop]);
 				} else if (node.hasAttribute('content')) {
-					node.content = data[prop];
+					node.setAttribute('content', data[prop]);
 				} else {
 					node.html = data[prop];
 				}

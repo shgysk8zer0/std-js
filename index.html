@@ -38,6 +38,8 @@
 			<figure itemtype="http://schema.org/ImageObject">
 				<img itemprop="contentUrl" src="" width="64" height="64"/>
 				<blockquote itemprop="caption"></blockquote>
+				<meta itemprop="width" content="" />
+				<meta itemprop="height" content="" />
 			</figure>
 		</template>
 		<template id="person-template">
@@ -45,16 +47,30 @@
 				<span itemprop="image" data-schema-template="image-template"></span>
 				<span itemprop="givenName"></span>
 				<span itemprop="familyName"></span>
+				<span itemprop="homeLocation" data-schema-template="address-template"></span>
 			</span>
 		</template>
 		<template id="article-template">
 			<article itemtype="http://schema.org/Article">
 				<header>
 					<h2 itemprop="headline"></h2>
-					<i>By <span itemprop="author" data-schema-template="person-template"</i>
+					<b>By <span itemprop="author" data-schema-template="person-template"</span></b>
 				</header>
 				<section itemprop="articleBody"></section>
 			</article>
+		</template>
+		<template id="address-template">
+			<address itemtype="http://schema.org/PostalAddress">
+				<div itemprop="streetAddress"></div>
+				<div>
+					<span itemprop="addressLocality"></span>,
+					<span itemprop="addressRegion"></span>
+					<span itemprop="postalCode"></span>
+				</div>
+				<a itemprop="email" href=""></a>
+				<br />
+				<a itemprop="telephone" href=""></a>
+			</address>
 		</template>
 	</body>
 </html>

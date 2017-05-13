@@ -30,23 +30,26 @@ body {
 *, *::before, *::after {
 	box-sizing: inherit;
 }
-header {
+body > header {
 	grid-area: header;
 	background-color: yellow;
 }
-nav {
+body > nav {
 	grid-area: nav;
 	background-color: blue;
 }
-main {
+body > main {
 	grid-area: main;
 	background-color: green;
 }
-aside {
+body > aside {
 	grid-area: sidebar;
 	background-color: purple;
 }
-footer {
+body >footer {
 	grid-area: footer;
 	background-color: gray;
+}
+a:empty[href]::after {
+	content: attr(href);
 }
