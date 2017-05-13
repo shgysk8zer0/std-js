@@ -1,4 +1,5 @@
 import SchemaNode from './SchemaNode.js';
+import SchemaData from './SchemaData.js';
 
 export default class SchemaTemplate extends DocumentFragment {
 	constructor(templateId) {
@@ -35,40 +36,36 @@ export default class SchemaTemplate extends DocumentFragment {
 	}
 
 	set data(data) {
-		if (
-			data.hasOwnProperty('@type')
-			&& data.hasOwnProperty('@context')
-			&& this.itemtype === `${new URL(data['@type'], data['@context'])}`
-		) {
-			for (let [prop, node] of this.entries()) {
-				if (! data.hasOwnProperty(prop)) {
-					node.remove();
-				} else if (typeof data[prop] === 'object') {
-					if (node.dataset.hasOwnProperty('schemaTemplate')) {
-						try {
-							let template = new SchemaTemplate(node.dataset.schemaTemplate);
-							template.itemprop = prop;
-							template.itemscope = '';
-							template.data = data[prop];
-							node.parentElement.replaceChild(template, node.node);
-						} catch (e) {
-							console.error(e);
-							node.remove();
-						}
-					} else {
-						console.error(`Missing data-template attribute for ${data[prop]['@type']}`);
+		let thing = new SchemaData(data);
+		if (thing.itemtype !== this.itemtype) {
+			throw new Error(`Template has itemtype of ${this.itemtype} but required ${thing.itemtype}`);
+		}
+		for (let [prop, node] of this.entries()) {
+			if (! thing.has(prop)) {
+				node.remove();
+			} else if (typeof thing.get(prop) === 'object') {
+				if (node.dataset.hasOwnProperty('schemaTemplate')) {
+					try {
+						let template = new SchemaTemplate(node.dataset.schemaTemplate);
+						template.itemprop = prop;
+						template.itemscope = '';
+						template.data = thing.get(prop);
+						node.parentElement.replaceChild(template, node.node);
+					} catch (e) {
+						console.error(e);
 						node.remove();
 					}
-				} else if(node.hasAttribute('src')) {
-					node.setAttribute('src', data[prop]);
-				} else if (node.hasAttribute('content')) {
-					node.setAttribute('content', data[prop]);
 				} else {
-					node.html = data[prop];
+					console.error(`Missing data-template attribute for ${thing.type}`);
+					node.remove();
 				}
+			} else if(node.hasAttribute('src')) {
+				node.setAttribute('src', thing.get(prop));
+			} else if (node.hasAttribute('content')) {
+				node.setAttribute('content', thing.get(prop));
+			} else {
+				node.html = thing.get(prop);
 			}
-		} else {
-			throw new Error('Invalid or missing @type / @context for SchemaTemplate');
 		}
 	}
 
