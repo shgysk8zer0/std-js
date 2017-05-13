@@ -41,11 +41,20 @@
 			</figure>
 		</template>
 		<template id="person-template">
-			<div itemtype="http://schema.org/Person">
+			<span itemtype="http://schema.org/Person">
 				<span itemprop="image" data-schema-template="image-template"></span>
 				<span itemprop="givenName"></span>
 				<span itemprop="familyName"></span>
-			</div>
+			</span>
+		</template>
+		<template id="article-template">
+			<article itemtype="http://schema.org/Article">
+				<header>
+					<h2 itemprop="headline"></h2>
+					<i>By <span itemprop="author" data-schema-template="person-template"</i>
+				</header>
+				<section itemprop="articleBody"></section>
+			</article>
 		</template>
 	</body>
 </html>

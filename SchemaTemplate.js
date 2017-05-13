@@ -81,6 +81,7 @@ export default class SchemaTemplate extends DocumentFragment {
 	}
 
 	appendTo(node) {
+		this.itemscope = this.itemscope || '';
 		node.appendChild(node.ownerDocument.importNode(this.firstElementChild, true));
 	}
 

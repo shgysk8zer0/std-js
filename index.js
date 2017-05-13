@@ -51,27 +51,22 @@ supportsAsClasses('svg', 'audio', 'video', 'picture', 'canvas', 'menuitem',
 // 	}
 // }
 $(self).load(() => {
-	console.log($('*'));
 	$('header h1').html = `<u>${document.title}</u>`;
 	$('[data-show-modal]').click(handlers.showModal);
 	$('[data-close]').click(handlers.close);
 	$('[data-remove]').click(handlers.remove);
 	$('[data-toggle-hidden]').click(handlers.toggleHidden);
-	const template = new SchemaTemplate('person-template');
-	template.itemprop = 'creator';
-	template.data = {
-		"@context": "http://schema.org",
-		"@type": "Person",
-		"givenName": "Chris",
-		"familyName": "Zuber",
-		"image": {
-			"@context": "http://schema.org",
-			"@type": "ImageObject",
-			"contentUrl": "/javascript.svg"
+	const template = new SchemaTemplate('article-template');
+	fetch('./article.json').then(resp => {
+		if (resp.ok) {
+			return resp.json();
+		} else {
+			throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
 		}
-	};
-	template.appendTo(document.querySelector('footer'));
-	console.log(Array.from(template.entries()));
+	}).then(json => {
+		template.data = json;
+		template.appendTo(document.querySelector('main'));
+	}).catch(console.error);
 	// $('form[name="keybase-search"]').submit(async submit => {
 	// 	submit.preventDefault();
 	// 	const form = new FormData(submit.target);
