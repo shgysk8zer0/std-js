@@ -52,7 +52,7 @@ export default class SchemaTemplate extends DocumentFragment {
 							template.data = data[prop];
 							node.parentElement.replaceChild(template, node.node);
 						} catch (e) {
-							console.trace(e);
+							console.error(e);
 							node.remove();
 						}
 					} else {
