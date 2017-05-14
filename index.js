@@ -13,6 +13,45 @@ import * as pattern from './patterns.js';
 // import KeyBase from './keybase.js';
 import * as handlers from './dataHandlers.js';
 import SchemaTemplate from './SchemaTemplate.js';
+
+if (document.createElement('dialog') instanceof HTMLUnknownElement) {
+	if (! ('open' in HTMLElement.prototype)) {
+		Object.defineProperty(HTMLElement.prototype, 'open', {
+			get: function() {
+				return this.hasAttribute('open')
+			},
+			set: function(open) {
+				open ? this.setAttribute('open', '') : this.removeAttribute('open');
+			}
+		});
+	}
+
+	HTMLElement.prototype.show = function() {
+		this.open = true;
+	};
+
+	HTMLElement.prototype.close = function() {
+		this.open = false;
+		this.classList.remove('modal');
+	};
+
+	HTMLElement.prototype.showModal = function() {
+		this.open = true;
+		this.classList.add('modal');
+	};
+} else if (document.createElement('details') instanceof HTMLUnknownElement) {
+	if (! ('open' in HTMLElement.prototype)) {
+		Object.defineProperty(HTMLElement.prototype, 'open', {
+			get: function() {
+				return this.hasAttribute('open')
+			},
+			set: function(open) {
+				open ? this.setAttribute('open', '') : this.removeAttribute('open');
+			}
+		});
+	}
+}
+
 // import GitHub from './GitHub.js';
 
 // const handlers = {
