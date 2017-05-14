@@ -28,6 +28,7 @@ const DAYS = [
 
 /**
  * Similar to PHP Date::format <https://secure.php.net/manual/en/function.date.php>
+ * @TODO Add support for more formatting options, including /especially timezones
  */
 function formatDate(date, chars) {
 	return chars.split('').reduce((str, char) => {
