@@ -1,11 +1,10 @@
-*.bak
-*.orig
-*.remote
+/patches/
 *.patch
-*~
-*.min.js
-*.map
 /node_modules/
+/npm-debug.log
+*.min*
+*.map
+
 #################
 ## Eclipse
 #################
