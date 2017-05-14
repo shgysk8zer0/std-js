@@ -3,47 +3,47 @@ export default class {
 	addEventListener(type, listener /*,  useCapture (will be ignored) */) {
 	  				var self = this;
 	  				var wrapper = function(e) {
-		e.target = e.srcElement;
-		e.currentTarget = self;
-		if (listener.handleEvent) {
+						e.target = e.srcElement;
+						e.currentTarget = self;
+						if (listener.handleEvent) {
 		  				listener.handleEvent(e);
-		} else {
+						} else {
 		  				listener.call(self, e);
-		}
+						}
 	  };
 	  				if (type === 'DOMContentLoaded') {
-		var wrapper2 = function(e) {
+						var wrapper2 = function(e) {
 		  				if (document.readyState == 'complete') {
-			wrapper(e);
+							wrapper(e);
 		  }
-		};
-		document.attachEvent('onreadystatechange', wrapper2);
-		eventListeners.push({object: this, type: type, listener: listener, wrapper: wrapper2});
+						};
+						document.attachEvent('onreadystatechange', wrapper2);
+						eventListeners.push({object: this, type: type, listener: listener, wrapper: wrapper2});
 
-		if (document.readyState == 'complete') {
+						if (document.readyState == 'complete') {
 		  				var e = new Event();
 		  				e.srcElement = window;
 		  				wrapper2(e);
-		}
+						}
 	  } else {
-		this.attachEvent('on' + type, wrapper);
-		eventListeners.push({object: this, type: type, listener: listener, wrapper: wrapper});
+						this.attachEvent('on' + type, wrapper);
+						eventListeners.push({object: this, type: type, listener: listener, wrapper: wrapper});
 	  }
 	}
 	removeEventListener(type, listener /*,  useCapture (will be ignored) */) {
 	  				var counter = 0;
 	  				while (counter < eventListeners.length) {
-		var eventListener = eventListeners[counter];
-		if (eventListener.object == this && eventListener.type == type && eventListener.listener == listener) {
+						var eventListener = eventListeners[counter];
+						if (eventListener.object == this && eventListener.type == type && eventListener.listener == listener) {
 		  				if (type == 'DOMContentLoaded') {
-			this.detachEvent('onreadystatechange', eventListener.wrapper);
+							this.detachEvent('onreadystatechange', eventListener.wrapper);
 		  } else {
-			this.detachEvent('on' + type, eventListener.wrapper);
+							this.detachEvent('on' + type, eventListener.wrapper);
 		  }
 		  				eventListeners.splice(counter, 1);
 		  				break;
-		}
-		++counter;
+						}
+						++counter;
 	  }
 	}
 	close() {

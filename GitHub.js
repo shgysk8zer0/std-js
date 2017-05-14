@@ -12,7 +12,7 @@ function getUrl(path = [], params = {}) {
 async function get(url) {
 	try {
 		const resp = await fetch(url, {
-			method: 'cors',
+			mode: 'cors',
 			method: 'GET'
 		});
 		const parsed = await(parse(resp));

@@ -5,10 +5,10 @@ const REQUIRED = [
 
 export default class SchemaData extends Map {
 	constructor(data) {
-		if (! typeof data === 'object') {
+		if (! (typeof data === 'object')) {
 			throw new Error(`Expected and object but received a ${typeof data}`);
 		} else if (! REQUIRED.every(key => data.hasOwnProperty(key))) {
-			throw new Error(`SchemaData argument object is missing required properties`);
+			throw new Error('SchemaData argument object is missing required properties');
 		} else {
 			super();
 			Object.keys(data).forEach(key => this.set(key, data[key]));

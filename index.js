@@ -1,11 +1,11 @@
 // import polyfill from './polyfills.js';
 // import Weather from './openweathermap.js';
-import WYSIWYG from './wysiwyg.js';
+// import WYSIWYG from './wysiwyg.js';
 // import FileUpload from './fileupload.js';
 import {$} from './functions.js';
 import {reportError, parseResponse} from './functions.js';
 import handleJSON from './json_response.js';
-import SocialShare from './socialshare.js';
+// import SocialShare from './socialshare.js';
 import {supportsAsClasses} from './support_test.js';
 // import popState from './popstate.js';
 import kbdShortcuts from './kbd_shortcuts.js';
@@ -18,7 +18,7 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement) {
 	if (! ('open' in HTMLElement.prototype)) {
 		Object.defineProperty(HTMLElement.prototype, 'open', {
 			get: function() {
-				return this.hasAttribute('open')
+				return this.hasAttribute('open');
 			},
 			set: function(open) {
 				open ? this.setAttribute('open', '') : this.removeAttribute('open');
@@ -43,7 +43,7 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement) {
 	if (! ('open' in HTMLElement.prototype)) {
 		Object.defineProperty(HTMLElement.prototype, 'open', {
 			get: function() {
-				return this.hasAttribute('open')
+				return this.hasAttribute('open');
 			},
 			set: function(open) {
 				open ? this.setAttribute('open', '') : this.removeAttribute('open');
