@@ -12,6 +12,8 @@
 		"homeLocation": {
 			"@context": "http:\/\/schema.org",
 			"@type": "PostalAddress",
+			"addressLocality": "Lake Isabella",
+			"addressRegion": "California",
 			"telephone": "tel:+1-661-619-6712",
 			"email": "mailto:shgysk8zer0@gmail.com"
 		},

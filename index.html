@@ -43,13 +43,15 @@
 			</figure>
 		</template>
 		<template id="person-template">
-			<span itemtype="http://schema.org/Person">
-				<a itemprop="url" href="">
-					<span itemprop="image" data-schema-template="image-template"></span>
-					<span itemprop="givenName"></span>
-					<span itemprop="familyName"></span>
+			<span itemtype="http://schema.org/Person" contenteditable="false">
+				<span itemprop="image" data-schema-template="image-template"></span>
+				<span itemprop="givenName"></span>
+				<span itemprop="familyName"></span>
+				<details>
+					<summary>Contact Info</summary>
 					<span itemprop="homeLocation" data-schema-template="address-template"></span>
-				</a>
+					<a href="" itemprop="url">Website</a>
+				</details>
 			</span>
 		</template>
 		<template id="article-template">
