@@ -1,26 +1,28 @@
-var webpack = require('webpack');
+const webpack = require('webpack');
+const path = require('path');
 
 module.exports = {
-    entry: './test.js',
+    entry: './index.js',
     output: {
         path: __dirname,
-        filename: 'bundle.min.js'
+        filename: 'index.min.js'
     },
     module: {
         loaders: [
             {
                 loader: 'babel-loader',
                 exclude: /node_modules/,
-                query: {
-                  presets: 'es2015',
-                },
+                options: {
+                    presets: ['latest'],
+                    plugins: ['transform-runtime']
+                }
             }
         ]
     },
     plugins: [
         // Avoid publishing files when compilation fails
         new webpack.NoErrorsPlugin(),
-        new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})
+		new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})
     ],
     stats: {
         // Nice colored output

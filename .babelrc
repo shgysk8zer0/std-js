@@ -1,6 +1,12 @@
 {
-	"presets": ["es2015"],
+	"presets": [
+		"es2015",
+		"stage-3"
+	],
 	"sourceMaps": true,
 	"compact": true,
-	"comments": false
+	"comments": false,
+	"plugins": [
+		"transform-runtime"
+	]
 }
