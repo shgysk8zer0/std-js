@@ -50,14 +50,21 @@ supportsAsClasses('svg', 'audio', 'video', 'picture', 'canvas', 'menuitem',
 // 		console.error(error);
 // 	}
 // }
-$(self).load(() => {
-	$('header h1').html = `<u>${document.title}</u>`;
-	$('[data-show-modal]').click(handlers.showModal);
-	$('[data-close]').click(handlers.close);
-	$('[data-remove]').click(handlers.remove);
-	$('[data-toggle-hidden]').click(handlers.toggleHidden);
-	const template = new SchemaTemplate('article-template');
-	fetch('./article.json').then(resp => {
+/**
+ * Expects node to have a data-schema-content attribute containing a URL with
+ * a hash / anchor of the <template> ID for template to populate and append
+ */
+function importSchema(node) {
+	const url = new URL(node.dataset.schemaContent, location.origin);
+	const template = new SchemaTemplate(url.hash.substring(1));
+	const headers = new Headers();
+	headers.set('Accept', 'application/json');
+	url.hash = '';
+
+	fetch(url, {
+		headers,
+		method: 'Get'
+	}).then(resp => {
 		if (resp.ok) {
 			return resp.json();
 		} else {
@@ -65,8 +72,18 @@ $(self).load(() => {
 		}
 	}).then(json => {
 		template.data = json;
-		template.appendTo(document.querySelector('main'));
+		template.appendTo(node);
 	}).catch(console.error);
+}
+
+$(self).load(async () => {
+	$('header h1').html = `<u>${document.title}</u>`;
+	$('[data-show-modal]').click(handlers.showModal);
+	$('[data-close]').click(handlers.close);
+	$('[data-remove]').click(handlers.remove);
+	$('[data-toggle-hidden]').click(handlers.toggleHidden);
+	$('[data-schema-content]').each(importSchema);
+
 	// $('form[name="keybase-search"]').submit(async submit => {
 	// 	submit.preventDefault();
 	// 	const form = new FormData(submit.target);
