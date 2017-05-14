@@ -1,6 +1,106 @@
 import SchemaNode from './SchemaNode.js';
 import SchemaData from './SchemaData.js';
 
+const MONTHS = [
+	{abbr: 'Jan', full: 'January'},
+	{abbr: 'Feb', full: 'February'},
+	{abbr: 'Mar', full: 'March'},
+	{abbr: 'Apr', full: 'April'},
+	{abbr: 'May', full: 'May'},
+	{abbr: 'Jun', full: 'June'},
+	{abbr: 'Jul', full: 'July'},
+	{abbr: 'Aug', full: 'August'},
+	{abbr: 'Sep', full: 'September'},
+	{abbr: 'Oct', full: 'October'},
+	{abbr: 'Nov', full: 'November'},
+	{abbr: 'Dec', full: 'December'}
+];
+
+const DAYS = [
+	{abbr: 'Sun', full: 'Sunday'},
+	{abbr: 'Mon', full: 'Monday'},
+	{abbr: 'Tue', full: 'Tuesday'},
+	{abbr: 'Wed', full: 'Wednesday'},
+	{abbr: 'Thu', full: 'Thursday'},
+	{abbr: 'Fri', full: 'Friday'},
+	{abbr: 'Sat', full: 'Saturday'}
+];
+
+/**
+ * Similar to PHP Date::format <https://secure.php.net/manual/en/function.date.php>
+ */
+function formatDate(date, chars) {
+	return chars.split('').reduce((str, char) => {
+		switch(char) {
+		case 'Y':
+			str += date.getFullYear();
+			break;
+		case 'y':
+			str += date.getYear();
+			break;
+		case 'M':
+			str += MONTHS[date.getMonth()].abbr;
+			break;
+		case 'F':
+			str += MONTHS[date.getMonth()].full;
+			break;
+		case 'm':
+			let m = date.getMonth() + 1;
+			str += m < 10 ? `0${m}` : m;
+			break;
+		case 'n':
+			str += date.getMonth() + 1;
+			break;
+		case 'd':
+			let d = date.getDate();
+			str += d < 10 ? `0${d}` : d;
+			break;
+		case 'N':
+			str += date.getDay() + 1;
+		case 'j':
+			str += date.getDate();
+			break;
+		case 'D':
+			str += DAYS[date.getDay() - 1].abbr;
+			break;
+		case 'l':
+			str += DAYS[date.getDay() - 1].full;
+			break;
+		case 'H':
+			let h = date.getHours();
+			str += h < 10 ? `0${h}` : h;
+			break;
+		case 'h':
+			let H = (date.getHours() % 12) + 1;
+			str += H < 10 ? `0${H}` : H;
+			break;
+		case 'G':
+			str += date.getHours();
+			break;
+		case 'g':
+			str += (date.getHours() % 12) + 1;
+			break;
+		case 'i':
+			let i = date.getMinutes();
+			str += i < 10 ? `0${i}` : i;
+			break;
+		case 's':
+			let s = date.getSeconds();
+			str += s < 10 ? `0${s}` : s;
+			break;
+		case 'a':
+			str += date.getHours() > 11 ? 'pm' : 'am';
+			break;
+		case 'A':
+			str += date.getHours() > 11 ? 'PM' : 'AM';
+			break;
+		default:
+			str += char;
+		}
+		return str;
+	}, '');
+}
+
 const SCHEMA_ATTRS = [
 	'itemtype',
 	'itemprop',
@@ -49,7 +149,15 @@ export default class SchemaTemplate extends DocumentFragment {
 		for (let [prop, node] of this.entries()) {
 			if (! thing.has(prop)) {
 				node.remove();
-			} else if (typeof thing.get(prop) === 'object') {
+			} else if (thing.get(prop) instanceof Date) {
+				let date = thing.get(prop);
+				if (node.hasAttribute('datetime')) {
+					node.setAttribute('datetime', date.toISOString());
+					node.text = node.dataset.hasOwnProperty('dateFormat')
+						? formatDate(date, node.dataset.dateFormat)
+						: date.toDateString();
+				}
+			} else if (thing.get(prop).constructor === Object) {
 				if (node.dataset.hasOwnProperty('schemaTemplate')) {
 					try {
 						let template = new SchemaTemplate(node.dataset.schemaTemplate);

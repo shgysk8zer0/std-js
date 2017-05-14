@@ -3,6 +3,37 @@ const REQUIRED = [
 	'@context'
 ];
 
+const TIMES = [
+	'closes',
+	'opens'
+];
+
+const DATES = [
+	'birthDate',
+	'commentTime',
+	'dateCreated',
+	'dateModified',
+	'datePosted',
+	'datePublished',
+	'dateVehicleFirstRegistered',
+	'deathDate',
+	'dissolutionDate',
+	'endDate',
+	'expires',
+	'foundingDate',
+	'lastReviewed',
+	'previousStartDate',
+	'priceValidUntil',
+	'productionDate',
+	'purchaseDate',
+	'releaseDate',
+	'scheduledPaymentDate',
+	'startDate',
+	'uploadDate',
+	'validUntil',
+	'vehicleModelDate'
+];
+
 export default class SchemaData extends Map {
 	constructor(data) {
 		if (! (typeof data === 'object')) {
@@ -11,7 +42,13 @@ export default class SchemaData extends Map {
 			throw new Error('SchemaData argument object is missing required properties');
 		} else {
 			super();
-			Object.keys(data).forEach(key => this.set(key, data[key]));
+			Object.keys(data).forEach(key => {
+				if (DATES.includes(key) || TIMES.includes(key)) {
+					this.set(key, new Date(data[key]));
+				} else {
+					this.set(key, data[key]);
+				}
+			});
 		}
 	}
 

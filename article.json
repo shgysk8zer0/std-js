@@ -9,6 +9,7 @@
 		"givenName": "Chris",
 		"familyName": "Zuber",
 		"url": "https:\/\/chriszuber.com",
+		"birthDate": "1985-03-26",
 		"homeLocation": {
 			"@context": "http:\/\/schema.org",
 			"@type": "PostalAddress",
