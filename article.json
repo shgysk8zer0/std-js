@@ -7,6 +7,20 @@
 		"@context": "http://schema.org",
 		"@type": "Person",
 		"givenName": "Chris",
-		"familyName": "Zuber"
+		"familyName": "Zuber",
+		"url": "https://chriszuber.com",
+		"homeLocation": {
+			"@context": "http://schema.org",
+			"@type": "PostalAddress",
+			"telephone": "tel:+1-661-619-6712",
+			"email": "mailto:shgysk8zer0@gmail.com"
+		},
+		"image": {
+			"@context": "http://schema.org",
+			"@type": "ImageObject",
+			"contentUrl": "https://gravatar.com/avatar/43578597e449298f5488c2407c8a8ae5",
+			"width": 80,
+			"height": 80
+		}
 	}
 }
