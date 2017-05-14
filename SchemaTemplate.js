@@ -1,6 +1,12 @@
 import SchemaNode from './SchemaNode.js';
 import SchemaData from './SchemaData.js';
 
+const SCHEMA_ATTRS = [
+	'itemtype',
+	'itemprop',
+	'itemscope'
+];
+
 export default class SchemaTemplate extends DocumentFragment {
 	constructor(templateId) {
 		super();
@@ -106,6 +112,15 @@ export default class SchemaTemplate extends DocumentFragment {
 
 	find(prop) {
 		return new SchemaNode(this.firstElementChild.querySelector(`[itemprop="${prop}"]`));
+	}
+
+	removeMicrodata() {
+		SCHEMA_ATTRS.forEach(attr => {
+			this.removeAttribute(attr);
+			this.querySelectorAll(`[${attr}]`).forEach(node => {
+				node.removeAttribute(attr);
+			});
+		});
 	}
 
 	*keys() {
