@@ -30,7 +30,7 @@ const DAYS = [
  * Similar to PHP Date::format <https://secure.php.net/manual/en/function.date.php>
  * @TODO Add support for more formatting options, including /especially timezones
  */
-function formatDate(date, chars) {
+function formatDate(date, chars = '') {
 	return chars.split('').reduce((str, char) => {
 		switch(char) {
 		case 'Y':
@@ -46,18 +46,19 @@ function formatDate(date, chars) {
 			str += MONTHS[date.getMonth()].full;
 			break;
 		case 'm':
-			let m = date.getMonth() + 1;
+			var m = date.getMonth() + 1;
 			str += m < 10 ? `0${m}` : m;
 			break;
 		case 'n':
 			str += date.getMonth() + 1;
 			break;
 		case 'd':
-			let d = date.getDate();
+			var d = date.getDate();
 			str += d < 10 ? `0${d}` : d;
 			break;
 		case 'N':
 			str += date.getDay() + 1;
+			break;
 		case 'j':
 			str += date.getDate();
 			break;
@@ -68,11 +69,11 @@ function formatDate(date, chars) {
 			str += DAYS[date.getDay() - 1].full;
 			break;
 		case 'H':
-			let h = date.getHours();
+			var h = date.getHours();
 			str += h < 10 ? `0${h}` : h;
 			break;
 		case 'h':
-			let H = (date.getHours() % 12) + 1;
+			var H = (date.getHours() % 12) + 1;
 			str += H < 10 ? `0${H}` : H;
 			break;
 		case 'G':
@@ -82,11 +83,11 @@ function formatDate(date, chars) {
 			str += (date.getHours() % 12) + 1;
 			break;
 		case 'i':
-			let i = date.getMinutes();
+			var i = date.getMinutes();
 			str += i < 10 ? `0${i}` : i;
 			break;
 		case 's':
-			let s = date.getSeconds();
+			var s = date.getSeconds();
 			str += s < 10 ? `0${s}` : s;
 			break;
 		case 'a':
