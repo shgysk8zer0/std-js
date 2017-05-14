@@ -115,7 +115,12 @@ function importSchema(node) {
 	}).catch(console.error);
 }
 
-$(self).load(async () => {
+$(self).load(() => {
+	if (document.createElement('details') instanceof HTMLUnknownElement) {
+		$('details > summary').click(() => {
+			this.parentElement.open = ! this.parentElement.open;
+		});
+	}
 	$('header h1').html = `<u>${document.title}</u>`;
 	$('[data-show-modal]').click(handlers.showModal);
 	$('[data-close]').click(handlers.close);
