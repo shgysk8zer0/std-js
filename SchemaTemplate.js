@@ -59,6 +59,8 @@ export default class SchemaTemplate extends DocumentFragment {
 					console.error(`Missing data-template attribute for ${thing.type}`);
 					node.remove();
 				}
+			} else if (node.hasAttribute('href')) {
+				node.setAttribute('href', thing.get(prop));
 			} else if(node.hasAttribute('src')) {
 				node.setAttribute('src', thing.get(prop));
 			} else if (node.hasAttribute('content')) {
@@ -91,10 +93,6 @@ export default class SchemaTemplate extends DocumentFragment {
 	}
 
 	setAttribute(attr, val) {
-		console.log({
-			template: this,
-			attr, val
-		});
 		this.firstElementChild.setAttribute(attr, val);
 	}
 
