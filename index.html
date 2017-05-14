@@ -9,7 +9,12 @@
 		<!-- <script type="application/javascript" src="index.min.js" async nomodule></script> -->
 		<link rel="stylesheet" type="text/css" href="index.css" />
 	</head>
-	<body class="no-js">
+	<body class="no-js" contextmenu="share-menu">
+		<menu type="context" id="share-menu">
+			<menuitem label="Twitter" data-social-share="twitter"></menuitem>
+			<menuitem label="Google Plus" data-social-share="googlePlus"></menuitem>
+			<menuitem label="reddit" data-social-share="reddit"></menuitem>
+		</menu>
 		<header>
 			<h1>JavaScript module testing</h1>
 			<button type="button" data-show-modal="#keybase-dialog">Show form</button>

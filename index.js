@@ -127,6 +127,7 @@ $(self).load(() => {
 	$('[data-remove]').click(handlers.remove);
 	$('[data-toggle-hidden]').click(handlers.toggleHidden);
 	$('[data-schema-content]').each(importSchema);
+	$('[data-social-share]').click(handlers.socialShare);
 
 	// $('form[name="keybase-search"]').submit(async submit => {
 	// 	submit.preventDefault();

@@ -1,6 +1,8 @@
+import SocialShare from './socialshare.js';
+
 /**
  * HTML API using data-* attributes
-  */
+ */
 export function show() {
 	const target = document.querySelector(this.dataset.show);
 	target.show();
@@ -49,4 +51,11 @@ export function toggleHidden() {
 	document.querySelectorAll(this.dataset.toggleHidden).forEach(el => {
 		el.hidden = ! el.hidden;
 	});
+}
+
+export function socialShare() {
+	console.info(SocialShare.twitter);
+	if (this.dataset.socialShare in SocialShare) {
+		SocialShare.openPopup(`${SocialShare[this.dataset.socialShare]}`);
+	}
 }
