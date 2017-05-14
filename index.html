@@ -14,7 +14,7 @@
 			<button type="button" data-show-modal="#keybase-dialog">Show form</button>
 		</header>
 		<nav>Nav</nav>
-		<main>Main</main>
+		<main data-schema-content="/article.json#article-template">Main</main>
 		<aside>Aside</aside>
 		<footer>footer</footer>
 		<noscript>You obviously need JavaScript enabled to test a JavaScript library.</noscript>
@@ -44,10 +44,12 @@
 		</template>
 		<template id="person-template">
 			<span itemtype="http://schema.org/Person">
-				<span itemprop="image" data-schema-template="image-template"></span>
-				<span itemprop="givenName"></span>
-				<span itemprop="familyName"></span>
-				<span itemprop="homeLocation" data-schema-template="address-template"></span>
+				<a itemprop="url" href="">
+					<span itemprop="image" data-schema-template="image-template"></span>
+					<span itemprop="givenName"></span>
+					<span itemprop="familyName"></span>
+					<span itemprop="homeLocation" data-schema-template="address-template"></span>
+				</a>
 			</span>
 		</template>
 		<template id="article-template">
@@ -67,9 +69,9 @@
 					<span itemprop="addressRegion"></span>
 					<span itemprop="postalCode"></span>
 				</div>
-				<a itemprop="email" href=""></a>
+				<a itemprop="email" href="">Email</a>
 				<br />
-				<a itemprop="telephone" href=""></a>
+				<a itemprop="telephone" href="">Telephone</a>
 			</address>
 		</template>
 	</body>
