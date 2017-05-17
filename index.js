@@ -52,6 +52,15 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement) {
 	}
 }
 
+if (!('replace' in DOMTokenList.prototype)) {
+	DOMTokenList.prototype.replace = function (oldToken, newToken) {
+		if (this.contains(oldToken)) {
+			this.remove(oldToken);
+			this.add(newToken);
+		}
+	}
+}
+
 // import GitHub from './GitHub.js';
 
 // const handlers = {
