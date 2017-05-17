@@ -56,6 +56,10 @@ export default class zQ {
 		return this.results[n];
 	}
 
+	has(node) {
+		return this.results.includes(node);
+	}
+
 	each(callback) {
 		this.results.forEach(callback);
 		return this;
@@ -111,7 +115,13 @@ export default class zQ {
 	}
 
 	swapClass(cname1, cname2) {
-		this.results.forEach(el => el.classList.swap(cname1, cname2));
+		this.each(node => {
+			if (node.classList.contains(cname1)) {
+				node.classList.replace(cname1, cname2);
+			} else if (node.classList.contains(cname2)) {
+				node.classList.replace(cname2, cname1);
+			}
+		});
 		return this;
 	}
 
