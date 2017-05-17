@@ -117,50 +117,50 @@ function importSchema(node) {
 const events = {
 	attributes: function() {
 		switch(this.attributeName) {
-			case 'data-remove':
-				if (this.target.dataset.hasOwnProperty('remove')) {
-					this.target.addEventListener('click', handlers.remove);
-				} else {
-					this.target.removeEventListener('click', handlers.remove);
-				}
-				break;
-			case 'data-show-modal':
-				if (this.target.dataset.hasOwnProperty('showModal')) {
-					this.target.addEventListener('click', handlers.showModal);
-				} else {
-					this.target.removeEventListener('click', handlers.showModal);
-				}
-				break;
-			case 'data-show':
-				if (this.target.dataset.hasOwnProperty('show')) {
-					this.target.addEventListener('click', handlers.show);
-				} else{
-					this.target.removeEventListener('click', handlers.show);
-				}
-				break;
-			case 'data-close':
-				if (this.target.dataset.hasOwnProperty('close')) {
-					this.target.addEventListener('click', handlers.close);
-				} else {
-					this.target.removeEventListener('click', handlers.close);
-				}
-				break;
-			case 'data-toggle-hidden':
-				if (this.target.dataset.hasOwnProperty('toggleHidden')) {
-					this.target.addEventListener('click', handlers.toggleHidden);
-				} else {
-					this.target.removeEventListener('click', handlers.toggleHidden);
-				}
-				break;
-			case 'data-social-share':
-				if (this.target.dataset.hasOwnProperty('socialShare')) {
-					this.target.addEventListener('click', handlers.socialShare);
-				} else {
-					this.target.removeEventListener('click', handlers.socialShare);
-				}
-				break;
-			default:
-				throw new Error(`Unhandled attribute change [${this.attributeName}]`);
+		case 'data-remove':
+			if (this.target.dataset.hasOwnProperty('remove')) {
+				this.target.addEventListener('click', handlers.remove);
+			} else {
+				this.target.removeEventListener('click', handlers.remove);
+			}
+			break;
+		case 'data-show-modal':
+			if (this.target.dataset.hasOwnProperty('showModal')) {
+				this.target.addEventListener('click', handlers.showModal);
+			} else {
+				this.target.removeEventListener('click', handlers.showModal);
+			}
+			break;
+		case 'data-show':
+			if (this.target.dataset.hasOwnProperty('show')) {
+				this.target.addEventListener('click', handlers.show);
+			} else{
+				this.target.removeEventListener('click', handlers.show);
+			}
+			break;
+		case 'data-close':
+			if (this.target.dataset.hasOwnProperty('close')) {
+				this.target.addEventListener('click', handlers.close);
+			} else {
+				this.target.removeEventListener('click', handlers.close);
+			}
+			break;
+		case 'data-toggle-hidden':
+			if (this.target.dataset.hasOwnProperty('toggleHidden')) {
+				this.target.addEventListener('click', handlers.toggleHidden);
+			} else {
+				this.target.removeEventListener('click', handlers.toggleHidden);
+			}
+			break;
+		case 'data-social-share':
+			if (this.target.dataset.hasOwnProperty('socialShare')) {
+				this.target.addEventListener('click', handlers.socialShare);
+			} else {
+				this.target.removeEventListener('click', handlers.socialShare);
+			}
+			break;
+		default:
+			throw new Error(`Unhandled attribute change [${this.attributeName}]`);
 
 		}
 	},
