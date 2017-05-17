@@ -58,7 +58,7 @@ if (!('replace' in DOMTokenList.prototype)) {
 			this.remove(oldToken);
 			this.add(newToken);
 		}
-	}
+	};
 }
 
 // import GitHub from './GitHub.js';
@@ -194,6 +194,7 @@ const options = [
 	'subtree',
 	'attributeOldValue'
 ];
+
 function init(base = document.body) {
 	$('[data-show-modal]', base).click(handlers.showModal);
 	$('[data-close]', base).click(handlers.close);
