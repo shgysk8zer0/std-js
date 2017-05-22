@@ -8,8 +8,9 @@ const PREFIXES = [
 /*============================ zQ Functions =======================*/
 export default class zQ {
 	constructor(selector, parent = document) {
+		this.results = [];
+		this.filters = [];
 		try {
-			this.results = [];
 			if (typeof selector === 'string') {
 				this.results = Array.from(parent.querySelectorAll(selector));
 				if (parent instanceof HTMLElement && parent.matches(selector)) {
@@ -25,8 +26,6 @@ export default class zQ {
 			this.query = selector || ':root';
 		} catch (error) {
 			console.error(error);
-		} finally {
-			this.filters = [];
 		}
 	}
 
