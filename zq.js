@@ -204,11 +204,7 @@ export default class zQ {
 
 	/*==================== Listener Functions =================================*/
 	on(event, callback, useCapture = false) {
-		this.results.forEach(function (e) {
-			('addEventListener' in Element.prototype)
-				? e.addEventListener(event, callback, useCapture)
-				: e.attachEvent(`on${event}`, callback);
-		});
+		this.each(node => node.addEventListener(event, callback, useCapture));
 		return this;
 	}
 
