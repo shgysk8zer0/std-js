@@ -1,5 +1,6 @@
 // import polyfill from './polyfills.js';
 import OpenWeatherMap from './openweathermap.js';
+import GPS from './GeoLocation.js';
 // import WYSIWYG from './wysiwyg.js';
 // import FileUpload from './fileupload.js';
 import {$} from './functions.js';
@@ -228,7 +229,33 @@ function init(base = document.body) {
 	$('[data-social-share]', base).click(handlers.socialShare);
 }
 
-$(self).load(() => {
+function showLocation() {
+	(async () => {
+		const gps = new GPS();
+		const loc = await gps.getCurrentPosition();
+		const dialog = document.createElement('dialog');
+		const btn = document.createElement('button');
+		const link = document.createElement('a');
+		const lat = document.createElement('b');
+		const long = document.createElement('b');
+
+		lat.textContent = `Latitude: ${loc.coords.latitude}`;
+		long.textContent = `Longitude: ${loc.coords.longitude}`;
+		btn.textContent = 'x';
+		dialog.appendChild(btn);
+		dialog.appendChild(document.createElement('hr'));
+		dialog.appendChild(link);
+		link.appendChild(lat);
+		link.appendChild(document.createElement('br'));
+		link.appendChild(long);
+		btn.addEventListener('click', () => dialog.remove());
+		link.href = GPS.getURI(loc);
+		document.body.appendChild(dialog);
+		dialog.show();
+	})();
+}
+
+$(self).load(async () => {
 	if (document.createElement('details') instanceof HTMLUnknownElement) {
 		$('details > summary').click(() => {
 			this.parentElement.open = ! this.parentElement.open;
@@ -246,6 +273,7 @@ $(self).load(() => {
 	});
 	$('header h1').html = `<u>${document.title}</u>`;
 	init();
+	$('#gps-btn').click(showLocation);
 	$(document.body).watch(events, options, filter);
 
 	// $('form[name="keybase-search"]').submit(async submit => {
