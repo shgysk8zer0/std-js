@@ -1,4 +1,10 @@
-/*eslint no-use-before-define: 0*/
+const PREFIXES = [
+	'',
+	'moz',
+	'webkit',
+	'ms'
+];
+
 /*============================ zQ Functions =======================*/
 export default class zQ {
 	constructor(selector, parent = document) {
