@@ -1,5 +1,5 @@
 // import polyfill from './polyfills.js';
-// import Weather from './openweathermap.js';
+import OpenWeatherMap from './openweathermap.js';
 // import WYSIWYG from './wysiwyg.js';
 // import FileUpload from './fileupload.js';
 import {$} from './functions.js';
@@ -13,6 +13,7 @@ import * as pattern from './patterns.js';
 // import KeyBase from './keybase.js';
 import * as handlers from './dataHandlers.js';
 import SchemaTemplate from './SchemaTemplate.js';
+import * as KEYS from './keys.js';
 
 if (document.createElement('dialog') instanceof HTMLUnknownElement) {
 	if (! ('open' in HTMLElement.prototype)) {
@@ -195,6 +196,29 @@ const options = [
 	'attributeOldValue'
 ];
 
+function appendWeather(weather) {
+	const template = document.getElementById('weather-results');
+	const dialog = document.createElement('dialog');
+	const header = document.createElement('header');
+	const close = document.createElement('button');
+	dialog.appendChild(header);
+	dialog.appendChild(document.importNode(template.content, true));
+	header.appendChild(close);
+	close.textContent = 'x';
+	dialog.id = 'weather-modal';
+	close.dataset.remove = `#${dialog.id}`;
+	$('[data-weather-prop]', dialog).each(node => {
+		if (node.dataset.weatherProp in weather.main) {
+			node.textContent = weather.main[node.dataset.weatherProp];
+		} else {
+			node.remove();
+		}
+	});
+	document.body.appendChild(dialog);
+	$('dialog[open]').each(dialog => dialog.close());
+	dialog.showModal();
+}
+
 function init(base = document.body) {
 	$('[data-show-modal]', base).click(handlers.showModal);
 	$('[data-close]', base).click(handlers.close);
@@ -210,6 +234,16 @@ $(self).load(() => {
 			this.parentElement.open = ! this.parentElement.open;
 		});
 	}
+	$('form[name="openweather"]').submit(event => {
+		event.preventDefault();
+		const form = new FormData(event.target);
+		const weather = new OpenWeatherMap(KEYS.OpenWeatherMap, {units: form.get('units')});
+		weather.getFromZip(form.get('zip'), appendWeather);
+	});
+	$('#weather-loc').click(() => {
+		const weather = new OpenWeatherMap(KEYS.OpenWeatherMap);
+		weather.getFromCoords(appendWeather);
+	});
 	$('header h1').html = `<u>${document.title}</u>`;
 	init();
 	$(document.body).watch(events, options, filter);
