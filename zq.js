@@ -70,9 +70,28 @@ export default class zQ {
 		return this;
 	}
 
+	show() {
+		this.each(node => {
+			if ('show' in node) {
+				node.show();
+			}
+		});
+		return this;
+	}
+
+	close() {
+		this.each(node => {
+			if ('close' in node) {
+				node.close();
+			}
+		});
+		return this;
+	}
+
 	indexOf(i) {
 		return this.results.indexOf(i);
 	}
+
 	some(callback) {
 		return this.results.some(callback);
 	}
