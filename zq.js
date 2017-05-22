@@ -190,9 +190,9 @@ export default class zQ {
 			val = '';
 		}
 		if (val === false) {
-			this.results.forEach(el => el.removeAttribute(attr));
+			this.each(el => el.removeAttribute(attr));
 		} else {
-			this.results.forEach(el => el.setAttribute(attr, val));
+			this.each(el => el.setAttribute(attr, val));
 		}
 		return this;
 	}
@@ -221,27 +221,22 @@ export default class zQ {
 	}
 
 	networkChange(callback) {
-		return this.online(callback) .offline(callback);
+		return this.online(callback).offline(callback);
 	}
 
 	playing(callback) {
-		this.results.forEach(e => e.onplay = callback);
+		this.each(e => e.onplay = callback);
 		return this;
 	}
 
 	paused(callback) {
-		this.results.forEach(e => e.onpause = callback);
+		this.each(e => e.onpause = callback);
 		return this;
 	}
 
 	visibilitychange(callback) {
-		this.results.forEach(function (e) {
-			[
-				'',
-				'moz',
-				'webkit',
-				'ms'
-			].forEach(function (pre) {
+		this.each(e => {
+			PREFIXES.forEach(pre => {
 				e.addEventListener(`${pre}visibilitychange`, callback);
 			});
 		});
@@ -398,25 +393,25 @@ export default class zQ {
 
 	watch(watching, options = [], attributeFilter = []) {
 		/*https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver*/
-		var watcher = new MutationObserver(mutations => {
+		let watcher = new MutationObserver(mutations => {
 			mutations.forEach(mutation => {
 				watching[mutation.type].call(mutation);
 			});
 		});
-		var watches = {};
+		let watches = {};
 		Object.keys(watching).concat(options).forEach(event => {
 			watches[event] = true;
 		});
 		if (attributeFilter.length > 0) {
 			watches.attributeFilter = attributeFilter;
 		}
-		this.results.forEach(el => {
+		this.each(el => {
 			watcher.observe(el, watches);
 		});
 		return this;
 	}
 
-	/*====================================================================================================================*/
+	/*========================================================================*/
 	$(selector) {
 		return new zQ(this.query.split(',').map(
 			str => selector.split(',').map(
