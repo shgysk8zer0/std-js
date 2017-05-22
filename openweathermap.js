@@ -2,6 +2,28 @@
  * Class for getting weather data using OpenWeatherMap
  * @see http://openweathermap.org/current
  */
+const ENDPOINT = 'http://api.openweathermap.org';
+
+/**
+ * Parse response from fetch request
+ *
+ * @param  {Response} resp Reponse object from fetch
+ *
+ * @return {void}
+ */
+function parseResponse(resp) {
+	if (resp.ok) {
+		let type = resp.headers.get('Content-Type').toLowerCase();
+		if (type.startsWith('application/json')) {
+			return resp.json();
+		} else {
+			throw new Error(`Unsupported Content-Type: "${type}"`);
+		}
+	} else {
+		throw new Error(`<${resp.url}> [${resp.status}: ${resp.statusText}]`);
+	}
+}
+
 export default class OpenWeatherMap {
 	/**
 	 * Creates new instance and sets class properties
@@ -10,8 +32,8 @@ export default class OpenWeatherMap {
 	 * @param  {string}                   language code
 	 * @param  {float}                    API version number
 	 */
-	constructor(appid, units = 'imperial', lang = 'en', version = 2.5) {
-		this.url = new URL(`http://api.openweathermap.org/data/${version}/weather`);
+	constructor(appid, {units = 'imperial', lang = 'en', version = 2.5} = {}) {
+		this.url = new URL(`/data/${version}/weather`, ENDPOINT);
 		this.url.searchParams.set('units', units);
 		this.url.searchParams.set('lang', lang);
 		this.url.searchParams.set('appid', appid);
@@ -39,10 +61,8 @@ export default class OpenWeatherMap {
 			fetch(this.url, {
 				method: 'GET',
 				mode: 'cors'
-			}).then(resp => this.parseResponse(resp)).then(callback);
-		}).catch(err => {
-			console.error(err);
-		});
+			}).then(parseResponse).then(callback);
+		}).catch(console.error);
 	}
 
 	/**
@@ -58,9 +78,7 @@ export default class OpenWeatherMap {
 		fetch(this.url, {
 			method: 'GET',
 			mode: 'cors'
-		}).then(resp => this.parseResponse(resp)).then(callback).catch(err => {
-			console.error(err);
-		});
+		}).then(parseResponse).then(callback).catch(console.error);
 	}
 
 	/**
@@ -76,9 +94,7 @@ export default class OpenWeatherMap {
 		fetch(this.url, {
 			method: 'GET',
 			mode: 'cors'
-		}).then(resp => this.parseResponse(resp)).then(callback).catch(err => {
-			console.error(err);
-		});
+		}).then(parseResponse).then(callback).catch(console.error);
 	}
 
 	/**
@@ -94,9 +110,7 @@ export default class OpenWeatherMap {
 		fetch(this.url, {
 			method: 'GET',
 			mode: 'cors'
-		}).then(resp => this.parseResponse(resp)).then(callback).catch(err => {
-			console.error(err);
-		});
+		}).then(parseResponse).then(callback).catch(console.error);
 	}
 
 	/**
@@ -106,9 +120,9 @@ export default class OpenWeatherMap {
 	 *
 	 * @return {Image}          <img src="..." alt="..." width="50" height="50">
 	 */
-	static getIcon(weather) {
-		let img = new Image(50, 50);
-		img.src = `http://openweathermap.org/img/w/${weather.icon}.png`;
+	static getIcon(weather, {width = 50, height = 50} = {}) {
+		let img = new Image(width, height);
+		img.src = new URL(`/img/w/${weather.icon}.png`, ENDPOINT);
 		img.alt = weather.description;
 		return img;
 	}
@@ -137,26 +151,6 @@ export default class OpenWeatherMap {
 			return 'W';
 		} else {
 			return 'NW';
-		}
-	}
-
-	/**
-	 * Parse response from fetch request
-	 *
-	 * @param  {Response} resp Reponse object from fetch
-	 *
-	 * @return {void}
-	 */
-	parseResponse(resp) {
-		if (resp.ok) {
-			let type = resp.headers.get('Content-Type').toLowerCase();
-			if (type.startsWith('application/json')) {
-				return resp.json();
-			} else {
-				throw new Error(`Unsupported Content-Type: "${type}"`);
-			}
-		} else {
-			throw new Error(`<${this.url.origin}> ${resp.status}: ${resp.statusText}`);
 		}
 	}
 
