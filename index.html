@@ -9,11 +9,16 @@
 		<!-- <script type="application/javascript" src="index.min.js" async nomodule></script> -->
 		<link rel="stylesheet" type="text/css" href="index.css" />
 	</head>
-	<body class="no-js" contextmenu="share-menu">
-		<menu type="context" id="share-menu">
-			<menuitem label="Twitter" data-social-share="twitter"></menuitem>
-			<menuitem label="Google Plus" data-social-share="googlePlus"></menuitem>
-			<menuitem label="reddit" data-social-share="reddit"></menuitem>
+	<body class="no-js" contextmenu="context-menu">
+		<menu type="context" id="context-menu">
+			<menu label="Share on ...">
+				<menuitem label="Twitter" data-social-share="twitter"></menuitem>
+				<menuitem label="Google Plus" data-social-share="googlePlus"></menuitem>
+				<menuitem label="reddit" data-social-share="reddit"></menuitem>
+			</menu>
+			<menu label="Forms">
+				<menuitem label="OpenWeatherMap" data-show-modal="#weather-dialog"></menuitem>
+			</menu>
 		</menu>
 		<header>
 			<h1>JavaScript module testing</h1>
@@ -24,6 +29,23 @@
 		<aside>Aside</aside>
 		<footer>footer</footer>
 		<noscript>You obviously need JavaScript enabled to test a JavaScript library.</noscript>
+		<dialog id="weather-dialog">
+			<header>
+				<button type="button" data-close="#weather-dialog">x</button>
+			</header>
+			<form name="openweather">
+				<input name="zip" type="number" min="10000" max="99999" placeholder="######" maxlength="5" required />
+				<details>
+					<summary>Units</summary>
+					<label for="units-imperial">Imperial</label>
+					<input type="radio" name="units" value="imperial" id="units-imperial" checked />
+					<label for="units-metric">Metric</label>
+					<input type="radio" name="units" value="metric" id="units-metric" />
+				</details>
+				<button type="submit">Search</button>
+			</form>
+			<button type="button" id="weather-loc">Get from GPS</button>
+		</dialog>
 		<dialog id="keybase-dialog">
 			<button data-close="#keybase-dialog">x</button>
 			<hr />
@@ -40,6 +62,12 @@
 				<button type="submit">Search</button>
 			</form>
 		</dialog>
+		<template id="weather-results">
+			<b>Temp: <span data-weather-prop="temp"></span></b>
+			<br />
+			<b>High: <u data-weather-prop="temp_max"></u></b>
+			<b>Low: <u data-weather-prop="temp_min"></u></b>
+		</template>
 		<template id="image-template">
 			<figure itemtype="http://schema.org/ImageObject">
 				<img itemprop="contentUrl" src="" width="64" height="64"/>
