@@ -15,7 +15,11 @@ export function showModal() {
 
 export function close() {
 	const target = document.querySelector(this.dataset.close);
-	target.close();
+	if (this.dataset.hasOwnProperty('returnValue')) {
+		target.close(this.dataset.returnValue);
+	} else {
+		target.close();
+	}
 }
 
 export function scrollTo() {
@@ -29,6 +33,10 @@ export function scrollTo() {
 export function remove() {
 	const targets = document.querySelectorAll(this.dataset.remove);
 	targets.forEach(target => target.remove());
+}
+
+export function fullscreen() {
+	document.querySelector(this.dataset.fullscreen).requestFullscreen();
 }
 
 export function changeAttrs() {
