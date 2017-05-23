@@ -18,7 +18,11 @@ import * as KEYS from './keys.js';
 import deprefix from './deprefixer.js';
 
 deprefix();
-
+function closeOnEscape(event) {
+	if (event.charCode === 0) {
+		document.querySelector('dialog[open]').close();
+	}
+}
 if (document.createElement('dialog') instanceof HTMLUnknownElement) {
 	if (! ('open' in HTMLElement.prototype)) {
 		Object.defineProperty(HTMLElement.prototype, 'open', {
@@ -26,7 +30,18 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement) {
 				return this.hasAttribute('open');
 			},
 			set: function(open) {
-				open ? this.setAttribute('open', '') : this.removeAttribute('open');
+				if (open) {
+					this.setAttribute('open', '');
+				} else {
+					this.removeAttribute('open');
+					if (this.tagName === 'DIALOG') {
+						document.removeEventListener('keypress', closeOnEscape);
+						if (document.fullscreen && document.fullscreenElement === this) {
+							document.exitFullscreen();
+						}
+						this.dispatchEvent(new CustomEvent('close', {detail: null}));
+					}
+				}
 			}
 		});
 	}
@@ -36,16 +51,13 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement) {
 	};
 
 	HTMLElement.prototype.close = function(returnValue = null) {
-		if (document.fullscreen && document.fullscreenElement === this) {
-			document.exitFullscreen();
-		}
 		this.returnValue = returnValue;
-		this.dispatchEvent(new Event('close'));
 		this.open = false;
 	};
 
 	HTMLElement.prototype.showModal = function() {
 		this.open = true;
+		document.addEventListener('keypress', closeOnEscape);
 		this.requestFullscreen();
 	};
 } else if (document.createElement('details') instanceof HTMLUnknownElement) {
