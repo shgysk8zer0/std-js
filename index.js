@@ -15,6 +15,9 @@ import * as pattern from './patterns.js';
 import * as handlers from './dataHandlers.js';
 import SchemaTemplate from './SchemaTemplate.js';
 import * as KEYS from './keys.js';
+import deprefix from './deprefixer.js';
+
+deprefix();
 
 if (document.createElement('dialog') instanceof HTMLUnknownElement) {
 	if (! ('open' in HTMLElement.prototype)) {
@@ -32,14 +35,18 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement) {
 		this.open = true;
 	};
 
-	HTMLElement.prototype.close = function() {
+	HTMLElement.prototype.close = function(returnValue = null) {
+		if (document.fullscreen && document.fullscreenElement === this) {
+			document.exitFullscreen();
+		}
+		this.returnValue = returnValue;
+		this.dispatchEvent(new Event('close'));
 		this.open = false;
-		this.classList.remove('modal');
 	};
 
 	HTMLElement.prototype.showModal = function() {
 		this.open = true;
-		this.classList.add('modal');
+		this.requestFullscreen();
 	};
 } else if (document.createElement('details') instanceof HTMLUnknownElement) {
 	if (! ('open' in HTMLElement.prototype)) {
@@ -170,6 +177,12 @@ const events = {
 				this.target.removeEventListener('click', handlers.socialShare);
 			}
 			break;
+		case 'data-fullscreen':
+			if (this.target.dataset.hasOwnProperty('fullscreen')) {
+				this.target.addEventListener('click', handlers.fullscreen);
+			} else {
+				this.target.removeEventListener('click', handlers.fullscreen);
+			}
 		default:
 			throw new Error(`Unhandled attribute change [${this.attributeName}]`);
 
@@ -190,6 +203,7 @@ const filter = [
 	'data-close',
 	'data-toggle-hidden',
 	'data-social-share',
+	'data-fullscreen',
 ];
 
 const options = [
@@ -227,6 +241,7 @@ function init(base = document.body) {
 	$('[data-toggle-hidden]', base).click(handlers.toggleHidden);
 	$('[data-schema-content]', base).each(importSchema);
 	$('[data-social-share]', base).click(handlers.socialShare);
+	$('[data-fullscreen]', base).click(handlers.fullscreen);
 }
 
 function showLocation() {
@@ -275,6 +290,7 @@ $(self).load(async () => {
 	init();
 	$('#gps-btn').click(showLocation);
 	$(document.body).watch(events, options, filter);
+	$('dialog').on('close', event => console.log(event.target.returnValue));
 
 	// $('form[name="keybase-search"]').submit(async submit => {
 	// 	submit.preventDefault();
