@@ -37,6 +37,7 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement) {
 					if (this.tagName === 'DIALOG') {
 						document.removeEventListener('keypress', closeOnEscape);
 						if (document.fullscreen && document.fullscreenElement === this) {
+							this.dispatchEvent(new CustomEvent('cancel', {detail: null}));
 							document.exitFullscreen();
 						}
 						this.dispatchEvent(new CustomEvent('close', {detail: null}));
