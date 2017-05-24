@@ -58,7 +58,7 @@
 					<option value="twitter">Twitter</option>
 				</select>
 				<label for="keybase-query">Query</label>
-				<input type="search" name="keybase[query]" id="keybase-query" placeholder="search for..." pattern="\w+" required />
+				<input type="search" name="keybase[query]" id="keybase-query" placeholder="search for..." pattern="[\w,]+" required />
 				<br />
 				<button type="submit">Search</button>
 			</form>
@@ -98,6 +98,22 @@
 				</header>
 				<section itemprop="articleBody"></section>
 			</article>
+		</template>
+		<template id="keybase-user-template">
+			<hr />
+			<img src="" width="" height="" data-keybase-prop="picture"/>
+			<a data-keybase-prop="keybase-url" href="">
+				<b data-keybase-prop="name"></b>
+				@ <span data-keybase-prop="location"></span>
+			</a>
+			<blockquote data-keybase-prop="bio"></blockquote>
+			<details>
+				<summary>Proofs</summary>
+				<ul data-keybase-prop="proofs"></ul>
+			</details>
+			<details data-keybase-prop="keys">
+				<summary>Keys</summary>
+			</details>
 		</template>
 		<template id="address-template">
 			<address itemtype="http://schema.org/PostalAddress">
