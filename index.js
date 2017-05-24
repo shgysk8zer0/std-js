@@ -11,7 +11,7 @@ import {supportsAsClasses} from './support_test.js';
 // import popState from './popstate.js';
 import kbdShortcuts from './kbd_shortcuts.js';
 import * as pattern from './patterns.js';
-// import KeyBase from './keybase.js';
+import KeyBase from './keybase.js';
 import * as handlers from './dataHandlers.js';
 import SchemaTemplate from './SchemaTemplate.js';
 import * as KEYS from './keys.js';
@@ -19,7 +19,7 @@ import deprefix from './deprefixer.js';
 
 deprefix();
 function closeOnEscape(event) {
-	if (event.charCode === 0) {
+	if (event.key === 'Escape') {
 		document.querySelector('dialog[open]').close();
 	}
 }
@@ -225,6 +225,103 @@ const options = [
 	'attributeOldValue'
 ];
 
+function keybaseSearch(submit) {
+	submit.preventDefault();
+	(async form => {
+		const query = form.get('keybase[query]').split(',');
+		let results = null;
+
+		switch(form.get('keybase[location]')) {
+		case 'usernames':
+			results = await KeyBase.searchUsers(...query);
+			break;
+		case 'twitter':
+			results = await KeyBase.searchTwitter(...query);
+			break;
+		case 'github':
+			results = await KeyBase.searchGithub(...query);
+			break;
+		default:
+			throw new Error(`Invalid keybase query: "${form.get('keybase[query]')}"`);
+		}
+		console.log(results);
+		const template = document.getElementById('keybase-user-template');
+		const dialog = document.createElement('dialog');
+		let close = document.createElement('button');
+		let header = document.createElement('header');
+		dialog.id='keybase-search-results';
+		close.dataset.remove = `#${dialog.id}`;
+		close.textContent = 'x';
+		dialog.appendChild(header);
+		header.appendChild(close);
+		results.them.forEach(user => {
+			console.info(user);
+			let entry = document.importNode(template.content, true);
+			$('[data-keybase-prop]', entry).each(node => {
+				switch(node.dataset.keybaseProp) {
+				case 'picture':
+					node.src = user.pictures.primary.url;
+					node.width = user.pictures.primary.width;
+					node.height = user.pictures.primary.height;
+					break;
+				case 'name':
+					node.textContent = user.profile.full_name;
+					break;
+				case 'location':
+					node.textContent = user.profile.location;
+					break;
+				case 'keybase-url':
+					node.href = `https://keybase.io/${user.basics.username_cased}`;
+					break;
+				case 'bio':
+					node.textContent = user.profile.bio;
+					break;
+				case 'proofs':
+					user.proofs_summary.all.forEach(proof => {
+						let item = document.createElement('li');
+						let link = document.createElement('a');
+						link.href = proof.proof_url;
+						link.textContent = `${proof.nametag} @ ${proof.proof_type}`;
+						link.target = '_blank';
+						item.appendChild(link);
+						node.appendChild(item);
+					});
+					break;
+				case 'keys':
+					user.public_keys.pgp_public_keys.forEach(key => {
+						let pre = document.createElement('pre');
+						pre.textContent = key;
+						node.appendChild(pre);
+					});
+					break;
+				default:
+					node.remove();
+				}
+
+			});
+			dialog.appendChild(entry);
+		});
+		document.body.appendChild(dialog);
+		dialog.show();
+	})(new FormData(submit.target));
+}
+
+function invalidForm(invalid) {
+	console.log(invalid);
+	invalid.target.closest('dialog').animate([
+		{transform: 'none'},
+		{transform: 'translate(-1rem, 0.2rem)'},
+		{transform: 'none'},
+		{transform: 'translate(1rem, -0.2rem)'}
+	], {
+		duration: 60,
+		iterations: 5,
+		direction: 'alternate'
+	});
+}
+
+window.invalidForm = invalidForm;
+
 function appendWeather(weather) {
 	const template = document.getElementById('weather-results');
 	const dialog = document.createElement('dialog');
@@ -256,6 +353,7 @@ function init(base = document.body) {
 	$('[data-schema-content]', base).each(importSchema);
 	$('[data-social-share]', base).click(handlers.socialShare);
 	$('[data-fullscreen]', base).click(handlers.fullscreen);
+	$('dialog form', base).invalid(invalidForm);
 }
 
 function showLocation() {
@@ -306,26 +404,7 @@ $(self).load(async () => {
 	$(document.body).watch(events, options, filter);
 	$('dialog').on('close', event => console.log(event.target.returnValue));
 
-	// $('form[name="keybase-search"]').submit(async submit => {
-	// 	submit.preventDefault();
-	// 	const form = new FormData(submit.target);
-	// 	const query = form.get('keybase[query]');
-	// 	let results = null;
-
-	// 	switch(form.get('keybase[location]')) {
-	// 	case 'usernames':
-	// 		results = await KeyBase.searchUsers(query);
-	// 		break;
-	// 	case 'twitter':
-	// 		results = await KeyBase.searchTwitter(query);
-	// 		break;
-	// 	case 'github':
-	// 		results = await KeyBase.searchGithub(query);
-	// 		break;
-	// 	}
-
-	// 	console.log(results);
-	// });
+	$('form[name="keybase-search"]').submit(keybaseSearch);
 	// console.info(Weather, SocialShare, WYSIWYG, FileUpload);
 	let url = new URL('fetch.json', location.origin);
 	let headers = new Headers();
