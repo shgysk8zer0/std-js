@@ -53,3 +53,9 @@ body >footer {
 a:empty[href]::after {
 	content: attr(href);
 }
+.round {
+	border-radius: 50%;
+}
+.shadow {
+	box-shadow: 0.3rem 0.3rem 0.3rem #222;
+}
