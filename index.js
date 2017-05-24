@@ -196,6 +196,7 @@ const events = {
 			} else {
 				this.target.removeEventListener('click', handlers.fullscreen);
 			}
+			break;
 		default:
 			throw new Error(`Unhandled attribute change [${this.attributeName}]`);
 
