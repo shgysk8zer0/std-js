@@ -14,7 +14,7 @@
 		"Message": "This was set via `fetch` request"
 	},
 	"append": {
-		"footer": "&copy; 2016"
+		"footer": "&copy; 2017"
 	},
 	"remove": [
 		"noscript"
