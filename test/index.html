@@ -6,8 +6,8 @@
 		<link rel="icon" type="image/svg+xml" href="./javascript.svg" sizes="any"/>
 		<script type="application/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js" crossorigin="annonymous" async></script>
 		<script type="module" src="index.js" async></script>
-		<!-- <script type="application/javascript" src="index.min.js" async nomodule></script> -->
-		<link rel="stylesheet" type="text/css" href="index.css" />
+		<!-- <script type="application/javascript" src="./index.min.js" async nomodule></script> -->
+		<link rel="stylesheet" type="text/css" href="./index.css" />
 	</head>
 	<body class="no-js" contextmenu="context-menu">
 		<menu type="context" id="context-menu">
@@ -18,12 +18,12 @@
 			</menu>
 			<menu label="Forms">
 				<menuitem label="OpenWeatherMap" data-show-modal="#weather-dialog"></menuitem>
+				<menuitem label="Keybase" data-show-modal="#keybase-dialog"></menuitem>
 			</menu>
 			<menuitem label="GPS" id="gps-btn"></menuitem>
 		</menu>
 		<header>
 			<h1>JavaScript module testing</h1>
-			<button type="button" data-show-modal="#keybase-dialog">Show form</button>
 		</header>
 		<nav>Nav</nav>
 		<main data-schema-content="/article.json#article-template">Main</main>
@@ -64,10 +64,13 @@
 			</form>
 		</dialog>
 		<template id="weather-results">
-			<b>Temp: <span data-weather-prop="temp"></span></b>
+			<h3>Current conditions in <b data-weather-prop="name"></b></h3>
+			<b>Temp: <span data-weather-prop="temp" data-weather-section="main"></span></b>
 			<br />
-			<b>High: <u data-weather-prop="temp_max"></u></b>
-			<b>Low: <u data-weather-prop="temp_min"></u></b>
+			<b>High: <u data-weather-prop="temp_max" data-weather-section="main"></u></b>
+			<b>Low: <u data-weather-prop="temp_min" data-weather-section="main"></u></b>
+			<hr />
+			<b>Wind speed: <span data-weather-prop="speed" data-weather-section="wind"></span></b>
 		</template>
 		<template id="image-template">
 			<figure itemtype="http://schema.org/ImageObject">
