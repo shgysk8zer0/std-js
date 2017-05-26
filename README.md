@@ -28,6 +28,10 @@
 ### Example
 ```js
 import {$} from './functions.js';
+import handleJSON from './json_response.js';
+import * as mutations from './mutations.js';
+
+$(document.body).watch(mutations.events, mutations.options, mutations.filter);
 
 $('[data-remove]').click(function(click) {
 	click.preventDefault();
