@@ -31,30 +31,28 @@ import {$} from './functions.js';
 import handleJSON from './json_response.js';
 import * as mutations from './mutations.js';
 
-$(document.body).watch(mutations.events, mutations.options, mutations.filter);
+$(self).load(() => {
+  $('[data-remove]').click(mutations.remove);
+  $(document.body).watch(mutations.events, mutations.options, mutations.filter);
+  $('a').filter(link => link.origin === location.origin && link.pathname !== location.pathname).click(async function(click) => {
+    click.preventDefault();
+    let url = new URL(this.href);
+    let headers = new Headers();
+    headers.set('Accept', 'application/json');
 
-$('[data-remove]').click(function(click) {
-	click.preventDefault();
-	$(this.dataset.remove).remove();
-});
-
-$('a').filter(link => link.origin === location.origin && link.pathname !== location.pathname).click(async function(click) => {
-	click.preventDefault();
-	let url = new URL(this.href);
-	let headers = new Headers();
-	headers.set('Accept', 'application/json');
-
-	const resp = fetch(url, {
-		headers,
-		method: 'GET',
-		credentials: 'include'
-	});
-  if (resp.ok) {
+    const resp = fetch(url, {
+      headers,
+      method: 'GET',
+      credentials: 'include'
+    });
+    if (resp.ok) {
       const json = await resp.json();
       handleJSON(json);
       history.pushState(json, document.title, resp.url);
-  } else {
-    throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
-  }
+    } else {
+      throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
+    }
+  });
 });
+
 ```
