@@ -2,7 +2,7 @@
 *.patch
 /node_modules/
 /npm-debug.log
-/keys.js
+/test/keys.js
 *.min*
 *.map
 
