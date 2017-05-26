@@ -2,10 +2,10 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
-    entry: './index.js',
+    entry: './test/index.js',
     output: {
         path: __dirname,
-        filename: 'index.min.js'
+        filename: 'test/index.min.js'
     },
     module: {
         loaders: [
@@ -13,7 +13,6 @@ module.exports = {
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 options: {
-                    presets: ['latest'],
                     plugins: ['transform-runtime']
                 }
             }
@@ -21,7 +20,7 @@ module.exports = {
     },
     plugins: [
         // Avoid publishing files when compilation fails
-        new webpack.NoErrorsPlugin(),
+        new webpack.NoEmitOnErrorsPlugin(),
 		new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})
     ],
     stats: {
