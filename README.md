@@ -13,30 +13,6 @@
 It was, in part, influenced by the syntax of jQuery, but its purpose is different in that this places little emphasis on style and animation. Rather, its emphasis is on asynchronous event handling though [Mutation Observers][mutations] and [Promises][promises].
 The "$" function can be thought of as a NodeList converted into an array, with a few Element methods that will be run on each element, as well as event handlers (e.g. `$('a').click()`).
 
-## Polyfills included:
-- ### Array.prototype
-  - `includes`
-  - `some`
-  - `every`
-  - `from`
-  - `of`
-- ### Element.prototype
-  - `remove`
-  - `show`
-  - `dataset`
-  - `classList`
-  - `matches`
-- ### JSON
-  - `parse`
-  - `stringify`
-- ### CSS
-  - `escape`
-  - `matches`
-- `fetch`
-- `URL`
-- `Promise`
-- A few more
-
 ## Recommendations for developers
 - [ESLint](http://eslint.org/)
 - [Babel](http://babeljs.io/)
