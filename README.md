@@ -92,8 +92,9 @@ import './shim.js';
 
 // Import specific functions/classes/classses
 // Must be valid relative or absolute path, so replative paths
-// must begin with "./" or "../" and must contain extension
-import {myFunc, MyClass} from './exports.js';
+// must begin with "./" or "../" and must contain extension.
+// importing `as` aliases an import, allowing renaming from the name exported
+import {myFunc, MyClass as CustomClass} from './exports.js';
 
 // Or import everything into an object / namespace
 import * as exports from './exports.js';
