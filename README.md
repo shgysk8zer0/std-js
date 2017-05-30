@@ -42,12 +42,19 @@ Simply clone or add as a submodule:
 export function myFunc() {
   // Function body
 }
+
+function notExported() {
+  // Function body
+}
+
 export function unused() {
   // Funciton body
 }
+
 export class MyClass {
   // Class body
 }
+
 export const FOO = 'bar';
 ```
 
