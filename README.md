@@ -8,10 +8,12 @@
 ## A JavaScript library for making front-end development sane!
 
 ## Navigation
+- [Installing](#installing)
+- [Contributing](./CONTRIBUTING.md)
+- [Contact](#contact-developer)
 - [Exporting](#exporting)
 - [Importing](#importing)
 - [Example](#example)
-- [Contact](#contact-developer)
 
 > The purpose of this library is not so much to provide alternatives to jQuery, etc,
 > but rather to provide polyfills and wrappers to native JavaScript, enabling use
@@ -23,6 +25,15 @@
 > The "$" function can be thought of as a NodeList converted into an array, with
 > a few Element methods that will be run on each element, as well as event handlers
 > (e.g. `$('a').click()`).
+
+### Installing
+Simply clone or add as a submodule:
+
+`git submodule add git://github.com/shgysk8zer0/std-js.git path/to/use`
+
+### Contact Developer
+- [Open an issue](https://github.com/shgysk8zer0/std-js/issues)
+- [Email](mailto:shgysk8zer0@gmail.com?subject=std-js)
 
 ### Exporting
 ```js
@@ -98,7 +109,3 @@ $(self).load(() => {
   });
 });
 ```
-
-### Contact Developer
-- [Open an issue](https://github.com/shgysk8zer0/std-js/issues)
-- [Email](mailto:shgysk8zer0@gmail.com?subject=std-js)
