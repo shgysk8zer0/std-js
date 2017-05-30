@@ -1,75 +1,45 @@
 # Contributing to the project
-**Table of Contents**
-- [General](#general)
-- [Requirements](#requirements)
-- [Windows developer issues](#windows-issues)
-- [PHP Contributions](#php)
-- [JavaScript Contributions](#javascript)
-- [CSS Contributions](#css)
-- [Icons](#icons)
-- [Git Submodules used](#git-submodules)
-- [NPM Modules / Dev dependencies](#dev-dependencies)
 
-- - -
+Due to Content-Security-Policy, use of `eval` and inline scripts are **prohibited**.
+Further, this project uses [native JavaScript modules](https://hacks.mozilla.org/2015/08/es6-in-depth-modules/),
+so be sure to familiarize yourself with the syntax. It also uses [classes](https://hacks.mozilla.org/2015/07/es6-in-depth-classes/)
+and many other [ES6](https://hacks.mozilla.org/category/es6-in-depth/) features,
+so you should be familiar with them.
 
-## General
-Write access to the GitHub repository is restricted, so make a fork and clone that. All work should be done on its own branch, named according to the issue number (*e.g. `42` or `bug/23`*). When you are finished with your work, push your feature branch to your fork, preserving branch name (*not to master*), and create a pull request.
+## Issues
+`ISSUE_TEMPALTE.md` will be used to pre-fill any issues created. Logs and detailed
+descriptions are extremely helpful and may be required. **DO NOT** report any
+issues relating to browser compatibility. Only modern browsers are supported, and
+it is your responsibility to deal with vendor prefixes and polyfills. The included
+polyfills are deprecated and will be moved to another repository. I suggest that
+you look into [Polyfill.io](https://polyfill.io).
 
-**Always pull from `upstream master` prior to sending pull-requests.**
+## Pull requests
+Please use an open issue and reference that issue in the pull request, as suggested
+in `PULL_REQUEST_TEMPLATE.md` (will be pre-filled when opening a pull request).
+When you open a pull request, it **MUST** pass test/linting or it cannot be merged.
 
-## Requirements
-- [Apache](https://httpd.apache.org/)
-- [Node/NPM](https://nodejs.org/en/)
-- [Git](https://www.git-scm.com/download/)
+It is also suggested that you label your branches according to the issue and label,
+so a bug reported in issue 14 becomes a branch named `bug/14` and a feature requested
+in issue 42 becomes `feature/42`. Do not work directly on master branch, as your
+pull request may not end up being accepted, causing your fork to divert.
 
-## Windows issues
-> This project requires several command line tools which require installation and
-some configuration on Windows. The following will need to be added to your `PATH`
-in order to be functional. "Git Shell" & "Git Bash" that comes with GitHub Desktop
-or Git GUI are fairly usable so long as you select "Use Windows' default console window"
-during installation. See [Windows Environment Extension](https://technet.microsoft.com/en-us/library/cc770493.aspx)
-
-- Node
-- Git
-- GPG (GPG4Win)
-
-## Git Hooks
-Add these script in `/.git/hooks/` to automate building on pulls and testing on pushes
-- `post-merge`
-```
-#!/bin/sh
-npm run build
-```
-- `pre-push` *Causes major delay while tests are running and has issues on GitHub Desktop*
-```
-npm test
-```
-
-You should also copy or rename `.git/hooks/pre-commit.sample` to `.git/hooks.pre-commit`
-to ensure that any filenames are valid across all OS's.
-
-## JavaScript
-Due to Content-Security-Policy, use of `eval` and inline scripts are **prohibited**. Further, this project uses ECMAScript 2015  [modules](http://exploringjs.com/es6/ch_modules.html), so be sure to familiarize yourself with the syntax.
-
-![JavaScript sample](https://i.imgur.com/Ac0fKZu.png)
-
+## Testing
 All JavaScript **MUST** pass Eslint according to the rules defined in `.eslintrc`
-and have an extension of `.es6`.
+and have an extension of `.js`. Tests are run using either `eslint` command directly
+or by running `npm test`.
+
+### Linting rules
+- Single quotes
+- Semicolons required
+- Indent using tabs (align using spaces)
+- No `require` function. This uses native modules only
+
+> Tabs require fewer characters and can be adjusted by altering tab width. A developer
+> can increase/decrease indentation just by altering tab width, without making
+> any changes to the code itself. Since spaces are still to be used for alignment,
+> I see zero benefit to using 2 or 4 space characters instead of a single tab.
+
 Since this project minifies and packages all JavaScript using Babel & Webpack,
 all script **MUST NOT** execute any code, but only
 import/export functions, classes, etc.
-
-
-## NPM
-Several useful modules are included for Node users, which is strongly recommended for all development aside from PHP. Simply run `npm install` after download to install all Node modules and Git submodules. There are also several NPM scripts configured, which may be run using `npm run $script`.
-- `build` which transpiles and minifies JavaScript
-- `test` Runs eslint
-- `git:hooks` Which sets `pre-commit`, `post-merge`, and `pre-push` hooks.
-NPM also has a `postinstall` script which will automatically install dependencies
-and create Git hooks, which should avoid problems with invalid file names and
-outdated generated files.
-
-## Dev dependencies
-- [Babel](https://babeljs.io/)
-- [Webpack](https://webpack.github.io/)
-- [ESLint](http://eslint.org/)

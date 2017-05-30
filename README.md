@@ -1,84 +1,141 @@
-[build-status]: https://travis-ci.org/shgysk8zer0/std-js.svg?branch=master
-[travis-ci]: https://travis-ci.org/shgysk8zer0/std-js
-[gitter-badge]: https://badges.gitter.im/shgysk8zer0/std-js.svg
-[gitter-link]: https://gitter.im/shgysk8zer0/std-js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[promises]: https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Promise.jsm/Promise
-[mutations]: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
 # std-js
+
 - - -
-[![Build Status][build-status]][travis-ci] [![Join the chat at https://gitter.im/shgysk8zer0/std-js][gitter-badge]][gitter-link]
+
+[![Build Status](https://travis-ci.org/shgysk8zer0/std-js.svg?branch=master)](https://travis-ci.org/shgysk8zer0/std-js)
+[![Join the chat at https://gitter.im/shgysk8zer0/std-js](https://badges.gitter.im/shgysk8zer0/std-js.svg)](https://gitter.im/shgysk8zer0/std-js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## A JavaScript library for making front-end development sane!
 
-> The purpose of this library is not so much to provide alternatives to jQuery, etc, but rather to provide polyfills and wrappers to native JavaScript, enabling use of modern JavaScript with less headache over browser support and implementation.  
-It was, in part, influenced by the syntax of jQuery, but its purpose is different in that this places little emphasis on style and animation. Rather, its emphasis is on asynchronous event handling though [Mutation Observers][mutations] and [Promises][promises].
-The "$" function can be thought of as a NodeList converted into an array, with a few Element methods that will be run on each element, as well as event handlers (e.g. `$('a').click()`).
+## Navigation
+- [Installing](#installing)
+- [Contributing](./CONTRIBUTING.md)
+- [Contact](#contact-developer)
+- [Exporting](#exporting)
+- [Importing](#importing)
+- [Example](#example)
 
-## Polyfills included:
-- ### Array.prototype
-  - `includes`
-  - `some`
-  - `every`
-  - `from`
-  - `of`
-- ### Element.prototype
-  - `remove`
-  - `show`
-  - `dataset`
-  - `classList`
-  - `matches`
-- ### JSON
-  - `parse`
-  - `stringify`
-- ### CSS
-  - `escape`
-  - `matches`
-- `fetch`
-- `URL`
-- `Promise`
-- A few more
+> The purpose of this library is not so much to provide alternatives to jQuery, etc,
+> but rather to provide polyfills and wrappers to native JavaScript, enabling use
+> of modern JavaScript with less headache over browser support and implementation.  
+> It was, in part, influenced by the syntax of jQuery, but its purpose is different
+> in that this places little emphasis on style and animation. Rather, its
+> emphasis is on asynchronous event handling though [Mutation Observers](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver)
+> and [Promises](https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Promise.jsm/Promise).
+> The "$" function can be thought of as a NodeList converted into an array, with
+> a few Element methods that will be run on each element, as well as event handlers
+> (e.g. `$('a').click()`).
 
-## Recommendations for developers
-- [ESLint](http://eslint.org/)
-- [Babel](http://babeljs.io/)
-- [Webpack](https://webpack.github.io/)
+### Installing
+Simply clone or add as a submodule:
 
-`npm install "babel-loader" "babel-core" "babel-preset-es2015" "webpack" "eslint"`
+`git submodule add git://github.com/shgysk8zer0/std-js.git path/to/use`
+
+### Contact Developer
+- [Open an issue](https://github.com/shgysk8zer0/std-js/issues)
+- [Email](mailto:shgysk8zer0@gmail.com?subject=std-js)
+
+### Exporting
+```js
+// exports.js
+// Export class/function/constant
+export function myFunc() {
+  // Function body
+}
+
+function notExported() {
+  // Function body
+}
+
+export function unused() {
+  // Funciton body
+}
+
+export class MyClass {
+  // Class body
+}
+
+export const FOO = 'bar';
+```
+
+```js
+// Spiffy.js
+// Default export (can only specify on default and should be only export)
+export default class Spiffy {
+  // Class body
+}
+```
+### Importing
+```js
+// shim.js
+// Does not export anything.
+if (! ('HTMLDialogElement' in window)) {
+  Object.defineProperty(HTMLElement.prototype, 'open', {
+    get: function() {
+      return this.hasAttribute('open');
+    },
+    set: function(open) {
+      if (open) {
+        this.setAttribute('open', '');
+      } else {
+        this.removeAttribute('open');
+      }
+    }
+  });
+  // ...
+}
+```
+```js
+// main.js
+// Import and run shim.js
+import './shim.js';
+
+// Import specific functions/classes/classses
+// Must be valid relative or absolute path, so replative paths
+// must begin with "./" or "../" and must contain extension.
+// importing `as` aliases an import, allowing renaming from the name exported
+import {myFunc, MyClass as CustomClass} from './exports.js';
+
+// Or import everything into an object / namespace
+import * as exports from './exports.js';
+/**
+ * const exports = {myFunc, unused, MyClass, FOO};
+ */
+
+// Import default (`export default`)
+import Spiffy from './Spiffy.js';
+
+// Import everything from a remote script
+import 'https://cdn.polyfill.io/v2/polyfill.min.js';
+```
 
 ### Example
 ```js
-import {default as $} from './zq.es6';
-import * as polyfills from './polyfills.es6';
+import {$} from './functions.js';
+import handleJSON from './json_response.js';
+import * as mutations from './mutations.js';
 
-$('[data-remove]').click(function(click) {
-	click.preventDefault();
-	$(this.dataset.remove).remove();
-});
+$(self).load(() => {
+  $('[data-remove]').click(mutations.remove);
+  $(document.body).watch(mutations.events, mutations.options, mutations.filter);
+  $('a').filter(link => link.origin === location.origin && link.pathname !== location.pathname).click(async function(click) => {
+    click.preventDefault();
+    let url = new URL(this.href);
+    let headers = new Headers();
+    headers.set('Accept', 'application/json');
 
-$('a').filter(link => link.origin === location.origin && link.pathname !== location.pathname).click(function(click) => {
-	click.preventDefault();
-	let url = new URL(this.href);
-	let headers = new Headers();
-	headers.set('Accept', 'application/json');
-	fetch(url, {
-		headers,
-		method: 'GET',
-		credentials: 'include'
-	}).then(resp => {
-		if (resp.ok) {
-			let type = resp.headers.get('Content-Type');
-			if (type.startsWith('application/json')) {
-				history.pushState({}, document.title, resp.url);
-				return resp.json();
-			} else {
-				throw new Error(`Unsupported Content-Type: ${type}`);
-			}
-		} else {
-			throw new Error(`<${resp.url}> ${resp.statusText}`);
-		}
-	}).then(json => {
-		// Handle JSON
-	}).catch(error => {
-		console.error(error);
-	});
+    const resp = fetch(url, {
+      headers,
+      method: 'GET',
+      credentials: 'include'
+    });
+    if (resp.ok) {
+      const json = await resp.json();
+      handleJSON(json);
+      history.pushState(json, document.title, resp.url);
+    } else {
+      throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
+    }
+  });
 });
 ```
