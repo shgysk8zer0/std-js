@@ -18,10 +18,40 @@
 > a few Element methods that will be run on each element, as well as event handlers
 > (e.g. `$('a').click()`).
 
-## Recommendations for developers
-- [ESLint](http://eslint.org/)
-- [Babel](http://babeljs.io/)
-- [Webpack](https://webpack.github.io/)
+```js
+// exports.js
+// Export class/function/constant
+export function myFunc() {}
+export function unused() {}
+export class MyClass {}
+export const FOO = 'bar';
+```
+
+```js
+// Spiffy.js
+// Default export (can only specify on default and should be only export)
+export default class Spiffy {}
+```
+
+```js
+// main.js
+// Import specific functions/classes/classses
+// Must be valid relative or absolute path, so replative paths
+// must begin with "./" or "../" and must contain extension
+import {myFunc, MyClass} from './exports.js';
+
+// Or import everything into an object / namespace
+import * as exports from './exports.js';
+/**
+ * const exports = {myFunc, unused, MyClass, FOO};
+ */
+
+// Import default (`export default`)
+import Spiffy from './spiffy.js';
+
+// Import everything from a remote script
+import 'https://cdn.polyfill.io/v2/polyfill.min.js';
+```
 
 ### Example
 ```js
