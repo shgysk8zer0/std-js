@@ -67,7 +67,29 @@ export default class Spiffy {
 ```
 ### Importing
 ```js
+// shim.js
+// Does not export anything.
+if (! ('HTMLDialogElement' in window)) {
+  Object.defineProperty(HTMLElement.prototype, 'open', {
+    get: function() {
+      return this.hasAttribute('open');
+    },
+    set: function(open) {
+      if (open) {
+        this.setAttribute('open', '');
+      } else {
+        this.removeAttribute('open');
+      }
+    }
+  });
+  // ...
+}
+```
+```js
 // main.js
+// Import and run shim.js
+import './shim.js';
+
 // Import specific functions/classes/classses
 // Must be valid relative or absolute path, so replative paths
 // must begin with "./" or "../" and must contain extension
