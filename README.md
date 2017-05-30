@@ -18,21 +18,30 @@
 > a few Element methods that will be run on each element, as well as event handlers
 > (e.g. `$('a').click()`).
 
+### Exporting
 ```js
 // exports.js
 // Export class/function/constant
-export function myFunc() {}
-export function unused() {}
-export class MyClass {}
+export function myFunc() {
+  // Function body
+}
+export function unused() {
+  // Funciton body
+}
+export class MyClass {
+  // Class body
+}
 export const FOO = 'bar';
 ```
 
 ```js
 // Spiffy.js
 // Default export (can only specify on default and should be only export)
-export default class Spiffy {}
+export default class Spiffy {
+  // Class body
+}
 ```
-
+### Importing
 ```js
 // main.js
 // Import specific functions/classes/classses
@@ -47,7 +56,7 @@ import * as exports from './exports.js';
  */
 
 // Import default (`export default`)
-import Spiffy from './spiffy.js';
+import Spiffy from './Spiffy.js';
 
 // Import everything from a remote script
 import 'https://cdn.polyfill.io/v2/polyfill.min.js';
