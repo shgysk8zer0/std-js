@@ -129,23 +129,17 @@ export default class zQ {
 		return this.some(el => el.classList.contains(cname));
 	}
 
-	toggleClass(cname, condition) {
-		if (typeof condition === 'undefined') {
-			this.results.forEach(el => el.classList.toggle(cname));
+	toggleClass(cname, force) {
+		if (typeof force !== 'undefined') {
+			this.each(node => node.classList.toggle(cname, force));
 		} else {
-			this.results.forEach(el => el.classList.toggle(cname, condition));
+			this.each(node => node.classList.toggle(cname));
 		}
 		return this;
 	}
 
-	swapClass(cname1, cname2) {
-		this.each(node => {
-			if (node.classList.contains(cname1)) {
-				node.classList.replace(cname1, cname2);
-			} else if (node.classList.contains(cname2)) {
-				node.classList.replace(cname2, cname1);
-			}
-		});
+	replaceClass(cname1, cname2) {
+		this.each(node => node.classList.replace(cname1, cname2));
 		return this;
 	}
 
