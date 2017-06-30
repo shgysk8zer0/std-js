@@ -88,6 +88,14 @@ export default class zQ {
 		return this;
 	}
 
+	animate(keyframes, opts) {
+		if ('animate' in Element.prototype) {
+			return this.results.map(node => node.animate(keyframes, opts));
+		} else {
+			return [];
+		}
+	}
+
 	indexOf(i) {
 		return this.results.indexOf(i);
 	}
