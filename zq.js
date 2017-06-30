@@ -89,7 +89,11 @@ export default class zQ {
 	}
 
 	animate(keyframes, opts) {
-		return this.results.map(node => node.animate(keyframes, opts));
+		if ('animate' in Element.prototype) {
+			return this.results.map(node => node.animate(keyframes, opts));
+		} else {
+			return [];
+		}
 	}
 
 	indexOf(i) {
