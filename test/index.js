@@ -203,7 +203,8 @@ function showLocation() {
 	})();
 }
 
-$(self).load(async () => {
+
+$(document).ready(async () => {
 	if (document.createElement('details') instanceof HTMLUnknownElement) {
 		$('details > summary').click(() => {
 			this.parentElement.open = ! this.parentElement.open;
