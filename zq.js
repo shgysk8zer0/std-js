@@ -230,11 +230,12 @@ export default class zQ {
 	}
 
 	ready(callback) {
+		this.on('DOMContentLoaded', callback);
 		if (document.readyState !== 'loading') {
-			callback();
-			return this;
+			this.each(node => {
+				node.dispatchEvent(new CustomEvent('DOMContentLoaded', {detail: null}));
+			});
 		}
-		return this.on('DOMContentLoaded', callback);
 	}
 
 	networkChange(callback) {
