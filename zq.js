@@ -231,9 +231,9 @@ export default class zQ {
 
 	ready(callback) {
 		this.on('DOMContentLoaded', callback);
-		if (document.readyState !== 'loading') {
+		if (document.readyState === 'complete') {
 			this.each(node => {
-				node.dispatchEvent(new CustomEvent('DOMContentLoaded', {detail: null}));
+				node.dispatchEvent(new Event('DOMContentLoaded'));
 			});
 		}
 	}
