@@ -65,11 +65,27 @@ export default class zQ {
 		return this.results.includes(node);
 	}
 
-	each(callback) {
-		this.results.forEach(callback);
+	each(...args) {
+		this.results.forEach(...args);
 		return this;
 	}
 
+	forEach(...args) {
+		this.results.forEach(...args);
+		return this;
+	}
+
+	*values() {
+		const len = this.results.length;
+		for(let i = 0; i < len; i++) {
+			yield this.results[i];
+		}
+	}
+
+	/**
+	 * Note: This is for `HTMLDialogElement.prototype.show`, not the inverse
+	 * of `hide`
+	 */
 	show() {
 		this.each(node => {
 			if ('show' in node) {
@@ -139,15 +155,15 @@ export default class zQ {
 
 	toggleClass(cname, force) {
 		if (typeof force !== 'undefined') {
-			this.each(node => node.classList.toggle(cname, force));
+			this.results.forEach(node => node.classList.toggle(cname, force));
 		} else {
-			this.each(node => node.classList.toggle(cname));
+			this.results.forEach(node => node.classList.toggle(cname));
 		}
 		return this;
 	}
 
 	replaceClass(cname1, cname2) {
-		this.each(node => node.classList.replace(cname1, cname2));
+		this.results.forEach(node => node.classList.replace(cname1, cname2));
 		return this;
 	}
 
@@ -161,25 +177,30 @@ export default class zQ {
 		return this;
 	}
 
-	hide() {
-		this.results.forEach(el => el.hidden = true);
+	hide(hidden = true) {
+		this.results.forEach(el => el.hidden = hidden);
 		return this;
 	}
 
-	unhide() {
-		this.results.forEach(el => el.hidden = false);
+	unhide(shown = true) {
+		return this.hide(!shown);
+	}
+
+	append(...nodes) {
+		this.results.forEach(el => el.append(...nodes));
 		return this;
 	}
 
-	delete() {
-		return this.remove();
+	prepend(...nodes) {
+		this.results.forEach(el => el.prepend(...nodes));
 	}
 
-	append(node) {
-		this.results.forEach(el => {
-			el.appendChild(document.importNode(node.cloneNode(true), true));
-		});
-		return this;
+	before(...nodes) {
+		this.results.forEach(el => el.before(...nodes));
+	}
+
+	after(...nodes) {
+		this.results.forEach(el => el.after(...nodes));
 	}
 
 	afterBegin(text) {
@@ -231,10 +252,12 @@ export default class zQ {
 
 	ready(callback, options = false) {
 		this.on('DOMContentLoaded', callback, options);
-		document.dispatchEvent(new Event('DOMContentLoaded'));
 		if (document.readyState !== 'loading') {
-			document.dispatchEvent(new Event('DOMContentLoaded'));
+			this.each(node => {
+				callback.bind(node)(new Event('DOMContentLoaded'));
+			});
 		}
+		return this;
 	}
 
 	networkChange(callback, options = false) {
@@ -350,10 +373,6 @@ export default class zQ {
 
 	updateready(callback, options = false) {
 		return this.on('updateready', callback, options);
-	}
-
-	DOMContentLoaded(callback, options = {once: true}) {
-		return this.on('DOMContentLoaded', callback, options);
 	}
 
 	load(callback, options = {once: true}) {

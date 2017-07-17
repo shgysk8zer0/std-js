@@ -17,19 +17,23 @@ import GitHub from '../GitHub.js';
 import Gravatar from '../Gravatar.js';
 
 export function loadHandler() {
-	// event.target.removeEventListener(event.type, loadHandler);
 	if (document.createElement('details') instanceof HTMLUnknownElement) {
 		$('details > summary').click(() => {
 			this.parentElement.open = ! this.parentElement.open;
 		});
 	}
+
+	mutations.init();
+
 	$('input[autocomplete="email"]:valid').each(input => {
 		input.before(new Gravatar(input.value));
 	});
+
 	$('input[autocomplete="username"]').each(input => {
 		input.before(GitHub.getAvatar(input.value));
 	});
-	$('form').submit(submit => {
+
+	$('form[name="contact-form"]').submit(submit => {
 		submit.preventDefault();
 		const form = new FormData(submit.target);
 		const data = {};
@@ -37,10 +41,10 @@ export function loadHandler() {
 			data[key] = form.get(key);
 		}
 		console.log(data);
-	});
-	$('form[name="contact-form"]').reset(reset => {
+	}).reset(reset => {
 		$('img', reset.target).remove();
 	});
+
 	$('input[autocomplete="email"]').change(input => {
 		$('img[src^="https://gravatar.com/"]', input.target.closest('fieldset')).remove();
 		if (input.target.validity.valid) {
@@ -48,48 +52,46 @@ export function loadHandler() {
 			input.target.before(grav);
 		}
 	});
+
 	$('input[autocomplete="username"]').change(input => {
 		$('img[src^="https://github.com"]', input.target.closest('fieldset')).remove();
 		if (input.target.validity.valid) {
 			input.target.before(GitHub.getAvatar(input.target.value));
 		}
 	});
+
 	$('form[name="openweather"]').submit(event => {
 		event.preventDefault();
 		const form = new FormData(event.target);
 		const weather = new OpenWeatherMap(KEYS.OpenWeatherMap, {units: form.get('units')});
 		weather.getFromZip(form.get('zip'), appendWeather);
 	});
+
 	$('#weather-loc').click(() => {
 		const weather = new OpenWeatherMap(KEYS.OpenWeatherMap);
 		weather.getFromCoords(appendWeather);
 	});
-	$('header h1').html = `<u>${document.title}</u>`;
-	mutations.init();
+
 	$('#gps-btn').click(showLocation);
+
 	$(document.body).watch(mutations.events, mutations.options, mutations.filter);
+
 	$('dialog').on('close', event => console.log(event.target.returnValue));
 
 	$('form[name="keybase-search"]').submit(keybaseSearch);
-	// console.info(Weather, SocialShare, WYSIWYG, FileUpload);
-	let url = new URL('fetch.json', location.origin);
-	let headers = new Headers();
-	headers.set('Accept', 'application/json');
-	fetch(url, {
-		headers
-	}).then(parseResponse).then(handleJSON).catch(reportError);
 
 	$('#vid-play').click(click => {
 		click.target.hidden = true;
 		getUserMedia();
 	});
-	$('#video-dialog').on('close', close => {
-		console.log(close);
-	});
 
 	$('#vid-canvas').click(click => {
 		open(click.target.toDataURL());
 	});
+
+	fetch(new URL('fetch.json', location.origin), {
+		headers: new Headers({Accept: 'application/json'})
+	}).then(parseResponse).then(handleJSON).catch(reportError);
 }
 
 function keybaseSearch(submit) {
@@ -208,8 +210,8 @@ function appendWeather(weather) {
 		// 	node.remove();
 		// }
 	});
-	document.body.appendChild(dialog);
-	$('dialog[open]').each(dialog => dialog.close());
+	document.body.append(dialog);
+	$('dialog[open]').close();
 	dialog.showModal();
 }
 

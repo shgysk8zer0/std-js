@@ -10,7 +10,7 @@
 		<script type="application/javascript" src="./index.min.js" async="" nomodule=""></script>
 		<link rel="stylesheet" type="text/css" href="./index.min.css" />
 	</head>
-	<body class="no-js" contextmenu="context-menu">
+	<body class="no-js" contextmenu="context-menu" lang="en-us" dir="ltr">
 		<menu type="context" id="context-menu">
 			<menu label="Share on ...">
 				<menuitem label="Twitter" data-social-share="twitter"></menuitem>
@@ -56,13 +56,13 @@
 					</fieldset>
 					<fieldset>
 						<legend>Address</legend>
-						<input type="text" name="address[street]" autocomplete="street-address" placeholder="123 Some Street" pattern="\d+ [\w ]+" required=""/>
+						<input type="text" name="address[street]" autocomplete="street-address" placeholder="123 Some Street" pattern="\d+ [\w\.# ]+" required=""/>
 						<br />
 						<input type="text" name="address[city]" autocomplete="address-level2" placeholder="City" pattern="[A-z ]+" required=""/>
 						<span>, </span>
 						<input type="text" name="address[state]" autocomplete="address-level1" placeholder="State" pattern="[A-z ]+" required="" />
 						<br />
-						<input type="number" name="address[postal]" autocomplete="postal-code" placeholder="#####" required="" />
+						<input type="number" name="address[postal]" autocomplete="postal-code" placeholder="#####" min="10000" max="99999" required="" />
 						<br />
 					</fieldset>
 					<fieldset>
@@ -103,7 +103,7 @@
 				<button type="button" data-close="#weather-dialog">x</button>
 			</header>
 			<form name="openweather">
-				<input name="zip" type="number" min="10000" max="99999" placeholder="######" maxlength="5" required="" />
+				<input name="zip" type="number" min="10000" max="99999" placeholder="######" maxlength="5" autocomplete="postal-code" required="" />
 				<details>
 					<summary>Units</summary>
 					<label for="units-imperial">Imperial</label>
