@@ -5,10 +5,10 @@
 		<meta charset="utf-8"/>
 		<base href="/test/" />
 		<link rel="icon" type="image/svg+xml" href="./javascript.svg" sizes="any"/>
-		<script type="application/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js" crossorigin="annonymous" async></script>
-		<script type="module" src="./index.js" async></script>
-		<!-- <script type="application/javascript" src="./index.min.js" async nomodule></script> -->
-		<link rel="stylesheet" type="text/css" href="./index.css" />
+		<script type="application/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js" crossorigin="annonymous" async=""></script>
+		<script type="module" src="./index.js" async=""></script>
+		<script type="application/javascript" src="./index.min.js" async="" nomodule=""></script>
+		<link rel="stylesheet" type="text/css" href="./index.min.css" />
 	</head>
 	<body class="no-js" contextmenu="context-menu">
 		<menu type="context" id="context-menu">
@@ -18,10 +18,12 @@
 				<menuitem label="reddit" data-social-share="reddit"></menuitem>
 			</menu>
 			<menu label="Forms">
+				<menuitem label="Registration" data-show-modal="#contact-dialog"></menuitem>
 				<menuitem label="OpenWeatherMap" data-show-modal="#weather-dialog"></menuitem>
 				<menuitem label="Keybase" data-show-modal="#keybase-dialog"></menuitem>
 			</menu>
 			<menuitem label="GPS" id="gps-btn"></menuitem>
+			<menuitem label="Video Test" data-show-modal="#video-dialog"></menuitem>
 		</menu>
 		<header>
 			<h1>JavaScript module testing</h1>
@@ -31,16 +33,81 @@
 		<aside>Aside</aside>
 		<footer>footer</footer>
 		<noscript>You obviously need JavaScript enabled to test a JavaScript library.</noscript>
+		<dialog id="contact-dialog">
+			<header>
+				<button type="reset" form="contact-form" data-close="#contact-dialog">X</button>
+				<form name="contact-form" id="contact-form">
+					<fieldset>
+						<legend>Basic Info</legend>
+						<input type="text" name="basic[first]" autocomplete="given-name" placeholder="First name" pattern="[A-z]+" required="" />
+						<input type="text" name="basic[middle]" autocomplete="additional-name" placeholder="Middle name" pattern="[A-z]+" />
+						<input type="text" name="basic[last]" autocomplete="family-name" placeholder="Last Name" Pattern="[A-z]+" required="" />
+						<br />
+						<label>Organization <input type="text" name="basic[org]" autocomplete="organization" placeholder="Company" /></label>
+						<br />
+						<label>Birthday<input type="date" name="basic[bday]" autocomplete="bday" placeholder="YYYY-mm-dd" required="" /></label>
+						<br />
+						<label for="sex">Sex</label>
+						<select name="basic[sex]" id="sex" autocomplete="sex" required="">
+							<option value="">Pick one</option>
+							<option value="Male">Male</option>
+							<option value="Female">Female</option>
+						</select>
+					</fieldset>
+					<fieldset>
+						<legend>Address</legend>
+						<input type="text" name="address[street]" autocomplete="street-address" placeholder="123 Some Street" pattern="\d+ [\w ]+" required=""/>
+						<br />
+						<input type="text" name="address[city]" autocomplete="address-level2" placeholder="City" pattern="[A-z ]+" required=""/>
+						<span>, </span>
+						<input type="text" name="address[state]" autocomplete="address-level1" placeholder="State" pattern="[A-z ]+" required="" />
+						<br />
+						<input type="number" name="address[postal]" autocomplete="postal-code" placeholder="#####" required="" />
+						<br />
+					</fieldset>
+					<fieldset>
+						<legend>Contact Info</legend>
+						<input type="email" name="contact[email]" autocomplete="email" placeholder="user@example.com" required="" />
+						<br />
+						<input type="tel" name="contact[tel]" autocomplete="tel" placeholder="+1-123-456-7890" required="" />
+						<br />
+						<input type="url" name="contact[url]" autocomplete="url" placeholder="http://example.com" />
+					</fieldset>
+					<fieldset>
+						<legend>Credentials</legend>
+						<input type="text" name="creds[user]" autocomplete="username" placeholder="username" required="" />
+						<br />
+						<input type="password" name="creds[password]" autocomplete="new-password" placeholder="***********" required="" />
+					</fieldset>
+					<fieldset>
+						<legend>Payment Info</legend>
+						<select name="cc[type]" required="">
+							<option value="">Select Credit Card Type</option>
+							<option>Master Card</option>
+							<option>Visa</option>
+						</select>
+						<br />
+						<input type="number" autocomplete="cc-number" min="1000000000000" max="9999999999999" placeholder="Credit Card Number (no '-')" required="" />
+						<br />
+						<input type="date" name="cc[exp]" autocomplete="cc-exp" placeholder="YYYY-MM-DD" required="" />
+						<br />
+						<input type="number" autocomplete="cc-csc" min="100" max="9999" name="cc[csc]" placeholder="CSC (###)" required="" />
+					</fieldset>
+					<button type="submit">Submit</button>
+					<button type="reset">Reset</button>
+				</form>
+			</header>
+		</dialog>
 		<dialog id="weather-dialog">
 			<header>
 				<button type="button" data-close="#weather-dialog">x</button>
 			</header>
 			<form name="openweather">
-				<input name="zip" type="number" min="10000" max="99999" placeholder="######" maxlength="5" required />
+				<input name="zip" type="number" min="10000" max="99999" placeholder="######" maxlength="5" required="" />
 				<details>
 					<summary>Units</summary>
 					<label for="units-imperial">Imperial</label>
-					<input type="radio" name="units" value="imperial" id="units-imperial" checked />
+					<input type="radio" name="units" value="imperial" id="units-imperial" checked="" />
 					<label for="units-metric">Metric</label>
 					<input type="radio" name="units" value="metric" id="units-metric" />
 				</details>
@@ -48,18 +115,26 @@
 			</form>
 			<button type="button" id="weather-loc">Get from GPS</button>
 		</dialog>
+		<dialog id="video-dialog">
+			<header>
+				<button data-close="#video-dialog">X</button>
+				<button id="vid-play">Play</button>
+			</header>
+			<video hidden="" muted="" id="vid"></video>
+			<canvas id="vid-canvas" width="800" height="640"></canvas>
+		</dialog>
 		<dialog id="keybase-dialog">
 			<button data-close="#keybase-dialog">x</button>
 			<hr />
 			<form name="keybase-search">
 				<label for="keybase-location">Search in...</label>
-				<select name="keybase[location]" id="keybase-location" required>
+				<select name="keybase[location]" id="keybase-location" required="">
 					<option value="usernames">KeyBase</option>
 					<option value="github">Github</option>
 					<option value="twitter">Twitter</option>
 				</select>
 				<label for="keybase-query">Query</label>
-				<input type="search" name="keybase[query]" id="keybase-query" placeholder="search for..." pattern="[\w,]+" required />
+				<input type="search" name="keybase[query]" id="keybase-query" placeholder="search for..." pattern="[\w,]+" required="" />
 				<br />
 				<button type="submit">Search</button>
 			</form>
@@ -98,7 +173,7 @@
 			<article itemtype="http://schema.org/Article">
 				<header>
 					<h2 itemprop="headline"></h2>
-					<b>By <span itemprop="author" data-schema-template="person-template"</span></b>
+					<b>By <span itemprop="author" data-schema-template="person-template"></span></b>
 				</header>
 				<section itemprop="articleBody"></section>
 			</article>
