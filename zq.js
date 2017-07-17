@@ -415,6 +415,10 @@ export default class zQ {
 		return this.on('online', callback, options);
 	}
 
+	hashchange(callback, options = false) {
+		return this.on('hashchange', callback, options);
+	}
+
 	/*visibilitychange(callback) {
 		return this.on('visibilitychange', callback);
 	}*/
