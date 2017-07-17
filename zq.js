@@ -416,7 +416,7 @@ export default class zQ {
 	}
 
 	hashchange(callback, options = false) {
-		return this.on('hashchange' callback, options);
+		return this.on('hashchange', callback, options);
 	}
 
 	/*visibilitychange(callback) {
