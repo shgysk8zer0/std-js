@@ -49,6 +49,17 @@ export default class GitHub {
 		this.repo = repo;
 	}
 
+	static getAvatar(username, size = 80) {
+		const url = new URL(`${username}.png`, 'https://github.com');
+		const img = new Image(80, 80);
+		if (size) {
+			url.searchParams.set('size', size);
+		}
+		img.src = url;
+		img.alt = `${username}@GitHub`;
+		return img;
+	}
+
 	async readme() {
 		return get(new URL(`/repos/${this.user}/${this.repo}/readme`, ENDPOINT));
 	}
