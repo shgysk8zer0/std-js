@@ -1,3 +1,14 @@
+import {supportsAsClasses} from '../support_test.js';
+import deprefix from '../deprefixer.js';
+
+deprefix();
+supportsAsClasses('svg', 'audio', 'video', 'picture', 'canvas', 'menuitem',
+'details', 'dialog', 'dataset', 'HTMLimports', 'classList', 'connectivity',
+'visibility', 'notifications', 'ApplicationCache', 'indexedDB',
+'localStorage', 'sessionStorage', 'CSSgradients', 'transitions',
+'animations', 'CSSvars', 'CSSsupports', 'CSSmatches', 'querySelectorAll',
+'workers', 'promises', 'ajax', 'FormData');
+
 function closeOnEscape(event) {
 	if (event.key === 'Escape') {
 		document.querySelector('dialog[open]').close();
