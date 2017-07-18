@@ -88,7 +88,7 @@ export default class SocialShare {
 		summary = getDescription(),
 		mini    = 'true'
 	} = {}) {
-		let url = new URL(ENDPOINTS.linnkedIn);
+		let url = new URL(ENDPOINTS.linkedIn);
 		url.searchParams.set('mini', mini);
 		url.searchParams.set('url', href);
 		url.searchParams.set('title', title);
