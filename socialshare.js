@@ -34,6 +34,10 @@ export default class SocialShare {
 		return SocialShare.getFacebook();
 	}
 
+	static get email() {
+		return `mailto:?subject=${encodeURIComponent(document.title)}&body=${location.href}`;
+	}
+
 	static get twitter() {
 		return SocialShare.getTwitter();
 	}
