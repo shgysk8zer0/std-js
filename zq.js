@@ -87,7 +87,7 @@ export default class zQ {
 	 * of `hide`
 	 */
 	show() {
-		this.each(node => {
+		this.results.forEach(node => {
 			if ('show' in node) {
 				node.show();
 			}
@@ -96,7 +96,7 @@ export default class zQ {
 	}
 
 	close() {
-		this.each(node => {
+		this.results.forEach(node => {
 			if ('close' in node) {
 				node.close();
 			}
@@ -253,7 +253,7 @@ export default class zQ {
 	ready(callback, options = false) {
 		this.on('DOMContentLoaded', callback, options);
 		if (document.readyState !== 'loading') {
-			this.each(node => {
+			this.results.forEach(node => {
 				callback.bind(node)(new Event('DOMContentLoaded'));
 			});
 		}
@@ -265,17 +265,17 @@ export default class zQ {
 	}
 
 	playing(callback) {
-		this.each(e => e.onplay = callback);
+		this.results.forEach(e => e.onplay = callback);
 		return this;
 	}
 
 	paused(callback) {
-		this.each(e => e.onpause = callback);
+		this.results.forEach(e => e.onpause = callback);
 		return this;
 	}
 
 	visibilitychange(callback, options = false) {
-		this.each(e => {
+		this.results.forEach(e => {
 			PREFIXES.forEach(pre => {
 				e.addEventListener(`${pre}visibilitychange`, callback, options);
 			});
@@ -433,21 +433,14 @@ export default class zQ {
 
 	watch(watching, options = [], attributeFilter = []) {
 		/*https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver*/
-		let watcher = new MutationObserver(mutations => {
-			mutations.forEach(mutation => {
-				watching[mutation.type].call(mutation);
-			});
+		const watcher = new MutationObserver(mutations => {
+			mutations.forEach(mutation => watching[mutation.type].call(mutation));
 		});
-		let watches = {};
-		Object.keys(watching).concat(options).forEach(event => {
-			watches[event] = true;
-		});
-		if (attributeFilter.length > 0) {
-			watches.attributeFilter = attributeFilter;
-		}
-		this.each(el => {
-			watcher.observe(el, watches);
-		});
+		const obs = Object.keys(watching).concat(options).reduce((watch, event) => {
+			watch[event] = true;
+			return watch;
+		}, {attributeFilter});
+		this.results.forEach(el => watcher.observe(el, obs));
 		return this;
 	}
 
