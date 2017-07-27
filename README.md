@@ -9,7 +9,7 @@
 
 ## Navigation
 - [Installing](#installing)
-- [Contributing](./CONTRIBUTING.md)
+- [Contributing](./docs/CONTRIBUTING.md)
 - [Contact](#contact-developer)
 - [Exporting](#exporting)
 - [Importing](#importing)
@@ -48,7 +48,7 @@ function notExported() {
 }
 
 export function unused() {
-  // Funciton body
+  // Function body
 }
 
 export class MyClass {
@@ -79,10 +79,10 @@ if (! ('HTMLDialogElement' in window)) {
         this.setAttribute('open', '');
       } else {
         this.removeAttribute('open');
+		this.dispatchEvent(new Event('close'));
       }
     }
   });
-  // ...
 }
 ```
 ```js
@@ -90,8 +90,8 @@ if (! ('HTMLDialogElement' in window)) {
 // Import and run shim.js
 import './shim.js';
 
-// Import specific functions/classes/classses
-// Must be valid relative or absolute path, so replative paths
+// Import specific functions/classes/objects/etc.
+// Must be valid relative or absolute path, so relative paths
 // must begin with "./" or "../" and must contain extension.
 // importing `as` aliases an import, allowing renaming from the name exported
 import {myFunc, MyClass as CustomClass} from './exports.js';
@@ -111,31 +111,13 @@ import 'https://cdn.polyfill.io/v2/polyfill.min.js';
 
 ### Example
 ```js
-import {$} from './functions.js';
+import {$, wait} from './functions.js';
 import handleJSON from './json_response.js';
 import * as mutations from './mutations.js';
 
-$(self).load(() => {
+$(document).ready(() => {
   $('[data-remove]').click(mutations.remove);
+  $('[data-show-modal]').click(mutations.showModal);
   $(document.body).watch(mutations.events, mutations.options, mutations.filter);
-  $('a').filter(link => link.origin === location.origin && link.pathname !== location.pathname).click(async function(click) => {
-    click.preventDefault();
-    let url = new URL(this.href);
-    let headers = new Headers();
-    headers.set('Accept', 'application/json');
-
-    const resp = fetch(url, {
-      headers,
-      method: 'GET',
-      credentials: 'include'
-    });
-    if (resp.ok) {
-      const json = await resp.json();
-      handleJSON(json);
-      history.pushState(json, document.title, resp.url);
-    } else {
-      throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
-    }
-  });
-});
+}, {once: true});
 ```
