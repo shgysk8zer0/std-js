@@ -41,5 +41,9 @@ or by running `npm test`.
 > I see zero benefit to using 2 or 4 space characters instead of a single tab.
 
 Since this project minifies and packages all JavaScript using Babel & Webpack,
-all script **MUST NOT** execute any code, but only
-import/export functions, classes, etc.
+all script **MUST NOT** execute any code, but only import/export functions,
+classes, etc. Modules which do not export anything, however, are the only exception
+to this rule.
+
+The simple rule is: if it exports, it **MUST NOT** have side effects. If it has
+side effects, it **MUST NOT** export.
