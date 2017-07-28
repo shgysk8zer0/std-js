@@ -9,7 +9,6 @@ const PREFIXES = [
 export default class zQ {
 	constructor(selector, parent = document) {
 		this.results = [];
-		this.filters = [];
 		try {
 			if (typeof selector === 'string') {
 				this.results = Array.from(parent.querySelectorAll(selector));
@@ -34,23 +33,23 @@ export default class zQ {
 	}
 
 	get found() {
-		return this.results.length !== 0;
+		return this.length !== 0;
 	}
 
 	get text() {
-		return this.results.map(node => node.textContent);
+		return [...this].map(node => node.textContent);
 	}
 
 	set text(str) {
-		this.results.forEach(node => node.textContent = str);
+		this.each(node => node.textContent = str);
 	}
 
 	get html() {
-		return this.results.map(node => node.innerHTML);
+		return [...this].map(node => node.innerHTML);
 	}
 
 	set html(html) {
-		this.results.forEach(node => node.innerHTML = html);
+		this.each(node => node.innerHTML = html);
 	}
 
 	toString() {
@@ -62,7 +61,7 @@ export default class zQ {
 	}
 
 	has(node) {
-		return this.results.includes(node);
+		return [...this].includes(node);
 	}
 
 	each(...args) {
@@ -71,15 +70,30 @@ export default class zQ {
 	}
 
 	forEach(...args) {
-		this.results.forEach(...args);
-		return this;
+		return this.each(...args);
 	}
 
 	*values() {
-		const len = this.results.length;
-		for(let i = 0; i < len; i++) {
-			yield this.results[i];
+		for (let item of this.results) {
+			yield item;
 		}
+	}
+
+	*keys() {
+		for (let n = 0; n < this.length; n++) {
+			yield n;
+		}
+	}
+
+	*entries() {
+		let n = 0;
+		for (const node of this) {
+			yield [n++, node];
+		}
+	}
+
+	[Symbol.iterator]() {
+		return this.values();
 	}
 
 	/**
@@ -87,7 +101,7 @@ export default class zQ {
 	 * of `hide`
 	 */
 	show() {
-		this.results.forEach(node => {
+		this.each(node => {
 			if ('show' in node) {
 				node.show();
 			}
@@ -96,7 +110,7 @@ export default class zQ {
 	}
 
 	close() {
-		this.results.forEach(node => {
+		this.each(node => {
 			if ('close' in node) {
 				node.close();
 			}
@@ -106,46 +120,35 @@ export default class zQ {
 
 	animate(keyframes, opts) {
 		if ('animate' in Element.prototype) {
-			return this.results.map(node => node.animate(keyframes, opts));
+			return [...this].map(node => node.animate(keyframes, opts));
 		} else {
 			return [];
 		}
 	}
 
-	indexOf(i) {
-		return this.results.indexOf(i);
-	}
-
 	some(callback) {
-		return this.results.some(callback);
+		return [...this].some(callback);
 	}
 
 	every(callback) {
-		return this.results.every(callback);
+		return [...this].every(callback);
 	}
 
-	filter(callback) {
-		this.filters.push(callback.toString());
-		this.results = this.results.filter(callback);
-		return this;
+	find(callback) {
+		return [...this].find(callback);
 	}
 
 	map(callback) {
-		return this.results.map(callback);
+		return [...this].map(callback);
 	}
-	/* *getResults() {
-		for (let result of this.results) {
-			yield result;
-		}
-	}*/
 
 	addClass(cname) {
-		this.results.forEach(el => el.classList.add(cname));
+		this.each(el => el.classList.add(cname));
 		return this;
 	}
 
 	removeClass(cname) {
-		this.results.forEach(el => el.classList.remove(cname));
+		this.each(el => el.classList.remove(cname));
 		return this;
 	}
 
@@ -155,15 +158,15 @@ export default class zQ {
 
 	toggleClass(cname, force) {
 		if (typeof force !== 'undefined') {
-			this.results.forEach(node => node.classList.toggle(cname, force));
+			this.each(node => node.classList.toggle(cname, force));
 		} else {
-			this.results.forEach(node => node.classList.toggle(cname));
+			this.each(node => node.classList.toggle(cname));
 		}
 		return this;
 	}
 
 	replaceClass(cname1, cname2) {
-		this.results.forEach(node => node.classList.replace(cname1, cname2));
+		this.each(node => node.classList.replace(cname1, cname2));
 		return this;
 	}
 
@@ -173,12 +176,25 @@ export default class zQ {
 	}
 
 	remove() {
-		this.results.forEach(el => el.remove());
+		this.each(el => el.remove());
+		return this;
+	}
+
+	empty(query = null) {
+		if (typeof query === 'string') {
+			this.each(node => [...node.children].forEach(child => {
+				if (child.matches(query)) {
+					child.remove();
+				}
+			}));
+		} else {
+			this.each(node => [...node.children].forEach(child => child.remove()));
+		}
 		return this;
 	}
 
 	hide(hidden = true) {
-		this.results.forEach(el => el.hidden = hidden);
+		this.each(el => el.hidden = hidden);
 		return this;
 	}
 
@@ -187,44 +203,44 @@ export default class zQ {
 	}
 
 	append(...nodes) {
-		this.results.forEach(el => el.append(...nodes));
+		this.each(el => el.append(...nodes));
 		return this;
 	}
 
 	prepend(...nodes) {
-		this.results.forEach(el => el.prepend(...nodes));
+		this.each(el => el.prepend(...nodes));
 	}
 
 	before(...nodes) {
-		this.results.forEach(el => el.before(...nodes));
+		this.each(el => el.before(...nodes));
 	}
 
 	after(...nodes) {
-		this.results.forEach(el => el.after(...nodes));
+		this.each(el => el.after(...nodes));
 	}
 
 	afterBegin(text) {
-		this.results.forEach(el => el.insertAdjacentHTML('afterbegin', text));
+		this.each(el => el.insertAdjacentHTML('afterbegin', text));
 		return this;
 	}
 
 	afterEnd(text) {
-		this.results.forEach(el => el.insertAdjacentHTML('afterend', text));
+		this.each(el => el.insertAdjacentHTML('afterend', text));
 		return this;
 	}
 
 	beforeBegin(text) {
-		this.results.forEach(el => el.insertAdjacentHTML('beforebegin', text));
+		this.each(el => el.insertAdjacentHTML('beforebegin', text));
 		return this;
 	}
 
 	beforeEnd(text) {
-		this.results.forEach(el => el.insertAdjacentHTML('beforeend', text));
+		this.each(el => el.insertAdjacentHTML('beforeend', text));
 		return this;
 	}
 
 	hasAttribute(attr) {
-		return this.results.some(el => el.hasAttribute(attr));
+		return this.some(el => el.hasAttribute(attr));
 	}
 
 	attr(attr, val) {
@@ -240,7 +256,7 @@ export default class zQ {
 	}
 
 	pause() {
-		this.results.forEach(media => media.pause());
+		this.each(media => media.pause());
 		return this;
 	}
 
@@ -253,7 +269,7 @@ export default class zQ {
 	ready(callback, options = false) {
 		this.on('DOMContentLoaded', callback, options);
 		if (document.readyState !== 'loading') {
-			this.results.forEach(node => {
+			this.each(node => {
 				callback.bind(node)(new Event('DOMContentLoaded'));
 			});
 		}
@@ -265,17 +281,17 @@ export default class zQ {
 	}
 
 	playing(callback) {
-		this.results.forEach(e => e.onplay = callback);
+		this.each(e => e.onplay = callback);
 		return this;
 	}
 
 	paused(callback) {
-		this.results.forEach(e => e.onpause = callback);
+		this.each(e => e.onpause = callback);
 		return this;
 	}
 
 	visibilitychange(callback, options = false) {
-		this.results.forEach(e => {
+		this.each(e => {
 			PREFIXES.forEach(pre => {
 				e.addEventListener(`${pre}visibilitychange`, callback, options);
 			});
@@ -440,7 +456,7 @@ export default class zQ {
 			watch[event] = true;
 			return watch;
 		}, {attributeFilter});
-		this.results.forEach(el => watcher.observe(el, obs));
+		this.each(el => watcher.observe(el, obs));
 		return this;
 	}
 
