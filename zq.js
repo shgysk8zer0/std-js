@@ -270,7 +270,7 @@ export default class zQ {
 		this.on('DOMContentLoaded', callback, ...args);
 		if (document.readyState !== 'loading') {
 			this.each(node => {
-				args[0].bind(node)(new Event('DOMContentLoaded'));
+				callback.bind(node)(new Event('DOMContentLoaded'));
 			});
 		}
 		return this;
