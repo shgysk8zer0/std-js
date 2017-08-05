@@ -262,7 +262,7 @@ export default class zQ {
 
 	/*==================== Listener Functions =================================*/
 	on(event, callback, ...args) {
-		this.each(node => node.addEventListener(callback, ...args));
+		this.each(node => node.addEventListener(event, callback, ...args));
 		return this;
 	}
 
