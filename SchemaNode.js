@@ -3,8 +3,52 @@ export default class SchemaNode {
 		this.node = node;
 	}
 
+	replaceWith(...nodes) {
+		this.node.replaceWith(...nodes);
+	}
+
+	before(...nodes) {
+		this.node.before(...nodes);
+	}
+
+	after(...nodes) {
+		this.node.after(...nodes);
+	}
+
+	append(...nodes) {
+		this.node.append(...nodes);
+	}
+
+	prepend(...nodes) {
+		this.node.prepend(...nodes);
+	}
+
 	toString() {
 		return this.node.outerHTML;
+	}
+
+	hasChildNodes() {
+		return this.node.hasChildNodes();
+	}
+
+	get textContent() {
+		return this.node.textContent;
+	}
+
+	get innerHTML() {
+		return this.node.innerHTML;
+	}
+
+	get outerHTML() {
+		return this.node.outerHTML;
+	}
+
+	set textContent(text) {
+		this.node.textContent = text;
+	}
+
+	set innerHTML(html) {
+		this.node.innerHTML = html;
 	}
 
 	get text() {
@@ -21,6 +65,22 @@ export default class SchemaNode {
 
 	set html(html) {
 		this.node.innerHTML = html;
+	}
+
+	get children() {
+		return this.node.children;
+	}
+
+	get childNodes() {
+		return this.node.childNodes;
+	}
+
+	get title() {
+		return this.node.title;
+	}
+
+	set title(text) {
+		this.node.title = text;
 	}
 
 	get itemprop() {

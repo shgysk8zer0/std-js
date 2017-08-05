@@ -166,7 +166,7 @@ export default class SchemaTemplate extends DocumentFragment {
 						template.itemprop = prop;
 						template.itemscope = '';
 						template.data = thing.get(prop);
-						node.parentElement.replaceChild(template, node.node);
+						node.replaceWith(template);
 					} catch (e) {
 						console.error(e);
 						node.remove();
@@ -176,7 +176,23 @@ export default class SchemaTemplate extends DocumentFragment {
 					node.remove();
 				}
 			} else if (node.hasAttribute('href')) {
-				node.setAttribute('href', thing.get(prop));
+				switch(prop) {
+				case 'email':
+					node.setAttribute('href', `mailto:${thing.get(prop)}`);
+					node.title = thing.get(prop);
+					break;
+
+				case 'telephone':
+					node.setAttribute('href', `tel:${thing.get(prop)}`);
+					node.title = thing.get(prop);
+					break;
+
+				default:
+					node.setAttribute('href', thing.get(prop));
+				}
+				if (! node.hasChildNodes()) {
+					node.textContent = thing.get(prop);
+				}
 			} else if(node.hasAttribute('src')) {
 				node.setAttribute('src', thing.get(prop));
 			} else if (node.hasAttribute('content')) {
