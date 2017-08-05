@@ -37,7 +37,7 @@ export default class zQ {
 	}
 
 	get text() {
-		return [...this].map(node => node.textContent);
+		return this.map(node => node.textContent);
 	}
 
 	set text(str) {
@@ -45,7 +45,7 @@ export default class zQ {
 	}
 
 	get html() {
-		return [...this].map(node => node.innerHTML);
+		return this.map(node => node.innerHTML);
 	}
 
 	set html(html) {
@@ -120,7 +120,7 @@ export default class zQ {
 
 	animate(keyframes, opts) {
 		if ('animate' in Element.prototype) {
-			return [...this].map(node => node.animate(keyframes, opts));
+			return this.map(node => node.animate(keyframes, opts));
 		} else {
 			return [];
 		}
@@ -171,7 +171,7 @@ export default class zQ {
 	}
 
 	pickClass(cname1, cname2, condition) {
-		(condition) ? this.addClass(cname1) : this.addClass(cname2);
+		this.addClass(condition ? cname1 : cname2);
 		return this;
 	}
 
@@ -261,23 +261,23 @@ export default class zQ {
 	}
 
 	/*==================== Listener Functions =================================*/
-	on(event, callback, useCapture = false, options = false) {
-		this.each(node => node.addEventListener(event, callback, useCapture, options));
+	on(event, callback, ...args) {
+		this.each(node => node.addEventListener(callback, ...args));
 		return this;
 	}
 
-	ready(callback, options = false) {
-		this.on('DOMContentLoaded', callback, options);
+	ready(callback, ...args) {
+		this.on('DOMContentLoaded', callback, ...args);
 		if (document.readyState !== 'loading') {
 			this.each(node => {
-				callback.bind(node)(new Event('DOMContentLoaded'));
+				args[0].bind(node)(new Event('DOMContentLoaded'));
 			});
 		}
 		return this;
 	}
 
-	networkChange(callback, options = false) {
-		return this.online(callback, options).offline(callback, options);
+	networkChange(callback, ...args) {
+		return this.online(callback, ...args).offline(callback, ...args);
 	}
 
 	playing(callback) {
@@ -290,161 +290,161 @@ export default class zQ {
 		return this;
 	}
 
-	visibilitychange(callback, options = false) {
+	visibilitychange(callback, ...args) {
 		this.each(e => {
 			PREFIXES.forEach(pre => {
-				e.addEventListener(`${pre}visibilitychange`, callback, options);
+				e.addEventListener(`${pre}visibilitychange`, callback, ...args);
 			});
 		});
 		return this;
 	}
 
-	click(callback, options = false) {
-		return this.on('click', callback, options);
+	click(callback, ...args) {
+		return this.on('click', callback, ...args);
 	}
 
-	dblclick(callback, options = false) {
-		this.on('dblclick', callback, options);
+	dblclick(callback, ...args) {
+		this.on('dblclick', callback, ...args);
 	}
 
-	contextmenu(callback, options = false) {
-		return this.on('contextmenu', callback, options);
+	contextmenu(callback, ...args) {
+		return this.on('contextmenu', callback, ...args);
 	}
 
-	keypress(callback, options = false) {
-		return this.on('keypress', callback, options);
+	keypress(callback, ...args) {
+		return this.on('keypress', callback, ...args);
 	}
 
-	keyup(callback, options = false) {
-		return this.on('keyup', callback, options);
+	keyup(callback, ...args) {
+		return this.on('keyup', callback, ...args);
 	}
 
-	keydown(callback, options = false) {
-		return this.on('keydown', callback, options);
+	keydown(callback, ...args) {
+		return this.on('keydown', ...args);
 	}
 
-	mouseenter(callback, options = false) {
-		return this.on('mouseenter', callback, options);
+	mouseenter(callback, ...args) {
+		return this.on('mouseenter', callback, ...args);
 	}
 
-	mouseleave(callback, options = false) {
-		return this.on('mouseleave', callback, options);
+	mouseleave(callback, ...args) {
+		return this.on('mouseleave', callback, ...args);
 	}
 
-	mouseover(callback, options = false) {
-		return this.on('mouseover', callback, options);
+	mouseover(callback, ...args) {
+		return this.on('mouseover', callback, ...args);
 	}
 
-	mouseout(callback, options = false) {
-		return this.on('mouseout', callback, options);
+	mouseout(callback, ...args) {
+		return this.on('mouseout', callback, ...args);
 	}
 
-	mousemove(callback, options = false) {
-		return this.on('mousemove', callback, options);
+	mousemove(callback, ...args) {
+		return this.on('mousemove', callback, ...args);
 	}
 
-	mousedown(callback, options = false) {
-		return this.on('mousedown', callback, options);
+	mousedown(callback, ...args) {
+		return this.on('mousedown', callback, ...args);
 	}
 
-	mouseup(callback, options = false) {
-		return this.on('mouseup', callback, options);
+	mouseup(callback, ...args) {
+		return this.on('mouseup', callback, ...args);
 	}
 
-	input(callback, options = false) {
-		return this.on('input', callback, options);
+	input(callback, ...args) {
+		return this.on('input', callback, ...args);
 	}
 
-	change(callback, options = false) {
-		return this.on('change', callback, options);
+	change(callback, ...args) {
+		return this.on('change', callback, ...args);
 	}
 
-	submit(callback, options = false) {
-		return this.on('submit', callback, options);
+	submit(callback, ...args) {
+		return this.on('submit', callback, ...args);
 	}
 
-	reset(callback, options = false) {
-		return this.on('reset', callback, options);
+	reset(callback, ...args) {
+		return this.on('reset', callback, ...args);
 	}
 
-	invalid(callback, options = false) {
-		return this.on('invalid', callback, options);
+	invalid(callback, ...args) {
+		return this.on('invalid', callback, ...args);
 	}
 
-	select(callback, options = false) {
-		return this.on('select', callback, options);
+	select(callback, ...args) {
+		return this.on('select', callback, ...args);
 	}
 
-	focus(callback, options = false) {
-		return this.on('focus', callback, options);
+	focus(callback, ...args) {
+		return this.on('focus', callback, ...args);
 	}
 
-	blur(callback, options = false) {
-		return this.on('blur', callback, options);
+	blur(callback, ...args) {
+		return this.on('blur', callback, ...args);
 	}
 
-	resize(callback, options = false) {
-		return this.on('resize', callback, options);
+	resize(callback, ...args) {
+		return this.on('resize', callback, ...args);
 	}
 
-	updateready(callback, options = false) {
-		return this.on('updateready', callback, options);
+	updateready(callback, ...args) {
+		return this.on('updateready', ...args);
 	}
 
-	load(callback, options = {once: true}) {
-		this.on('load', callback, options);
+	load(callback, ...args) {
+		this.on('load', callback, ...args);
 		if (document.readyState === 'complete') {
 			document.dispatchEvent(new Event('load'));
 		}
 		return this;
 	}
 
-	unload(callback, options = false) {
-		return this.on('unload', callback, options);
+	unload(callback, ...args) {
+		return this.on('unload', callback, ...args);
 	}
 
-	beforeunload(callback, options = false) {
-		return this.on('beforeunload', callback, options);
+	beforeunload(callback, ...args) {
+		return this.on('beforeunload', callback, ...args);
 	}
 
-	abort(callback, options = false) {
-		return this.on('abort', callback, options);
+	abort(callback, ...args) {
+		return this.on('abort', callback, ...args);
 	}
 
-	error(callback, options = false) {
-		return this.on('error', callback, options);
+	error(callback, ...args) {
+		return this.on('error', callback, ...args);
 	}
 
-	scroll(callback, options = false) {
-		return this.on('scroll', callback, options);
+	scroll(callback, ...args) {
+		return this.on('scroll', ...args);
 	}
 
-	drag(callback, options = false) {
-		return this.on('drag', callback, options);
+	drag(callback, ...args) {
+		return this.on('drag', callback, ...args);
 	}
 
-	offline(callback, options = false) {
-		return this.on('offline', callback, options);
+	offline(callback, ...args) {
+		return this.on('offline', callback, ...args);
 	}
 
-	online(callback, options = false) {
-		return this.on('online', callback, options);
+	online(callback, ...args) {
+		return this.on('online', callback, ...args);
 	}
 
-	hashchange(callback, options = false) {
-		return this.on('hashchange', callback, options);
+	hashchange(callback, ...args) {
+		return this.on('hashchange', callback, ...args);
 	}
 
 	/*visibilitychange(callback) {
 		return this.on('visibilitychange', callback);
 	}*/
 
-	popstate(callback, options = false) {
-		return this.on('popstate', callback, options);
+	popstate(callback, ...args) {
+		return this.on('popstate', callback, ...args);
 	}
 
-	pagehide(callback, options = false) {
-		return this.on('pagehide', callback, options);
+	pagehide(callback, ...args) {
+		return this.on('pagehide', callback, ...args);
 	}
 
 	watch(watching, options = [], attributeFilter = []) {
@@ -457,6 +457,15 @@ export default class zQ {
 			return watch;
 		}, {attributeFilter});
 		this.each(el => watcher.observe(el, obs));
+		return this;
+	}
+
+	/**
+	 * @see https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver
+	 */
+	intersect(callback, options = {}) {
+		const observer = new IntersectionObserver(callback, options);
+		this.each(node => observer.observe(node));
 		return this;
 	}
 
