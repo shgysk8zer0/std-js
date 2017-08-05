@@ -19,8 +19,10 @@
 			</menu>
 			<menu label="Forms">
 				<menuitem label="Registration" data-show-modal="#contact-dialog"></menuitem>
+				<menuitem label="Login" data-show-modal="#login-dialog"></menuitem>
 				<menuitem label="OpenWeatherMap" data-show-modal="#weather-dialog"></menuitem>
 				<menuitem label="Keybase" data-show-modal="#keybase-dialog"></menuitem>
+				<menuitem label="Event" data-show-modal="#event-dialog"></menuitem>
 			</menu>
 			<menuitem label="GPS" id="gps-btn"></menuitem>
 			<menuitem label="Video Test" data-show-modal="#video-dialog"></menuitem>
@@ -29,9 +31,9 @@
 			<h1>JavaScript module testing</h1>
 		</header>
 		<nav>Nav</nav>
-		<main data-schema-content="/article.json#article-template">Main</main>
-		<aside>Aside</aside>
-		<footer>footer</footer>
+		<main><div data-infinite-scroll="/test/assets/article.html?page=1"></div></main>
+		<aside data-import="/test/assets/sidebar.html#foo"></aside>
+		<footer data-import="/test/assets/footer.html"></footer>
 		<noscript>You obviously need JavaScript enabled to test a JavaScript library.</noscript>
 		<dialog id="contact-dialog">
 			<header>
@@ -137,6 +139,55 @@
 				<input type="search" name="keybase[query]" id="keybase-query" placeholder="search for..." pattern="[\w,]+" required="" />
 				<br />
 				<button type="submit">Search</button>
+			</form>
+		</dialog>
+		<dialog id="event-dialog">
+			<header>
+				<button data-close="#event-dialog">X</button>
+			</header>
+			<form name="event">
+				<fieldset>
+					<legend>Event Details</legend>
+					<input type="text" name="event[name]" placeholder="Event name" pattern="[\w\. ]+" required="" />
+					<br />
+					<textarea name="event[description]" placeholder="Event description"></textarea>
+				</fieldset>
+				<fieldset>
+					<legend>From / Until</legend>
+					<input type="date" name="event[startDate]" required="" />
+					<input type="time" name="event[startTime]" />
+					<br />
+					<input type="date" name="event[endDate]" required="" />
+					<input type="time" name="event[endTime]" />
+				</fieldset>
+				<fieldset>
+					<legend>Where</legend>
+					<input type="text" name="event[address][street]" autocomplete="street-address" placeholder="123 Some Street" pattern="\d+ [\w\.# ]+" required=""/>
+					<br />
+					<input type="text" name="event[address][city]" autocomplete="address-level2" placeholder="City" pattern="[A-z ]+" required=""/>
+					<span>, </span>
+					<input type="text" name="event[address][state]" autocomplete="address-level1" placeholder="State" pattern="[A-z ]+" required="" />
+					<br />
+					<input type="number" name="event[address][postal]" autocomplete="postal-code" placeholder="#####" min="10000" max="99999" />
+				</fieldset>
+				<button type="submit">Submit</button>
+				<button type="reset">Reset</button>
+			</form>
+		</dialog>
+		<dialog id="login-dialog">
+			<header>
+				<button data-close="#login-dialog">X</button>
+			</header>
+			<form name="login">
+				<fieldset>
+					<legend>Login</legend>
+					<img id="login-grav" src="https://gravatar.com/avatar/dne?s=128" width="128" height="128" class="round shadow center" />
+					<br />
+					<input type="email" name="login[email]" autocomplete="email" placeholder="user@example.com" required="" />
+					<br />
+					<input type="password" name="login[password]" autocomplete="current-password" placeholder="********" minlength="8" required="" />
+				</fieldset>
+				<button type="submit">Submit</button>
 			</form>
 		</dialog>
 		<template id="weather-results">
