@@ -23,9 +23,30 @@ export function loadHandler() {
 		});
 	}
 
+	document.forms.login.querySelector('[type="email"]').addEventListener('change', change => {
+		if (change.target.validity.valid) {
+			const grav = new Gravatar(change.target.value, 64, 256, 128, 64, 32);
+			const old = document.getElementById('login-grav');
+			grav.id = old.id;
+			grav.className = old.className;
+			old.replaceWith(grav);
+		}
+	});
+
 	mutations.init();
 
-	$('input[autocomplete="email"]:valid').each(input => {
+	$('form[name="event"]').submit(submit => {
+		submit.preventDefault();
+		const event = new FormData(submit.target);
+		const dt = new Date(`${event.get('event[startDate]')}T${event.get('event[startTime]')}`);
+		new Notification(event.get('event[name]'), {
+			body: `${dt}
+${event.get('event[description]')}
+${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${event.get('event[address][state]')}`
+		});
+	});
+
+	$('form:not([name="login"]) input[autocomplete="email"]:valid').each(input => {
 		input.before(new Gravatar(input.value));
 	});
 
@@ -45,10 +66,10 @@ export function loadHandler() {
 		$('img', reset.target).remove();
 	});
 
-	$('input[autocomplete="email"]').change(input => {
+	$('form:not([name="login"]) input[autocomplete="email"]').change(input => {
 		$('img[src^="https://gravatar.com/"]', input.target.closest('fieldset')).remove();
 		if (input.target.validity.valid) {
-			const grav = new Gravatar(input.target.value);
+			const grav = new Gravatar(input.target.value, 80, 256, 128, 64, 32);
 			input.target.before(grav);
 		}
 	});

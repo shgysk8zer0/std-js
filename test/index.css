@@ -7,7 +7,7 @@ body {
 	min-height: 100vh;
 	display: grid;
 	grid-gap: 0.5rem;
-	grid-template-rows: 3fr 1fr 11fr 2fr;
+	grid-template-rows: 13vh 6vh auto 8vh;
 	grid-template-columns:4fr 1fr;
 	grid-template-areas:
 		'header header'
@@ -58,4 +58,13 @@ a:empty[href]::after {
 }
 .shadow {
 	box-shadow: 0.3rem 0.3rem 0.3rem #222;
+}
+article {
+	margin: 0.3em 1.5em;
+}
+article p {
+	text-indent: 2em;
+}
+[itemprop="title"] {
+	text-align: center;
 }

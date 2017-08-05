@@ -2,6 +2,64 @@ import * as handlers from '../dataHandlers.js';
 import {$} from '../functions.js';
 import SchemaTemplate from '../SchemaTemplate.js';
 
+function loadContent(entries, observer) {
+	entries.forEach(async (entry) => {
+		try {
+			const url = new URL(entry.target.dataset.import, location.origin);
+			const resp = await fetch(url);
+			if (resp.ok) {
+				const parser = new DOMParser();
+				const html = await resp.text();
+				const doc = parser.parseFromString(html, 'text/html');
+				if (url.hash !== '') {
+					entry.target.append(doc.getElementById(url.hash.substring(1)));
+				} else {
+					entry.target.append(...doc.body.childNodes);
+				}
+			} else {
+				throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
+			}
+		} catch (error) {
+			console.error(error);
+		} finally {
+			delete entry.target.dataset.import;
+			observer.unobserve(entry.target);
+		}
+	});
+}
+
+function infiniteScroll(entries, observer) {
+	entries.filter(entry => entry.isIntersecting).forEach(async (entry) => {
+		observer.unobserve(entry.target);
+		console.log(entry);
+		const url = new URL(entry.target.dataset.infiniteScroll, location.origin);
+		try {
+			const resp = await fetch(url);
+			if (url.searchParams.has('page')) {
+				url.searchParams.set('page', parseInt(url.searchParams.get('page')) + 1);
+				entry.target.dataset.infiniteScroll = url;
+			}
+			if (resp.ok) {
+				const parser = new DOMParser();
+				const html = await resp.text();
+				const doc = parser.parseFromString(html, 'text/html');
+
+				if (url.hash !== '') {
+					entry.target.before(doc.getElementById(url.hash.substring(1)));
+				} else {
+					entry.target.before(...doc.body.childNodes);
+				}
+				observer.observe(entry.target);
+			} else {
+				throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
+			}
+		} catch (error) {
+			console.error(error);
+			observer.observe(entry.target);
+		}
+	});
+}
+
 export const events = {
 	attributes: function() {
 		switch(this.attributeName) {
@@ -91,6 +149,8 @@ export function init(base = document.body) {
 	$('[data-social-share]', base).click(handlers.socialShare);
 	$('[data-fullscreen]', base).click(handlers.fullscreen);
 	$('dialog form', base).invalid(invalidForm);
+	$('[data-import]', base).intersect(loadContent);
+	$('[data-infinite-scroll]').intersect(infiniteScroll);
 }
 
 function invalidForm(invalid) {
