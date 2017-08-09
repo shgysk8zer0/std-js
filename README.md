@@ -3,7 +3,14 @@
 - - -
 
 [![Build Status](https://travis-ci.org/shgysk8zer0/std-js.svg?branch=master)](https://travis-ci.org/shgysk8zer0/std-js)
+[![license](https://img.shields.io/github/license/shgysk8zer0/std-js.svg)]()
+[![GitHub issues](https://img.shields.io/github/issues/shgysk8zer0/std-js.svg)](https://github.com/shgysk8zer0/std-js/issues)
+[![GitHub forks](https://img.shields.io/github/forks/shgysk8zer0/std-js.svg)](https://github.com/shgysk8zer0/std-js/network)
+[![GitHub release](https://img.shields.io/github/release/shgysk8zer0/std-js.svg)]()
+
 [![Join the chat at https://gitter.im/shgysk8zer0/std-js](https://badges.gitter.im/shgysk8zer0/std-js.svg)](https://gitter.im/shgysk8zer0/std-js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/shgysk8zer0/std-js.svg?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=%5Bobject%20Object%5D)
+[![Twitter Follow](https://img.shields.io/twitter/follow/espadrine.svg?style=social&label=Follow)](https://twitter.com/shgysk8zer0)
 
 ## A JavaScript library for making front-end development sane!
 
