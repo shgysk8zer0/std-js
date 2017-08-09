@@ -40,7 +40,7 @@ Simply clone or add as a submodule:
 
 ### Contact Developer
 - [Open an issue](https://github.com/shgysk8zer0/std-js/issues)
-- [Email](mailto:shgysk8zer0@gmail.com?subject=std-js)
+- [Email](mailto:chris@chriszuber.com?subject=std-js)
 
 ### Exporting
 ```js
