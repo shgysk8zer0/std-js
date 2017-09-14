@@ -41,7 +41,7 @@ export default class zQ {
 	}
 
 	set text(str) {
-		this.each(node => node.textContent = str);
+		this.each(node => node.textContent = str, true);
 	}
 
 	get html() {
@@ -49,7 +49,7 @@ export default class zQ {
 	}
 
 	set html(html) {
-		this.each(node => node.innerHTML = html);
+		this.each(node => node.innerHTML = html, false);
 	}
 
 	toString() {
@@ -134,12 +134,8 @@ export default class zQ {
 		return [...this].some(callback);
 	}
 
-	every(callback, sync = true) {
-		if (sync) {
-			return [...this].every(callback);
-		} else {
-			Promise.resolve().then(() => this.every(callback, false));
-		}
+	every(callback) {
+		return [...this].every(callback);
 	}
 
 	find(callback) {
@@ -151,12 +147,12 @@ export default class zQ {
 	}
 
 	addClass(cname) {
-		this.each(el => el.classList.add(cname));
+		this.each(el => el.classList.add(cname), false);
 		return this;
 	}
 
 	removeClass(cname) {
-		this.each(el => el.classList.remove(cname));
+		this.each(el => el.classList.remove(cname), false);
 		return this;
 	}
 
@@ -166,15 +162,14 @@ export default class zQ {
 
 	toggleClass(cname, force) {
 		if (typeof force !== 'undefined') {
-			this.each(node => node.classList.toggle(cname, force));
+			return this.each(node => node.classList.toggle(cname, force), false);
 		} else {
-			this.each(node => node.classList.toggle(cname));
+			return this.each(node => node.classList.toggle(cname), false);
 		}
-		return this;
 	}
 
 	replaceClass(cname1, cname2) {
-		this.each(node => node.classList.replace(cname1, cname2));
+		this.each(node => node.classList.replace(cname1, cname2), false);
 		return this;
 	}
 
@@ -183,8 +178,8 @@ export default class zQ {
 		return this;
 	}
 
-	remove(sync = true) {
-		this.each(el => el.remove(), sync);
+	remove() {
+		this.each(el => el.remove(), false);
 		return this;
 	}
 
@@ -194,9 +189,9 @@ export default class zQ {
 				if (child.matches(query)) {
 					child.remove();
 				}
-			}));
+			}), false);
 		} else {
-			this.each(node => [...node.children].forEach(child => child.remove()));
+			this.each(node => [...node.children].forEach(child => child.remove()), false);
 		}
 		return this;
 	}
@@ -272,7 +267,7 @@ export default class zQ {
 		if (document.readyState !== 'loading') {
 			this.each(node => {
 				callback.bind(node)(new Event('DOMContentLoaded'));
-			});
+			}, false);
 		}
 		return this;
 	}
@@ -282,12 +277,12 @@ export default class zQ {
 	}
 
 	playing(callback) {
-		this.each(e => e.onplay = callback);
+		this.each(e => e.onplay = callback, false);
 		return this;
 	}
 
 	paused(callback) {
-		this.each(e => e.onpause = callback);
+		this.each(e => e.onpause = callback, false);
 		return this;
 	}
 
@@ -296,7 +291,7 @@ export default class zQ {
 			PREFIXES.forEach(pre => {
 				e.addEventListener(`${pre}visibilitychange`, callback, ...args);
 			});
-		});
+		}, false);
 		return this;
 	}
 
