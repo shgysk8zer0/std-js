@@ -126,5 +126,11 @@ $(document).ready(() => {
   $('[data-remove]').click(mutations.remove);
   $('[data-show-modal]').click(mutations.showModal);
   $(document.body).watch(mutations.events, mutations.options, mutations.filter);
+  // Note that many DOM operations happen asynchronously
+  $('.someClass').append('foo ', 'bar').then(nodes => {
+    /*...*/
+  }).catch(console.error);
+  document.querySelector('.someClass').textContent = 'baz ';
+  // Will most likely result in textContent of "baz foo bar"
 }, {once: true});
 ```
