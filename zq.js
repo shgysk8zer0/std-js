@@ -64,14 +64,18 @@ export default class zQ {
 		return [...this].includes(node);
 	}
 
-	each(...args) {
-		this.results.forEach(...args);
-		return this;
+	each(callback, sync = true) {
+		if (sync) {
+			[...this].forEach(callback);
+			return this;
+		} else {
+			return Promise.resolve().then(() => this.each(callback, true));
+		}
 	}
 
-	forEach(...args) {
-		return this.each(...args);
-	}
+	// forEach(...args) {
+	// 	return this.each(...args);
+	// }
 
 	*values() {
 		for (let item of this.results) {
@@ -105,7 +109,7 @@ export default class zQ {
 			if ('show' in node) {
 				node.show();
 			}
-		});
+		}, false);
 		return this;
 	}
 
@@ -114,7 +118,7 @@ export default class zQ {
 			if ('close' in node) {
 				node.close();
 			}
-		});
+		}, false);
 		return this;
 	}
 
@@ -130,8 +134,12 @@ export default class zQ {
 		return [...this].some(callback);
 	}
 
-	every(callback) {
-		return [...this].every(callback);
+	every(callback, sync = true) {
+		if (sync) {
+			return [...this].every(callback);
+		} else {
+			Promise.resolve().then(() => this.every(callback, false));
+		}
 	}
 
 	find(callback) {
@@ -175,8 +183,8 @@ export default class zQ {
 		return this;
 	}
 
-	remove() {
-		this.each(el => el.remove());
+	remove(sync = true) {
+		this.each(el => el.remove(), sync);
 		return this;
 	}
 
@@ -193,50 +201,44 @@ export default class zQ {
 		return this;
 	}
 
-	hide(hidden = true) {
-		this.each(el => el.hidden = hidden);
-		return this;
+	hide(hidden = true, sync = true) {
+		return this.each(el => el.hidden = hidden, sync);
 	}
 
-	unhide(shown = true) {
-		return this.hide(!shown);
+	unhide(shown = true, sync = true) {
+		return this.hide(!shown, sync);
 	}
 
 	append(...nodes) {
-		this.each(el => el.append(...nodes));
-		return this;
+		return this.each(el => el.append(...nodes), false);
 	}
 
 	prepend(...nodes) {
-		this.each(el => el.prepend(...nodes));
+		return this.each(el => el.prepend(...nodes), false);
 	}
 
 	before(...nodes) {
-		this.each(el => el.before(...nodes));
+		return this.each(el => el.before(...nodes), false);
 	}
 
 	after(...nodes) {
-		this.each(el => el.after(...nodes));
+		return this.each(el => el.after(...nodes), false);
 	}
 
 	afterBegin(text) {
-		this.each(el => el.insertAdjacentHTML('afterbegin', text));
-		return this;
+		return this.each(el => el.insertAdjacentHTML('afterbegin', text), false);
 	}
 
 	afterEnd(text) {
-		this.each(el => el.insertAdjacentHTML('afterend', text));
-		return this;
+		return this.each(el => el.insertAdjacentHTML('afterend', text), false);
 	}
 
 	beforeBegin(text) {
-		this.each(el => el.insertAdjacentHTML('beforebegin', text));
-		return this;
+		return this.each(el => el.insertAdjacentHTML('beforebegin', text), false);
 	}
 
 	beforeEnd(text) {
-		this.each(el => el.insertAdjacentHTML('beforeend', text));
-		return this;
+		return this.each(el => el.insertAdjacentHTML('beforeend', text), false);
 	}
 
 	hasAttribute(attr) {
@@ -248,21 +250,20 @@ export default class zQ {
 			val = '';
 		}
 		if (val === false) {
-			this.each(el => el.removeAttribute(attr));
+			return this.each(el => el.removeAttribute(attr), false);
 		} else {
-			this.each(el => el.setAttribute(attr, val));
+			return this.each(el => el.setAttribute(attr, val), false);
 		}
-		return this;
 	}
 
 	pause() {
-		this.each(media => media.pause());
+		this.each(media => media.pause(), false);
 		return this;
 	}
 
 	/*==================== Listener Functions =================================*/
 	on(event, callback, ...args) {
-		this.each(node => node.addEventListener(event, callback, ...args));
+		this.each(node => node.addEventListener(event, callback, ...args), false);
 		return this;
 	}
 
@@ -456,7 +457,7 @@ export default class zQ {
 			watch[event] = true;
 			return watch;
 		}, {attributeFilter});
-		this.each(el => watcher.observe(el, obs));
+		this.each(el => watcher.observe(el, obs), false);
 		return this;
 	}
 
@@ -465,7 +466,7 @@ export default class zQ {
 	 */
 	intersect(callback, options = {}) {
 		const observer = new IntersectionObserver(callback, options);
-		this.each(node => observer.observe(node));
+		this.each(node => observer.observe(node), false);
 		return this;
 	}
 
