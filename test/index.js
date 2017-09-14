@@ -4,7 +4,7 @@ import kbdShortcuts from '../kbd_shortcuts.js';
 import {$} from '../functions.js';
 import Cookie from '../Cookie.js';
 
-document.body.classList.replace('no-js', 'js');
+$('body').replaceClass('no-js', 'js');
 
 $(document).ready(loadHandler).keypress(kbdShortcuts);
 /* eslint-disable quotes */
