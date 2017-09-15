@@ -1,6 +1,6 @@
 import {notify, query as $} from './functions.js';
 
-export default function handleJSON(json) {
+export default async function handleJSON(json) {
 	if(typeof json === 'string') {
 		json = JSON.parse(json.trim());
 	} else if(typeof json !== 'object') {
@@ -60,8 +60,8 @@ export default function handleJSON(json) {
 				Object.keys(json.attributes[selector]).forEach(attribute => {
 					if(typeof json.attributes[selector][attribute] === 'boolean') {
 						(json.attributes[selector][attribute])
-							? el.setAttribute(attribute, '')
-							: el.removeAttribute(attribute);
+						? el.setAttribute(attribute, '')
+						: el.removeAttribute(attribute);
 					} else {
 						el.setAttribute(attribute, json.attributes[selector][attribute]);
 					}
@@ -116,15 +116,15 @@ export default function handleJSON(json) {
 	if('sessionStorage' in json) {
 		Object.keys(json.sessionStorage).forEach(key => {
 			(json.sessionStorage[key] === '')
-				? sessionStorage.removeItem(key)
-				: sessionStorage.setItem(key, json.sessionStorage[key]);
+			? sessionStorage.removeItem(key)
+			: sessionStorage.setItem(key, json.sessionStorage[key]);
 		});
 	}
 	if('localStorage' in json) {
 		Object.keys(json.localStorage).forEach(key => {
 			(json.localStorage[key] === '')
-				? sessionStorage.removeItem(key)
-				: localStorage.setItem(key, json.localStorage[key]);
+			? sessionStorage.removeItem(key)
+			: localStorage.setItem(key, json.localStorage[key]);
 		});
 	}
 	if('script' in json) {
@@ -232,4 +232,5 @@ export default function handleJSON(json) {
 	if ('notify' in json) {
 		notify(json.notify);
 	}
+	return json;
 }

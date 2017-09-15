@@ -122,9 +122,26 @@ import {$, wait} from './functions.js';
 import handleJSON from './json_response.js';
 import * as mutations from './mutations.js';
 
-$(document).ready(() => {
+// Note that almost all DOM operations are async
+$(document).ready(async () => {
   $('[data-remove]').click(mutations.remove);
   $('[data-show-modal]').click(mutations.showModal);
   $(document.body).watch(mutations.events, mutations.options, mutations.filter);
+
+  // Use promises
+  $('#container p').some(p => p.textContent.startsWith('Lorem impsum')).then(ipsum => {
+    if (ipsum) {
+      $('.no-ipum').hide();
+    }
+  });
+  // Or `await` results (Here, to search nodes by their text)
+  // In this example, `found` would be a regular `Element`
+  const found = await $('div').find(el => el.textContent.startsWith('Delete me'));
+  if (found) {
+	  found.remove();
+  }
+
+  document.querySelector('.someClass').textContent = 'baz ';
+  // Will most likely result in textContent of "baz foo bar"
 }, {once: true});
 ```
