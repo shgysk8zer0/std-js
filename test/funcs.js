@@ -2,7 +2,7 @@ import OpenWeatherMap from '../openweathermap.js';
 import GPS from '../GeoLocation.js';
 // import WYSIWYG from '../wysiwyg.js';
 // import FileUpload from '../fileupload.js';
-import {$, reportError, parseResponse} from '../functions.js';
+import {$} from '../functions.js';
 import handleJSON from '../json_response.js';
 // import SocialShare from '../socialshare.js';
 // import {supportsAsClasses} from '../support_test.js';
@@ -16,14 +16,14 @@ import * as mutations from './mutations.js';
 import GitHub from '../GitHub.js';
 import Gravatar from '../Gravatar.js';
 
-export function loadHandler() {
+export async function loadHandler() {
 	if (document.createElement('details') instanceof HTMLUnknownElement) {
-		$('details > summary').click(() => {
+		$('details > summary').click(function() {
 			this.parentElement.open = ! this.parentElement.open;
 		});
 	}
 
-	document.forms.login.querySelector('[type="email"]').addEventListener('change', change => {
+	$('[type="email"]', document.forms.login).change(change => {
 		if (change.target.validity.valid) {
 			const grav = new Gravatar(change.target.value, 64, 256, 128, 64, 32);
 			const old = document.getElementById('login-grav');
@@ -48,11 +48,11 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 
 	$('form:not([name="login"]) input[autocomplete="email"]:valid').each(input => {
 		input.before(new Gravatar(input.value));
-	});
+	}, false);
 
 	$('input[autocomplete="username"]').each(input => {
 		input.before(GitHub.getAvatar(input.value));
-	});
+	}, false);
 
 	$('form[name="contact-form"]').submit(submit => {
 		submit.preventDefault();
@@ -62,9 +62,9 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 			data[key] = form.get(key);
 		}
 		console.log(data);
-	}).reset(reset => {
+	}).then($forms => $forms.reset(reset => {
 		$('img', reset.target).remove();
-	});
+	}));
 
 	$('form:not([name="login"]) input[autocomplete="email"]').change(input => {
 		$('img[src^="https://gravatar.com/"]', input.target.closest('fieldset')).remove();
@@ -81,9 +81,9 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 		}
 	});
 
-	$('form[name="openweather"]').submit(event => {
-		event.preventDefault();
-		const form = new FormData(event.target);
+	$('form[name="openweather"]').submit(submit => {
+		submit.preventDefault();
+		const form = new FormData(submit.target);
 		const weather = new OpenWeatherMap(KEYS.OpenWeatherMap, {units: form.get('units')});
 		weather.getFromZip(form.get('zip'), appendWeather);
 	});
@@ -110,9 +110,19 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 		open(click.target.toDataURL());
 	});
 
-	fetch(new URL('fetch.json', location.origin), {
-		headers: new Headers({Accept: 'application/json'})
-	}).then(parseResponse).then(handleJSON).catch(reportError);
+	const url = new URL('fetch.json', location.origin);
+	const headers = new Headers();
+	headers.set('Accept', 'application/json');
+
+	try {
+		const resp = await fetch(url, {headers});
+		if (resp.ok) {
+			const json = await resp.json();
+			handleJSON(json);
+		}
+	} catch(err) {
+		console.error(err);
+	}
 }
 
 function keybaseSearch(submit) {
@@ -223,43 +233,33 @@ function appendWeather(weather) {
 				node.remove();
 			}
 		}
-		// if (node.dataset.weatherProp in weather.main) {
-		// 	node.textContent = weather.main[node.dataset.weatherProp];
-		// } else if (node.dataset.weatherProp in weather) {
-		// 	node.textContent = weather[node.dataset.weatherProp];
-		// } else {
-		// 	node.remove();
-		// }
 	});
 	document.body.append(dialog);
-	$('dialog[open]').close();
-	dialog.showModal();
+	$('dialog[open]').close().then(() => dialog.showModal());
 }
 
-export function showLocation() {
-	(async () => {
-		const gps = new GPS();
-		const loc = await gps.getCurrentPosition();
-		const dialog = document.createElement('dialog');
-		const btn = document.createElement('button');
-		const link = document.createElement('a');
-		const lat = document.createElement('b');
-		const long = document.createElement('b');
+export async function showLocation() {
+	const gps = new GPS();
+	const loc = await gps.getCurrentPosition();
+	const dialog = document.createElement('dialog');
+	const btn = document.createElement('button');
+	const link = document.createElement('a');
+	const lat = document.createElement('b');
+	const long = document.createElement('b');
 
-		lat.textContent = `Latitude: ${loc.coords.latitude}`;
-		long.textContent = `Longitude: ${loc.coords.longitude}`;
-		btn.textContent = 'x';
-		dialog.appendChild(btn);
-		dialog.appendChild(document.createElement('hr'));
-		dialog.appendChild(link);
-		link.appendChild(lat);
-		link.appendChild(document.createElement('br'));
-		link.appendChild(long);
-		btn.addEventListener('click', () => dialog.remove());
-		link.href = GPS.getURI(loc);
-		document.body.appendChild(dialog);
-		dialog.show();
-	})();
+	lat.textContent = `Latitude: ${loc.coords.latitude}`;
+	long.textContent = `Longitude: ${loc.coords.longitude}`;
+	btn.textContent = 'x';
+	dialog.appendChild(btn);
+	dialog.appendChild(document.createElement('hr'));
+	dialog.appendChild(link);
+	link.appendChild(lat);
+	link.appendChild(document.createElement('br'));
+	link.appendChild(long);
+	btn.addEventListener('click', () => dialog.remove());
+	link.href = GPS.getURI(loc);
+	document.body.appendChild(dialog);
+	dialog.show();
 }
 
 function getUserMedia() {
