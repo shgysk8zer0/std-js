@@ -10,7 +10,7 @@
 
 [![Join the chat at https://gitter.im/shgysk8zer0/std-js](https://badges.gitter.im/shgysk8zer0/std-js.svg)](https://gitter.im/shgysk8zer0/std-js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Twitter](https://img.shields.io/twitter/url/https/github.com/shgysk8zer0/std-js.svg?style=social)](https://twitter.com/intent/tweet)
-[![Twitter Follow](https://img.shields.io/twitter/follow/espadrine.svg?style=social&label=Follow)](https://twitter.com/shgysk8zer0)
+[![Twitter Follow](https://img.shields.io/twitter/follow/shgysk8zer0.svg?style=social&label=Follow)](https://twitter.com/shgysk8zer0)
 
 ## A JavaScript library for making front-end development sane!
 
