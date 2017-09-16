@@ -51,6 +51,7 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 	}, false);
 
 	$('input[autocomplete="username"]').each(input => {
+	$('input[autocomplete="username:valid"]').each(input => {
 		input.before(GitHub.getAvatar(input.value));
 	}, false);
 
