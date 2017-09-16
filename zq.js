@@ -151,13 +151,11 @@ export default class zQ {
 	}
 
 	async addClass(cname) {
-		this.each(el => el.classList.add(cname));
-		return this;
+		return this.each(el => el.classList.add(cname));
 	}
 
 	async removeClass(cname) {
-		this.each(el => el.classList.remove(cname));
-		return this;
+		return this.each(el => el.classList.remove(cname));
 	}
 
 	async hasClass(cname) {
