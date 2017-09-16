@@ -146,8 +146,16 @@ export default class zQ {
 		return [...this].find(callback);
 	}
 
+	async findAll(callback) {
+		return this.filter(callback);
+	}
+
 	async map(callback) {
 		return [...this].map(callback);
+	}
+
+	async filter(callback) {
+		return new zQ([...this].filter(callback));
 	}
 
 	async addClass(cname) {
