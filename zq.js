@@ -17,10 +17,12 @@ export default class zQ {
 				}
 			} else if (selector instanceof NodeList || selector instanceof HTMLCollection) {
 				this.results = Array.from(selector);
+			} else if (selector instanceof Array) {
+				this.results = selector;
 			} else if (typeof selector === 'object') {
 				this.results = [selector];
 			} else {
-				throw new TypeError(`Expected a string or Nodelist but got a ${typeof selector}: ${selector}.`);
+				throw new TypeError(`Expected a string or NodeList but got a ${typeof selector}: ${selector}.`);
 			}
 			this.query = selector || ':root';
 		} catch (error) {
