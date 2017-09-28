@@ -81,16 +81,18 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 		}
 	});
 
-	$('form[name="openweather"]').submit(submit => {
+	$('form[name="openweather"]').submit(async (submit) => {
 		submit.preventDefault();
 		const form = new FormData(submit.target);
 		const weather = new OpenWeatherMap(KEYS.OpenWeatherMap, {units: form.get('units')});
-		weather.getFromZip(form.get('zip'), appendWeather);
+		const data = await weather.getFromZip(form.get('zip'));
+		appendWeather(data);
 	});
 
-	$('#weather-loc').click(() => {
+	$('#weather-loc').click(async () => {
 		const weather = new OpenWeatherMap(KEYS.OpenWeatherMap);
-		weather.getFromCoords(appendWeather);
+		const data = await weather.getFromCoords();
+		appendWeather(data);
 	});
 
 	$('#gps-btn').click(showLocation);
@@ -221,7 +223,7 @@ function appendWeather(weather) {
 		let prop = node.dataset.weatherProp;
 		if (node.dataset.hasOwnProperty('weatherSection')) {
 			let sect = node.dataset.weatherSection;
-			if (prop in weather[sect]) {
+			if (weather.hasOwnProperty(sect) && weather[sect].hasOwnProperty(prop)) {
 				node.textContent = weather[sect][prop];
 			} else {
 				node.remove();

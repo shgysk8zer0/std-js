@@ -4,40 +4,23 @@
  */
 const ENDPOINT = 'http://api.openweathermap.org';
 
-/**
- * Parse response from fetch request
- *
- * @param  {Response} resp Reponse object from fetch
- *
- * @return {void}
- */
-function parseResponse(resp) {
-	if (resp.ok) {
-		let type = resp.headers.get('Content-Type').toLowerCase();
-		if (type.startsWith('application/json')) {
-			return resp.json();
-		} else {
-			throw new Error(`Unsupported Content-Type: "${type}"`);
-		}
-	} else {
-		throw new Error(`<${resp.url}> [${resp.status}: ${resp.statusText}]`);
-	}
-}
-
 export default class OpenWeatherMap {
 	/**
 	 * Creates new instance and sets class properties
-	 *
-	 * @param  {string}                   imperial or metric
-	 * @param  {string}                   language code
-	 * @param  {float}                    API version number
+	 * @param  {string} appid              Your unique API key [http://home.openweathermap.org/users/sign_up]
+	 * @param  {String} [units='imperial'] imperial or metric
+	 * @param  {String} [lang='en']        language code
+	 * @param  {float} [version=2.5]       API version
 	 */
 	constructor(appid, {units = 'imperial', lang = 'en', version = 2.5} = {}) {
 		this.url = new URL(`/data/${version}/weather`, ENDPOINT);
+		this.headers = new Headers();
 		this.url.searchParams.set('units', units);
 		this.url.searchParams.set('lang', lang);
 		this.url.searchParams.set('appid', appid);
 		this.units = {};
+		this.headers.set('Accept', 'application/json');
+
 		if (units === 'imperial') {
 			this.units.temp = 'F';
 			this.units.speed = 'MPH';
@@ -49,75 +32,100 @@ export default class OpenWeatherMap {
 
 	/**
 	 * Get weather using GeoLocation API
-	 *
-	 * @param  {callable} callback     Callback to call with response
-	 *
-	 * @return {void}
+	 * @return {object}
 	 */
-	getFromCoords(callback = data => console.log(data)) {
-		OpenWeatherMap.getLocation().then(location => {
-			this.url.searchParams.set('lat', location.coords.latitude);
-			this.url.searchParams.set('lon', location.coords.longitude);
-			fetch(this.url, {
-				method: 'GET',
-				mode: 'cors'
-			}).then(parseResponse).then(callback);
-		}).catch(console.error);
+	async getFromCoords() {
+		const location = await OpenWeatherMap.getLocation();
+		this.url.searchParams.set('lat', location.coords.latitude);
+		this.url.searchParams.set('lon', location.coords.longitude);
+
+		const resp = await fetch(this.url, {
+			headers: this.headers,
+			method: 'GET',
+			mode: 'cors'
+		});
+
+		this.url.searchParams.delete('lat');
+		this.url.searchParams.delete('lon');
+
+		if (resp.ok) {
+			return await resp.json();
+		} else {
+			throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
+		}
 	}
 
 	/**
 	 * Get weather using city name
-	 *
 	 * @param  {string}   city             City name to get weather for
-	 * @param  {callable} callback         Callback to call with response
-	 *
 	 * @return {void}
 	 */
-	getFromCity(city, callback = data => console.log(data)) {
+	async getFromCity(city) {
 		this.url.searchParams.set('q', city);
-		fetch(this.url, {
+
+		const resp = await fetch(this.url, {
+			headers: this.headers,
 			method: 'GET',
-			mode: 'cors'
-		}).then(parseResponse).then(callback).catch(console.error);
+			mode: 'cors',
+		});
+
+		this.url.searchParams.delete('q');
+
+		if (resp.ok) {
+			return await resp.json();
+		} else {
+			throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
+		}
 	}
 
 	/**
 	 * Get weather from zip code
-	 *
 	 * @param  {integer}  zip      Zip code
-	 * @param  {[type]}   callback Callback to call with response
-	 *
-	 * @return {void}
+	 * @return {object}
 	 */
-	getFromZip(zip, callback = data => console.log(data)) {
+	async getFromZip(zip) {
 		this.url.searchParams.set('zip', `${zip},us`);
-		fetch(this.url, {
+
+		const resp = await fetch(this.url, {
+			headers: this.headers,
 			method: 'GET',
-			mode: 'cors'
-		}).then(parseResponse).then(callback).catch(console.error);
+			mode: 'cors',
+		});
+
+		this.url.searchParams.delete('zip');
+
+		if (resp.ok) {
+			return await resp.json();
+		} else {
+			throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
+		}
 	}
 
 	/**
 	 * Get weather from city ID
-	 *
 	 * @param  {integer} id       City ID number
-	 * @param  {[type]}  callback Callback to call with response
-	 *
 	 * @return {void}
 	 */
-	getFromID(id, callback = data => console.log(data)) {
+	async getFromID(id) {
 		this.url.searchParams.set('id', id);
-		fetch(this.url, {
+
+		const resp = await fetch(this.url, {
+			headers: this.headers,
 			method: 'GET',
-			mode: 'cors'
-		}).then(parseResponse).then(callback).catch(console.error);
+			mode: 'cors',
+		});
+
+		this.url.searchParams.delete('id');
+		if (resp.ok) {
+			return await resp.json();
+		} else {
+			throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
+		}
 	}
 
 	/**
 	 * Get icon for current weather
-	 *
 	 * @param  {Object} weather An element from the weather array from response
-	 *
 	 * @return {Image}          <img src="..." alt="..." width="50" height="50">
 	 */
 	static getIcon(weather, {width = 50, height = 50} = {}) {
@@ -129,9 +137,7 @@ export default class OpenWeatherMap {
 
 	/**
 	 * Converts degrees into direction
-	 *
 	 * @param  {Object} wind {deg: ..., }
-	 *
 	 * @return {string}      "N", "NE", etc...
 	 */
 	static getDirectionFromDegree(wind) {
@@ -156,13 +162,11 @@ export default class OpenWeatherMap {
 
 	/**
 	 * Static method to get location using GeoLocation API
-	 *
 	 * @param  {object} options    GeoLocation options object
-	 *
-	 * @return {Promise}           A promise which resolves with GeoLocation coords
+	 * @return {object}            GeoLocation coords
 	 */
-	static getLocation(options = {}) {
-		return new Promise(function(success, fail) {
+	static async getLocation(options = {}) {
+		return await new Promise(function(success, fail) {
 			if (!('geolocation' in navigator)) {
 				fail('Your browser does not support GeoLocation');
 			}
