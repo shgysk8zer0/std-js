@@ -62,7 +62,6 @@ export function toggleHidden() {
 }
 
 export function socialShare() {
-	console.info(SocialShare.twitter);
 	if (this.dataset.socialShare in SocialShare) {
 		SocialShare.openPopup(`${SocialShare[this.dataset.socialShare]}`);
 	}
