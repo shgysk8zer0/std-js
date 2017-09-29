@@ -106,11 +106,8 @@ export function parseResponse(resp) {
 	}
 }
 
-export function getLocation(options) {
+export async function getLocation(options = {}) {
 	/*https://developer.mozilla.org/en-US/docs/Web/API/Geolocation.getCurrentPosition*/
-	if (typeof options === 'undefined') {
-		options = {};
-	}
 	return new Promise(function(success, fail) {
 		if (!('geolocation' in navigator)) {
 			fail('Your browser does not support GeoLocation');
