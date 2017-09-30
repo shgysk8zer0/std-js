@@ -39,7 +39,7 @@ export default class zQ {
 	}
 
 	get text() {
-		return this.map(node => node.textContent);
+		return this.map(node => node.textContent).join();
 	}
 
 	set text(str) {
@@ -47,7 +47,7 @@ export default class zQ {
 	}
 
 	get html() {
-		return this.map(node => node.innerHTML);
+		return this.map(node => node.innerHTML).join();
 	}
 
 	set html(html) {
@@ -84,7 +84,15 @@ export default class zQ {
 	[Symbol.iterator]() {
 		return this.values();
 	}
-	
+
+	async visible() {
+		return this.css({visibility: 'visible'});
+	}
+
+	async invisible() {
+		return this.css({visibility: 'hidden'});
+	}
+
 	async forEach(...args) {
 		return this.each(...args);
 	}
@@ -96,6 +104,18 @@ export default class zQ {
 	async each(callback) {
 		[...this].forEach(callback);
 		return this;
+	}
+
+	async data(data = {}) {
+		return this.each(node => {
+			Object.keys(data).forEach(key => {
+				if (! data[key]) {
+					delete node.dataset[key];
+				} else {
+					node.dataset[key] = data[key];
+				}
+			});
+		});
 	}
 
 	/**
@@ -126,12 +146,348 @@ export default class zQ {
 		});
 	}
 
-	async animate(keyframes, opts) {
+	async animate(keyframes, opts = 400) {
 		if ('animate' in Element.prototype) {
-			return this.map(node => node.animate(keyframes, opts));
+			return Promise.all(await this.map(node => {
+				return new Promise(resolve => {
+					const anim = node.animate(keyframes, opts);
+					anim.onfinish = () => resolve(node);
+				});
+			})).then(els => new zQ(els));
 		} else {
-			return [];
+			return Promise.resolve([]);
 		}
+	}
+
+	async getAnimations() {
+		let anims = [];
+		await this.each(el => {
+			const elAnims = el.getAnimations();
+			anims = anims.concat(elAnims);
+		});
+		return anims;
+	}
+
+	async playAnimations(...ids) {
+		let anims = await this.getAnimations(...ids);
+		anims.filter(anim => ids.includes(anim.id)).forEach(anim => anim.play());
+		return this;
+	}
+
+	async pauseAnimations(...ids) {
+		let anims = await this.getAnimations(...ids);
+		anims.filter(anim => ids.includes(anim.id)).forEach(anim => anim.pause());
+		return this;
+	}
+
+	async cancelAnimations(...ids) {
+		const anims = await this.getAnimations(...ids);
+		anims.forEach(anim => anim.cancel());
+		return this;
+	}
+
+	async fade({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'forwards',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 1,
+		to         = 0,
+		id         = 'fade-in',
+	} = {}) {
+		return this.animate([
+			{opacity: from},
+			{opacity: to}
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async fadeIn({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'forwards',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 0,
+		to         = 1,
+		id         = 'fade-in',
+	} = {}) {
+		return this.fade({
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			from,
+			to,
+			id,
+		});
+	}
+
+	async fadeOut(opts = {}) {
+		return this.fade(opts);
+	}
+
+	async scale({
+		duration     = 400,
+		delay        = 0,
+		fill         = 'both',
+		direction    = 'normal',
+		easing       = 'linear',
+		iterations   = 1,
+		id           = 'scale',
+		initialScale = 0,
+		scale        = 1.5,
+	} = {}) {
+		return this.animate([
+			{transform: `scale(${initialScale})`},
+			{transform: `scale(${scale})`}
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async grow({
+		duration     = 400,
+		delay        = 0,
+		fill         = 'both',
+		direction    = 'normal',
+		easing       = 'linear',
+		iterations   = 1,
+		id           = 'grow',
+		initialScale = 0,
+		scale        = 1,
+	} = {}) {
+		return this.scale({
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+			scale,
+			initialScale,
+		});
+	}
+
+	async shrink({
+		duration     = 400,
+		delay        = 0,
+		fill         = 'both',
+		direction    = 'normal',
+		easing       = 'linear',
+		iterations   = 1,
+		id           = 'shrink',
+		initialScale = 1,
+		scale        = 0,
+	} = {}) {
+		return this.scale({
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+			scale,
+			initialScale,
+		});
+	}
+
+	async rotate({
+		duration        = 400,
+		delay           = 0,
+		fill            = 'both',
+		direction       = 'normal',
+		easing          = 'linear',
+		iterations      = 1,
+		id              = 'rotate',
+		rotation        = '1turn',
+		initialRotation = '0turn',
+	} = {}) {
+		return this.animate([
+			{transform: `rotate(${initialRotation})`},
+			{transform: `rotate(${rotation})`}
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async bounce({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'none',
+		direction  = 'alternate',
+		easing     = 'ease-in-out',
+		iterations = 1,
+		id         = 'bounce',
+		height     = '50px',
+	} = {}) {
+		return this.animate([
+			{transform: 'none'},
+			{transform: `translateY(${height})`}
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async shake({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'none',
+		direction  = 'alternate',
+		easing     = 'cubic-bezier(.68,-0.55,.27,1.55)',
+		iterations = 6,
+		id         = 'shake',
+		offsetX    = '60px',
+		offsetY    = '20px',
+		scale      = 0.9,
+	} = {}) {
+		return this.animate([
+			{transform: 'none'},
+			{transform: `translateY(${offsetY}) translateX(-${offsetX}) scale(${scale})`},
+			{transform: 'none'},
+			{transform: `translateY(-${offsetY}) translateX(${offsetX}) scale(${1/scale})`},
+			{transform: 'none'},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async slideLeft({
+		duration     = 400,
+		delay        = 0,
+		fill         = 'forwards',
+		direction    = 'normal',
+		easing       = 'ease-in',
+		iterations   = 1,
+		id           = 'slide-left',
+		initial      = 0,
+		distance     = '50px',
+	} = {}) {
+		return this.animate([
+			{transform: `translateX(${initial})`},
+			{transform: `translateX(-${distance})`}
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async slideRight({
+		duration     = 400,
+		delay        = 0,
+		fill         = 'forwards',
+		direction    = 'normal',
+		easing       = 'ease-in',
+		iterations   = 1,
+		id           = 'slide-right',
+		initial      = 0,
+		distance     = '50px',
+	} = {}) {
+		return this.animate([
+			{transform: `translateX(${initial})`},
+			{transform: `translateX(${distance})`}
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async slideUp({
+		duration     = 400,
+		delay        = 0,
+		fill         = 'forwards',
+		direction    = 'normal',
+		easing       = 'ease-in',
+		iterations   = 1,
+		id           = 'slide-up',
+		initial      = 0,
+		distance     = '50px',
+	} = {}) {
+		return this.animate([
+			{transform: `translateY(${initial})`},
+			{transform: `translateY(-${distance})`}
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async slideDown({
+		duration     = 400,
+		delay        = 0,
+		fill         = 'forwards',
+		direction    = 'normal',
+		easing       = 'ease-in',
+		iterations   = 1,
+		id           = 'slide-down',
+		initial      = 0,
+		distance     = '50px',
+	} = {}) {
+		return this.animate([
+			{transform: `translateY(${initial})`},
+			{transform: `translateY(${distance})`}
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
 	}
 
 	async some(callback) {
@@ -184,7 +540,8 @@ export default class zQ {
 	}
 
 	async pickClass(cname1, cname2, condition) {
-		this.addClass(condition ? cname1 : cname2);
+		this.toggleClass(cname1, condition);
+		this.toggleClass(cname2, ! condition);
 		return this;
 	}
 
@@ -269,6 +626,10 @@ export default class zQ {
 	async on(event, callback, ...args) {
 		this.each(node => node.addEventListener(event, callback, ...args));
 		return this;
+	}
+
+	async off(event, callback) {
+		return this.each(node => node.removeEventListener(callback));
 	}
 
 	async ready(callback, ...args) {
@@ -471,18 +832,11 @@ export default class zQ {
 		return this.each(node => observer.observe(node));
 	}
 
-	/*========================================================================*/
-	$(selector) {
-		return new zQ(this.query.split(',').map(
-			str => selector.split(',').map(
-				q => `${str.trim()} ${q.trim()}`
-			)
-		)).join(', ');
-	}
-
-	css(args) {
-		var style = document.styleSheets[document.styleSheets.length - 1];
-		style.insertRule(`${this.query} {${args}}`, style.cssRules.length);
-		return this;
+	async css(props = {}) {
+		return this.each(node => {
+			Object.keys(props).forEach(prop => {
+				node.style.setProperty(prop, props[prop]);
+			});
+		});
 	}
 }
