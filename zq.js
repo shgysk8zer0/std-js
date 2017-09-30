@@ -38,20 +38,18 @@ export default class zQ {
 		return this.length !== 0;
 	}
 
-	get text() {
-		return this.map(node => node.textContent).join();
+	async text(str) {
+		return this.each(node => node.textContent = str);
 	}
 
-	set text(str) {
-		this.each(node => node.textContent = str, true);
+	async html(html) {
+		return this.each(node => node.innerHTML = html);
 	}
 
-	get html() {
-		return this.map(node => node.innerHTML).join();
-	}
-
-	set html(html) {
-		this.each(node => node.innerHTML = html, false);
+	async replaceText(replacements = {}) {
+		return this.each(el => Object.keys(replacements).forEach(find => {
+			el.textContent = el.textContent.replace(find, replacements[find]);
+		}));
 	}
 
 	toString() {
@@ -169,20 +167,20 @@ export default class zQ {
 	}
 
 	async playAnimations(...ids) {
-		let anims = await this.getAnimations(...ids);
+		let anims = await this.getAnimations();
 		anims.filter(anim => ids.includes(anim.id)).forEach(anim => anim.play());
 		return this;
 	}
 
 	async pauseAnimations(...ids) {
-		let anims = await this.getAnimations(...ids);
+		let anims = await this.getAnimations();
 		anims.filter(anim => ids.includes(anim.id)).forEach(anim => anim.pause());
 		return this;
 	}
 
 	async cancelAnimations(...ids) {
-		const anims = await this.getAnimations(...ids);
-		anims.forEach(anim => anim.cancel());
+		const anims = await this.getAnimations();
+		anims.filter(anim => ids.includes(anim.id)).forEach(anim => anim.cancel());
 		return this;
 	}
 
@@ -200,6 +198,31 @@ export default class zQ {
 		return this.animate([
 			{filter: `${from}`},
 			{filter: `${to}`},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async filterDropShadow({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = '0 0 0 black',
+		to         = '0.5em 0.5em 0.5em rgba(0,0,0,0.3)',
+		id         = 'drop-shadow',
+	} = {}) {
+		return this.animate([
+			{filter: `drop-shadow(${from})`},
+			{filter: `drop-shadow(${to})`},
 		], {
 			delay,
 			duration,
@@ -290,7 +313,7 @@ export default class zQ {
 		direction  = 'normal',
 		easing     = 'linear',
 		iterations = 1,
-		from       = 0,
+		from       = '0deg',
 		to         = '90deg',
 		id         = 'hue-rotate',
 	} = {}) {
@@ -586,7 +609,7 @@ export default class zQ {
 		easing     = 'ease-in-out',
 		iterations = 1,
 		id         = 'bounce',
-		height     = '50px',
+		height     = '-50px',
 	} = {}) {
 		return this.animate([
 			{transform: 'none'},
@@ -808,8 +831,8 @@ export default class zQ {
 		return this.each(el => el.hidden = hidden);
 	}
 
-	async unhide(shown = true, sync = true) {
-		return this.hide(!shown, sync);
+	async unhide(shown = true) {
+		return this.hide(! shown);
 	}
 
 	async append(...nodes) {
@@ -848,15 +871,21 @@ export default class zQ {
 		return this.some(el => el.hasAttribute(attr));
 	}
 
-	async attr(attr, val) {
-		if (typeof val == 'undefined' || val === true) {
-			val = '';
-		}
-		if (val === false) {
-			return this.each(el => el.removeAttribute(attr));
-		} else {
-			return this.each(el => el.setAttribute(attr, val));
-		}
+	async attr(attrs = {}) {
+		return this.each(el => Object.keys(attrs).forEach(attr => {
+			const val = attrs[attr];
+			switch (typeof(val)) {
+			case 'string':
+			case 'number':
+				el.setAttribute(attr, val);
+				break;
+			case 'boolean':
+				val ? el.setAttribute(attr, '') : el.removeAttribute(attr);
+				break;
+			default:
+				el.removeAttribute(attr);
+			}
+		}));
 	}
 
 	async pause() {
