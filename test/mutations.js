@@ -150,7 +150,7 @@ export function init(base = document.body) {
 	$('[data-fullscreen]', base).click(handlers.fullscreen);
 	$('dialog form', base).invalid(invalidForm);
 	$('[data-import]', base).intersect(loadContent);
-	$('[data-infinite-scroll]').intersect(infiniteScroll);
+	$('[data-infinite-scroll]', base).intersect(infiniteScroll);
 }
 
 function invalidForm(invalid) {
