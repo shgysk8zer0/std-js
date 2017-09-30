@@ -4,7 +4,7 @@ export function $(selector, parent = document) {
 	return new zQ(selector, parent);
 }
 
-export function wait(ms) {
+export async function wait(ms) {
 	return new Promise(resolve => {
 		setTimeout(resolve, ms);
 	});
@@ -19,58 +19,28 @@ export function query(selector, node = document.documentElement) {
 }
 
 export function isOnline() {
-	return (!('onLine' in navigator)) || navigator.onLine;
+	return navigator.onLine === true;
 }
-export function notify(options) {
-	/*Creates a notification, with alert fallback*/
-	let notification;
-	if (typeof options === 'string') {
-		options = {
-			title: options,
-			body: '',
-			icon: '/images/octicons/lib/svg/megaphone.svg'
-		};
-	}
-	if (typeof options.icon !== 'string') {
-		options.icon = '/images/octicons/lib/svg/megaphone.svg';
-	}
-	if ('Notification' in window) {
-		if (Notification.permission === 'default') {
-			Notification.requestPermission().then(resp => {
-				if (resp === 'granted') {
-					try {
-						notification = new Notification(options.title, options);
-					} catch (e) {
-						if (('fallback' in options) && options.fallback) {
-							alert(`${options.title}\n${options.body}`);
-						}
-					}
-				} else if (('fallback' in options) && options.fallback) {
-					alert(`${options.title}\n${options.body}`);
-				}
-			});
-		} else if (Notification.permission === 'granted') {
-			notification = new Notification(options.title, options);
-		} else if (('fallback' in options) && options.fallback) {
-			alert(`${options.title}\n${options.body}`);
-		}
-	}
-	if (notification) {
-		if ('onclick' in options) {
-			notification.onclick = options.onclick;
-		}
-		if ('onshow' in options) {
-			notification.onshow = options.onshow;
-		}
-		if ('onclose' in options) {
-			notification.onclose = options.onclose;
-		}
-		if ('onerror' in options) {
-			notification.onerror = options.onerror;
+export async function notify(title, options = {}) {
+	if (! window.hasOwnProperty('Notification') || Notification.permission === 'denied') {
+		alert(`${title}\n${options.body || ''}`);
+		return {};
+	} else if (Notification.permission === 'default') {
+		const permission = await Notification.requestPermission();
+		if (permission === 'granted') {
+			return notify(title, options);
 		} else {
-			notification.onerror = console.error;
+			alert(`${title}\n${options.body || ''}`);
+			return {};
 		}
-		return notification;
+	} else {
+		try {
+			return new Notification(title, options);
+		} catch (err) {
+			console.error(err);
+			alert(`${title}\n${options.body || ''}`);
+			return {};
+		}
 	}
 }
 export function reportError(err) {
