@@ -186,7 +186,32 @@ export default class zQ {
 		return this;
 	}
 
-	async grayscale({
+	async animateFilter({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 'none',
+		to         = 'none',
+		id         = 'grayscale',
+	} = {}) {
+		return this.animate([
+			{filter: `${from}`},
+			{filter: `${to}`},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async filterGrayscale({
 		duration   = 400,
 		delay      = 0,
 		fill       = 'both',
@@ -197,10 +222,9 @@ export default class zQ {
 		to         = 1,
 		id         = 'grayscale',
 	} = {}) {
-		return this.animate([
-			{filter: `grayscale(${from})`},
-			{filter: `grayscale(${to})`},
-		], {
+		return this.animateFilter({
+			from: `grayscale(${from})`,
+			to: `grayscale(${to})`,
 			delay,
 			duration,
 			fill,
@@ -211,7 +235,7 @@ export default class zQ {
 		});
 	}
 
-	async blur({
+	async filterBlur({
 		duration   = 400,
 		delay      = 0,
 		fill       = 'both',
@@ -222,10 +246,9 @@ export default class zQ {
 		to         = '5px',
 		id         = 'blur',
 	} = {}) {
-		return this.animate([
-			{filter: `blur(${from})`},
-			{filter: `blur(${to})`},
-		], {
+		return this.animateFilter({
+			from: `blur(${from})`,
+			to: `blur(${to})`,
 			delay,
 			duration,
 			fill,
@@ -236,7 +259,7 @@ export default class zQ {
 		});
 	}
 
-	async invert({
+	async filterInvert({
 		duration   = 400,
 		delay      = 0,
 		fill       = 'both',
@@ -247,10 +270,9 @@ export default class zQ {
 		to         = '100%',
 		id         = 'invert',
 	} = {}) {
-		return this.animate([
-			{filter: `invert(${from})`},
-			{filter: `invert(${to})`},
-		], {
+		return this.animateFilter({
+			from: `invert(${from})`,
+			to: `invert(${to})`,
 			delay,
 			duration,
 			fill,
@@ -261,7 +283,7 @@ export default class zQ {
 		});
 	}
 
-	async hueRotate({
+	async filterHueRotate({
 		duration   = 400,
 		delay      = 0,
 		fill       = 'both',
@@ -272,10 +294,9 @@ export default class zQ {
 		to         = '90deg',
 		id         = 'hue-rotate',
 	} = {}) {
-		return this.animate([
-			{filter: `hue-rotate(${from})`},
-			{filter: `hue-rotate(${to})`},
-		], {
+		return this.animateFilter({
+			from: `hue-rotate(${from})`,
+			to: `hue-rotate(${to})`,
 			delay,
 			duration,
 			fill,
@@ -286,7 +307,7 @@ export default class zQ {
 		});
 	}
 
-	async brightness({
+	async filterBrightness({
 		duration   = 400,
 		delay      = 0,
 		fill       = 'both',
@@ -297,10 +318,9 @@ export default class zQ {
 		to         = 1,
 		id         = 'brightness',
 	} = {}) {
-		return this.animate([
-			{filter: `brightness(${from})`},
-			{filter: `brightness(${to})`},
-		], {
+		return this.animateFilter({
+			from: `brightness(${from})`,
+			to: `brightness(${to})`,
 			delay,
 			duration,
 			fill,
@@ -311,7 +331,7 @@ export default class zQ {
 		});
 	}
 
-	async contrast({
+	async filterContrast({
 		duration   = 400,
 		delay      = 0,
 		fill       = 'both',
@@ -322,10 +342,9 @@ export default class zQ {
 		to         = 1,
 		id         = 'contrast',
 	} = {}) {
-		return this.animate([
-			{filter: `contrast(${from})`},
-			{filter: `contrast(${to})`},
-		], {
+		return this.animateFilter({
+			from: `contrast(${from})`,
+			to: `contrast(${to})`,
 			delay,
 			duration,
 			fill,
@@ -336,7 +355,7 @@ export default class zQ {
 		});
 	}
 
-	async saturate({
+	async filterSaturate({
 		duration   = 400,
 		delay      = 0,
 		fill       = 'both',
@@ -347,10 +366,9 @@ export default class zQ {
 		to         = 1,
 		id         = 'saturate',
 	} = {}) {
-		return this.animate([
-			{filter: `saturate(${from})`},
-			{filter: `saturate(${to})`},
-		], {
+		return this.animateFilter({
+			from: `saturate(${from})`,
+			to: `saturate(${to})`,
 			delay,
 			duration,
 			fill,
@@ -361,7 +379,31 @@ export default class zQ {
 		});
 	}
 
-	async sepia({
+	async filterOpacity({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 0,
+		to         = 1,
+		id         = 'saturate',
+	} = {}) {
+		return this.animateFilter({
+			from: `opacity(${from})`,
+			to: `opacity(${to})`,
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async filterSepia({
 		duration   = 400,
 		delay      = 0,
 		fill       = 'both',
@@ -372,10 +414,9 @@ export default class zQ {
 		to         = 1,
 		id         = 'sepia',
 	} = {}) {
-		return this.animate([
-			{filter: `sepia(${from})`},
-			{filter: `sepia(${to})`},
-		], {
+		return this.animateFilter({
+			from: `sepia(${from})`,
+			to: `sepia(${to})`,
 			delay,
 			duration,
 			fill,
