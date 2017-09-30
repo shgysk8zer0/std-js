@@ -10,7 +10,7 @@ export async function wait(ms) {
 	});
 }
 
-export function query(selector, node = document.documentElement) {
+export function query(selector, node = document) {
 	let results = Array.from(node.querySelectorAll(selector));
 	if (node.matches(selector)) {
 		results.unshift(node);
@@ -43,18 +43,12 @@ export async function notify(title, options = {}) {
 		}
 	}
 }
-export function reportError(err) {
-	console.error(err);
-	notify({
-		title: err.name,
-		body: err.message,
-		icon: 'images/octicons/svg/bug.svg'
-	});
-}
+
 export function isInternalLink(link) {
 	return link.origin === location.origin;
 }
-export function parseResponse(resp) {
+
+export async function parseResponse(resp) {
 	if (! resp.headers.has('Content-Type')) {
 		throw new Error(`No Content-Type header in request to "${resp.url}"`);
 	} else if (resp.headers.get('Content-Length') === 0) {
@@ -64,11 +58,11 @@ export function parseResponse(resp) {
 	if (type.startsWith('application/json')) {
 		return resp.json();
 	} else if (type.startsWith('application/xml')) {
-		return new DOMParser().parseFromString(resp.text(), 'application/xml');
+		return new DOMParser().parseFromString(await resp.text(), 'application/xml');
 	} else if (type.startsWith('image/svg+xml')) {
-		return new DOMParser().parseFromString(resp.text(), 'image/svg+xml');
+		return new DOMParser().parseFromString(await resp.text(), 'image/svg+xml');
 	} else if (type.startsWith('text/html')) {
-		return new DOMParser().parseFromString(resp.text(), 'text/html');
+		return new DOMParser().parseFromString(await resp.text(), 'text/html');
 	} else if (type.startsWith('text/plain')) {
 		return resp.text();
 	} else {

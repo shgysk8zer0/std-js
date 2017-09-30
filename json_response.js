@@ -1,4 +1,4 @@
-import {notify, query as $} from './functions.js';
+import {notify, $} from './functions.js';
 
 export default async function handleJSON(json) {
 	if(typeof json === 'string') {
@@ -38,7 +38,7 @@ export default async function handleJSON(json) {
 	}
 	if('addClass' in json) {
 		Object.keys(json.addClass).forEach(selector => {
-			$(selector).forEach(el => {
+			$(selector).each(el => {
 				json.addClass[selector].split(',').forEach(cname => {
 					el.classList.add(cname);
 				});
@@ -47,7 +47,7 @@ export default async function handleJSON(json) {
 	}
 	if('removeClass' in json) {
 		Object.keys(json.removeClass).forEach(selector => {
-			$(selector).forEach(el => {
+			$(selector).each(el => {
 				json.removeClass[selector].split(',').forEach(cname => {
 					el.classList.remove(cname);
 				});
@@ -56,7 +56,7 @@ export default async function handleJSON(json) {
 	}
 	if('attributes' in json) {
 		Object.keys(json.attributes).forEach(selector => {
-			$(selector).forEach(el => {
+			$(selector).each(el => {
 				Object.keys(json.attributes[selector]).forEach(attribute => {
 					if(typeof json.attributes[selector][attribute] === 'boolean') {
 						(json.attributes[selector][attribute])
@@ -83,7 +83,7 @@ export default async function handleJSON(json) {
 	}
 	if('stepUp' in json) {
 		Object.keys(json.stepUp).forEach(selector => {
-			$(selector).forEach(el => {
+			$(selector).each(el => {
 				el.stepUp(json.stepUp[selector]);
 			});
 		});
@@ -96,22 +96,10 @@ export default async function handleJSON(json) {
 		});
 	}
 	if('style' in json) {
-		Object.keys(json.style).forEach(sel => {
-			$(sel).forEach(el => {
-				Object.keys(json.style[sel]).forEach(prop => {
-					el.style[prop.camelCase()] = json.style[sel][prop];
-				});
-			});
-		});
+		Object.keys(json.style).forEach(sel => $(sel).css(json.style[sel]));
 	}
 	if('dataset' in json) {
-		Object.keys(json.dataset).forEach(sel => {
-			$(sel).forEach(el => {
-				Object.keys(json.dataset[sel]).forEach(prop => {
-					el.dataset[prop] = json.dataset[sel][prop];
-				});
-			});
-		});
+		Object.keys(json.dataset).forEach(sel => $(sel).data(json.dataset[sel]));
 	}
 	if('sessionStorage' in json) {
 		Object.keys(json.sessionStorage).forEach(key => {
@@ -149,7 +137,7 @@ export default async function handleJSON(json) {
 		console.error(json.error);
 	}
 	if('scrollTo' in json) {
-		document.querySelectorAll(json.scrollTo.sel).item(json.scrollTo.nth).scrollIntoView();
+		document.querySelectorAll(json.scrollTo.sel).item(json.scrollTo.nth || 0).scrollIntoView();
 	}
 	if('focus' in json) {
 		document.querySelector(json.focus).focus();
@@ -184,24 +172,19 @@ export default async function handleJSON(json) {
 	if (('animate' in json) && ('animate' in Element.prototype)) {
 		Object.keys(json.animate).forEach(sel => {
 			try {
-				let els = Array.from(document.querySelectorAll(sel));
-				els.forEach(el => {
-					el.animate(json.animate[sel].keyframes, json.animate[sel].opts);
-				});
+				$(sel).animate(
+					json.animate[sel].keyframes || [],
+					json.animate[sel].opts || 600);
 			} catch (err) {
 				console.error(err);
 			}
 		});
 	}
 	if('close' in json) {
-		$(json.close).forEach(el => {
-			el.close();
-		});
+		$(json.close).close();
 	}
 	if ('remove' in json) {
-		$(json.remove).forEach(el => {
-			el.remove();
-		});
+		json.remove.forEach(sel => $(sel).remove());
 	}
 	if('triggerEvent' in json) {
 		Object.keys(json.triggerEvent).forEach(selector => {
