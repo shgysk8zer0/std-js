@@ -628,6 +628,10 @@ export default class zQ {
 		return this;
 	}
 
+	async once(event, callback) {
+		return this.on(event, callback, {once: true});
+	}
+
 	async off(event, callback) {
 		return this.each(node => node.removeEventListener(callback));
 	}
