@@ -186,6 +186,206 @@ export default class zQ {
 		return this;
 	}
 
+	async grayscale({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 0,
+		to         = 1,
+		id         = 'grayscale',
+	} = {}) {
+		return this.animate([
+			{filter: `grayscale(${from})`},
+			{filter: `grayscale(${to})`},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async blur({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = '0px',
+		to         = '5px',
+		id         = 'blur',
+	} = {}) {
+		return this.animate([
+			{filter: `blur(${from})`},
+			{filter: `blur(${to})`},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async invert({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 0,
+		to         = '100%',
+		id         = 'invert',
+	} = {}) {
+		return this.animate([
+			{filter: `invert(${from})`},
+			{filter: `invert(${to})`},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async hueRotate({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 0,
+		to         = '90deg',
+		id         = 'hue-rotate',
+	} = {}) {
+		return this.animate([
+			{filter: `hue-rotate(${from})`},
+			{filter: `hue-rotate(${to})`},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async brightness({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 0,
+		to         = 1,
+		id         = 'brightness',
+	} = {}) {
+		return this.animate([
+			{filter: `brightness(${from})`},
+			{filter: `brightness(${to})`},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async contrast({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 0,
+		to         = 1,
+		id         = 'contrast',
+	} = {}) {
+		return this.animate([
+			{filter: `contrast(${from})`},
+			{filter: `contrast(${to})`},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async saturate({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 0,
+		to         = 1,
+		id         = 'saturate',
+	} = {}) {
+		return this.animate([
+			{filter: `saturate(${from})`},
+			{filter: `saturate(${to})`},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
+	async sepia({
+		duration   = 400,
+		delay      = 0,
+		fill       = 'both',
+		direction  = 'normal',
+		easing     = 'linear',
+		iterations = 1,
+		from       = 0,
+		to         = 1,
+		id         = 'sepia',
+	} = {}) {
+		return this.animate([
+			{filter: `sepia(${from})`},
+			{filter: `sepia(${to})`},
+		], {
+			delay,
+			duration,
+			fill,
+			easing,
+			direction,
+			iterations,
+			id,
+		});
+	}
+
 	async fade({
 		duration   = 400,
 		delay      = 0,
