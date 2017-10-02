@@ -1,5 +1,5 @@
 import * as handlers from './dataHandlers.js';
-import {$} from '.functions.js';
+import {$} from './functions.js';
 
 // function lazyLoad(entries, observer) {
 // 	entries.filter(entry => entry.isIntersecting).forEach(async (entry) => {
@@ -112,6 +112,7 @@ export const options = [
 
 export function init(base = document.body) {
 	// const observer = new IntersectionObserver(lazyLoad, {rootMargin: '500px 0px 0px 0px'});
+	$('[data-show]', base).click(handlers.show);
 	$('[data-show-modal]', base).click(handlers.showModal);
 	$('[data-close]', base).click(handlers.close);
 	$('[data-remove]', base).click(handlers.remove);
