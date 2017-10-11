@@ -135,9 +135,10 @@ export default class zQ {
 	async animate(keyframes, opts = 400) {
 		if ('animate' in Element.prototype) {
 			return Promise.all(await this.map(node => {
-				return new Promise(resolve => {
+				return new Promise((resolve, reject) => {
 					const anim = node.animate(keyframes, opts);
 					anim.onfinish = () => resolve(node);
+					anim.oncancel = reject;
 				});
 			})).then(els => new zQ(els));
 		} else {
