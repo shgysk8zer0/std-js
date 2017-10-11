@@ -104,18 +104,6 @@ export default class zQ {
 		return this;
 	}
 
-	async data(data = {}) {
-		return this.each(node => {
-			Object.keys(data).forEach(key => {
-				if (! data[key]) {
-					delete node.dataset[key];
-				} else {
-					node.dataset[key] = data[key];
-				}
-			});
-		});
-	}
-
 	/**
 	 * Note: This is for `HTMLDialogElement.prototype.show`, not the inverse
 	 * of `hide`
@@ -147,9 +135,10 @@ export default class zQ {
 	async animate(keyframes, opts = 400) {
 		if ('animate' in Element.prototype) {
 			return Promise.all(await this.map(node => {
-				return new Promise(resolve => {
+				return new Promise((resolve, reject) => {
 					const anim = node.animate(keyframes, opts);
 					anim.onfinish = () => resolve(node);
+					anim.oncancel = reject;
 				});
 			})).then(els => new zQ(els));
 		} else {
@@ -754,6 +743,21 @@ export default class zQ {
 		});
 	}
 
+	async loadHTML(href) {
+		const url = new URL(href, location.origin);
+		const resp = await fetch(url);
+
+		if (resp.ok) {
+			const parser = new DOMParser();
+			const html = await resp.text();
+			const doc = parser.parseFromString(html, 'text/html');
+			this.html(doc.body.innerHTML);
+			return this;
+		} else {
+			throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
+		}
+	}
+
 	async some(callback) {
 		return [...this].some(callback);
 	}
@@ -778,12 +782,12 @@ export default class zQ {
 		return new zQ([...this].filter(callback));
 	}
 
-	async addClass(cname) {
-		return this.each(el => el.classList.add(cname));
+	async addClass(...classes) {
+		return this.each(el => el.classList.add(...classes));
 	}
 
-	async removeClass(cname) {
-		return this.each(el => el.classList.remove(cname));
+	async removeClass(...classes) {
+		return this.each(el => el.classList.remove(...classes));
 	}
 
 	async hasClass(cname) {
@@ -872,20 +876,35 @@ export default class zQ {
 	}
 
 	async attr(attrs = {}) {
-		return this.each(el => Object.keys(attrs).forEach(attr => {
-			const val = attrs[attr];
-			switch (typeof(val)) {
-			case 'string':
-			case 'number':
-				el.setAttribute(attr, val);
-				break;
-			case 'boolean':
-				val ? el.setAttribute(attr, '') : el.removeAttribute(attr);
-				break;
-			default:
-				el.removeAttribute(attr);
+		return this.each(node => {
+			for (const [key, value] of Object.entries(attrs)) {
+				switch (typeof(value)) {
+				case 'string':
+				case 'number':
+					node.setAttribute(key, value);
+					break;
+				case 'boolean':
+					value ? node.setAttribute(key, '') : node.removeAttribute(key);
+					break;
+				default:
+					node.removeAttribute(key);
+				}
 			}
-		}));
+		});
+	}
+
+	async data(props = {}) {
+		return this.each(node => {
+			for (const [key, value] of Object.entries(props)) {
+				if (value === false) {
+					delete node.dataset[key];
+				} else if (value === true || value === null) {
+					node.dataset[key] = '';
+				} else {
+					node.dataset[key] = typeof(value) === 'string' ? value : JSON.stringify(value);
+				}
+			}
+		});
 	}
 
 	async pause() {

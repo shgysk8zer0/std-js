@@ -8,12 +8,12 @@ export default async function handleJSON(json) {
 	}
 	if('text' in json) {
 		Object.keys(json.text).forEach(key => {
-			document.querySelector(key).textContent = json.text[key];
+			$(key).text(json.text[key]);
 		});
 	}
 	if('html' in json) {
 		Object.keys(json.html).forEach(key => {
-			document.querySelector(key).innerHTML = json.html[key];
+			$(key).html(json.html[key]);
 		});
 	}
 	if('after' in json) {
@@ -56,17 +56,7 @@ export default async function handleJSON(json) {
 	}
 	if('attributes' in json) {
 		Object.keys(json.attributes).forEach(selector => {
-			$(selector).each(el => {
-				Object.keys(json.attributes[selector]).forEach(attribute => {
-					if(typeof json.attributes[selector][attribute] === 'boolean') {
-						(json.attributes[selector][attribute])
-							? el.setAttribute(attribute, '')
-							: el.removeAttribute(attribute);
-					} else {
-						el.setAttribute(attribute, json.attributes[selector][attribute]);
-					}
-				});
-			});
+			$(selector).attr(json.attributes[selector]);
 		});
 	}
 	if('increment' in json) {
@@ -174,7 +164,7 @@ export default async function handleJSON(json) {
 			try {
 				$(sel).animate(
 					json.animate[sel].keyframes || [],
-					json.animate[sel].opts || 600);
+					json.animate[sel].opts || {duration: 600});
 			} catch (err) {
 				console.error(err);
 			}
