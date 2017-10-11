@@ -1,4 +1,7 @@
 {
+	"text": {
+		"header h1": "FooBar"
+	},
 	"addClass": {
 		".no-js": "js"
 	},

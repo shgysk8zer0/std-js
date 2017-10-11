@@ -5,7 +5,12 @@ import {$} from '../functions.js';
 import Cookie from '../Cookie.js';
 
 (async () => {
-	$('body').replaceClass('no-js', 'js');
+	const $body = $('body');
+	const $doc = $(':root');
+	$doc.replaceClass('no-js', 'js');
+	$doc.data({foo: {a: 1, b: [1,2]}, fooBar: false});
+	$doc.attr({lang: 'en', dir: 'ltr'});
+	$body.attr({contextmenu: 'context-menu'});
 	await $(document).ready(loadHandler).then($doc => $doc.keypress(kbdShortcuts));
 
 	Cookie.set('foo', 'bar', {'max-age': 60, path: '/test'});
