@@ -12,7 +12,7 @@ import handleJSON from '../json_response.js';
 import KeyBase from '../keybase.js';
 import * as KEYS from './keys.js';
 // import deprefix from '../deprefixer.js';
-import * as mutations from './mutations.js';
+import * as mutations from '../mutations.js';
 import GitHub from '../GitHub.js';
 import Gravatar from '../Gravatar.js';
 
