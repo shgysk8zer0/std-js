@@ -1,6 +1,8 @@
 import * as handlers from './dataHandlers.js';
 import {$} from './functions.js';
 
+const observer = new IntersectionObserver(lazyLoad, {rootMargin: '500px 0px 0px 0px'});
+
 function infiniteScroll(entries, observer) {
 	entries.filter(entry => entry.isIntersecting).forEach(async entry => {
 		observer.unobserve(entry.target);
@@ -147,7 +149,6 @@ export const options = [
 ];
 
 export function init(base = document.body) {
-	const observer = new IntersectionObserver(lazyLoad, {rootMargin: '500px 0px 0px 0px'});
 	$('[data-show]', base).click(handlers.show);
 	$('[data-show-modal]', base).click(handlers.showModal);
 	$('[data-close]', base).click(handlers.close);
@@ -159,6 +160,7 @@ export function init(base = document.body) {
 	$('[data-scroll-to]', base).click(handlers.scrollTo);
 	$('[data-infinite-scroll]', base).intersect(infiniteScroll);
 	$('[data-load-from]', base).each(node => observer.observe(node));
+
 	if (document.createElement('details') instanceof HTMLUnknownElement) {
 		$('details > summary').click(toggleDetails);
 	}
