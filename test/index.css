@@ -7,7 +7,7 @@ body {
 	min-height: 100vh;
 	display: grid;
 	grid-gap: 0.5rem;
-	grid-template-rows: 13vh 6vh auto 8vh;
+	grid-template-rows: 100vh 6vh auto 8vh;
 	grid-template-columns:4fr 1fr;
 	grid-template-areas:
 		'header header'
@@ -29,6 +29,7 @@ body {
 }
 *, *::before, *::after {
 	box-sizing: inherit;
+	animation-play-state: paused;
 }
 body > header {
 	grid-area: header;
@@ -67,4 +68,44 @@ article p {
 }
 [itemprop="title"] {
 	text-align: center;
+}
+
+dialog {
+  position: absolute;
+  left: 0; right: 0;
+  width: -moz-fit-content;
+  width: -webkit-fit-content;
+  width: fit-content;
+  height: -moz-fit-content;
+  height: -webkit-fit-content;
+  height: fit-content;
+  margin: auto;
+  border: solid;
+  padding: 1em;
+  background: white;
+  color: black;
+  display: block;
+  z-index: 100;
+}
+
+dialog:not([open]) {
+  display: none;
+}
+
+dialog + .backdrop, dialog::backdrop {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 99;
+  background: rgba(0,0,0,0.7);
+}
+
+._dialog_overlay {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+}
+
+dialog.modal {
+  position: fixed;
+  top: 50%;
+  transform: translate(0, -50%);
 }
