@@ -71,21 +71,21 @@ article p {
 }
 
 dialog {
-  position: absolute;
-  left: 0; right: 0;
-  width: -moz-fit-content;
-  width: -webkit-fit-content;
-  width: fit-content;
-  height: -moz-fit-content;
-  height: -webkit-fit-content;
-  height: fit-content;
-  margin: auto;
-  border: solid;
-  padding: 1em;
-  background: white;
-  color: black;
-  display: block;
-  z-index: 100;
+	position: absolute;
+	left: 0; right: 0;
+	width: -moz-fit-content;
+	width: -webkit-fit-content;
+	width: fit-content;
+	height: -moz-fit-content;
+	height: -webkit-fit-content;
+	height: fit-content;
+	margin: auto;
+	border: solid;
+	padding: 1em;
+	background: white;
+	color: black;
+	display: block;
+	z-index: 100;
 }
 
 dialog:not([open]) {
@@ -105,7 +105,7 @@ dialog + .backdrop, dialog::backdrop {
 }
 
 dialog.modal {
-  position: fixed;
-  top: 50%;
-  transform: translate(0, -50%);
+	position: fixed;
+	top: 50%;
+	transform: translate(0, -50%);
 }
