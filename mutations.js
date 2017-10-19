@@ -99,11 +99,11 @@ export const events = {
 				this.target.removeEventListener('click', handlers.toggleHidden);
 			}
 			break;
-		case 'data-social-share':
-			if (this.target.dataset.hasOwnProperty('socialShare')) {
-				this.target.addEventListener('click', handlers.socialShare);
+		case 'data-share':
+			if (this.target.dataset.hasOwnProperty('share')) {
+				this.target.addEventListener('click', handlers.share);
 			} else {
-				this.target.removeEventListener('click', handlers.socialShare);
+				this.target.removeEventListener('click', handlers.share);
 			}
 			break;
 		case 'data-fullscreen':
@@ -139,7 +139,7 @@ export const filter = [
 	'data-show',
 	'data-close',
 	'data-toggle-hidden',
-	'data-social-share',
+	'data-share',
 	'data-fullscreen',
 ];
 
@@ -155,7 +155,7 @@ export function init(base = document.body) {
 	$('[data-remove]', base).click(handlers.remove);
 	$('[data-toggle-hidden]', base).click(handlers.toggleHidden);
 	// $('[data-schema-content]', base).each(importSchema);
-	$('[data-social-share]', base).click(handlers.socialShare);
+	$('[data-share]', base).click(handlers.share);
 	$('[data-fullscreen]', base).click(handlers.fullscreen);
 	$('[data-scroll-to]', base).click(handlers.scrollTo);
 	$('[data-infinite-scroll]', base).intersect(infiniteScroll);
