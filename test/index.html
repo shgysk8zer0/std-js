@@ -1,22 +1,21 @@
 <!DOCTYPE html>
-<html class="no-js" data-foo-bar="remove">
+<html class="no-js" data-foo-bar="remove" itemtype="http://schema.org/WebPage" itemscope="">
 	<head>
 		<title>std-js test</title>
 		<meta charset="utf-8"/>
+		<meta name="description" content="A testing page for my JavaScript library" />
 		<base href="/test/" />
-		<link rel="icon" type="image/svg+xml" href="./javascript.svg" sizes="any"/>
 		<script type="application/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js" crossorigin="annonymous" async=""></script>
 		<script type="module" src="./index.js" async=""></script>
 		<script type="application/javascript" src="./index.min.js" async="" nomodule=""></script>
+		<link rel="icon" type="image/svg+xml" href="./javascript.svg" sizes="any"/>
+		<link rel="canonical" href="http://example.com" />
 		<link rel="stylesheet" type="text/css" href="./index.css" />
 	</head>
 	<body>
 		<menu type="context" id="context-menu">
-			<menu label="Share on ...">
-				<menuitem label="Twitter" data-social-share="twitter"></menuitem>
-				<menuitem label="Google Plus" data-social-share="googlePlus"></menuitem>
-				<menuitem label="reddit" data-social-share="reddit"></menuitem>
-			</menu>
+			<menuitem label="Share page" data-share=""></menuitem>
+			<menuitem label="Share article" data-share="article"></menuitem>
 			<menu label="Forms">
 				<menuitem label="Registration" data-show-modal="#contact-dialog"></menuitem>
 				<menuitem label="Login" data-show-modal="#login-dialog"></menuitem>
@@ -222,9 +221,12 @@
 		</template>
 		<template id="article-template">
 			<article itemtype="http://schema.org/Article">
+				<meta itemprop="url" content="./article" />
+				<menu itemprop="description" content="Lorem Ipsum"></menu>
 				<header>
 					<h2 itemprop="headline"></h2>
 					<b>By <span itemprop="author" data-schema-template="person-template"></span></b>
+					<button data-share="">Share</button>
 				</header>
 				<section itemprop="articleBody"></section>
 			</article>

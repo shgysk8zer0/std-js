@@ -1,5 +1,3 @@
-import SocialShare from './socialshare.js';
-
 /**
  * HTML API using data-* attributes
  */
@@ -61,8 +59,61 @@ export function toggleHidden() {
 	});
 }
 
-export function socialShare() {
-	if (this.dataset.socialShare in SocialShare) {
-		SocialShare.openPopup(`${SocialShare[this.dataset.socialShare]}`);
+export function share(event) {
+	event.preventDefault();
+	event.stopPropagation();
+	const containerEl = this.dataset.share === '' ? this : document.querySelector(this.dataset.share);
+	let url = location.href, text = '', title = document.title;
+
+	if (containerEl instanceof HTMLImageElement) {
+		url = containerEl.src;
+		title = containerEl.alt;
+	} else if (containerEl instanceof HTMLAnchorElement) {
+		url = containerEl.href;
+		title = containerEl.title;
+		text = containerEl.textContent;
+	} else if (containerEl instanceof Element) {
+		const urlEl = containerEl.closest('[itemtype]')
+			.querySelector('[itemprop="url"], [itemprop="contentUrl"], [rel="canonical"]');
+		const titleEl = containerEl.closest('[itemtype]')
+			.querySelector('[itemprop="name"], [itemprop="headline"], title');
+		const textEl = containerEl.closest('[itemtype]')
+			.querySelector('[itemprop="description"], [name="description"]');
+
+		if (urlEl instanceof Element) {
+			if (urlEl.hasAttribute('content')) {
+				url = urlEl.getAttribute('content');
+			} else if (urlEl.hasAttribute('href')) {
+				url = urlEl.href;
+			} else {
+				url = urlEl.textContent;
+			}
+		} else {
+			url = location.href;
+		}
+
+		if (titleEl instanceof Element) {
+			if (titleEl.hasAttribute('content')) {
+				title = titleEl.getAttribute('content');
+			} else {
+				title = titleEl.textContent;
+			}
+		} else {
+			title = document.title;
+		}
+
+		if (textEl instanceof Element) {
+			if (textEl.hasAttribute('content')) {
+				text = textEl.getAttribute('content');
+			} else {
+				text = textEl.textContent;
+			}
+		}
 	}
+
+	navigator.share({
+		url: new URL(url, location.origin).toString(),
+		title,
+		text,
+	}).catch(console.error);
 }
