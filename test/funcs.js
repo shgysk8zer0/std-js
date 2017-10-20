@@ -15,8 +15,11 @@ import * as KEYS from './keys.js';
 import * as mutations from '../mutations.js';
 import GitHub from '../GitHub.js';
 import Gravatar from '../Gravatar.js';
+import {facebook, twitter, linkedIn, googlePlus, reddit} from './share-config.js';
+import WebShareAPI from '../webShareApi.js';
 
 export async function loadHandler() {
+	WebShareAPI(facebook, twitter, linkedIn, googlePlus, reddit);
 	if (document.createElement('details') instanceof HTMLUnknownElement) {
 		$('details > summary').click(function() {
 			this.parentElement.open = ! this.parentElement.open;

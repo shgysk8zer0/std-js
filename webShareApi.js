@@ -55,6 +55,8 @@ export default (...shares) => {
 
 			if (text === null && title === null && url === null) {
 				reject(new TypeError('No known share data fields supplied. If using only new fields (other than title, text and url), you must feature-detect them first.'));
+			} else if (shares.length === 0) {
+				reject(new Error('No shares configured'));
 			} else {
 				msg.textContent = 'Share via';
 				close.title     = 'Close dialog';
@@ -77,6 +79,8 @@ export default (...shares) => {
 
 					if (share.url.searchParams.has('text')) {
 						share.url.searchParams.set('text', text);
+					} else if (share.url.searchParams.has('summary')) {
+						share.url.searchParams.set('summary', text);
 					}
 
 					link.style.setProperty('display', 'inline-block');

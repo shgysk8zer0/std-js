@@ -73,11 +73,11 @@ export function share(event) {
 		title = containerEl.title;
 		text = containerEl.textContent;
 	} else if (containerEl instanceof Element) {
-		const urlEl = (containerEl.closest('[itemtype]') || document)
+		const urlEl = containerEl.closest('[itemtype]')
 			.querySelector('[itemprop="url"], [itemprop="contentUrl"], [rel="canonical"]');
-		const titleEl = (containerEl.closest('[itemtype]') || document)
+		const titleEl = containerEl.closest('[itemtype]')
 			.querySelector('[itemprop="name"], [itemprop="headline"], title');
-		const textEl = (containerEl.closest('[itemtype]') || document)
+		const textEl = containerEl.closest('[itemtype]')
 			.querySelector('[itemprop="description"], [name="description"]');
 
 		if (urlEl instanceof Element) {
