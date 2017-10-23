@@ -1,7 +1,7 @@
-import zQ from './zq.js';
+import esQuery from './esQuery.js';
 
 export function $(selector, parent = document) {
-	return new zQ(selector, parent);
+	return new esQuery(selector, parent);
 }
 
 export async function wait(ms) {
