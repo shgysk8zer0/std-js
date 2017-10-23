@@ -5,82 +5,48 @@ const PREFIXES = [
 	'ms'
 ];
 
-/*============================ zQ Functions =======================*/
-export default class zQ {
+/*============================ esQuery Functions =======================*/
+export default class esQuery extends Set {
 	constructor(selector, parent = document) {
-		this.results = [];
-		try {
-			if (typeof selector === 'string') {
-				this.results = Array.from(parent.querySelectorAll(selector));
-				if (parent instanceof HTMLElement && parent.matches(selector)) {
-					this.results.push(parent);
-				}
-			} else if (selector instanceof NodeList || selector instanceof HTMLCollection) {
-				this.results = Array.from(selector);
-			} else if (selector instanceof Array) {
-				this.results = selector;
-			} else if (typeof selector === 'object') {
-				this.results = [selector];
-			} else {
-				throw new TypeError(`Expected a string or NodeList but got a ${typeof selector}: ${selector}.`);
+		if (typeof selector === 'string') {
+			super(parent.querySelectorAll(selector));
+			if (parent instanceof HTMLElement && parent.matches(selector)) {
+				this.add(parent);
 			}
-			this.query = selector || ':root';
-		} catch (error) {
-			console.error(error);
+		} else if (
+			selector instanceof NodeList
+			|| selector instanceof HTMLCollection
+			|| selector instanceof Array
+		) {
+			super(selector);
+		} else if (typeof selector === 'object') {
+			super();
+			this.add(selector);
+		} else {
+			super();
+			throw new TypeError(`Expected a string or NodeList but got a ${typeof selector}: ${selector}.`);
 		}
-	}
-
-	get length() {
-		return this.results.length;
 	}
 
 	get found() {
-		return this.length !== 0;
+		return this.size !== 0;
 	}
 
 	async text(str) {
-		return this.each(node => node.textContent = str);
+		this.forEach(node => node.textContent = str);
+		return this;
 	}
 
 	async html(html) {
-		return this.each(node => node.innerHTML = html);
+		this.forEach(node => node.innerHTML = html);
+		return this;
 	}
 
 	async replaceText(replacements = {}) {
-		return this.each(el => Object.keys(replacements).forEach(find => {
+		this.forEach(el => Object.keys(replacements).forEach(find => {
 			el.textContent = el.textContent.replace(find, replacements[find]);
 		}));
-	}
-
-	toString() {
-		return this.query;
-	}
-
-	item(n) {
-		return this.results[n];
-	}
-
-	*values() {
-		for (let item of this.results) {
-			yield item;
-		}
-	}
-
-	*keys() {
-		for (let n = 0; n < this.length; n++) {
-			yield n;
-		}
-	}
-
-	*entries() {
-		let n = 0;
-		for (const node of this) {
-			yield [n++, node];
-		}
-	}
-
-	[Symbol.iterator]() {
-		return this.values();
+		return this;
 	}
 
 	async visible() {
@@ -91,16 +57,8 @@ export default class zQ {
 		return this.css({visibility: 'hidden'});
 	}
 
-	async forEach(...args) {
-		return this.each(...args);
-	}
-
-	async has(node) {
-		return [...this].includes(node);
-	}
-
-	async each(callback) {
-		[...this].forEach(callback);
+	async each(...args) {
+		this.forEach(...args);
 		return this;
 	}
 
@@ -109,27 +67,30 @@ export default class zQ {
 	 * of `hide`
 	 */
 	async show() {
-		return this.each(node => {
+		this.forEach(node => {
 			if ('show' in node) {
 				node.show();
 			}
 		});
+		return this;
 	}
 
 	async showModal() {
-		return this.each(node => {
+		this.forEach(node => {
 			if ('showModal' in node) {
 				node.showModal();
 			}
 		});
+		return this;
 	}
 
 	async close() {
-		return this.each(node => {
+		this.forEach(node => {
 			if ('close' in node) {
 				node.close();
 			}
 		});
+		return this;
 	}
 
 	async animate(keyframes, opts = 400) {
@@ -140,7 +101,7 @@ export default class zQ {
 					anim.onfinish = () => resolve(node);
 					anim.oncancel = reject;
 				});
-			})).then(els => new zQ(els));
+			})).then(els => new esQuery(els));
 		} else {
 			return Promise.resolve([]);
 		}
@@ -148,7 +109,7 @@ export default class zQ {
 
 	async getAnimations() {
 		let anims = [];
-		await this.each(el => {
+		this.forEach(el => {
 			const elAnims = el.getAnimations();
 			anims = anims.concat(elAnims);
 		});
@@ -779,15 +740,17 @@ export default class zQ {
 	}
 
 	async filter(callback) {
-		return new zQ([...this].filter(callback));
+		return new esQuery([...this].filter(callback));
 	}
 
 	async addClass(...classes) {
-		return this.each(el => el.classList.add(...classes));
+		this.forEach(el => el.classList.add(...classes));
+		return this;
 	}
 
 	async removeClass(...classes) {
-		return this.each(el => el.classList.remove(...classes));
+		this.forEach(el => el.classList.remove(...classes));
+		return this;
 	}
 
 	async hasClass(cname) {
@@ -796,14 +759,15 @@ export default class zQ {
 
 	async toggleClass(cname, force) {
 		if (typeof force !== 'undefined') {
-			return this.each(node => node.classList.toggle(cname, force));
+			this.forEach(node => node.classList.toggle(cname, force));
 		} else {
-			return this.each(node => node.classList.toggle(cname));
+			this.forEach(node => node.classList.toggle(cname));
 		}
+		return this;
 	}
 
 	async replaceClass(cname1, cname2) {
-		this.each(node => node.classList.replace(cname1, cname2));
+		this.forEach(node => node.classList.replace(cname1, cname2));
 		return this;
 	}
 
@@ -814,25 +778,26 @@ export default class zQ {
 	}
 
 	async remove() {
-		this.each(el => el.remove());
+		this.forEach(el => el.remove());
 		return this;
 	}
 
 	async empty(query = null) {
 		if (typeof query === 'string') {
-			this.each(node => [...node.children].forEach(child => {
+			this.forEach(node => [...node.children].forEach(child => {
 				if (child.matches(query)) {
 					child.remove();
 				}
 			}));
 		} else {
-			this.each(node => [...node.children].forEach(child => child.remove()));
+			this.forEach(node => [...node.children].forEach(child => child.remove()));
 		}
 		return this;
 	}
 
 	async hide(hidden = true) {
-		return this.each(el => el.hidden = hidden);
+		this.forEach(el => el.hidden = hidden);
+		return this;
 	}
 
 	async unhide(shown = true) {
@@ -840,35 +805,43 @@ export default class zQ {
 	}
 
 	async append(...nodes) {
-		return this.each(el => el.append(...nodes));
+		this.forEach(el => el.append(...nodes));
+		return this;
 	}
 
 	async prepend(...nodes) {
-		return this.each(el => el.prepend(...nodes));
+		this.forEach(el => el.prepend(...nodes));
+		return this;
 	}
 
 	async before(...nodes) {
-		return this.each(el => el.before(...nodes));
+		this.forEach(el => el.before(...nodes));
+		return this;
 	}
 
 	async after(...nodes) {
-		return this.each(el => el.after(...nodes));
+		this.forEach(el => el.after(...nodes));
+		return this;
 	}
 
 	async afterBegin(text) {
-		return this.each(el => el.insertAdjacentHTML('afterbegin', text));
+		this.forEach(el => el.insertAdjacentHTML('afterbegin', text));
+		return this;
 	}
 
 	async afterEnd(text) {
-		return this.each(el => el.insertAdjacentHTML('afterend', text));
+		this.forEach(el => el.insertAdjacentHTML('afterend', text));
+		return this;
 	}
 
 	async beforeBegin(text) {
-		return this.each(el => el.insertAdjacentHTML('beforebegin', text));
+		this.forEach(el => el.insertAdjacentHTML('beforebegin', text));
+		return this;
 	}
 
 	async beforeEnd(text) {
-		return this.each(el => el.insertAdjacentHTML('beforeend', text));
+		this.forEach(el => el.insertAdjacentHTML('beforeend', text));
+		return this;
 	}
 
 	async hasAttribute(attr) {
@@ -876,7 +849,7 @@ export default class zQ {
 	}
 
 	async attr(attrs = {}) {
-		return this.each(node => {
+		this.forEach(node => {
 			for (const [key, value] of Object.entries(attrs)) {
 				switch (typeof(value)) {
 				case 'string':
@@ -891,10 +864,11 @@ export default class zQ {
 				}
 			}
 		});
+		return this;
 	}
 
 	async data(props = {}) {
-		return this.each(node => {
+		this.forEach(node => {
 			for (const [key, value] of Object.entries(props)) {
 				if (value === false) {
 					delete node.dataset[key];
@@ -905,15 +879,17 @@ export default class zQ {
 				}
 			}
 		});
+		return this;
 	}
 
 	async pause() {
-		return this.each(media => media.pause());
+		this.forEach(media => media.pause());
+		return this;
 	}
 
 	/*==================== Listener Functions =================================*/
 	async on(event, callback, ...args) {
-		this.each(node => node.addEventListener(event, callback, ...args));
+		this.forEach(node => node.addEventListener(event, callback, ...args));
 		return this;
 	}
 
@@ -922,13 +898,14 @@ export default class zQ {
 	}
 
 	async off(event, callback) {
-		return this.each(node => node.removeEventListener(callback));
+		this.forEach(node => node.removeEventListener(callback));
+		return this;
 	}
 
 	async ready(callback, ...args) {
 		this.on('DOMContentLoaded', callback, ...args);
 		if (document.readyState !== 'loading') {
-			this.each(node => {
+			this.forEach(node => {
 				callback.bind(node)(new Event('DOMContentLoaded'));
 			}, false);
 		}
@@ -940,16 +917,17 @@ export default class zQ {
 	}
 
 	async playing(callback) {
-		return this.each(e => e.onplay = callback);
+		this.forEach(e => e.onplay = callback);
+		return this;
 	}
 
 	async paused(callback) {
-		this.each(e => e.onpause = callback, false);
+		this.forEach(e => e.onpause = callback, false);
 		return this;
 	}
 
 	async visibilitychange(callback, ...args) {
-		this.each(e => {
+		this.forEach(e => {
 			PREFIXES.forEach(pre => {
 				e.addEventListener(`${pre}visibilitychange`, callback, ...args);
 			});
@@ -1114,7 +1092,8 @@ export default class zQ {
 			watch[event] = true;
 			return watch;
 		}, {attributeFilter});
-		return this.each(el => watcher.observe(el, obs));
+		this.forEach(el => watcher.observe(el, obs));
+		return this;
 	}
 
 	/**
@@ -1122,14 +1101,16 @@ export default class zQ {
 	 */
 	async intersect(callback, options = {}) {
 		const observer = new IntersectionObserver(callback, options);
-		return this.each(node => observer.observe(node));
+		this.forEach(node => observer.observe(node));
+		return this;
 	}
 
 	async css(props = {}) {
-		return this.each(node => {
+		this.forEach(node => {
 			Object.keys(props).forEach(prop => {
 				node.style.setProperty(prop, props[prop]);
 			});
 		});
+		return this;
 	}
 }
