@@ -57,8 +57,9 @@ export default class esQuery extends Set {
 		return this.css({visibility: 'hidden'});
 	}
 
-	async each(...args) {
-		this.forEach(...args);
+	async each(callback, thisArg = this) {
+		let n = 0;
+		this.forEach(el => callback.call(thisArg, el, n++));
 		return this;
 	}
 
