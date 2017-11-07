@@ -888,6 +888,75 @@ export default class esQuery extends Set {
 		return this;
 	}
 
+	async read({
+		pause = null,
+		resume = null,
+		cancel = null,
+	}) {
+		if (window.hasOwnProperty('speechSynthesis')) {
+			if (pause instanceof HTMLButtonElement) {
+				pause.addEventListener('click', () => {
+					window.speechSynthesis.pause();
+					pause.disabled = true;
+
+					if (resume instanceof HTMLButtonElement) {
+						resume.disabled = false;
+					}
+				});
+			}
+
+			if (resume instanceof HTMLButtonElement) {
+				resume.addEventListener('click', () => {
+					window.speechSynthesis.resume();
+					resume.disabled = true;
+
+					if (pause instanceof HTMLButtonElement) {
+						pause.disabled = false;
+					}
+				});
+			}
+
+			if (cancel instanceof HTMLButtonElement) {
+				cancel.addEventListener('click', () => {
+					window.speechSynthesis.cancel();
+					cancel.disabled = true;
+					new esQuery('.reading').removeClass('reading');
+
+					if (resume instanceof HTMLButtonElement) {
+						resume.disabled = true;
+					}
+					if (pause instanceof HTMLButtonElement) {
+						pause.disabled = true;
+					}
+				});
+			}
+
+			const utterances = await this.map(async el => {
+				return new Promise((resolve, reject) => {
+					const reading = new SpeechSynthesisUtterance(el.textContent);
+					reading.addEventListener('start', () => {
+
+						el.classList.add('reading');
+						el.scrollIntoView({
+							behavior: 'smooth',
+							block: 'start',
+						});
+					});
+					reading.addEventListener('end', event => {
+						el.classList.remove('reading');
+						resolve(event.target);
+					});
+					reading.addEventListener('error', event => reject(event.target));
+					window.speechSynthesis.speak(reading);
+				});
+			});
+			await Promise.all(utterances);
+		} else {
+			throw new Error('SpeechSynthesis is not supported');
+		}
+		return this;
+	}
+
 	/*==================== Listener Functions =================================*/
 	async on(event, callback, ...args) {
 		this.forEach(node => node.addEventListener(event, callback, ...args));
