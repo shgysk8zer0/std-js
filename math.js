@@ -59,6 +59,15 @@ export function standardDeviation(...nums) {
 	return Math.sqrt(variance(...nums));
 }
 
+export function choose(n, k) {
+	if (k === 0 || k === n) {
+		return 1;
+	} else if (! (Number.isInteger(n) && Number.isInteger(k))) {
+		return NaN;
+	}
+	return factorial(n) / (k * factorial(n - k));
+}
+
 export function factorial(n) {
 	if (! Number.isInteger(n)) {
 		return NaN;
