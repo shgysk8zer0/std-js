@@ -892,6 +892,7 @@ export default class esQuery extends Set {
 		pause = null,
 		resume = null,
 		cancel = null,
+		scrollWith = false,
 	}) {
 		if (window.hasOwnProperty('speechSynthesis')) {
 			if (pause instanceof HTMLButtonElement) {
@@ -913,6 +914,10 @@ export default class esQuery extends Set {
 					if (pause instanceof HTMLButtonElement) {
 						pause.disabled = false;
 					}
+
+					if (cancel instanceof HTMLElement) {
+						cancel.disabled = false;
+					}
 				});
 			}
 
@@ -923,8 +928,9 @@ export default class esQuery extends Set {
 					new esQuery('.reading').removeClass('reading');
 
 					if (resume instanceof HTMLButtonElement) {
-						resume.disabled = true;
+						resume.disabled = false;
 					}
+
 					if (pause instanceof HTMLButtonElement) {
 						pause.disabled = true;
 					}
@@ -935,12 +941,13 @@ export default class esQuery extends Set {
 				return new Promise((resolve, reject) => {
 					const reading = new SpeechSynthesisUtterance(el.textContent);
 					reading.addEventListener('start', () => {
-
 						el.classList.add('reading');
-						el.scrollIntoView({
-							behavior: 'smooth',
-							block: 'start',
-						});
+						if (scrollWith) {
+							el.scrollIntoView({
+								behavior: 'smooth',
+								block: 'start',
+							});
+						}
 					});
 					reading.addEventListener('end', event => {
 						el.classList.remove('reading');
