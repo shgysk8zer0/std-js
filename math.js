@@ -9,11 +9,14 @@ export function* range(start, end, step = 1) {
 	}
 }
 
-export function* fibonacci() {
+export function* fibonacci(terms = Number.MAX_SAFE_INTEGER) {
+	if (! (Number.isInteger(terms) && Number.isSafeInteger(terms) && terms > 0)) {
+		throw new Error('Invalid terms given');
+	}
 	let current = 1, prev = 1;
 	yield 1;
 
-	while (Number.isSafeInteger(current)) {
+	for (let term = 1; term < terms; term++) {
 		yield current;
 		[prev, current] = [current, current + prev];
 	}
