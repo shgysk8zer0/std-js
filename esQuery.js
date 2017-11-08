@@ -915,7 +915,7 @@ export default class esQuery extends Set {
 						pause.disabled = false;
 					}
 
-					if (cancel instanceof HTMLElement) {
+					if (cancel instanceof HTMLButtonElement) {
 						cancel.disabled = false;
 					}
 				});
@@ -951,6 +951,18 @@ export default class esQuery extends Set {
 					});
 					reading.addEventListener('end', event => {
 						el.classList.remove('reading');
+						if (resume instanceof HTMLButtonElement) {
+							resume.disabled = false;
+						}
+
+						if (pause instanceof HTMLButtonElement) {
+							pause.disabled = true;
+						}
+
+						if (cancel instanceof HTMLButtonElement) {
+							cancel.disabled = true;
+						}
+
 						resolve(event.target);
 					});
 					reading.addEventListener('error', event => reject(event.target));
