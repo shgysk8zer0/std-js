@@ -40,14 +40,30 @@ export function sum(...nums) {
 	return nums.reduce((sum, num) => sum + num, 0);
 }
 
+export function mean(...nums) {
+	return sum(...nums) / nums.length;
+}
+
+export function variance(...nums) {
+	if (nums.length <= 1) {
+		return 0;
+	}
+	const m = mean(...nums);
+	return nums.reduce((sum, num) => sum + (num - m)**2, 0) / (nums.length - 1);
+}
+
+export function standardDeviation(...nums) {
+	return Math.sqrt(variance(...nums));
+}
+
 export function factorial(n) {
 	if (! Number.isInteger(n)) {
-		throw new TypeError(`Expected an Integer but got ${typeof n}`);
+		return NaN;
 	} else if (n > 1) {
 		return n * factorial(n - 1);
 	} else if (n === 1 || n === 0) {
 		return 1;
 	} else {
-		throw new TypeError(`Cannot handle numbers < 0. Got ${n}`);
+		return undefined;
 	}
 }
