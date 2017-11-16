@@ -75,12 +75,16 @@ export default (...shares) => {
 						share.url.searchParams.set('title', title);
 					} else if (share.url.searchParams.has('t')) {
 						share.url.searchParams.set('t', title);
+					} else if (share.url.searchParams.has('subject')) {
+						share.url.searchParams.set('subject', title);
 					}
 
 					if (share.url.searchParams.has('text')) {
 						share.url.searchParams.set('text', text);
 					} else if (share.url.searchParams.has('summary')) {
 						share.url.searchParams.set('summary', text);
+					} else if (share.url.searchParams.has('body')) {
+						share.url.searchParams.set('body', `${text}\n${url}`);
 					}
 
 					link.style.setProperty('display', 'inline-block');
