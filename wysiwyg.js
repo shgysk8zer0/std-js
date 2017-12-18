@@ -1,5 +1,18 @@
 import {query as $} from './functions.js';
 
+function getSelectedElement(matching = '[contenteditable="true"] *') {
+	let selected = getSelection().anchorNode;
+	while(! (selected instanceof HTMLElement)) {
+		selected = selected.parentElement;
+	}
+
+	if (selected.matches('[contenteditable="true"] *')) {
+		return selected;
+	} else {
+		throw new Error('Attempting to edit an element that is not editable');
+	}
+}
+
 function editorCommand(click) {
 	click.preventDefault();
 	document.execCommand('styleWithCSS', null, click.target.dataset.hasOwnProperty('styleWithCss'));
@@ -18,18 +31,18 @@ function editorCommand(click) {
 
 function addClass(click) {
 	click.preventDefault();
-	let addClass = prompt('Enter class name to add');
+	const cname = prompt('Enter class name to add');
 	if (addClass.length !== 0) {
-		getSelection().anchorNode.parentElement.classList.add(addClass);
+		getSelectedElement().classList.add(cname);
 	}
 }
 
 function removeClass(click) {
 	click.preventDefault();
-	let removeClass = prompt('Enter class name to remove');
+	const cname = prompt('Enter class name to remove');
 	if (removeClass.length !== 0) {
-		let el = getSelection().anchorNode.parentElement;
-		el.classList.remove(removeClass);
+		const el = getSelectedElement();
+		el.classList.remove(cname);
 		if (el.classList.length === 0) {
 			el.removeAttribute('class');
 		}
@@ -38,18 +51,18 @@ function removeClass(click) {
 
 function setAttribute(click) {
 	click.preventDefault();
-	let name = prompt('Enter attribute name');
+	const name = prompt('Enter attribute name');
 	if (name.length !== 0) {
-		var value = prompt('Enter attribute value');
-		getSelection().anchorNode.parentElement.setAttribute(name, value.toString());
+		const value = prompt('Enter attribute value');
+		getSelectedElement().setAttribute(name, value.toString());
 	}
 }
 
 function removeAttribute(click) {
 	click.preventDefault();
-	let attr = prompt('Enter name of attribute to remove');
+	const attr = prompt('Enter name of attribute to remove');
 	if (attr.length !== 0) {
-		getSelection().anchorNode.parentElement.removeAttribute(attr);
+		getSelectedElement().removeAttribute(attr);
 	}
 }
 
