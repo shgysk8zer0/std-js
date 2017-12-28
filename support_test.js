@@ -11,6 +11,9 @@ export function supports(type) {
 
 	try {
 		switch (type.toLowerCase()) {
+		case 'js-animate':
+			return HTMLElement.prototype.hasOwnProperty('animate');
+
 		case 'queryselectorall':
 			return ('querySelectorAll' in document);
 
@@ -44,7 +47,7 @@ export function supports(type) {
 		case 'listeners':
 			return ('addEventListener' in window);
 
-		case 'animations':
+		case 'css-animations':
 			return ((supports('csssupports')
 					&& (CSS.supports('animation', 'name')
 					|| CSS.supports('-webkit-animation', 'name'))
