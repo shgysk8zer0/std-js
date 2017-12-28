@@ -1,4 +1,5 @@
 import '../shims.js';
+import '../deprefixer.js';
 import {loadHandler} from './funcs.js';
 import kbdShortcuts from '../kbd_shortcuts.js';
 import {$} from '../functions.js';
