@@ -10,6 +10,15 @@ export async function wait(ms) {
 	});
 }
 
+export function* toGenerator(...items) {
+	/*eslint no-constant-condition: "off" */
+	while (true) {
+		for (const item of items) {
+			yield item;
+		}
+	}
+}
+
 export function query(selector, node = document) {
 	let results = Array.from(node.querySelectorAll(selector));
 	if (node.matches(selector)) {
@@ -67,6 +76,49 @@ export async function parseResponse(resp) {
 		return resp.text();
 	} else {
 		throw new TypeError(`Unsupported Content-Type: ${type}`);
+	}
+}
+
+export async function marquee({
+	parent,
+	delay        = 200,
+	cursor       = '|',
+	blinkRate    = 800,
+	pause        = 1000,
+	containerTag = 'span',
+	cursorTag    = 'span',
+} = {}, ...sentences) {
+	const cursorEl = document.createElement(cursorTag);
+	const container = document.createElement(containerTag);
+
+	cursorEl.animate([
+		{opacity: 0},
+		{opacity: 1}
+	], {
+		duration: blinkRate,
+		iterations: Infinity,
+		direction: 'alternate',
+	});
+
+	cursorEl.textContent = cursor;
+	parent.prepend(container, cursorEl);
+
+	for (const text of toGenerator(...sentences)) {
+		container.textContent = '';
+
+		for (const char of text.split('')) {
+			container.append(char);
+			await wait(delay);
+		}
+
+		await wait(pause);
+
+		while (container.textContent !== '') {
+			const chars = container.textContent.split('');
+			chars.pop();
+			container.textContent = chars.join('');
+			await wait(delay);
+		}
 	}
 }
 
