@@ -43,7 +43,7 @@
     "postinstall": "npm run git:fetch && npm run build:all"
 },
   "devDependencies": {
-    "eslint": "^3.10.0",
+    "eslint": "^4.14.0",
     "eslint-plugin-async-await": "0.0.0",
     "eslint-plugin-babel": "^4.0.1"
   },
@@ -57,9 +57,9 @@
     "cssnano": "^3.10.0",
     "postcss": "^6.0.1",
     "postcss-cli": "^4.0.0",
-    "postcss-cssnext": "^2.9.0",
-    "postcss-import": "^10.0.0",
-    "postcss-url": "^6.1.0",
-    "webpack": "^2.6.1"
+    "postcss-cssnext": "^3.0.2",
+    "postcss-import": "^11.0.0",
+    "postcss-url": "^7.3.0",
+    "webpack": "^3.10.0"
   }
 }
