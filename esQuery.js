@@ -13,15 +13,10 @@ export default class esQuery extends Set {
 			if (parent instanceof HTMLElement && parent.matches(selector)) {
 				this.add(parent);
 			}
-		} else if (
-			selector instanceof NodeList
-			|| selector instanceof HTMLCollection
-			|| selector instanceof Array
-		) {
+		} else if (selector[Symbol.iterator] instanceof Function) {
 			super(selector);
 		} else if (typeof selector === 'object') {
-			super();
-			this.add(selector);
+			super([selector]);
 		} else {
 			super();
 			throw new TypeError(`Expected a string or NodeList but got a ${typeof selector}: ${selector}.`);
@@ -1189,8 +1184,12 @@ export default class esQuery extends Set {
 	 * @see https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver
 	 */
 	async intersect(callback, options = {}) {
-		const observer = new IntersectionObserver(callback, options);
-		this.forEach(node => observer.observe(node));
+		try {
+			const observer = new IntersectionObserver(callback, options);
+			this.forEach(node => observer.observe(node));
+		} catch(err) {
+			console.error(err);
+		}
 		return this;
 	}
 
