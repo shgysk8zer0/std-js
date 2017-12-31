@@ -977,6 +977,11 @@ export default class esQuery extends Set {
 		return this;
 	}
 
+	async waitUntil(...events) {
+		return Promise.race(events.map(event => new Promise(resolve => this.on(event, resolve, {once: true}))));
+		//new Promise(resolve => this.on(event, resolve, {once: true}));
+	}
+
 	async once(event, callback) {
 		return this.on(event, callback, {once: true});
 	}
