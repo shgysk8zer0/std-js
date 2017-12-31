@@ -1,5 +1,19 @@
 import esQuery from './esQuery.js';
 
+export function clone(thing) {
+	if (thing instanceof Array) {
+		return [...thing].map(clone);
+	} else if (['string', 'number'].includes(typeof(thing))) {
+		return thing;
+	} else if (thing instanceof Element) {
+		return thing.cloneNode(true);
+	} else if (thing instanceof Function) {
+		return thing;
+	} else {
+		return Object.assign({}, thing);
+	}
+}
+
 export function $(selector, parent = document) {
 	return new esQuery(selector, parent);
 }
