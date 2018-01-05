@@ -63,6 +63,7 @@ export function query(selector, node = document) {
 export function isOnline() {
 	return navigator.onLine === true;
 }
+
 export async function notify(title, options = {}) {
 	if (! window.hasOwnProperty('Notification') || Notification.permission === 'denied') {
 		alert(`${title}\n${options.body || ''}`);
@@ -112,6 +113,43 @@ export async function parseResponse(resp) {
 	}
 }
 
+export async function getLocation(options = {}) {
+	/*https://developer.mozilla.org/en-US/docs/Web/API/Geolocation.getCurrentPosition*/
+	return new Promise((resolve, reject) => {
+		if (!('geolocation' in navigator)) {
+			reject('Your browser does not support GeoLocation');
+		}
+		navigator.geolocation.getCurrentPosition(resolve, reject, options);
+	});
+}
+
+export async function registerServiceWorker(path) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			if (! Navigator.prototype.hasOwnProperty('serviceWorker')) {
+				throw new Error('Service worker not supported');
+			} else if (! navigator.onLine) {
+				throw new Error('Offline');
+			}
+
+			const url = new URL(path, document.baseURI);
+			const reg = await navigator.serviceWorker.register(url, {scope: document.baseURI});
+
+			if (navigator.onLine) {
+				reg.update();
+			}
+
+			reg.addEventListener('updatefound', event => resolve(event.target));
+			reg.addEventListener('install', event => resolve(event.target));
+			reg.addEventListener('activate', event => resolve(event.target));
+			reg.addEventListener('error', event => reject(event.target));
+			reg.addEventListener('fetch', console.info);
+		} catch (error) {
+			reject(error);
+		}
+	});
+}
+
 export async function marquee({
 	parent,
 	delay        = 200,
@@ -153,14 +191,4 @@ export async function marquee({
 			await wait(delay);
 		}
 	}
-}
-
-export async function getLocation(options = {}) {
-	/*https://developer.mozilla.org/en-US/docs/Web/API/Geolocation.getCurrentPosition*/
-	return new Promise(function(success, fail) {
-		if (!('geolocation' in navigator)) {
-			fail('Your browser does not support GeoLocation');
-		}
-		navigator.geolocation.getCurrentPosition(success, fail, options);
-	});
 }
