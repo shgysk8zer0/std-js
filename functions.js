@@ -24,6 +24,25 @@ export async function wait(ms) {
 	});
 }
 
+export async function ready() {
+	if (document.readyState === 'loading') {
+		await waitUntil(document, 'DOMContentLoaded');
+	}
+}
+
+export async function loaded() {
+	if (document.readyState !== 'complete') {
+		await waitUntil(window, 'load');
+	}
+}
+
+export async function waitUntil(target, event) {
+	const prom = new Promise(resolve => {
+		target.addEventListener(event, () => resolve(), {once: true});
+	});
+	await prom;
+}
+
 export function* toGenerator(...items) {
 	/*eslint no-constant-condition: "off" */
 	while (true) {
