@@ -1,69 +1,94 @@
 export default class Cookie {
-	static set(key, value, config = {}) {
-		let cookie = `${encodeURIComponent(key)}=${encodeURIComponent(value)};`;
-		cookie += Object.keys(config).reduce((params, key) => {
-			params.push(`${key}=${config[key]}`);
-			return params;
-		}, []).join(';');
-		console.log(cookie);
+	static set(name, value, {
+		path    = location.pathname,
+		domain  = location.hostname,
+		maxAge  = null,
+		expires = null,
+		secure  = (location.protocol === 'https:'),
+	} = {}) {
+		if (value === null) {
+			value = '';
+		}
+
+		let cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
+		cookie += `;domain=${encodeURI(domain)}`;
+		cookie += `;path=${encodeURI(path)}`;
+
+		if (Number.isInteger(maxAge)) {
+			cookie += `;max-age=${maxAge}`;
+		}
+
+		if (expires instanceof Date) {
+			cookie += `;expires=${expires.toUTCString()}`;
+		}
+
+		if (secure) {
+			cookie += ';secure';
+		}
+
 		document.cookie = cookie;
 	}
 
-	static has(key) {
-		key = encodeURIComponent(key);
-		return document.cookie.split('; ').some(cookie => cookie.startsWith(`${key}=`));
-	}
+	static has(name) {
+		let found = false;
 
-	static get(key) {
-		const cookies = document.cookie.split('; ');
-		const len = cookies.length;
-		let val = null;
-		key = encodeURIComponent(key);
-		for (let i = 0; i < len; i++) {
-			if (cookies[i].startsWith(`${key}=`)) {
-				[,val = null] = cookies[i].split('=', 2);
+		for (const key of Cookie.keys()) {
+			if (key === name) {
+				found = true;
 				break;
 			}
 		}
-		return decodeURIComponent(val);
+		return found;
+	}
+
+	static get(name) {
+		let value = null;
+
+		for (const [key, val] of Cookie.entries()) {
+			if (name === key) {
+				value = val;
+				break;
+			}
+		}
+		return value;
 	}
 
 	static getAll() {
-		let cookies = {};
-		for (let [key, value] of Cookie.entries()) {
-			cookies[key] = value;
+		const cookies = {};
+		for (const [key, val] of Cookie.entries()) {
+			cookies[key] = val;
 		}
 		return cookies;
 	}
 
-	static delete(key) {
-		/* eslint-disable quotes */
-		Cookie.set(key, null, {"max-age": 0});
+	static delete(name) {
+		Cookie.set(name, '', {maxAge: 0});
+	}
+
+	static clear() {
+		for (const key of Cookie.keys()) {
+			Cookie.delete(key);
+		}
 	}
 
 	static *keys() {
-		const cookies = document.cookie.split('; ');
-		const len = cookies.length;
-		for (let i = 0; i < len; i++) {
-			let [key] = cookies[i].split('=', 2);
-			yield decodeURIComponent(key);
+		for (const[key] of Cookie.entries()) {
+			yield key;
 		}
 	}
 
 	static *values() {
-		const cookies = document.cookie.split('; ');
-		const len = cookies.length;
-		for (let i = 0; i < len; i++) {
-			let [, val = null] = cookies[i].split('=', 2);
-			yield decodeURIComponent(val);
+		for (const [,val] of Cookie.entries()) {
+			yield val;
 		}
 	}
 
 	static *entries() {
 		const cookies = document.cookie.split('; ');
 		const len = cookies.length;
+
 		for (let i = 0; i < len; i++) {
-			let [key, val = null] = cookies[i].split('=', 2);
+			const [key, val = ''] = cookies[i].split('=', 2);
 			yield [decodeURIComponent(key), decodeURIComponent(val)];
 		}
 	}
