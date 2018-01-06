@@ -4,19 +4,18 @@ import GPS from '../GeoLocation.js';
 // import FileUpload from '../fileupload.js';
 import {$} from '../functions.js';
 import handleJSON from '../json_response.js';
-// import SocialShare from '../socialshare.js';
 // import {supportsAsClasses} from '../support_test.js';
 // import popState from '../popstate.js';
 // import kbdShortcuts from '../kbd_shortcuts.js';
 // import * as pattern from '../patterns.js';
 import KeyBase from '../keybase.js';
 import * as KEYS from './keys.js';
-// import deprefix from '../deprefixer.js';
 import * as mutations from '../mutations.js';
 import GitHub from '../GitHub.js';
 import Gravatar from '../Gravatar.js';
 import {facebook, twitter, linkedIn, googlePlus, reddit} from './share-config.js';
 import WebShareAPI from '../webShareApi.js';
+import Cookie from '../Cookie.js';
 
 export async function loadHandler() {
 	WebShareAPI(facebook, twitter, linkedIn, googlePlus, reddit);
@@ -114,6 +113,35 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 	$('#vid-canvas').click(click => {
 		open(click.target.toDataURL());
 	});
+
+	$('#set-cookie').click(() => {
+		const name = prompt('Enter cookie name');
+		if (name !== '') {
+			const value = prompt('Enter cookie value');
+			Cookie.set(name, value, {maxAge: 60});
+		}
+	});
+
+	$('#get-cookie').click(() => {
+		const name = prompt('Enter cookie name');
+		if (name !== '') {
+			alert(`${name} = "${Cookie.get(name)}"`);
+		}
+	});
+
+	$('#has-cookie').click(() => {
+		const name = prompt('Enter Cookie name');
+		if (name !== '') {
+			alert(Cookie.has(name) ? 'Found' : 'Not found');
+		}
+	});
+
+	$('#all-cookie').click(() =>{
+		console.log(Cookie.getAll());
+		alert('Check console');
+	});
+
+	$('#clear-cookie').click(Cookie.clear);
 
 	const url = new URL('fetch.json', location.origin);
 	const headers = new Headers();
