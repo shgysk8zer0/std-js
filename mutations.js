@@ -1,8 +1,10 @@
 import * as handlers from './dataHandlers.js';
 import {$} from './functions.js';
 
+let observer = null;
+
 if (IntersectionObserver instanceof Function) {
-	const observer = new IntersectionObserver(lazyLoad, {rootMargin: '500px 0px 0px 0px'});
+	observer = new IntersectionObserver(lazyLoad, {rootMargin: '500px 0px 0px 0px'});
 }
 
 function infiniteScroll(entries, observer) {
@@ -135,6 +137,7 @@ export const events = {
 		});
 	}
 };
+
 export const filter = [
 	'data-remove',
 	'data-show-modal',
