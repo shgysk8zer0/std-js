@@ -39,3 +39,15 @@ if (! document.createElement('dialog').hasOwnProperty('showModal')) {
 		this.after(backdrop);
 	};
 }
+
+if (! ('content' in document.createElement('template'))) {
+	Object.defineProperty(HTMLUnknownElement.prototype, 'content', {
+		get: function() {
+			const frag = document.createDocumentFragment();
+			for (let i = 0; i < this.childNodes.length; i++) {
+				frag.appendChild(this.childNodes[i].cloneNode(true));
+			}
+			return frag;
+		}
+	});
+}
