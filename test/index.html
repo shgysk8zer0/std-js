@@ -8,6 +8,11 @@
 		<script type="application/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js" crossorigin="annonymous" async=""></script>
 		<script type="module" src="./index.js" async=""></script>
 		<script type="application/javascript" src="./index.min.js" async="" nomodule=""></script>
+		<script type="module">
+			import {$, read} from '../functions.js';
+			window.$ = $;
+			window.read = read;
+		</script>
 		<link rel="icon" type="image/svg+xml" href="./javascript.svg" sizes="any"/>
 		<link rel="canonical" href="http://example.com" />
 		<link rel="stylesheet" type="text/css" href="./index.css" />
