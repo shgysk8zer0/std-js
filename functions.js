@@ -73,9 +73,6 @@ export async function read(...nodes) {
 			}
 		} else if (node  instanceof Text) {
 			node.parentElement.classList.add('reading');
-			node.parentElement.scrollIntoView({
-				behavior: 'smooth',
-			});
 			await read(node.wholeText);
 			node.parentElement.classList.remove('reading');
 		} else if (node instanceof Element && ! node.hidden && node.hasChildNodes()) {
