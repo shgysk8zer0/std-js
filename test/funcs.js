@@ -2,7 +2,7 @@ import OpenWeatherMap from '../openweathermap.js';
 import GPS from '../GeoLocation.js';
 // import WYSIWYG from '../wysiwyg.js';
 // import FileUpload from '../fileupload.js';
-import {$} from '../functions.js';
+import {$, read} from '../functions.js';
 import handleJSON from '../json_response.js';
 // import {supportsAsClasses} from '../support_test.js';
 // import popState from '../popstate.js';
@@ -152,6 +152,7 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 		if (resp.ok) {
 			const json = await resp.json();
 			handleJSON(json);
+			$('main').click(() => $('article:first-of-type').read() );
 		}
 	} catch(err) {
 		console.error(err);

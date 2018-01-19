@@ -52,6 +52,45 @@ export function* toGenerator(...items) {
 	}
 }
 
+export async function read(...nodes) {
+	if (! window.hasOwnProperty('speechSynthesis')) {
+		throw new Error('SpeechSynthesis not supported');
+	}
+
+	for (const node of nodes) {
+		if (typeof(node) === 'string') {
+			/*
+			 * Work-around for Chrome issue with long utterances
+			 * <https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis/speak#Browser_compatibility>
+			*/
+			for (const chunk of chunkText(node, 200)) {
+				await new Promise((resolve, reject) => {
+					const utter = new SpeechSynthesisUtterance(chunk);
+					utter.addEventListener('end', resolve);
+					utter.addEventListener('error', reject);
+					speechSynthesis.speak(utter);
+				});
+			}
+		} else if (node  instanceof Text) {
+			node.parentElement.classList.add('reading');
+			await read(node.wholeText);
+			node.parentElement.classList.remove('reading');
+		} else if (node instanceof Element && ! node.hidden && node.hasChildNodes()) {
+			await read(...node.childNodes);
+		}
+	}
+}
+
+export function chunkText(string, length) {
+	const size = Math.ceil(string.length / length);
+	const chunks = Array(size);
+
+	for (let i = 0, offset = 0; i < size; i++, offset++) {
+		chunks[i] = string.substr(offset, length);
+	}
+	return chunks;
+}
+
 export function query(selector, node = document) {
 	let results = Array.from(node.querySelectorAll(selector));
 	if (node.matches(selector)) {
