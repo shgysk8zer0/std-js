@@ -77,6 +77,8 @@ export default (...shares) => {
 						share.url.searchParams.set('t', title);
 					} else if (share.url.searchParams.has('subject')) {
 						share.url.searchParams.set('subject', title);
+					} else if (share.url.searchParams.has('su')) {
+						share.url.searchParams.set('su', title);
 					}
 
 					if (share.url.searchParams.has('text')) {
