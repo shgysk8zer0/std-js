@@ -1,6 +1,6 @@
 import * as handlers from './dataHandlers.js';
 import {$} from './functions.js';
-import actions from './actions.js';
+import {clickHandler} from './actions.js';
 let observer = null;
 
 if (IntersectionObserver instanceof Function) {
@@ -124,12 +124,8 @@ export const events = {
 				this.target.removeEventListener('click', handlers.scrollTo);
 			}
 			break;
-		case 'data-action':
-			if (this.target.dataset.hasOwnProperty('action')) {
-				this.target.addEventListener('click', actions);
-			} else {
-				this.target.removeEventListener('click', actions);
-			}
+		case 'data-click':
+			clickHandler(this.target);
 			break;
 		default:
 			throw new Error(`Unhandled attribute change [${this.attributeName}]`);
@@ -153,7 +149,7 @@ export const filter = [
 	'data-toggle-hidden',
 	'data-share',
 	'data-fullscreen',
-	'data-action',
+	'data-click',
 ];
 
 export const options = [
@@ -171,7 +167,7 @@ export function init(base = document.body) {
 	$('[data-share]', base).click(handlers.share);
 	$('[data-fullscreen]', base).click(handlers.fullscreen);
 	$('[data-scroll-to]', base).click(handlers.scrollTo);
-	$('[data-action]', base).click(actions);
+	$('[data-click]', base).each(el => clickHandler(el));
 
 	if (IntersectionObserver instanceof Function) {
 		$('[data-infinite-scroll]', base).intersect(infiniteScroll);
