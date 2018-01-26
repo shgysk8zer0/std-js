@@ -1,6 +1,6 @@
 export const facebook = {
 	url: new URL('https://www.facebook.com/sharer/sharer.php?u&t'),
-	icon: new URL('img/logos/Facebook.svg', document.baseURI),
+	icon: new URL('img/logos/facebook.svg', document.baseURI),
 	label: 'Facebook',
 };
 
@@ -12,7 +12,7 @@ export const twitter = {
 
 export const googlePlus = {
 	url: new URL('https://plus.google.com/share/?url'),
-	icon: new URL('img/logos/Google_plus.svg', document.baseURI),
+	icon: new URL('img/logos/google-plus.svg', document.baseURI),
 	label: 'Google+',
 };
 
@@ -24,7 +24,7 @@ export const linkedIn = {
 
 export const reddit = {
 	url: new URL('https://www.reddit.com/submit/?url&title'),
-	icon: new URL('img/logos/Reddit.svg', document.baseURI),
+	icon: new URL('img/logos/reddit.svg', document.baseURI),
 	label: 'Reddit',
 };
 
