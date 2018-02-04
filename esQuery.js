@@ -757,7 +757,7 @@ export default class esQuery extends Set {
 
 	async toggleClass(cname, force = null) {
 		if (force instanceof Function) {
-			this.forEach(node => node.classList.toggle(name, force(node)));
+			this.forEach(node => node.classList.toggle(cname, force(node)));
 		} else if (typeof force === 'boolean') {
 			this.forEach(node => node.classList.toggle(cname, force));
 		} else {
