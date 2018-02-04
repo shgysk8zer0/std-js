@@ -51,6 +51,52 @@ export function* toGenerator(...items) {
 		}
 	}
 }
+export async function imgur(url, {
+	sizes       = ['100vw'],
+	alt         = '',
+	defaultSize = 'h',
+} = {}) {
+	const imgurSizes = {
+		h: 1024,
+		l: 640,
+		m: 320,
+		t: 160,
+	};
+
+	const formats = {
+		'image/webp': '.webp',
+		'image/png': '.png',
+	};
+
+	const picture = document.createElement('picture');
+	const imgur = new URL(url, 'https://i.imgur.com/');
+	const image = new Image();
+
+
+	imgur.host = 'i.imgur.com';
+	imgur.protocol = 'https:';
+	imgur.pathname = imgur.pathname.replace(/\.[A-z]+$/, '');
+	Object.entries(formats).forEach(format => {
+		const [type, ext] = format;
+		const source = document.createElement('source');
+		source.type = type;
+		source.sizes = sizes.join(', ');
+		const srcset = Object.entries(imgurSizes).map(size => {
+			const [suffix, width] = size;
+			return `${imgur}${suffix}${ext} ${width}w`;
+		});
+		source.srcset = srcset.join(', ');
+		picture.append(source);
+	});
+
+	return new Promise((resolve, reject) => {
+		picture.append(image);
+		image.alt = alt;
+		image.addEventListener('load', (event) => resolve(event.target.parentElement), {once: true});
+		image.addEventListener('error', event => reject(event.target));
+		image.src = `${imgur}${defaultSize}.png`;
+	});
+}
 
 export async function read(...nodes) {
 	if (! window.hasOwnProperty('speechSynthesis')) {
