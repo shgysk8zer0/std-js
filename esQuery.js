@@ -755,8 +755,10 @@ export default class esQuery extends Set {
 		return this.some(el => el.classList.contains(cname));
 	}
 
-	async toggleClass(cname, force) {
-		if (typeof force !== 'undefined') {
+	async toggleClass(cname, force = null) {
+		if (force instanceof Function) {
+			this.forEach(node => node.classList.toggle(name, force(node)));
+		} else if (typeof force === 'boolean') {
 			this.forEach(node => node.classList.toggle(cname, force));
 		} else {
 			this.forEach(node => node.classList.toggle(cname));
