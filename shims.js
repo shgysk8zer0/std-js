@@ -51,3 +51,13 @@ if (! ('content' in document.createElement('template'))) {
 		}
 	});
 }
+
+if (! HTMLElement.prototype.hasOwnProperty('contextMenu')){
+	Object.defineProperty(HTMLElement.prototype, 'contextMenu', {
+		get: function() {
+			if (this.hasAttribute('contextmenu')) {
+				return document.getElementById(this.getAttribute('contextmenu'));
+			}
+		}
+	});
+}
