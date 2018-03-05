@@ -1,6 +1,20 @@
 /**
  * HTML API using data-* attributes
  */
+export function copy() {
+	let el = null;
+	if (this.dataset.copy.length) {
+		el = document.querySelector(this.dataset.copy);
+	} else {
+		el = this;
+	}
+
+	if (el instanceof Element) {
+		el.select();
+		document.execCommand('copy');
+	}
+}
+
 export function show() {
 	const target = document.querySelector(this.dataset.show);
 	target.show();
