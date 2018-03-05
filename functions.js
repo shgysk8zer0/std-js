@@ -247,14 +247,16 @@ export async function marquee({
 	const cursorEl = document.createElement(cursorTag);
 	const container = document.createElement(containerTag);
 
-	cursorEl.animate([
-		{opacity: 0},
-		{opacity: 1}
-	], {
-		duration: blinkRate,
-		iterations: Infinity,
-		direction: 'alternate',
-	});
+	if (Element.prototype.animate) {
+		cursorEl.animate([
+			{opacity: 0},
+			{opacity: 1}
+		], {
+			duration: blinkRate,
+			iterations: Infinity,
+			direction: 'alternate',
+		});
+	}
 
 	cursorEl.textContent = cursor;
 	parent.prepend(container, cursorEl);
