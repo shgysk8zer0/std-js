@@ -20,6 +20,51 @@ export default (...shares) => {
 			const msg    = document.createElement('b');
 			const font   = 'Roboto, Helvetica, "Sans Seriff"';
 
+			const styles = {
+				dialog: {
+					display: 'block',
+					position: 'fixed',
+					background: '#fefefe',
+					top: '0',
+					bottom: 'auto',
+					left: '0',
+					right: '0',
+					transform: 'none',
+					'border-radius': '0 0 5px 5px',
+					'max-height': '500px',
+				},
+				header: {
+					height: '47px',
+					'line-height': '47px',
+					color: '#232323',
+					'box-shadow': 'none',
+					'border-bottom': '1px solid #d5d5d5',
+				},
+				closeBtn: {
+					float: 'right',
+					'font-family': font,
+					'font-weight': 'bold',
+					'font-size': '16px',
+					color: 'black',
+					border: 'none',
+					background: 'transparent',
+				},
+				msg: {
+					'font-family': font,
+					'font-size': '24px',
+					display: 'block',
+				},
+				link: {
+					display: 'inline-block',
+					margin: '0.3em',
+					'text-decoration': 'none',
+					color: '#626262',
+					'text-align': 'center',
+					'font-family': font,
+					'font-size': '20px',
+				},
+			};
+
 			function closeDialog(event) {
 				if (
 					(event.type === 'click'
@@ -28,6 +73,12 @@ export default (...shares) => {
 				) {
 					dialog.close('Share canceled');
 				}
+			}
+
+			function css(el, rules) {
+				Object.entries(rules).forEach(([key, value]) => {
+					el.style.setProperty(key, value);
+				});
 			}
 
 			function closeHandler(event) {
@@ -89,13 +140,7 @@ export default (...shares) => {
 						share.url.searchParams.set('body', `${text}\n${url}`);
 					}
 
-					link.style.setProperty('display', 'inline-block');
-					link.style.setProperty('margin', '0.3em');
-					link.style.setProperty('text-decoration', 'none');
-					link.style.setProperty('color', '#626262');
-					link.style.setProperty('text-align', 'center');
-					link.style.setProperty('font-family', font);
-					link.style.setProperty('font-size', '20px');
+					css(link, styles.link);
 
 					link.target = '_blank';
 					icon.src    = share.icon.toString();
@@ -111,31 +156,10 @@ export default (...shares) => {
 					});
 				});
 
-				dialog.style.setProperty('display', 'block');
-				dialog.style.setProperty('position' ,'fixed');
-				dialog.style.setProperty('background', '#fefefe');
-				dialog.style.setProperty('top', '0');
-				dialog.style.setProperty('bottom', 'auto');
-				dialog.style.setProperty('left', '0');
-				dialog.style.setProperty('right', '0');
-				dialog.style.setProperty('transform', 'none');
-				dialog.style.setProperty('border-radius', '0 0 5px 5px');
-				dialog.style.setProperty('max-height', '500px');
-
-				header.style.setProperty('height', '47px');
-				header.style.setProperty('line-height', '47px');
-				header.style.setProperty('color', '#232323');
-				header.style.setProperty('box-shadow', 'none');
-				header.style.setProperty('border-bottom', '1px solid #d5d5d5');
-
-				msg.style.setProperty('font-family', font);
-				msg.style.setProperty('font-size', '24px');
-				msg.style.setProperty('display', 'block');
-
-				close.style.setProperty('float', 'right');
-				close.style.setProperty('font-family', font);
-				close.style.setProperty('font-weight', 'bold');
-				close.style.setProperty('font-size', '16px');
+				css(dialog, styles.dialog);
+				css(header, styles.header);
+				css(msg, styles.msg);
+				css(close, styles.closeBtn);
 
 				if (CSS.supports('width', 'fit-content')) {
 					dialog.style.setProperty('width', 'fit-content');
