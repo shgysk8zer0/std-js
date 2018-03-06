@@ -6,7 +6,7 @@ function getSelectedElement(matching = '[contenteditable="true"] *') {
 		selected = selected.parentElement;
 	}
 
-	if (selected.matches('[contenteditable="true"] *')) {
+	if (selected.matches(`${matching} *`)) {
 		return selected;
 	} else {
 		throw new Error('Attempting to edit an element that is not editable');
