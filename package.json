@@ -32,8 +32,7 @@
   },
   "scripts": {
     "test": "eslint .",
-    "start": "python -m SimpleHTTPServer 8000",
-    "postinstall": "npm run git:fetch && npm run build:all"
+    "start": "python -m SimpleHTTPServer 8000"
   },
   "devDependencies": {
     "eslint": "^4.14.0",
