@@ -1,6 +1,7 @@
 /**
  * HTML API using data-* attributes
  */
+import {selectElement} from './functions.js';
 export function copy() {
 	let el = null;
 	if (this.dataset.copy.length) {
@@ -10,7 +11,7 @@ export function copy() {
 	}
 
 	if (el instanceof Element) {
-		el.select();
+		selectElement(el);
 		document.execCommand('copy');
 	}
 }
