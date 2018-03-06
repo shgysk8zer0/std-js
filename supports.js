@@ -51,7 +51,7 @@ export function supports(type) {
 			return ((supports('csssupports')
 					&& (CSS.supports('animation', 'name')
 					|| CSS.supports('-webkit-animation', 'name'))
-				)
+			)
 					|| 'animation' in document.body.style
 					|| 'webkitAnimation' in document.body.style
 			);
@@ -60,7 +60,7 @@ export function supports(type) {
 			return ((supports('csssupports')
 				&& (CSS.supports('transition', 'none')
 					|| CSS.supports('-webkit-transition', 'none'))
-				)
+			)
 				|| 'transition' in document.body.style
 				|| 'webkitTransition' in document.body.style
 			);

@@ -51,6 +51,25 @@ export function* toGenerator(...items) {
 		}
 	}
 }
+
+export function selectElement(el) {
+	if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+		el.select();
+	} else if (window.getSelection) {
+		const selection = getSelection();
+		const range = document.createRange();
+		range.selectNodeContents(el);
+		selection.removeAllRanges();
+		selection.addRange(range);
+	} else if (document.body.createTextRange) {
+		const range = document.body.createTextRange();
+		range.moveToElementText(el);
+		range.select();
+	} else {
+		throw new Error('Text selection is not supported');
+	}
+}
+
 export async function imgur(url, {
 	sizes       = ['100vw'],
 	alt         = '',
@@ -247,14 +266,16 @@ export async function marquee({
 	const cursorEl = document.createElement(cursorTag);
 	const container = document.createElement(containerTag);
 
-	cursorEl.animate([
-		{opacity: 0},
-		{opacity: 1}
-	], {
-		duration: blinkRate,
-		iterations: Infinity,
-		direction: 'alternate',
-	});
+	if (Element.prototype.animate) {
+		cursorEl.animate([
+			{opacity: 0},
+			{opacity: 1}
+		], {
+			duration: blinkRate,
+			iterations: Infinity,
+			direction: 'alternate',
+		});
+	}
 
 	cursorEl.textContent = cursor;
 	parent.prepend(container, cursorEl);

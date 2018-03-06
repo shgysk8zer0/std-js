@@ -2,7 +2,7 @@ import OpenWeatherMap from '../openweathermap.js';
 import GPS from '../GeoLocation.js';
 // import WYSIWYG from '../wysiwyg.js';
 // import FileUpload from '../fileupload.js';
-import {$, read} from '../functions.js';
+import {$} from '../functions.js';
 import handleJSON from '../json_response.js';
 // import {supportsAsClasses} from '../support_test.js';
 // import popState from '../popstate.js';
@@ -13,12 +13,16 @@ import * as KEYS from './keys.js';
 import * as mutations from '../mutations.js';
 import GitHub from '../GitHub.js';
 import Gravatar from '../Gravatar.js';
-import {facebook, twitter, linkedIn, googlePlus, reddit} from './share-config.js';
+import * as shares from '../share-config.js';
 import WebShareAPI from '../webShareApi.js';
 import Cookie from '../Cookie.js';
 
 export async function loadHandler() {
-	WebShareAPI(facebook, twitter, linkedIn, googlePlus, reddit);
+	WebShareAPI(...Object.values(shares).map(share => {
+		share.icon = new URL(share.icon.pathname.replace('/test', ''), 'https://shgysk8zer0.github.io');
+		return share;
+	}));
+
 	if (document.createElement('details') instanceof HTMLUnknownElement) {
 		$('details > summary').click(function() {
 			this.parentElement.open = ! this.parentElement.open;

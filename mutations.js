@@ -150,6 +150,7 @@ export const filter = [
 	'data-share',
 	'data-fullscreen',
 	'data-click',
+	'data-copy',
 ];
 
 export const options = [
@@ -168,6 +169,7 @@ export function init(base = document.body) {
 	$('[data-fullscreen]', base).click(handlers.fullscreen);
 	$('[data-scroll-to]', base).click(handlers.scrollTo);
 	$('[data-click]', base).each(el => clickHandler(el));
+	$('[data-copy]').click(handlers.copy);
 
 	if (IntersectionObserver instanceof Function) {
 		$('[data-infinite-scroll]', base).intersect(infiniteScroll);
