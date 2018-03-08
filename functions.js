@@ -52,6 +52,25 @@ export function* toGenerator(...items) {
 	}
 }
 
+export function setIncrementor(obj, {
+	key       = 'i',
+	start     = 0,
+	increment = 1,
+} = {}) {
+	const inc = (function*(n = 0) {
+		/*eslint no-constant-condition: "off" */
+		while(true) {
+			yield n;
+			n += increment;
+		}
+	})(obj.hasOwnProperty(key) ? obj[key] : start);
+
+	return Object.defineProperty(obj, key, {
+		get: () => inc.next().value,
+		enumerable: true,
+	});
+}
+
 export function selectElement(el) {
 	if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
 		el.select();
