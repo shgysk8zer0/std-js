@@ -63,7 +63,7 @@ export function setIncrementor(obj, {
 			yield n;
 			n += increment;
 		}
-	})(start);
+	})(obj.hasOwnProperty(key) ? obj[key] : start);
 
 	return Object.defineProperty(obj, key, {
 		get: () => inc.next().value,
