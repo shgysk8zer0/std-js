@@ -12,7 +12,13 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 	HTMLElement.prototype.close = function(returnValue = null) {
 		this.open = false;
 		if (this.tagName === 'DIALOG') {
-			this.dispatchEvent(new CustomEvent('close', {detail: returnValue}));
+			const event = new CustomEvent('close');
+			if (typeof returnValue === 'string') {
+				event.returnValue = true;
+				this.returnValue = returnValue;
+			}
+			this.dispatchEvent(event);
+			delete this.returnValue;
 		}
 	};
 
