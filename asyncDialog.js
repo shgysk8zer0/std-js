@@ -36,15 +36,19 @@ export async function confirm(text) {
 		close.textContent = 'Cancel';
 		ok.textContent = 'Ok';
 
-		dialog.addEventListener('close', event => event.target.remove());
+		dialog.addEventListener('close', event => {
+			event.target.remove();
+			resolve(!!event.returnValue);
+		});
+
 		close.addEventListener('click', event => {
 			event.target.closest('dialog[open]').close();
-			resolve(false);
 		});
+
 		ok.addEventListener('click', event => {
-			event.target.closest('dialog[open]').close();
-			resolve(true);
+			event.target.closest('dialog[open]').close('confirm');
 		});
+
 		dialog.append(msg, ok, close);
 		document.body.append(dialog);
 		dialog.showModal();
