@@ -1,3 +1,9 @@
+import Notification from './Notification.js';
+
+if (! window.hasOwnProperty('Notification')) {
+	window.Notification = Notification;
+}
+
 if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLElement.prototype.hasOwnProperty('open')) {
 	HTMLElement.prototype.show = function() {
 		this.open = true;
