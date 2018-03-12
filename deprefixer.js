@@ -1,4 +1,3 @@
-
 if (!('Notification' in window)) {
 	window.Notification = window.notifications || window.webkitNotifications || window.oNotifications || window.msNotifications || false;
 }
