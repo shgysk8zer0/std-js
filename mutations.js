@@ -171,6 +171,18 @@ export function init(base = document.body) {
 	$('[data-click]', base).each(el => clickHandler(el));
 	$('[data-copy]').click(handlers.copy);
 
+	if (document.createElement('dialog') instanceof HTMLUnknownElement) {
+		$('dialog form[method="dialog"]', base).submit(event => {
+			event.preventDefault();
+		}).then($forms => {
+			[...$forms].forEach(form => {
+				$('[type="submit"], button:not([type])', form).click(event => {
+					event.target.closest('dialog').close(event.target.value);
+				});
+			});
+		});
+	}
+
 	if (IntersectionObserver instanceof Function) {
 		$('[data-infinite-scroll]', base).intersect(infiniteScroll);
 		$('[data-load-from]', base).each(node => observer.observe(node));

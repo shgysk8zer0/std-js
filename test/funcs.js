@@ -105,7 +105,11 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 
 	$(document.body).watch(mutations.events, mutations.options, mutations.filter);
 
-	$('dialog').on('close', event => console.log(event.target.returnValue));
+	$('dialog').on('close', event => {
+		if (event.returnValue) {
+			console.log(event.target.returnValue);
+		}
+	});
 
 	$('form[name="keybase-search"]').submit(keybaseSearch);
 
