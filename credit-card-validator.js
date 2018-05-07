@@ -6,7 +6,7 @@
  */
 export function isValidCC(ccnum) {
 	ccnum = ccnum.replace('-', '').replace(' ', '');
-	if ((ccnum.length !== 16 && ccnum.length !== 13) || ! /^\d+$/.test(ccnum)) {
+	if (! /^\d{13,16}$/.test(ccnum)) {
 		return false;
 	}
 	const sums = ccnum.split('').map(num => parseInt(num)).reduce((nums, num, i) => {
