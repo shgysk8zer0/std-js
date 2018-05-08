@@ -795,6 +795,14 @@ export default class esQuery extends Set {
 		return this;
 	}
 
+	async disable(disabled = true) {
+		this.forEach(el => el.disabled = disabled);
+	}
+
+	async enable(enabled = true) {
+		this.disable(! enabled);
+	}
+
 	async hide(hidden = true) {
 		this.forEach(el => el.hidden = hidden);
 		return this;
