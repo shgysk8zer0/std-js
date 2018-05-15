@@ -187,27 +187,61 @@ export function isOnline() {
 	return navigator.onLine === true;
 }
 
-export async function notify(title, options = {}) {
-	if (! window.hasOwnProperty('Notification') || Notification.permission === 'denied') {
-		alert(`${title}\n${options.body || ''}`);
-		return {};
-	} else if (Notification.permission === 'default') {
-		const permission = await Notification.requestPermission();
-		if (permission === 'granted') {
-			return notify(title, options);
-		} else {
-			alert(`${title}\n${options.body || ''}`);
-			return {};
-		}
-	} else {
+export async function notify(title, {
+	body = '',
+	icon = '',
+	dir = document.dir,
+	lang = document.documentElement.lang,
+	tag = '',
+	data = null,
+	vibrate = false,
+	renotify = false,
+	requireInteraction = false,
+	actions = [],
+	silent = false,
+	noscreen = false,
+	sticky = false,
+} = {}) {
+	return new Promise(async (resolve, reject) => {
 		try {
-			return new Notification(title, options);
+			if (! (window.Notification instanceof Function)) {
+				throw new Error('Notifications not supported');
+			} else if (Notification.permission === 'denied') {
+				throw new Error('Notification permission denied');
+			} else if (Notification.permission === 'default') {
+				await new Promise(async (resolve, reject) => {
+					const resp = await Notification.requestPermission();
+
+					if (resp === 'granted') {
+						resolve();
+					} else {
+						reject(new Error('Notification permission not granted'));
+					}
+				});
+			}
+
+			const notification = new Notification(title, {
+				body,
+				icon,
+				dir,
+				lang,
+				tag,
+				data,
+				vibrate,
+				renotify,
+				requireInteraction,
+				actions,
+				silent,
+				noscreen,
+				sticky,
+			});
+
+			notification.addEventListener('show', event => resolve(event.target), {once: true});
+			notification.addEventListener('error', event => reject(event.target), {once: true});
 		} catch (err) {
-			console.error(err);
-			alert(`${title}\n${options.body || ''}`);
-			return {};
+			reject(err);
 		}
-	}
+	});
 }
 
 export function isInternalLink(link) {
