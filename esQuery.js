@@ -734,7 +734,7 @@ export default class esQuery extends Set {
 	}
 
 	async map(callback) {
-		return [...this].map(callback);
+		return Promise.all([...this].map(callback));
 	}
 
 	async filter(callback) {
