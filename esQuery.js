@@ -29,6 +29,16 @@ export default class esQuery extends Set {
 		return this.size !== 0;
 	}
 
+	toArray() {
+		return [...this];
+	}
+
+	*toGenerator() {
+		for (const node of this) {
+			yield node;
+		}
+	}
+
 	async text(str) {
 		this.forEach(node => node.textContent = str);
 		return this;
@@ -89,6 +99,24 @@ export default class esQuery extends Set {
 			}
 		});
 		return this;
+	}
+
+	async parent() {
+		return new esQuery([...this].map(el => el.parentElement));
+	}
+
+	async children() {
+		return new esQuery([...this].reduce((children, el) => {
+			return children.concat([...el.children]);
+		}, []));
+	}
+
+	async closest(selector) {
+		return new esQuery([...this].map(el => el.closest(selector)));
+	}
+
+	async matches(selector) {
+		return this.every(el => el.matches(selector));
 	}
 
 	async animate(keyframes, opts = 400) {
@@ -1132,8 +1160,8 @@ export default class esQuery extends Set {
 
 	async css(props = {}) {
 		this.forEach(node => {
-			Object.keys(props).forEach(prop => {
-				node.style.setProperty(prop, props[prop]);
+			Object.entries(props).forEach(([prop, value]) => {
+				node.style.setProperty(prop, value);
 			});
 		});
 		return this;
