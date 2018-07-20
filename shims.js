@@ -4,6 +4,30 @@ if (! window.hasOwnProperty('Notification')) {
 	window.Notification = Notification;
 }
 
+if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
+	Element.prototype.toggleAttribute = function(name, force) {
+		const forcePassed = arguments.length === 2;
+		const forceOn = !!force;
+		const forceOff = forcePassed && !force;
+
+		if (this.hasAttribute(name)) {
+			if (forceOn) {
+				return true;
+			} else {
+				this.removeAttribute(name);
+				return false;
+			}
+		} else {
+			if (forceOff) {
+				return false;
+			} else {
+				this.setAttribute(name, '');
+				return true;
+			}
+		}
+	};
+}
+
 if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLElement.prototype.hasOwnProperty('open')) {
 	HTMLElement.prototype.show = function() {
 		this.open = true;
@@ -21,6 +45,8 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 			delete this.returnValue;
 		}
 	};
+
+
 
 	Object.defineProperty(HTMLElement.prototype, 'open', {
 		set: function(open) {

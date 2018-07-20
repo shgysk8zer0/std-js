@@ -856,6 +856,10 @@ export default class esQuery extends Set {
 		return this.some(el => el.hasAttribute(attr));
 	}
 
+	async toggleAttribute(...args) {
+		return this.each(el => el.toggleAttribute(...args));
+	}
+
 	async attr(attrs = {}) {
 		this.forEach(node => {
 			for (const [key, value] of Object.entries(attrs)) {
