@@ -37,7 +37,7 @@ if (! Math.hasOwnProperty('log10')) {
 }
 
 if (! Math.hasOwnProperty('log2')) {
-	Math.log10 = x => Math.log(x) * Math.LOG2E;
+	Math.log2 = x => Math.log(x) * Math.LOG2E;
 }
 
 if (! Math.hasOwnProperty('log1p')) {
