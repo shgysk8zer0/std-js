@@ -16,6 +16,7 @@ import Gravatar from '../Gravatar.js';
 import * as shares from '../share-config.js';
 import WebShareAPI from '../webShareApi.js';
 import Cookie from '../Cookie.js';
+import {alert, prompt} from '../asyncDialog.js';
 
 export async function loadHandler() {
 	WebShareAPI(...Object.values(shares).map(share => {
@@ -75,7 +76,7 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 	$('form:not([name="login"]) input[autocomplete="email"]').change(input => {
 		$('img[src^="https://gravatar.com/"]', input.target.closest('fieldset')).remove();
 		if (input.target.validity.valid) {
-			const grav = new Gravatar(input.target.value, 80, 256, 128, 64, 32);
+			const grav = new Gravatar(input.target.value, 256, 256, 128, 64, 32);
 			input.target.before(grav);
 		}
 	});
@@ -111,7 +112,7 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 		}
 	});
 
-	$('form[name="keybase-search"]').submit(keybaseSearch);
+	$('form[name="keybaseSearch"]').submit(keybaseSearch);
 
 	$('#vid-play').click(click => {
 		click.target.hidden = true;
@@ -122,30 +123,30 @@ ${event.get('event[address][street]')} ${event.get('event[address][city]')}, ${e
 		open(click.target.toDataURL());
 	});
 
-	$('#set-cookie').click(() => {
-		const name = prompt('Enter cookie name');
+	$('#set-cookie').click(async () => {
+		const name = await prompt('Enter cookie name');
 		if (name !== '') {
-			const value = prompt('Enter cookie value');
+			const value = await prompt('Enter cookie value');
 			Cookie.set(name, value, {maxAge: 60});
 		}
 	});
 
-	$('#get-cookie').click(() => {
-		const name = prompt('Enter cookie name');
+	$('#get-cookie').click(async () => {
+		const name = await prompt('Enter cookie name');
 		if (name !== '') {
 			alert(`${name} = "${Cookie.get(name)}"`);
 		}
 	});
 
-	$('#has-cookie').click(() => {
-		const name = prompt('Enter Cookie name');
+	$('#has-cookie').click(async () => {
+		const name = await prompt('Enter Cookie name');
 		if (name !== '') {
 			alert(Cookie.has(name) ? 'Found' : 'Not found');
 		}
 	});
 
-	$('#all-cookie').click(() =>{
-		console.log(Cookie.getAll());
+	$('#all-cookie').click(async () =>{
+		console.log(await Cookie.getAll());
 		alert('Check console');
 	});
 
@@ -191,9 +192,10 @@ function keybaseSearch(submit) {
 		const dialog = document.createElement('dialog');
 		let close = document.createElement('button');
 		let header = document.createElement('header');
+		close.textContent = 'X';
 		dialog.id='keybase-search-results';
-		close.dataset.remove = `#${dialog.id}`;
-		close.textContent = 'x';
+		close.addEventListener('click', dialog.close);
+		dialog.addEventListener('close', dialog.remove);
 		dialog.appendChild(header);
 		header.appendChild(close);
 		results.them.forEach(user => {
@@ -244,7 +246,10 @@ function keybaseSearch(submit) {
 			dialog.appendChild(entry);
 		});
 		document.body.appendChild(dialog);
-		dialog.show();
+		await $(submit.target.closest('dialog[open]')).fadeOut();
+		submit.target.closest('dialog[open]').close();
+		dialog.showModal();
+		$(dialog).fadeIn();
 	})(new FormData(submit.target));
 }
 
@@ -304,14 +309,23 @@ export async function showLocation() {
 	dialog.show();
 }
 
-function getUserMedia() {
+async function getUserMedia() {
 	const video = document.getElementById('vid');
-	navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
-		video.srcObject = stream;
-		video.play();
-	}).then(() => {
-		draw();
-	}).catch(console.error);
+	const stream = await navigator.mediaDevices.getUserMedia({
+		audio: false,
+		video: {
+			width: {
+				ideal: window.innerWidth,
+			},
+			height: {
+				ideal: window.innerHeight,
+			}
+		},
+		facingMode: 'user',
+	});
+	video.srcObject = stream;
+	video.play();
+	draw();
 }
 
 function draw() {

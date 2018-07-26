@@ -29,6 +29,11 @@ if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
 }
 
 if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLElement.prototype.hasOwnProperty('open')) {
+	window.addEventListener('keypress', event => {
+		if (event.key === 'Escape') {
+			document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+		}
+	}, {passive: true});
 	HTMLElement.prototype.show = function() {
 		this.open = true;
 	};
@@ -46,15 +51,14 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 		}
 	};
 
-
-
 	Object.defineProperty(HTMLElement.prototype, 'open', {
 		set: function(open) {
-			if (open) {
-				this.setAttribute('open', '');
-			} else {
-				this.removeAttribute('open');
-				if (this.tagName === 'DIALOG') {
+			if (this.tagName === 'DETAILS') {
+				this.dispatchEvent(new CustomEvent('toggle'));
+				this.toggleAttribute('open', open);
+			} else if (this.tagName === 'DIALOG') {
+				this.toggleAttribute('open', open);
+				if (! open) {
 					this.classList.remove('modal');
 					const next = this.nextElementSibling;
 					if (next instanceof HTMLElement && next.matches('.backdrop')) {

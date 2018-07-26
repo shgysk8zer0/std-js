@@ -1,7 +1,9 @@
 @charset "UTF-8";
+
 :root, ::backdrop {
 	--backdrop-background: rgba(0,0,0,0.7);
 }
+
 body {
 	box-sizing: border-box;
 	margin: 0;
@@ -16,6 +18,7 @@ body {
 		'main sidebar'
 		'footer footer';
 }
+
 @media (max-width: 600px) {
 	body {
 		grid-template-columns: 1fr;
@@ -28,6 +31,7 @@ body {
 			'footer';
 	}
 }
+
 *, *::before, *::after {
 	box-sizing: inherit;
 	animation-play-state: paused;
@@ -36,37 +40,47 @@ body > header {
 	grid-area: header;
 	background-color: yellow;
 }
+
 body > nav {
 	grid-area: nav;
 	background-color: blue;
 }
+
 body > main {
 	grid-area: main;
 	background-color: green;
 }
+
 body > aside {
 	grid-area: sidebar;
 	background-color: purple;
 }
+
 body >footer {
 	grid-area: footer;
 	background-color: gray;
 }
+
 a:empty[href]::after {
 	content: attr(href);
 }
+
 .round {
 	border-radius: 50%;
 }
+
 .shadow {
 	box-shadow: 0.3rem 0.3rem 0.3rem #222;
 }
+
 article {
 	margin: 0.3em 1.5em;
 }
+
 article p {
 	text-indent: 2em;
 }
+
 [itemprop="title"] {
 	text-align: center;
 }
@@ -87,6 +101,7 @@ dialog {
 	color: black;
 	display: block;
 	z-index: 100;
+	border: none;
 }
 
 dialog:not([open]) {
@@ -122,4 +137,8 @@ dialog.modal {
 
 details:not([open]) > :not(summary) {
 	display: none;
+}
+
+.center {
+	text-align: center;
 }
