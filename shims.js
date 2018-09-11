@@ -4,6 +4,15 @@ if (! window.hasOwnProperty('Notification')) {
 	window.Notification = Notification;
 }
 
+if (! Object.hasOwnProperty('fromEntries')) {
+	Object.fromEntries = function(iterable) {
+		return [...iterable].reduce((obj, [key, value]) => {
+			obj[key] = value;
+			return obj;
+		}, {});
+	};
+}
+
 if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
 	Element.prototype.toggleAttribute = function(name, force) {
 		const forcePassed = arguments.length === 2;
