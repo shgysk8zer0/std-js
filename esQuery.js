@@ -25,8 +25,32 @@ export default class esQuery extends Set {
 		}
 	}
 
+	get parents() {
+		return new esQuery(this.toArray().map(item => item.parentElement));
+	}
+
+	get children() {
+		return new esQuery(this.toArray().reduce((items, item) => items.concat([...item.children]), []));
+	}
+
 	get found() {
 		return this.size !== 0;
+	}
+
+	get first() {
+		return this.toArray().shift();
+	}
+
+	get last() {
+		return this.toArray().pop();
+	}
+
+	item(num) {
+		if (this.size > num) {
+			return this.toArray()[num];
+		} else {
+			return undefined;
+		}
 	}
 
 	toArray() {
@@ -101,16 +125,6 @@ export default class esQuery extends Set {
 		return this;
 	}
 
-	async parent() {
-		return new esQuery([...this].map(el => el.parentElement));
-	}
-
-	async children() {
-		return new esQuery([...this].reduce((children, el) => {
-			return children.concat([...el.children]);
-		}, []));
-	}
-
 	async closest(selector) {
 		return new esQuery([...this].map(el => el.closest(selector)));
 	}
@@ -121,13 +135,8 @@ export default class esQuery extends Set {
 
 	async animate(keyframes, opts = 400) {
 		if ('animate' in Element.prototype) {
-			return Promise.all(await this.map(node => {
-				return new Promise((resolve, reject) => {
-					const anim = node.animate(keyframes, opts);
-					anim.onfinish = () => resolve(node);
-					anim.oncancel = reject;
-				});
-			})).then(els => new esQuery(els));
+			await this.map(node =>  node.animate(keyframes, opts).finished);
+			return this;
 		} else {
 			return Promise.resolve([]);
 		}
@@ -937,18 +946,23 @@ export default class esQuery extends Set {
 		return this;
 	}
 
+	async off(event, callback, ...args) {
+		this.forEach(node => node.removeEventListener(event, callback, ...args));
+		return this;
+	}
+
 	async waitUntil(...events) {
-		return Promise.race(events.map(event => new Promise(resolve => this.on(event, resolve, {once: true}))));
-		//new Promise(resolve => this.on(event, resolve, {once: true}));
+		return new Promise(resolve => {
+			const callback = event => {
+				resolve(event.target);
+				events.forEach(event => this.off(event, callback, {once: true}));
+			};
+			events.forEach(event => this.on(event, callback, {once: true}));
+		});
 	}
 
 	async once(event, callback) {
 		return this.on(event, callback, {once: true});
-	}
-
-	async off(event, callback) {
-		this.forEach(node => node.removeEventListener(callback));
-		return this;
 	}
 
 	async ready(callback, ...args) {
