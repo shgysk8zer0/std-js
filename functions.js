@@ -24,9 +24,18 @@ export async function wait(ms) {
 	});
 }
 
-export async function ready() {
+export async function ready(...requires) {
 	if (document.readyState === 'loading') {
 		await waitUntil(document, 'DOMContentLoaded');
+		await defined(...requires);
+	} else {
+		await defined(...requires);
+	}
+}
+
+export async function defined(...els) {
+	if (els.length !== 0) {
+		await Promise.all(els.map(el => customElements.whenDefined(el)));
 	}
 }
 
