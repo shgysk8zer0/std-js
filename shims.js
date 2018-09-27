@@ -149,10 +149,9 @@ if (! HTMLLinkElement.prototype.hasOwnProperty('import')) {
 		const url = new URL(link.href);
 		const resp = await fetch(url);
 		if (resp.ok) {
-			const type = resp.headers.get('Content-Type').split(';').pop();
 			const parser = new DOMParser();
 			const content = await resp.text();
-			link.import = parser.parseFromString(content, type);
+			link.import = parser.parseFromString(content, 'text/html');
 			link.dispatchEvent(new Event('load'));
 		} else {
 			link.dispatchEvent(new Event('error'));
