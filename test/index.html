@@ -5,6 +5,19 @@
 		<meta charset="utf-8"/>
 		<meta name="description" content="A testing page for my JavaScript library" />
 		<base href="/test/" />
+		<link rel="import" name="contextmenu" href="components/contentextment.html">
+		<link rel="import" name="contact-form" href="components/contact-form.html"/>
+		<link rel="import" name="weather-dialog" href="components/weather-dialog.html" />
+		<link rel="import" name="video-dialog" href="components/video-dialog.html" />
+		<link rel="import" name="keybase-dialog" href="components/keybase-dialog.html" />
+		<link rel="import" name="event-dialog" href="components/event-dialog.html" />
+		<link rel="import" name="login-dialog" href="components/login-dialog.html" />
+		<link rel="import" name="weather-results" href="components/weather-results.html" />
+		<link rel="import" name="image-template" href="components/image-template.html" />
+		<link rel="import" name="person-template" href="components/person-template.html" />
+		<link rel="import" name="article-template" href="components/article-template.html" />
+		<link rel="import" name="keybase-user-template" href="components/keybase-user-template.html" />
+		<link rel="import" name="address-template" href="components/address-template.html" />
 		<script type="application/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js" crossorigin="annonymous" async=""></script>
 		<script type="module" src="./index.js" async=""></script>
 		<script type="application/javascript" src="./index.min.js" async="" nomodule=""></script>
@@ -18,33 +31,6 @@
 		<link rel="stylesheet" type="text/css" href="./index.css" />
 	</head>
 	<body>
-		<menu type="context" id="context-menu">
-			<menuitem label="Copy test" data-copy="body > header > h1"></menuitem>
-			<menuitem label="Share page" data-share=""></menuitem>
-			<menuitem label="Share article" data-share="article"></menuitem>
-			<menu label="Actions">
-				<menuitem label="Back" data-click="back"></menuitem>
-				<menuitem label="Forward" data-click="forward"></menuitem>
-				<menuitem label="Reload" data-click="reload"></menuitem>
-				<menuitem label="Print" data-click="print"></menuitem>
-			</menu>
-			<menu label="Forms">
-				<menuitem label="Registration" data-show-modal="#contact-dialog"></menuitem>
-				<menuitem label="Login" data-show-modal="#login-dialog"></menuitem>
-				<menuitem label="OpenWeatherMap" data-show-modal="#weather-dialog"></menuitem>
-				<menuitem label="Keybase" data-show-modal="#keybase-dialog"></menuitem>
-				<menuitem label="Event" data-show-modal="#event-dialog"></menuitem>
-			</menu>
-			<menu label="Cookies">
-				<menuitem label="Set cookie" id="set-cookie"></menuitem>
-				<menuitem label="Get cookie" id="get-cookie"></menuitem>
-				<menuitem label="Has cookie" id="has-cookie"></menuitem>
-				<menuitem label="All cookies" id="all-cookie"></menuitem>
-				<menuitem label="Clear cookies" id="clear-cookie"></menuitem>
-			</menu>
-			<menuitem label="GPS" id="gps-btn"></menuitem>
-			<menuitem label="Video Test" data-show-modal="#video-dialog"></menuitem>
-		</menu>
 		<header>
 			<h1>JavaScript module testing</h1>
 		</header>
@@ -53,233 +39,5 @@
 		<aside data-import="/test/assets/sidebar.html#foo"></aside>
 		<footer data-import="/test/assets/footer.html"></footer>
 		<noscript>You obviously need JavaScript enabled to test a JavaScript library.</noscript>
-		<dialog id="contact-dialog">
-			<header>
-				<button type="reset" form="contact-form" data-close="#contact-dialog">X</button>
-			</header>
-			<form name="contact-form" id="contact-form">
-				<fieldset>
-					<legend>Basic Info</legend>
-					<input type="text" name="basic[first]" autocomplete="given-name" placeholder="First name" pattern="[A-z]+" required="" />
-					<input type="text" name="basic[middle]" autocomplete="additional-name" placeholder="Middle name" pattern="[A-z]+" />
-					<input type="text" name="basic[last]" autocomplete="family-name" placeholder="Last Name" Pattern="[A-z]+" required="" />
-					<br />
-					<label>Organization <input type="text" name="basic[org]" autocomplete="organization" placeholder="Company" /></label>
-					<br />
-					<label>Birthday<input type="date" name="basic[bday]" autocomplete="bday" placeholder="YYYY-mm-dd" required="" /></label>
-					<br />
-					<label for="sex">Sex</label>
-					<select name="basic[sex]" id="sex" autocomplete="sex" required="">
-						<option value="">Pick one</option>
-						<option value="Male">Male</option>
-						<option value="Female">Female</option>
-					</select>
-				</fieldset>
-				<fieldset>
-					<legend>Address</legend>
-					<input type="text" name="address[street]" autocomplete="street-address" placeholder="123 Some Street" pattern="\d+ [\w\.# ]+" required=""/>
-					<br />
-					<input type="text" name="address[city]" autocomplete="address-level2" placeholder="City" pattern="[A-z ]+" required=""/>
-					<span>, </span>
-					<input type="text" name="address[state]" autocomplete="address-level1" placeholder="State" pattern="[A-z ]+" required="" />
-					<br />
-					<input type="number" name="address[postal]" autocomplete="postal-code" placeholder="#####" min="10000" max="99999" required="" />
-					<br />
-				</fieldset>
-				<fieldset>
-					<legend>Contact Info</legend>
-					<input type="email" name="contact[email]" autocomplete="email" placeholder="user@example.com" required="" />
-					<br />
-					<input type="tel" name="contact[tel]" autocomplete="tel" placeholder="+1-123-456-7890" required="" />
-					<br />
-					<input type="url" name="contact[url]" autocomplete="url" placeholder="http://example.com" />
-				</fieldset>
-				<fieldset>
-					<legend>Credentials</legend>
-					<input type="text" name="creds[user]" autocomplete="username" placeholder="username" required="" />
-					<br />
-					<input type="password" name="creds[password]" autocomplete="new-password" placeholder="***********" required="" />
-				</fieldset>
-				<fieldset>
-					<legend>Payment Info</legend>
-					<select name="cc[type]" required="">
-						<option value="">Select Credit Card Type</option>
-						<option>Master Card</option>
-						<option>Visa</option>
-					</select>
-					<br />
-					<input type="number" autocomplete="cc-number" min="1000000000000" max="9999999999999" placeholder="Credit Card Number (no '-')" required="" />
-					<br />
-					<input type="date" name="cc[exp]" autocomplete="cc-exp" placeholder="YYYY-MM-DD" required="" />
-					<br />
-					<input type="number" autocomplete="cc-csc" min="100" max="9999" name="cc[csc]" placeholder="CSC (###)" required="" />
-				</fieldset>
-				<button type="submit">Submit</button>
-				<button type="reset">Reset</button>
-			</form>
-		</dialog>
-		<dialog id="weather-dialog">
-			<header>
-				<button type="button" data-close="#weather-dialog">x</button>
-			</header>
-			<form name="openweather">
-				<input name="zip" type="number" min="10000" max="99999" placeholder="######" maxlength="5" autocomplete="postal-code" required="" />
-				<details>
-					<summary>Units</summary>
-					<label for="units-imperial">Imperial</label>
-					<input type="radio" name="units" value="imperial" id="units-imperial" checked="" />
-					<label for="units-metric">Metric</label>
-					<input type="radio" name="units" value="metric" id="units-metric" />
-				</details>
-				<button type="submit">Search</button>
-			</form>
-			<button type="button" id="weather-loc">Get from GPS</button>
-		</dialog>
-		<dialog id="video-dialog">
-			<header>
-				<button data-close="#video-dialog">X</button>
-				<button id="vid-play">Play</button>
-			</header>
-			<video hidden="" muted="" id="vid"></video>
-			<canvas id="vid-canvas" width="800" height="640"></canvas>
-		</dialog>
-		<dialog id="keybase-dialog">
-			<button data-close="#keybase-dialog">x</button>
-			<hr />
-			<form name="keybase-search">
-				<label for="keybase-location">Search in...</label>
-				<select name="keybase[location]" id="keybase-location" required="">
-					<option value="usernames">KeyBase</option>
-					<option value="github">Github</option>
-					<option value="twitter">Twitter</option>
-				</select>
-				<label for="keybase-query">Query</label>
-				<input type="search" name="keybase[query]" id="keybase-query" placeholder="search for..." pattern="[\w,]+" required="" />
-				<br />
-				<button type="submit">Search</button>
-			</form>
-		</dialog>
-		<dialog id="event-dialog">
-			<header>
-				<button data-close="#event-dialog">X</button>
-			</header>
-			<form name="event">
-				<fieldset>
-					<legend>Event Details</legend>
-					<input type="text" name="event[name]" placeholder="Event name" pattern="[\w\. ]+" required="" />
-					<br />
-					<textarea name="event[description]" placeholder="Event description"></textarea>
-				</fieldset>
-				<fieldset>
-					<legend>From / Until</legend>
-					<input type="date" name="event[startDate]" required="" />
-					<input type="time" name="event[startTime]" />
-					<br />
-					<input type="date" name="event[endDate]" required="" />
-					<input type="time" name="event[endTime]" />
-				</fieldset>
-				<fieldset>
-					<legend>Where</legend>
-					<input type="text" name="event[address][street]" autocomplete="street-address" placeholder="123 Some Street" pattern="\d+ [\w\.# ]+" required=""/>
-					<br />
-					<input type="text" name="event[address][city]" autocomplete="address-level2" placeholder="City" pattern="[A-z ]+" required=""/>
-					<span>, </span>
-					<input type="text" name="event[address][state]" autocomplete="address-level1" placeholder="State" pattern="[A-z ]+" required="" />
-					<br />
-					<input type="number" name="event[address][postal]" autocomplete="postal-code" placeholder="#####" min="10000" max="99999" />
-				</fieldset>
-				<button type="submit">Submit</button>
-				<button type="reset">Reset</button>
-			</form>
-		</dialog>
-		<dialog id="login-dialog">
-			<header>
-				<button data-close="#login-dialog">X</button>
-			</header>
-			<form name="login">
-				<fieldset>
-					<legend>Login</legend>
-					<figure class="center">
-						<img id="login-grav" src="https://gravatar.com/avatar/dne?s=128" width="128" height="128" class="round shadow center" />
-					</figure>
-					<br />
-					<input type="email" name="login[email]" autocomplete="email" placeholder="user@example.com" required="" />
-					<br />
-					<input type="password" name="login[password]" autocomplete="current-password" placeholder="********" minlength="8" required="" />
-				</fieldset>
-				<button type="submit">Submit</button>
-			</form>
-		</dialog>
-		<template id="weather-results">
-			<h3>Current conditions in <b data-weather-prop="name"></b></h3>
-			<b>Temp: <span data-weather-prop="temp" data-weather-section="main"></span></b>
-			<br />
-			<b>High: <u data-weather-prop="temp_max" data-weather-section="main"></u></b>
-			<b>Low: <u data-weather-prop="temp_min" data-weather-section="main"></u></b>
-			<hr />
-			<b>Wind speed: <span data-weather-prop="speed" data-weather-section="wind"></span></b>
-		</template>
-		<template id="image-template">
-			<figure itemtype="http://schema.org/ImageObject">
-				<img itemprop="contentUrl" src="" width="64" height="64"/>
-				<blockquote itemprop="caption"></blockquote>
-				<meta itemprop="width" content="" />
-				<meta itemprop="height" content="" />
-			</figure>
-		</template>
-		<template id="person-template">
-			<span itemtype="http://schema.org/Person" contenteditable="false">
-				<span itemprop="image" data-schema-template="image-template"></span>
-				<span itemprop="givenName"></span>
-				<span itemprop="familyName"></span>
-				<time itemprop="birthDate" datetime="" data-date-format="D, F j, Y g:i A"></time>
-				<details>
-					<summary>Contact Info</summary>
-					<span itemprop="homeLocation" data-schema-template="address-template"></span>
-					<a href="" itemprop="url">Website</a>
-				</details>
-			</span>
-		</template>
-		<template id="article-template">
-			<article itemtype="http://schema.org/Article">
-				<meta itemprop="url" content="./article" />
-				<menu itemprop="description" content="Lorem Ipsum"></menu>
-				<header>
-					<h2 itemprop="headline"></h2>
-					<b>By <span itemprop="author" data-schema-template="person-template"></span></b>
-					<button data-share="">Share</button>
-				</header>
-				<section itemprop="articleBody"></section>
-			</article>
-		</template>
-		<template id="keybase-user-template">
-			<hr />
-			<img src="" width="" height="" data-keybase-prop="picture"/>
-			<a data-keybase-prop="keybase-url" href="">
-				<b data-keybase-prop="name"></b>
-				@ <span data-keybase-prop="location"></span>
-			</a>
-			<blockquote data-keybase-prop="bio"></blockquote>
-			<details>
-				<summary>Proofs</summary>
-				<ul data-keybase-prop="proofs"></ul>
-			</details>
-			<details data-keybase-prop="keys">
-				<summary>Keys</summary>
-			</details>
-		</template>
-		<template id="address-template">
-			<address itemtype="http://schema.org/PostalAddress">
-				<div itemprop="streetAddress"></div>
-				<div>
-					<span itemprop="addressLocality"></span>,
-					<span itemprop="addressRegion"></span>
-					<span itemprop="postalCode"></span>
-				</div>
-				<a itemprop="email" href="">Email</a>
-				<br />
-				<a itemprop="telephone" href="">Telephone</a>
-			</address>
-		</template>
 	</body>
 </html>
