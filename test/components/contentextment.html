@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+	</head>
+	<body>
+		<menu type="context" id="context-menu">
+			<menuitem label="Copy test" data-copy="body > header > h1"></menuitem>
+			<menuitem label="Share page" data-share=""></menuitem>
+			<menuitem label="Share article" data-share="article"></menuitem>
+			<menu label="Actions">
+				<menuitem label="Back" data-click="back"></menuitem>
+				<menuitem label="Forward" data-click="forward"></menuitem>
+				<menuitem label="Reload" data-click="reload"></menuitem>
+				<menuitem label="Print" data-click="print"></menuitem>
+			</menu>
+			<menu label="Forms">
+				<menuitem label="Registration" data-show-modal="#contact-dialog"></menuitem>
+				<menuitem label="Login" data-show-modal="#login-dialog"></menuitem>
+				<menuitem label="OpenWeatherMap" data-show-modal="#weather-dialog"></menuitem>
+				<menuitem label="Keybase" data-show-modal="#keybase-dialog"></menuitem>
+				<menuitem label="Event" data-show-modal="#event-dialog"></menuitem>
+			</menu>
+			<menu label="Cookies">
+				<menuitem label="Set cookie" id="set-cookie"></menuitem>
+				<menuitem label="Get cookie" id="get-cookie"></menuitem>
+				<menuitem label="Has cookie" id="has-cookie"></menuitem>
+				<menuitem label="All cookies" id="all-cookie"></menuitem>
+				<menuitem label="Clear cookies" id="clear-cookie"></menuitem>
+			</menu>
+			<menuitem label="GPS" id="gps-btn"></menuitem>
+			<menuitem label="Video Test" data-show-modal="#video-dialog"></menuitem>
+		</menu>
+	</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+	</head>
+	<body>
+		<dialog id="keybase-dialog">
+			<button data-close="#keybase-dialog">x</button>
+			<hr />
+			<form name="keybase-search">
+				<label for="keybase-location">Search in...</label>
+				<select name="keybase[location]" id="keybase-location" required="">
+					<option value="usernames">KeyBase</option>
+					<option value="github">Github</option>
+					<option value="twitter">Twitter</option>
+				</select>
+				<label for="keybase-query">Query</label>
+				<input type="search" name="keybase[query]" id="keybase-query" placeholder="search for..." pattern="[\w,]+" required="" />
+				<br />
+				<button type="submit">Search</button>
+			</form>
+		</dialog>
+	</body>
+</html>

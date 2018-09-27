@@ -27,10 +27,9 @@ export async function wait(ms) {
 export async function ready(...requires) {
 	if (document.readyState === 'loading') {
 		await waitUntil(document, 'DOMContentLoaded');
-		await defined(...requires);
-	} else {
-		await defined(...requires);
 	}
+	await defined(...requires);
+	await importsLoaded();
 }
 
 export async function defined(...els) {
@@ -39,9 +38,43 @@ export async function defined(...els) {
 	}
 }
 
-export async function loaded() {
+export async function loaded(...requires) {
 	if (document.readyState !== 'complete') {
 		await waitUntil(window, 'load');
+	}
+	await importsLoaded();
+	await defined(...requires);
+}
+
+export async function importsLoaded() {
+	await $('link[rel="import"]:not([async])').map(async link => {
+		if (link.import === null) {
+			await new Promise((resolve, reject) => {
+				link.addEventListener('load', () => resolve());
+				link.addEventListener('error', reject);
+			});
+		}
+	});
+}
+
+export async function getImports() {
+	await importsLoaded();
+	const imports = await $('link[rel="import"][name]').map(link => link.getAttribute('name'));
+	return await Promise.all(imports.map(async name => {
+		return {
+			name,
+			content: await importLink(name),
+		};
+	}));
+}
+
+export async function importLink(name) {
+	await importsLoaded();
+	const link = document.querySelector(`link[rel="import"][name="${name}"]`);
+	if (link instanceof HTMLLinkElement) {
+		return link.import;
+	} else {
+		throw new Error(`Link named "${name}" has no content to import`);
 	}
 }
 

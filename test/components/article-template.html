@@ -1,0 +1,21 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+	</head>
+	<body>
+		<template id="article-template">
+			<article itemtype="http://schema.org/Article">
+				<meta itemprop="url" content="./article" />
+				<menu itemprop="description" content="Lorem Ipsum"></menu>
+				<header>
+					<h2 itemprop="headline"></h2>
+					<b>By <span itemprop="author" data-schema-template="person-template"></span></b>
+					<button data-share="">Share</button>
+				</header>
+				<section itemprop="articleBody"></section>
+			</article>
+		</template>
+	</body>
+</html>

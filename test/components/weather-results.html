@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+	</head>
+	<body>
+		<template id="weather-results">
+			<h3>Current conditions in <b data-weather-prop="name"></b></h3>
+			<b>Temp: <span data-weather-prop="temp" data-weather-section="main"></span></b>
+			<br />
+			<b>High: <u data-weather-prop="temp_max" data-weather-section="main"></u></b>
+			<b>Low: <u data-weather-prop="temp_min" data-weather-section="main"></u></b>
+			<hr />
+			<b>Wind speed: <span data-weather-prop="speed" data-weather-section="wind"></span></b>
+		</template>
+	</body>
+</html>

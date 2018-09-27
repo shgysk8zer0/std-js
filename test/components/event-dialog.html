@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+	</head>
+	<body>
+		<dialog id="event-dialog">
+			<header>
+				<button data-close="#event-dialog">X</button>
+			</header>
+			<form name="event">
+				<fieldset>
+					<legend>Event Details</legend>
+					<input type="text" name="event[name]" placeholder="Event name" pattern="[\w\. ]+" required="" />
+					<br />
+					<textarea name="event[description]" placeholder="Event description"></textarea>
+				</fieldset>
+				<fieldset>
+					<legend>From / Until</legend>
+					<input type="date" name="event[startDate]" required="" />
+					<input type="time" name="event[startTime]" />
+					<br />
+					<input type="date" name="event[endDate]" required="" />
+					<input type="time" name="event[endTime]" />
+				</fieldset>
+				<fieldset>
+					<legend>Where</legend>
+					<input type="text" name="event[address][street]" autocomplete="street-address" placeholder="123 Some Street" pattern="\d+ [\w\.# ]+" required=""/>
+					<br />
+					<input type="text" name="event[address][city]" autocomplete="address-level2" placeholder="City" pattern="[A-z ]+" required=""/>
+					<span>, </span>
+					<input type="text" name="event[address][state]" autocomplete="address-level1" placeholder="State" pattern="[A-z ]+" required="" />
+					<br />
+					<input type="number" name="event[address][postal]" autocomplete="postal-code" placeholder="#####" min="10000" max="99999" />
+				</fieldset>
+				<button type="submit">Submit</button>
+				<button type="reset">Reset</button>
+			</form>
+		</dialog>
+	</body>
+</html>

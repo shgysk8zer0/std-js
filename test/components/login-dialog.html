@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+	</head>
+	<body>
+		<dialog id="login-dialog">
+			<header>
+				<button data-close="#login-dialog">X</button>
+			</header>
+			<form name="login">
+				<fieldset>
+					<legend>Login</legend>
+					<figure class="center">
+						<img id="login-grav" src="https://gravatar.com/avatar/dne?s=128" width="128" height="128" class="round shadow center" />
+					</figure>
+					<br />
+					<input type="email" name="login[email]" autocomplete="email" placeholder="user@example.com" required="" />
+					<br />
+					<input type="password" name="login[password]" autocomplete="current-password" placeholder="********" minlength="8" required="" />
+				</fieldset>
+				<button type="submit">Submit</button>
+			</form>
+		</dialog>
+	</body>
+</html>
