@@ -1,6 +1,6 @@
 {
   "name": "std-js",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "A JavaScript library for making front-end development sane!",
   "keywords": [
     "ECMAScript2015",
@@ -32,12 +32,13 @@
   },
   "scripts": {
     "test": "eslint .",
+    "fix": "eslint . --fix",
     "start": "python -m SimpleHTTPServer 8000"
   },
   "devDependencies": {
-    "eslint": "^4.14.0",
+    "eslint": "^4.19.1",
     "eslint-plugin-async-await": "0.0.0",
-    "eslint-plugin-babel": "^4.0.1"
+    "eslint-plugin-babel": "^4.1.2"
   },
   "dependencies": {}
 }

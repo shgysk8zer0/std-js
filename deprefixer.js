@@ -20,5 +20,10 @@ if (!('exitFullscreen' in Document.prototype)) {
 	Document.prototype.exitFullscreen = document.mozCancelFullScreen || document.webkitCancelFullScreen || document.msCancelFullScreen || false;
 }
 if (!('requestFullscreen' in HTMLElement.prototype)) {
-	HTMLElement.prototype.requestFullScreen = HTMLElement.prototype.mozRequestFullScreen || HTMLElement.prototype.webkitRequestFullScreen || false;
+	HTMLElement.prototype.requestFullscreen = HTMLElement.prototype.requestFullScreen || HTMLElement.prototype.mozRequestFullScreen || HTMLElement.prototype.webkitRequestFullScreen || false;
+}
+if (!('fullscreen' in Document.prototype)) {
+	Object.defineProperty(Document.prototype, 'fullscreen', {
+		get:() => document.fullscreenElement instanceof Element,
+	});
 }
