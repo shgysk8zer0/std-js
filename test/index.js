@@ -2,7 +2,7 @@ import '../shims.js';
 import '../deprefixer.js';
 import {loadHandler} from './funcs.js';
 import kbdShortcuts from '../kbd_shortcuts.js';
-import {$, ready, getImports} from '../functions.js';
+import {$, ready} from '../functions.js';
 
 ready().then(async () => {
 	const $body = $('body');
@@ -12,8 +12,6 @@ ready().then(async () => {
 	$doc.attr({lang: 'en', dir: 'ltr'});
 	$body.attr({contextmenu: 'context-menu'});
 	$doc.keypress(kbdShortcuts);
-
-	const items = await getImports();
-	items.forEach(item => document.body.append(...item.content.body.children));
+	document.body.append(await $('link[rel="import"]').import());
 	loadHandler();
 });
