@@ -133,6 +133,34 @@ export default class esQuery extends Set {
 		return this.every(el => el.matches(selector));
 	}
 
+	async import(selector = 'body > *') {
+		const imports = this.toArray().filter(node => node.tagName === 'LINK'
+			&& node.relList.contains('import'));
+		const docs = await Promise.all(imports.map(link => {
+			return new Promise((resolve, reject) => {
+				if (link.import instanceof Document) {
+					resolve(link.import);
+				} else {
+					link.addEventListener('load', event => {
+						resolve(event.target.import);
+					}, {
+						once: true,
+						passive: true,
+					});
+					link.addEventListener('error', event => reject(event), {
+						once: true,
+						passive: true,
+					});
+				}
+			});
+		}));
+
+		return docs.reduce((frag, doc) => {
+			new esQuery(selector, doc).forEach(child => frag.appendChild(child));
+			return frag;
+		}, document.createDocumentFragment());
+	}
+
 	async animate(keyframes, opts = 400) {
 		if ('animate' in Element.prototype) {
 			await this.map(node =>  node.animate(keyframes, opts).finished);
