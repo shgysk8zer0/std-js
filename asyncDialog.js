@@ -30,15 +30,19 @@ export async function confirm(text) {
 		close.type = 'button';
 		ok.type = 'button';
 
+		ok.classList.add('btn', 'btn-confirm');
+		close.classList.add('btn', 'btn-reject');
 		dialog.classList.add('animation-speed-normal', 'animation-ease-in', 'fadeInUp');
 
 		msg.textContent = text;
 		close.textContent = 'Cancel';
 		ok.textContent = 'Ok';
 
+		ok.style.setProperty('margin-right', '0.4em');
+
 		dialog.addEventListener('close', event => {
 			event.target.remove();
-			resolve(!!event.returnValue);
+			resolve(event.returnValue && event.target.returnValue === 'confirm');
 		});
 
 		close.addEventListener('click', event => {
@@ -71,13 +75,15 @@ export async function prompt(text, defaultValue = '') {
 		input.value = defaultValue;
 		input.name = 'result';
 
+		ok.classList.add('btn', 'btn-confirm');
+		close.classList.add('btn', 'btn-reject');
 		dialog.classList.add('animation-speed-normal', 'animation-ease-in', 'fadeInUp');
 
 		msg.textContent = text;
 		close.textContent = 'Cancel';
 		ok.textContent = 'Ok';
 		input.style.setProperty('margin-bottom', '12px');
-		ok.style.setProperty('margin-right', '8px');
+		ok.style.setProperty('margin-right', '0.4em');
 
 		dialog.addEventListener('close', event => event.target.remove());
 
