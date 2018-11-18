@@ -1,24 +1,30 @@
 {
   "name": "std-js",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "A JavaScript library for making front-end development sane!",
+  "config": {
+    "port": 8001
+  },
   "keywords": [
+    "ECMAScript",
     "ECMAScript2015",
     "ES6",
+    "DOM",
     "esQuery",
     "JavaScript",
     "modules",
     "front-end",
     "polyfill",
-    "shim"
+    "shim",
+    "async"
   ],
   "author": {
     "name": "Chris Zuber",
     "email": "shgysk8zer0@gmail.com",
-    "url": "https://chriszuber.com"
+    "url": "https://shgysk8zer0.github.io"
   },
   "contributors": [],
-  "homepage": "https://chriszuber.com/",
+  "homepage": "https://github.com/shgysk8zer0/std-js/",
   "license": "GPL-3.0",
   "repository": {
     "type": "git",
@@ -32,12 +38,13 @@
   },
   "scripts": {
     "test": "eslint .",
-    "start": "python -m SimpleHTTPServer 8000"
+    "fix": "eslint . --fix",
+    "start": "python -m SimpleHTTPServer ${npm_package_config_port}"
   },
   "devDependencies": {
-    "eslint": "^4.14.0",
+    "eslint": "^4.19.1",
     "eslint-plugin-async-await": "0.0.0",
-    "eslint-plugin-babel": "^4.0.1"
+    "eslint-plugin-babel": "^4.1.2"
   },
   "dependencies": {}
 }
