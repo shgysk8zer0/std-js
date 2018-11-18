@@ -1,4 +1,4 @@
-import md5 from './std-js/md5.js';
+import md5 from './md5.js';
 
 export default class GravatarURL extends URL {
 	constructor(hash, {
