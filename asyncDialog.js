@@ -30,7 +30,7 @@ export async function confirm(text) {
 		close.type = 'button';
 		ok.type = 'button';
 
-		ok.classList.add('btn', 'btn-confirm');
+		ok.classList.add('btn', 'btn-accept');
 		close.classList.add('btn', 'btn-reject');
 		dialog.classList.add('animation-speed-normal', 'animation-ease-in', 'fadeInUp');
 
@@ -75,7 +75,7 @@ export async function prompt(text, defaultValue = '') {
 		input.value = defaultValue;
 		input.name = 'result';
 
-		ok.classList.add('btn', 'btn-confirm');
+		ok.classList.add('btn', 'btn-accept');
 		close.classList.add('btn', 'btn-reject');
 		dialog.classList.add('animation-speed-normal', 'animation-ease-in', 'fadeInUp');
 

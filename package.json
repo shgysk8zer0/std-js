@@ -1,6 +1,6 @@
 {
   "name": "std-js",
-  "version": "2.2.0",
+  "version": "2.3.1",
   "description": "A JavaScript library for making front-end development sane!",
   "config": {
     "port": 8001
@@ -25,7 +25,7 @@
   },
   "contributors": [],
   "homepage": "https://github.com/shgysk8zer0/std-js/",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/shgysk8zer0/std-js"
