@@ -72,7 +72,14 @@ export async function importLink(name) {
 	await importsLoaded();
 	const link = document.querySelector(`link[rel="import"][name="${name}"]`);
 	if (link instanceof HTMLLinkElement) {
-		return link.import;
+		return new Promise((resolve, reject) => {
+			link.addEventListener('error', reject);
+			if (link.import === null) {
+				link.addEventListener('load', () => resolve(link.import), {once: true});
+			} else {
+				resolve(link.import);
+			}
+		});
 	} else {
 		throw new Error(`Link named "${name}" has no content to import`);
 	}
