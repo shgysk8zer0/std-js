@@ -91,6 +91,37 @@ export async function waitUntil(target, event) {
 	});
 	await prom;
 }
+export async function pageVisible() {
+	await new Promise(resolve => {
+		if (document.visibilityState === 'visible') {
+			resolve();
+		} else {
+			const handler = () => {
+				if (document.visibilityState === 'visible') {
+					document.removeEventListener('visibilitychange', handler);
+					resolve();
+				}
+			};
+			document.addEventListener('visibilitychange', handler);
+		}
+	});
+}
+
+export async function pageHidden() {
+	await new Promise(resolve => {
+		if (document.visibilityState === 'hidden') {
+			resolve();
+		} else {
+			const handler = () => {
+				if (document.visibilityState === 'hidden') {
+					document.removeEventListener('visibilitychange', handler);
+					resolve();
+				}
+			};
+			document.addEventListener('visibilitychange', handler);
+		}
+	});
+}
 
 export function* toGenerator(...items) {
 	/*eslint no-constant-condition: "off" */
