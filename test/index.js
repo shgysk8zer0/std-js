@@ -3,6 +3,8 @@ import '../deprefixer.js';
 import {loadHandler} from './funcs.js';
 import kbdShortcuts from '../kbd_shortcuts.js';
 import {$, ready} from '../functions.js';
+import Color from '/Color.js';
+window.Color = Color;
 
 ready().then(async () => {
 	const $body = $('body');
