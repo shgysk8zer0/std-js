@@ -1,6 +1,6 @@
 {
   "name": "std-js",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "A JavaScript library for making front-end development sane!",
   "config": {
     "port": 8001
