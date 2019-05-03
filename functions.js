@@ -47,7 +47,7 @@ export async function loaded(...requires) {
 }
 
 export async function importsLoaded() {
-	await $('link[rel="import"]:not([async])').map(async link => {
+	await $('link[rel~="import"]:not([async])').map(async link => {
 		if (link.import === null) {
 			await new Promise((resolve, reject) => {
 				link.addEventListener('load', () => resolve());
@@ -59,7 +59,7 @@ export async function importsLoaded() {
 
 export async function getImports() {
 	await importsLoaded();
-	const imports = await $('link[rel="import"][name]').map(link => link.getAttribute('name'));
+	const imports = await $('link[rel~="import"][name]').map(link => link.getAttribute('name'));
 	return await Promise.all(imports.map(async name => {
 		return {
 			name,
@@ -70,7 +70,7 @@ export async function getImports() {
 
 export async function importLink(name) {
 	await importsLoaded();
-	const link = document.querySelector(`link[rel="import"][name="${name}"]`);
+	const link = document.querySelector(`link[rel~="import"][name="${name}"]`);
 	if (link instanceof HTMLLinkElement) {
 		return new Promise((resolve, reject) => {
 			link.addEventListener('error', reject);
