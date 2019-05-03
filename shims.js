@@ -144,7 +144,7 @@ if (! HTMLElement.prototype.hasOwnProperty('contextMenu')){
 }
 
 if (! HTMLLinkElement.prototype.hasOwnProperty('import')) {
-	[...document.querySelectorAll('link[rel="import"]')].forEach(async link => {
+	[...document.querySelectorAll('link[rel~="import"]')].forEach(async link => {
 		link.import = null;
 		const url = new URL(link.href);
 		const resp = await fetch(url);
