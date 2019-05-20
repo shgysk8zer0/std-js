@@ -19,10 +19,7 @@ import Cookie from '../Cookie.js';
 import {alert, prompt} from '../asyncDialog.js';
 
 export async function loadHandler() {
-	WebShareAPI(...Object.values(shares).map(share => {
-		share.icon = new URL(share.icon.pathname.replace('/test', ''), 'https://shgysk8zer0.github.io');
-		return share;
-	}));
+	WebShareAPI(...Object.values(shares));
 
 	if (document.createElement('details') instanceof HTMLUnknownElement) {
 		$('details > summary').click(function() {
