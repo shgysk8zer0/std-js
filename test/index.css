@@ -48,7 +48,7 @@ body > nav {
 
 body > main {
 	grid-area: main;
-	background-color: green;
+	background-color: #fdfdfd;
 }
 
 body > aside {

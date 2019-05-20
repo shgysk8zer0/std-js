@@ -3,7 +3,17 @@
   "version": "2.3.2",
   "description": "A JavaScript library for making front-end development sane!",
   "config": {
-    "port": 8001
+    "serve": {
+      "domain": "localhost",
+      "path": "./",
+      "port": 8080
+    },
+    "dir": {
+      "css": "css/ components/",
+      "js": "js/ components/",
+      "img": "img/",
+      "html": "components/"
+    }
   },
   "keywords": [
     "ECMAScript",
@@ -39,12 +49,13 @@
   "scripts": {
     "test": "eslint .",
     "fix": "eslint . --fix",
-    "start": "python -m SimpleHTTPServer ${npm_package_config_port}"
+    "start": "http-server ${npm_package_config_serve_path} -p ${npm_package_config_serve_port} -a ${npm_package_config_serve_domain} -o"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
     "eslint-plugin-async-await": "0.0.0",
-    "eslint-plugin-babel": "^4.1.2"
+    "eslint-plugin-babel": "^4.1.2",
+    "http-server": "^0.11.1"
   },
   "dependencies": {}
 }
