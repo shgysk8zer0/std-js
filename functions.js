@@ -300,24 +300,46 @@ export async function notify(title, {
 				});
 			}
 
-			const notification = new Notification(title, {
-				body,
-				icon,
-				dir,
-				lang,
-				tag,
-				data,
-				vibrate,
-				renotify,
-				requireInteraction,
-				actions,
-				silent,
-				noscreen,
-				sticky,
-			});
+			if (navigator.hasOwnProperty('serviceWorker') && navigator.serviceWorker.controller !== null) {
+				const reg = await navigator.serviceWorker.getRegistration();
+				await reg.showNotification(title, {
+					body,
+					icon,
+					dir,
+					lang,
+					tag,
+					actions,
+					data,
+					vibrate,
+					renotify,
+					requireInteraction,
+					silent,
+					noscreen,
+					sticky,
+				});
+				const notifications = await reg.getNotifications();
+				resolve(notifications[notifications.length - 1]);
+			} else {
+				const notification = new Notification(title, {
+					body,
+					icon,
+					dir,
+					lang,
+					tag,
+					data,
+					vibrate,
+					renotify,
+					requireInteraction,
+					actions,
+					silent,
+					noscreen,
+					sticky,
+				});
 
-			notification.addEventListener('show', event => resolve(event.target), {once: true});
-			notification.addEventListener('error', event => reject(event.target), {once: true});
+				notification.addEventListener('show', event => resolve(event.target), {once: true});
+				notification.addEventListener('error', event => reject(event.target), {once: true});
+			}
+
 		} catch (err) {
 			reject(err);
 		}
