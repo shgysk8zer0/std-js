@@ -300,7 +300,7 @@ export async function notify(title, {
 				});
 			}
 
-			if (navigator.hasOwnProperty('serviceWorker') && navigator.serviceWorker.controller !== null) {
+			if (('serviceWorker' in navigator) && navigator.serviceWorker.controller !== null) {
 				const reg = await navigator.serviceWorker.getRegistration();
 				await reg.showNotification(title, {
 					body,
