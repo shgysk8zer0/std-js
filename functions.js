@@ -14,6 +14,22 @@ export function clone(thing) {
 	}
 }
 
+export function reportError(err) {
+	if (err instanceof Error) {
+		const url = new URL('Errors/Client/', document.documentElement.dataset.endpoint || 'https://api.kernvalley.us');
+		const data = new FormData();
+		data.set('name', err.name);
+		data.set('message', err.message);
+		data.set('lineNumber', err.lineNumber);
+		data.set('columnNumber', err.columnNumber);
+		data.set('fileName', err.fileName);
+		data.set('stack', err.stack);
+		return navigator.sendBeacon(url, data);
+	} else {
+		return false;
+	}
+}
+
 export function $(selector, parent = document) {
 	return new esQuery(selector, parent);
 }
