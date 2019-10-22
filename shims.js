@@ -173,4 +173,4 @@ if (! ('connection' in navigator)) {
 	});
 } else if (! navigator.connection.hasOwnProperty('type')) {
 	navigator.connection.type = 'unknown';
-};
+}
