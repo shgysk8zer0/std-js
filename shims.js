@@ -158,3 +158,19 @@ if (! HTMLLinkElement.prototype.hasOwnProperty('import')) {
 		}
 	});
 }
+
+if (! ('connection' in navigator)) {
+	navigator.connection = Object.freeze({
+		type: 'unknown',
+		effectiveType: '4g',
+		rtt: NaN,
+		downlink: NaN,
+		downlinkMax: Infinity,
+		saveData: false,
+		onchange: null,
+		ontypechange: null,
+		addEventListener: () => null,
+	});
+} else if (! navigator.connection.hasOwnProperty('type')) {
+	navigator.connection.type = 'unknown';
+}
