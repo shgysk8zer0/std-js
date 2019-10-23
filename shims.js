@@ -171,6 +171,4 @@ if (! ('connection' in navigator)) {
 		ontypechange: null,
 		addEventListener: () => null,
 	});
-} else if (! navigator.connection.hasOwnProperty('type')) {
-	navigator.connection.type = 'unknown';
 }
