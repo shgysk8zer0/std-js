@@ -3,7 +3,7 @@ import esQuery from './esQuery.js';
 export function clone(thing) {
 	if (thing instanceof Array) {
 		return [...thing].map(clone);
-	} else if (['string', 'number'].includes(typeof(thing))) {
+	} else if (['string', 'number'].includes(typeof (thing))) {
 		return thing;
 	} else if (thing instanceof Element) {
 		return thing.cloneNode(true);
@@ -15,15 +15,14 @@ export function clone(thing) {
 }
 
 export function reportError(err) {
-	if (err instanceof Error) {
+	if (err instanceof ErrorEvent) {
 		const url = new URL('Errors/Client/', document.documentElement.dataset.endpoint || 'https://api.kernvalley.us');
 		const data = new FormData();
-		data.set('name', err.name);
+		data.set('name', err.type);
 		data.set('message', err.message);
-		data.set('lineNumber', err.lineNumber);
-		data.set('columnNumber', err.columnNumber);
-		data.set('fileName', err.fileName);
-		data.set('stack', err.stack);
+		data.set('lineNumber', err.lineno);
+		data.set('columnNumber', err.colno);
+		data.set('fileName', err.filename);
 		return navigator.sendBeacon(url, data);
 	} else {
 		return false;
@@ -91,7 +90,7 @@ export async function importLink(name) {
 		return new Promise((resolve, reject) => {
 			link.addEventListener('error', reject);
 			if (link.import === null) {
-				link.addEventListener('load', () => resolve(link.import), {once: true});
+				link.addEventListener('load', () => resolve(link.import), { once: true });
 			} else {
 				resolve(link.import);
 			}
@@ -103,7 +102,7 @@ export async function importLink(name) {
 
 export async function waitUntil(target, event) {
 	const prom = new Promise(resolve => {
-		target.addEventListener(event, () => resolve(), {once: true});
+		target.addEventListener(event, () => resolve(), { once: true });
 	});
 	await prom;
 }
@@ -149,13 +148,13 @@ export function* toGenerator(...items) {
 }
 
 export function setIncrementor(obj, {
-	key       = 'i',
-	start     = 0,
+	key = 'i',
+	start = 0,
 	increment = 1,
 } = {}) {
-	const inc = (function*(n = 0) {
+	const inc = (function* (n = 0) {
 		/*eslint no-constant-condition: "off" */
-		while(true) {
+		while (true) {
 			yield n;
 			n += increment;
 		}
@@ -186,8 +185,8 @@ export function selectElement(el) {
 }
 
 export async function imgur(url, {
-	sizes       = ['100vw'],
-	alt         = '',
+	sizes = ['100vw'],
+	alt = '',
 	defaultSize = 'h',
 } = {}) {
 	const imgurSizes = {
@@ -226,19 +225,19 @@ export async function imgur(url, {
 	return new Promise((resolve, reject) => {
 		picture.append(image);
 		image.alt = alt;
-		image.addEventListener('load', (event) => resolve(event.target.parentElement), {once: true});
+		image.addEventListener('load', (event) => resolve(event.target.parentElement), { once: true });
 		image.addEventListener('error', event => reject(event.target));
 		image.src = `${imgur}${defaultSize}.png`;
 	});
 }
 
 export async function read(...nodes) {
-	if (! window.hasOwnProperty('speechSynthesis')) {
+	if (!window.hasOwnProperty('speechSynthesis')) {
 		throw new Error('SpeechSynthesis not supported');
 	}
 
 	for (const node of nodes) {
-		if (typeof(node) === 'string') {
+		if (typeof (node) === 'string') {
 			/*
 			 * Work-around for Chrome issue with long utterances
 			 * <https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis/speak#Browser_compatibility>
@@ -251,11 +250,11 @@ export async function read(...nodes) {
 					speechSynthesis.speak(utter);
 				});
 			}
-		} else if (node  instanceof Text) {
+		} else if (node instanceof Text) {
 			node.parentElement.classList.add('reading');
 			await read(node.wholeText);
 			node.parentElement.classList.remove('reading');
-		} else if (node instanceof Element && ! node.hidden && node.hasChildNodes()) {
+		} else if (node instanceof Element && !node.hidden && node.hasChildNodes()) {
 			await read(...node.childNodes);
 		}
 	}
@@ -265,7 +264,7 @@ export function chunkText(string, length) {
 	const size = Math.ceil(string.length / length);
 	const chunks = Array(size);
 
-	for (let i = 0, offset = 0; i < size; i++, offset++) {
+	for (let i = 0, offset = 0; i < size; i++ , offset++) {
 		chunks[i] = string.substr(offset, length);
 	}
 	return chunks;
@@ -300,7 +299,7 @@ export async function notify(title, {
 } = {}) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			if (! (window.Notification instanceof Function)) {
+			if (!(window.Notification instanceof Function)) {
 				throw new Error('Notifications not supported');
 			} else if (Notification.permission === 'denied') {
 				throw new Error('Notification permission denied');
@@ -352,8 +351,8 @@ export async function notify(title, {
 					sticky,
 				});
 
-				notification.addEventListener('show', event => resolve(event.target), {once: true});
-				notification.addEventListener('error', event => reject(event.target), {once: true});
+				notification.addEventListener('show', event => resolve(event.target), { once: true });
+				notification.addEventListener('error', event => reject(event.target), { once: true });
 			}
 
 		} catch (err) {
@@ -367,7 +366,7 @@ export function isInternalLink(link) {
 }
 
 export async function parseResponse(resp) {
-	if (! resp.headers.has('Content-Type')) {
+	if (!resp.headers.has('Content-Type')) {
 		throw new Error(`No Content-Type header in request to "${resp.url}"`);
 	} else if (resp.headers.get('Content-Length') === 0) {
 		throw new Error(`No response body for "${resp.url}"`);
@@ -401,14 +400,14 @@ export async function getLocation(options = {}) {
 export async function registerServiceWorker(path) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			if (! Navigator.prototype.hasOwnProperty('serviceWorker')) {
+			if (!Navigator.prototype.hasOwnProperty('serviceWorker')) {
 				throw new Error('Service worker not supported');
-			} else if (! navigator.onLine) {
+			} else if (!navigator.onLine) {
 				throw new Error('Offline');
 			}
 
 			const url = new URL(path, document.baseURI);
-			const reg = await navigator.serviceWorker.register(url, {scope: document.baseURI});
+			const reg = await navigator.serviceWorker.register(url, { scope: document.baseURI });
 
 			if (navigator.onLine) {
 				reg.update();
@@ -427,20 +426,20 @@ export async function registerServiceWorker(path) {
 
 export async function marquee({
 	parent,
-	delay        = 200,
-	cursor       = '|',
-	blinkRate    = 800,
-	pause        = 1000,
+	delay = 200,
+	cursor = '|',
+	blinkRate = 800,
+	pause = 1000,
 	containerTag = 'span',
-	cursorTag    = 'span',
+	cursorTag = 'span',
 } = {}, ...sentences) {
 	const cursorEl = document.createElement(cursorTag);
 	const container = document.createElement(containerTag);
 
 	if (Element.prototype.animate) {
 		cursorEl.animate([
-			{opacity: 0},
-			{opacity: 1}
+			{ opacity: 0 },
+			{ opacity: 1 }
 		], {
 			duration: blinkRate,
 			iterations: Infinity,
