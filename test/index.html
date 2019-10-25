@@ -30,16 +30,16 @@
 		<link rel="canonical" href="http://example.com" />
 		<link rel="stylesheet" type="text/css" href="./index.css" />
 	</head>
-	<body>
-		<header>
+	<body class="background-primary color-default font-main grid">
+		<header id="header">
 			<h1>JavaScript module testing</h1>
 		</header>
-		<nav>Nav</nav>
-		<main>
+		<nav id="nav" class="sticky top shadow z-3 background-accent">Nav</nav>
+		<main id="main">
 			<div data-infinite-scroll="/test/assets/article.html?page=1"></div>
 		</main>
-		<aside data-import="/test/assets/sidebar.html#foo"></aside>
-		<footer data-import="/test/assets/footer.html"></footer>
+		<aside id="sidebar" data-import="/test/assets/sidebar.html#foo"></aside>
+		<footer id="footer" data-import="/test/assets/footer.html"></footer>
 		<noscript>You obviously need JavaScript enabled to test a JavaScript library.</noscript>
 	</body>
 </html>
