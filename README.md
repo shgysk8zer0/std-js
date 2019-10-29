@@ -1,16 +1,19 @@
 # std-js
 
 - - -
+[[![Build Status](https://travis-ci.com/shgysk8zer0/std-js.svg?branch=master)](https://travis-ci.com/shgysk8zer0/std-js)
+[![GitHub license](https://img.shields.io/github/license/shgysk8zer0/std-js.svg)](https://github.com/shgysk8zer0/std-js/blob/master/LICENSE)
+![GitHub last commit](https://img.shields.io/github/last-commit/shgysk8zer0/std-js.svg)
+![GitHub release](https://img.shields.io/github/release/shgysk8zer0/std-js.svg)
 
-[![Build Status](https://travis-ci.org/shgysk8zer0/std-js.svg?branch=master)](https://travis-ci.org/shgysk8zer0/std-js)
-[![license](https://img.shields.io/github/license/shgysk8zer0/std-js.svg)](https://github.com/shgysk8zer0/std-js/blob/master/LICENSE)
-[![GitHub issues](https://img.shields.io/github/issues/shgysk8zer0/std-js.svg)](https://github.com/shgysk8zer0/std-js/issues)
-[![GitHub forks](https://img.shields.io/github/forks/shgysk8zer0/std-js.svg)](https://github.com/shgysk8zer0/std-js/network)
-[![GitHub release](https://img.shields.io/github/release/shgysk8zer0/std-js.svg)](https://github.com/shgysk8zer0/std-js/releases/latest)
+[![Donate using Liberapay](https://img.shields.io/liberapay/receives/shgysk8zer0.svg?logo=liberapay)](https://liberapay.com/shgysk8zer0/donate "Donate using Liberapay")
+![Keybase PGP](https://img.shields.io/keybase/pgp/shgysk8zer0.svg)
+![Keybase BTC](https://img.shields.io/keybase/btc/shgysk8zer0.svg)
 
-[![Join the chat at https://gitter.im/shgysk8zer0/std-js](https://badges.gitter.im/shgysk8zer0/std-js.svg)](https://gitter.im/shgysk8zer0/std-js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Twitter](https://img.shields.io/twitter/url/https/github.com/shgysk8zer0/std-js.svg?style=social)](https://twitter.com/intent/tweet)
-[![Twitter Follow](https://img.shields.io/twitter/follow/shgysk8zer0.svg?style=social&label=Follow)](https://twitter.com/shgysk8zer0)
+![GitHub followers](https://img.shields.io/github/followers/shgysk8zer0.svg?style=social)
+![GitHub forks](https://img.shields.io/github/forks/shgysk8zer0/std-js.svg?style=social)
+![GitHub stars](https://img.shields.io/github/stars/shgysk8zer0/std-js.svg?style=social)
+![Twitter Follow](https://img.shields.io/twitter/follow/shgysk8zer0.svg?style=social)
 
 ## A JavaScript library for making front-end development sane!
 
