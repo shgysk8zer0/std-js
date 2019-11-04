@@ -14,6 +14,24 @@ export function clone(thing) {
 	}
 }
 
+export function mediaQuery(query = {}) {
+	if (typeof matchMedia !== 'function') {
+		return false;
+	} else {
+		const queries = Object.entries(query).map(([k, v]) => `(${k}: ${v})`).join(' and ');
+		return matchMedia(queries).matches;
+	}
+}
+
+export function prefersReducedMotion() {
+	return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+export function prefersColorScheme() {
+	return typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches
+		? 'dark' : 'light';
+}
+
 export function reportError(err) {
 	if (err instanceof ErrorEvent) {
 		const url = new URL('Errors/Client/', document.documentElement.dataset.endpoint || 'https://api.kernvalley.us');

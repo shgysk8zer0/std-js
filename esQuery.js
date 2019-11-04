@@ -1,4 +1,4 @@
-import {read} from './functions.js';
+import {read, prefersReducedMotion} from './functions.js';
 
 const PREFIXES = [
 	'',
@@ -30,7 +30,7 @@ export default class esQuery extends Set {
 	}
 
 	get children() {
-		return new esQuery(this.toArray().reduce((items, item) => items.concat([...item.children]), []));
+		new esQuery(this.toArray().map(el => [...el.children]).flat());
 	}
 
 	get found() {
@@ -162,7 +162,7 @@ export default class esQuery extends Set {
 	}
 
 	async animate(keyframes, opts = 400) {
-		if ('animate' in Element.prototype) {
+		if (('animate' in Element.prototype) && ! prefersReducedMotion()) {
 			await this.map(node =>  node.animate(keyframes, opts).finished);
 			return this;
 		} else {
@@ -942,6 +942,10 @@ export default class esQuery extends Set {
 			}
 		});
 		return this;
+	}
+
+	async value(val) {
+		return this.each(el => el.value = val);
 	}
 
 	async data(props = {}) {
