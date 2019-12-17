@@ -32,6 +32,13 @@ export function prefersColorScheme() {
 		? 'dark' : 'light';
 }
 
+export function displayMode() {
+	const displays = ['browser', 'standalone', 'minimal-ui', 'fullscreen'];
+	return typeof matchMedia === 'function'
+		? displays.find(mode => matchMedia(`(display-mode: ${mode})`).matches)
+		: 'browser';
+}
+
 export function reportError(err) {
 	if (err instanceof ErrorEvent) {
 		const url = new URL('Errors/Client/', document.documentElement.dataset.endpoint || 'https://api.kernvalley.us');
