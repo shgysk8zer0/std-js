@@ -41,3 +41,9 @@ export const email = {
 	icon: new URL('img/adwaita-icons/actions/mail-send.svg', BASE),
 	label: 'Email',
 };
+
+export const sms = {
+	url: new URL('sms:?body'),
+	icon: new URL('img/octicons/comment-discussion.svg', BASE),
+	label: 'Text Message',
+};
