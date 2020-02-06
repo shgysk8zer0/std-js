@@ -5,7 +5,12 @@ import 'https://cdn.kernvalley.us/components/toast-message.js';
  * @return Promise
  */
 export default (...shares) => {
-	shares.forEach(share => share.url = new URL(share.url));
+	shares.forEach(share => {
+		if (typeof share.url === 'string') {
+			share.url = new URL(share.url);
+		}
+	});
+
 	if (! Navigator.prototype.hasOwnProperty('share')) {
 		Navigator.prototype.share = async ({
 			text  = null,
@@ -58,44 +63,84 @@ export default (...shares) => {
 				close.title     = 'Close dialog';
 
 				shares.forEach(share => {
-					const link = document.createElement('a');
 					const icon = new Image(size, size);
+					icon.src   = share.icon.toString();
 
-					if (share.url.searchParams.has('url')) {
-						share.url.searchParams.set('url', url);
-					} else if (share.url.searchParams.has('u')) {
-						share.url.searchParams.set('u', url);
+					if (share.url instanceof URL) {
+						const link = document.createElement('a');
+						if (share.url.searchParams.has('url')) {
+							share.url.searchParams.set('url', url);
+						} else if (share.url.searchParams.has('u')) {
+							share.url.searchParams.set('u', url);
+						}
+
+						if (share.url.searchParams.has('title')) {
+							share.url.searchParams.set('title', title);
+						} else if (share.url.searchParams.has('t')) {
+							share.url.searchParams.set('t', title);
+						} else if (share.url.searchParams.has('subject')) {
+							share.url.searchParams.set('subject', title);
+						} else if (share.url.searchParams.has('su')) {
+							share.url.searchParams.set('su', title);
+						}
+
+						if (share.url.searchParams.has('text')) {
+							share.url.searchParams.set('text', text);
+						} else if (share.url.searchParams.has('summary')) {
+							share.url.searchParams.set('summary', text);
+						} else if (share.url.searchParams.has('body')) {
+							share.url.searchParams.set('body', `${text}\n${url}`);
+						}
+
+						css(link, styles.link);
+
+						link.target = '_blank';
+						link.href   = share.url.toString();
+						icon.src    = share.icon.toString();
+						link.title  = share.label;
+						link.classList.add('inline-block');
+
+						link.append(icon, document.createElement('br'), share.label);
+						link.addEventListener('click', () => toast.close());
+						body.append(link);
+					} else if (typeof share.action === 'string') {
+						const container = document.createElement('span');
+						container.classList.add('share-element');
+						css(container, styles.link);
+						container.style.setProperty('cursor', 'pointer');
+
+						if (typeof url === 'string') {
+							container.dataset.url = url;
+						}
+						if (typeof text === 'string') {
+							container.dataset.text = text;
+						}
+						if (typeof title === 'string') {
+							container.dataset.title = title;
+						}
+
+						switch (share.action) {
+						case 'clipboard':
+							if ('clipboard' in navigator && navigator.clipboard.writeText instanceof Function) {
+								container.addEventListener('click', async ({target}) => {
+									const container = target.closest('.share-element');
+									await navigator.clipboard.writeText(`${container.dataset.title} | ${container.dataset.url}`);
+									await toast.close();
+								});
+							} else {
+								return;
+							}
+							break;
+
+						default: throw new Error(`Unhandled action: ${share.action}`);
+						}
+
+						container.append(icon, document.createElement('br'), share.label);
+						body.append(container);
+					} else {
+						console.info(share);
+						throw new Error('No url or action given');
 					}
-
-					if (share.url.searchParams.has('title')) {
-						share.url.searchParams.set('title', title);
-					} else if (share.url.searchParams.has('t')) {
-						share.url.searchParams.set('t', title);
-					} else if (share.url.searchParams.has('subject')) {
-						share.url.searchParams.set('subject', title);
-					} else if (share.url.searchParams.has('su')) {
-						share.url.searchParams.set('su', title);
-					}
-
-					if (share.url.searchParams.has('text')) {
-						share.url.searchParams.set('text', text);
-					} else if (share.url.searchParams.has('summary')) {
-						share.url.searchParams.set('summary', text);
-					} else if (share.url.searchParams.has('body')) {
-						share.url.searchParams.set('body', `${text}\n${url}`);
-					}
-
-					css(link, styles.link);
-
-					link.target = '_blank';
-					icon.src    = share.icon.toString();
-					link.href   = share.url.toString();
-					link.title  = share.label;
-					link.classList.add('inline-block');
-
-					link.append(icon, document.createElement('br'), share.label);
-					link.addEventListener('click', () => toast.close());
-					body.append(link);
 				});
 
 				css(header, styles.header);

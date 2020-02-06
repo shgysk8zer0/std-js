@@ -47,3 +47,10 @@ export const sms = {
 	icon: new URL('img/octicons/comment-discussion.svg', BASE),
 	label: 'Text Message',
 };
+
+export const clipboard = {
+	url: null,
+	action: 'clipboard',
+	icon: new URL('img/octicons/clippy.svg', BASE),
+	label: 'Copy',
+}
