@@ -53,4 +53,4 @@ export const clipboard = {
 	action: 'clipboard',
 	icon: new URL('img/octicons/clippy.svg', BASE),
 	label: 'Copy',
-}
+};
