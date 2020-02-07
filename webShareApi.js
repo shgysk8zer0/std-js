@@ -4,7 +4,7 @@ import 'https://cdn.kernvalley.us/components/toast-message.js';
  * @param share {url, icon, label)[, {}, [...]]
  * @return Promise
  */
-export default (...shares) => {
+export default async (...shares) => {
 	shares.forEach(share => {
 		if (typeof share.url === 'string') {
 			share.url = new URL(share.url);
@@ -12,20 +12,17 @@ export default (...shares) => {
 	});
 
 	if (! Navigator.prototype.hasOwnProperty('share')) {
-		Navigator.prototype.share = async ({
-			text  = null,
-			title = null,
-			url   = null,
-		} = {}) =>   {
+		await customElements.whenDefined('toast-message');
+		const HTMLToastMessageElement = customElements.get('toast-message');
 
-			if (text === null && title === null && url === null) {
+		Navigator.prototype.share = async function({text, title, url, files = [],} = {}) {
+			if (! this.canShare({text, title, url, files})) {
 				throw new TypeError('No known share data fields supplied. If using only new fields (other than title, text and url), you must feature-detect them first.');
 			} else if (shares.length === 0) {
 				throw new Error('No shares configured');
 			} else {
-				await customElements.whenDefined('toast-message');
-				const HTMLToastMessageElement = customElements.get('toast-message');
 				const toast = new HTMLToastMessageElement();
+				toast.backdrop = true;
 				const font   = 'Roboto, Helvetica, "Sans Seriff"';
 				const header = document.createElement('header');
 				const body   = document.createElement('div');
@@ -155,7 +152,12 @@ export default (...shares) => {
 				await toast.closed;
 				toast.remove();
 			}
+		};
+	}
 
+	if (! Navigator.prototype.hasOwnProperty('canShare')) {
+		Navigator.prototype.canShare = function({url, title, text, files = []}) {
+			return (Array.isArray(files) && files.length === 0) &&  (url !== undefined || text !== undefined || title !== undefined);
 		};
 	}
 };
