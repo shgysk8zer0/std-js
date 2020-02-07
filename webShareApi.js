@@ -22,6 +22,7 @@ export default async (...shares) => {
 				throw new Error('No shares configured');
 			} else {
 				const toast = new HTMLToastMessageElement();
+				toast.backdrop = true;
 				const font   = 'Roboto, Helvetica, "Sans Seriff"';
 				const header = document.createElement('header');
 				const body   = document.createElement('div');
