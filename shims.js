@@ -1,5 +1,19 @@
 import Notification from './Notification.js';
 
+if (! window.hasOwnProperty('CustomEvent')) {
+	window.CustomEvent = class CustomEvent {
+		constructor(event, {
+			bubbles = false,
+			cancelable = false,
+			detail = null
+		} = {}) {
+			const evt = document.createEvent('CustomEvent');
+			evt.initCustomEvent(event, bubbles, cancelable, detail);
+			return evt;
+		}
+	};
+}
+
 if (! window.hasOwnProperty('Notification')) {
 	window.Notification = Notification;
 }
