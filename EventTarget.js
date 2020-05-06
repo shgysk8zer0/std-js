@@ -3,23 +3,24 @@ let module = EventTarget;
 try {
 	new EventTarget();
 } catch (err) {
+	const storage = new WeakMap();
 	module = class EventTarget {
 		constructor() {
-			this._target = document.createElement('div');
+			storage.set(this, document.createElement('div'));
 		}
 
 		addEventListener(event, ...args) {
-			this._target.addEventListener(event, ...args);
+			storage.get(this).addEventListener(event, ...args);
 		}
 
 		dispatchEvent(event, ...args) {
-			this._target.dispatchEvent(event, ...args);
+			storage.get(this).dispatchEvent(event, ...args);
 		}
 
 		removeEventListener(event, ...args) {
-			this._target.removeEventListener(event, ...args);
+			storage.get(this).removeEventListener(event, ...args);
 		}
 	};
 }
-console.info(module);
+
 export default module;
