@@ -30,7 +30,7 @@ export default class esQuery extends Set {
 	}
 
 	get children() {
-		new esQuery(this.toArray().map(el => [...el.children]).flat());
+		return new esQuery(this.toArray().map(el => [...el.children]).flat());
 	}
 
 	get found() {

@@ -152,6 +152,8 @@ if (! HTMLElement.prototype.hasOwnProperty('contextMenu')){
 		get: function() {
 			if (this.hasAttribute('contextmenu')) {
 				return document.getElementById(this.getAttribute('contextmenu'));
+			} else {
+				return null;
 			}
 		}
 	});
