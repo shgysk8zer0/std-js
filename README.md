@@ -17,7 +17,7 @@
 ![Keybase BTC](https://img.shields.io/keybase/btc/shgysk8zer0.svg)
 - - -
 
-## A JavaScript library for making front-end development sane!
+## A JavaScript library for making front-end development sane
 
 ## Navigation
 - [Installing](#installing)
@@ -91,7 +91,7 @@ if (! ('HTMLDialogElement' in window)) {
         this.setAttribute('open', '');
       } else {
         this.removeAttribute('open');
-		this.dispatchEvent(new Event('close'));
+        this.dispatchEvent(new Event('close'));
       }
     }
   });
@@ -143,7 +143,7 @@ $(document).ready(async () => {
   // In this example, `found` would be a regular `Element`
   const found = await $('div').find(el => el.textContent.startsWith('Delete me'));
   if (found) {
-	  found.remove();
+    found.remove();
   }
 
   document.querySelector('.someClass').textContent = 'baz ';
