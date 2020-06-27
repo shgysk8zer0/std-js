@@ -1,7 +1,7 @@
 # std-js
 
 ![Node CI](https://github.com/shgysk8zer0/std-js/workflows/Node%20CI/badge.svg)
-![Super Linter](https://github.com/shgysk8zer0/std-js/workflows/Node%20CI/badge.svg)
+![Lint Code Base](https://github.com/shgysk8zer0/std-js/workflows/Lint%20Code%20Base/badge.svg)
 
 [![GitHub license](https://img.shields.io/github/license/shgysk8zer0/std-js.svg)](https://github.com/shgysk8zer0/std-js/blob/master/LICENSE)
 ![GitHub last commit](https://img.shields.io/github/last-commit/shgysk8zer0/std-js.svg)
