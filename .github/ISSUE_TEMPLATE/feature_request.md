@@ -2,8 +2,8 @@
 name: Feature request
 about: Suggest an idea for this project
 title: Request a feature
-labels: enhancemnt
-assignees: shgysk8zer0
+labels: enhancement
+assignees: ''
 ---
 
 **Is your feature request related to a problem? Please describe.**
