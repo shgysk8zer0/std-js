@@ -23,6 +23,8 @@
             "always"
         ],
         "no-console": 0,
+        "no-async-promise-executor": 0,
+        "no-prototype-builtins": 0,
         "async-await/space-after-async": 2,
         "async-await/space-after-await": 2
     },
