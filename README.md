@@ -1,21 +1,23 @@
 # std-js
 
-- - -
-[[![Build Status](https://travis-ci.com/shgysk8zer0/std-js.svg?branch=master)](https://travis-ci.com/shgysk8zer0/std-js)
+![Node CI](https://github.com/shgysk8zer0/std-js/workflows/Node%20CI/badge.svg)
+![Super Linter](https://github.com/shgysk8zer0/std-js/workflows/Node%20CI/badge.svg)
+
 [![GitHub license](https://img.shields.io/github/license/shgysk8zer0/std-js.svg)](https://github.com/shgysk8zer0/std-js/blob/master/LICENSE)
 ![GitHub last commit](https://img.shields.io/github/last-commit/shgysk8zer0/std-js.svg)
 ![GitHub release](https://img.shields.io/github/release/shgysk8zer0/std-js.svg)
-
-[![Donate using Liberapay](https://img.shields.io/liberapay/receives/shgysk8zer0.svg?logo=liberapay)](https://liberapay.com/shgysk8zer0/donate "Donate using Liberapay")
-![Keybase PGP](https://img.shields.io/keybase/pgp/shgysk8zer0.svg)
-![Keybase BTC](https://img.shields.io/keybase/btc/shgysk8zer0.svg)
 
 ![GitHub followers](https://img.shields.io/github/followers/shgysk8zer0.svg?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/shgysk8zer0/std-js.svg?style=social)
 ![GitHub stars](https://img.shields.io/github/stars/shgysk8zer0/std-js.svg?style=social)
 ![Twitter Follow](https://img.shields.io/twitter/follow/shgysk8zer0.svg?style=social)
 
-## A JavaScript library for making front-end development sane!
+[![Donate using Liberapay](https://img.shields.io/liberapay/receives/shgysk8zer0.svg?logo=liberapay)](https://liberapay.com/shgysk8zer0/donate "Donate using Liberapay")
+![Keybase PGP](https://img.shields.io/keybase/pgp/shgysk8zer0.svg)
+![Keybase BTC](https://img.shields.io/keybase/btc/shgysk8zer0.svg)
+- - -
+
+## A JavaScript library for making front-end development sane
 
 ## Navigation
 - [Installing](#installing)
@@ -89,7 +91,7 @@ if (! ('HTMLDialogElement' in window)) {
         this.setAttribute('open', '');
       } else {
         this.removeAttribute('open');
-		this.dispatchEvent(new Event('close'));
+        this.dispatchEvent(new Event('close'));
       }
     }
   });
@@ -141,7 +143,7 @@ $(document).ready(async () => {
   // In this example, `found` would be a regular `Element`
   const found = await $('div').find(el => el.textContent.startsWith('Delete me'));
   if (found) {
-	  found.remove();
+    found.remove();
   }
 
   document.querySelector('.someClass').textContent = 'baz ';
