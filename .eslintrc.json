@@ -6,9 +6,9 @@
     "extends": "eslint:recommended",
     "parserOptions": {
         "sourceType": "module",
-        "ecmaVersion": 2019
+        "ecmaVersion": 2018
     },
-    "plugins": ["async-await", "babel"],
+    "plugins": ["async-await"],
     "rules": {
         "indent": [
             2,
@@ -27,9 +27,5 @@
         "no-prototype-builtins": 0,
         "async-await/space-after-async": 2,
         "async-await/space-after-await": 2
-    },
-    "globals": {
-        "URLSearchParams": false,
-        "ga": false
     }
 }
