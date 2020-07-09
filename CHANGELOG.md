@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 <!-- markdownlint-disable -->
+## [v2.4.1] - 2020-07-09
+
+### Added
+- Single module as wrapper for `crypto.subtle.digest`
+- Shim for [`ParentNode.replaceChildren()`](https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/replaceChildren)
+
+### Changed
+- Update eslint config and do not use project-wide globals
+
+### Removed
+- Uninstall eslint-babel plugin
+
 ## [v2.4.0] - 2020-06-27
 
 ### Added
