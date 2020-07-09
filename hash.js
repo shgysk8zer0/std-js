@@ -24,7 +24,7 @@ export async function hash(data, algo = 'SHA-1') {
 		const hexCode = value.toString(16).toUpperCase();
 		const paddedHexCode = hexCode.padStart(2, '0');
 		return paddedHexCode;
-	}).join('');
+	}).join('').toLowerCase();
 }
 
 function safeAdd (x, y) {
