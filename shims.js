@@ -1,5 +1,29 @@
 import Notification from './Notification.js';
 
+if (! (Element.prototype.replaceChildren instanceof Function)) {
+	Element.prototype.replaceChildren = function(...items) {
+		[...this.children].forEach(el => el.remove());
+		this.append(...items);
+	};
+
+	Document.prototype.replaceChildren = function(...items) {
+		[...this.children].forEach(el => el.remove());
+		this.append(...items);
+	};
+
+	DocumentFragment.prototype.replaceChildren = function(...items) {
+		[...this.children].forEach(el => el.remove());
+		this.append(...items);
+	};
+
+	if ('ShadowRoot' in window) {
+		ShadowRoot.prototype.replaceChildren = function(...items) {
+			[...this.children].forEach(el => el.remove());
+			this.append(...items);
+		};
+	}
+}
+
 if (! window.hasOwnProperty('CustomEvent')) {
 	window.CustomEvent = class CustomEvent {
 		constructor(event, {

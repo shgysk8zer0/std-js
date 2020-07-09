@@ -1,8 +1,10 @@
 import '../shims.js';
 import '../deprefixer.js';
-import {loadHandler} from './funcs.js';
+import { loadHandler } from './funcs.js';
+import { $, ready } from '../functions.js';
 import kbdShortcuts from '../kbd_shortcuts.js';
-import {$, ready} from '../functions.js';
+
+document.documentElement.classList.toggle('no-dialog', document.createElement('dialog') instanceof HTMLUnknownElement);
 
 ready().then(async () => {
 	const $body = $('body');
