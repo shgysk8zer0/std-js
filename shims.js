@@ -1,5 +1,13 @@
 import Notification from './Notification.js';
 
+if (! (navigator.setAppBadge instanceof Function)) {
+	navigator.setAppBadge = () => Promise.reject('Not Supported');
+}
+
+if (! (navigator.clearAppBadge instanceof Function)) {
+	navigator.clearAppBadge = () => navigator.setAppBadge(0);
+}
+
 if (! (Element.prototype.replaceChildren instanceof Function)) {
 	Element.prototype.replaceChildren = function(...items) {
 		[...this.children].forEach(el => el.remove());
@@ -188,6 +196,7 @@ if (! HTMLLinkElement.prototype.hasOwnProperty('import')) {
 		link.import = null;
 		const url = new URL(link.href);
 		const resp = await fetch(url);
+
 		if (resp.ok) {
 			const parser = new DOMParser();
 			const content = await resp.text();
