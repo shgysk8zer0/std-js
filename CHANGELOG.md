@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 <!-- markdownlint-disable -->
+## [v2.4.2] - 2020-07-15
+
+### Added
+- `registerCustomElement(tag, classObject)` function
+- `getCustomElement(tag)` function
+- `createCustomElement(tag, ...args)` function
+- `navigator.setAppbadge()` shim (just a promise that rejects)
+- `navigator.clearAppBadge()` shim (calls `navigator.setAppBadge(0)`)
+
 ## [v2.4.1] - 2020-07-09
 
 ### Added
