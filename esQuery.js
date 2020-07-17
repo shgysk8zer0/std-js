@@ -929,15 +929,15 @@ export default class esQuery extends Set {
 		this.forEach(node => {
 			for (const [key, value] of Object.entries(attrs)) {
 				switch (typeof (value)) {
-				case 'string':
-				case 'number':
-					node.setAttribute(key, value);
-					break;
-				case 'boolean':
-					value ? node.setAttribute(key, '') : node.removeAttribute(key);
-					break;
-				default:
-					node.removeAttribute(key);
+					case 'string':
+					case 'number':
+						node.setAttribute(key, value);
+						break;
+					case 'boolean':
+						value ? node.setAttribute(key, '') : node.removeAttribute(key);
+						break;
+					default:
+						node.removeAttribute(key);
 				}
 			}
 		});

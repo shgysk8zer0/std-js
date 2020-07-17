@@ -172,17 +172,17 @@ function keybaseSearch(submit) {
 		let results = null;
 
 		switch(form.get('keybase[location]')) {
-		case 'usernames':
-			results = await KeyBase.searchUsers(...query);
-			break;
-		case 'twitter':
-			results = await KeyBase.searchTwitter(...query);
-			break;
-		case 'github':
-			results = await KeyBase.searchGithub(...query);
-			break;
-		default:
-			throw new Error(`Invalid keybase query: "${form.get('keybase[query]')}"`);
+			case 'usernames':
+				results = await KeyBase.searchUsers(...query);
+				break;
+			case 'twitter':
+				results = await KeyBase.searchTwitter(...query);
+				break;
+			case 'github':
+				results = await KeyBase.searchGithub(...query);
+				break;
+			default:
+				throw new Error(`Invalid keybase query: "${form.get('keybase[query]')}"`);
 		}
 		console.log(results);
 		const template = document.getElementById('keybase-user-template');
@@ -200,43 +200,43 @@ function keybaseSearch(submit) {
 			let entry = document.importNode(template.content, true);
 			$('[data-keybase-prop]', entry).each(node => {
 				switch(node.dataset.keybaseProp) {
-				case 'picture':
-					node.src = user.pictures.primary.url;
-					node.width = user.pictures.primary.width;
-					node.height = user.pictures.primary.height;
-					break;
-				case 'name':
-					node.textContent = user.profile.full_name;
-					break;
-				case 'location':
-					node.textContent = user.profile.location;
-					break;
-				case 'keybase-url':
-					node.href = `https://keybase.io/${user.basics.username_cased}`;
-					break;
-				case 'bio':
-					node.textContent = user.profile.bio;
-					break;
-				case 'proofs':
-					user.proofs_summary.all.forEach(proof => {
-						let item = document.createElement('li');
-						let link = document.createElement('a');
-						link.href = proof.proof_url;
-						link.textContent = `${proof.nametag} @ ${proof.proof_type}`;
-						link.target = '_blank';
-						item.appendChild(link);
-						node.appendChild(item);
-					});
-					break;
-				case 'keys':
-					user.public_keys.pgp_public_keys.forEach(key => {
-						let pre = document.createElement('pre');
-						pre.textContent = key;
-						node.appendChild(pre);
-					});
-					break;
-				default:
-					node.remove();
+					case 'picture':
+						node.src = user.pictures.primary.url;
+						node.width = user.pictures.primary.width;
+						node.height = user.pictures.primary.height;
+						break;
+					case 'name':
+						node.textContent = user.profile.full_name;
+						break;
+					case 'location':
+						node.textContent = user.profile.location;
+						break;
+					case 'keybase-url':
+						node.href = `https://keybase.io/${user.basics.username_cased}`;
+						break;
+					case 'bio':
+						node.textContent = user.profile.bio;
+						break;
+					case 'proofs':
+						user.proofs_summary.all.forEach(proof => {
+							let item = document.createElement('li');
+							let link = document.createElement('a');
+							link.href = proof.proof_url;
+							link.textContent = `${proof.nametag} @ ${proof.proof_type}`;
+							link.target = '_blank';
+							item.appendChild(link);
+							node.appendChild(item);
+						});
+						break;
+					case 'keys':
+						user.public_keys.pgp_public_keys.forEach(key => {
+							let pre = document.createElement('pre');
+							pre.textContent = key;
+							node.appendChild(pre);
+						});
+						break;
+					default:
+						node.remove();
 				}
 
 			});
