@@ -68,67 +68,67 @@ function toggleDetails() {
 export const events = {
 	attributes: function() {
 		switch(this.attributeName) {
-		case 'data-remove':
-			if (this.target.dataset.hasOwnProperty('remove')) {
-				this.target.addEventListener('click', handlers.remove);
-			} else {
-				this.target.removeEventListener('click', handlers.remove);
-			}
-			break;
-		case 'data-show-modal':
-			if (this.target.dataset.hasOwnProperty('showModal')) {
-				this.target.addEventListener('click', handlers.showModal);
-			} else {
-				this.target.removeEventListener('click', handlers.showModal);
-			}
-			break;
-		case 'data-show':
-			if (this.target.dataset.hasOwnProperty('show')) {
-				this.target.addEventListener('click', handlers.show);
-			} else{
-				this.target.removeEventListener('click', handlers.show);
-			}
-			break;
-		case 'data-close':
-			if (this.target.dataset.hasOwnProperty('close')) {
-				this.target.addEventListener('click', handlers.close);
-			} else {
-				this.target.removeEventListener('click', handlers.close);
-			}
-			break;
-		case 'data-toggle-hidden':
-			if (this.target.dataset.hasOwnProperty('toggleHidden')) {
-				this.target.addEventListener('click', handlers.toggleHidden);
-			} else {
-				this.target.removeEventListener('click', handlers.toggleHidden);
-			}
-			break;
-		case 'data-share':
-			if (this.target.dataset.hasOwnProperty('share')) {
-				this.target.addEventListener('click', handlers.share);
-			} else {
-				this.target.removeEventListener('click', handlers.share);
-			}
-			break;
-		case 'data-fullscreen':
-			if (this.target.dataset.hasOwnProperty('fullscreen')) {
-				this.target.addEventListener('click', handlers.fullscreen);
-			} else {
-				this.target.removeEventListener('click', handlers.fullscreen);
-			}
-			break;
-		case 'data-scroll-to':
-			if (this.target.dataset.hasOwnProperty('scrollTo')) {
-				this.target.addEventListener('click', handlers.scrollTo);
-			} else {
-				this.target.removeEventListener('click', handlers.scrollTo);
-			}
-			break;
-		case 'data-click':
-			clickHandler(this.target);
-			break;
-		default:
-			throw new Error(`Unhandled attribute change [${this.attributeName}]`);
+			case 'data-remove':
+				if (this.target.dataset.hasOwnProperty('remove')) {
+					this.target.addEventListener('click', handlers.remove);
+				} else {
+					this.target.removeEventListener('click', handlers.remove);
+				}
+				break;
+			case 'data-show-modal':
+				if (this.target.dataset.hasOwnProperty('showModal')) {
+					this.target.addEventListener('click', handlers.showModal);
+				} else {
+					this.target.removeEventListener('click', handlers.showModal);
+				}
+				break;
+			case 'data-show':
+				if (this.target.dataset.hasOwnProperty('show')) {
+					this.target.addEventListener('click', handlers.show);
+				} else{
+					this.target.removeEventListener('click', handlers.show);
+				}
+				break;
+			case 'data-close':
+				if (this.target.dataset.hasOwnProperty('close')) {
+					this.target.addEventListener('click', handlers.close);
+				} else {
+					this.target.removeEventListener('click', handlers.close);
+				}
+				break;
+			case 'data-toggle-hidden':
+				if (this.target.dataset.hasOwnProperty('toggleHidden')) {
+					this.target.addEventListener('click', handlers.toggleHidden);
+				} else {
+					this.target.removeEventListener('click', handlers.toggleHidden);
+				}
+				break;
+			case 'data-share':
+				if (this.target.dataset.hasOwnProperty('share')) {
+					this.target.addEventListener('click', handlers.share);
+				} else {
+					this.target.removeEventListener('click', handlers.share);
+				}
+				break;
+			case 'data-fullscreen':
+				if (this.target.dataset.hasOwnProperty('fullscreen')) {
+					this.target.addEventListener('click', handlers.fullscreen);
+				} else {
+					this.target.removeEventListener('click', handlers.fullscreen);
+				}
+				break;
+			case 'data-scroll-to':
+				if (this.target.dataset.hasOwnProperty('scrollTo')) {
+					this.target.addEventListener('click', handlers.scrollTo);
+				} else {
+					this.target.removeEventListener('click', handlers.scrollTo);
+				}
+				break;
+			case 'data-click':
+				clickHandler(this.target);
+				break;
+			default:
+				throw new Error(`Unhandled attribute change [${this.attributeName}]`);
 
 		}
 	},

@@ -173,13 +173,13 @@ export default class Calendar extends Date {
 		[month, year].forEach(input => {
 			input.addEventListener('change', change => {
 				switch(change.target) {
-				case month:
-					calendar.setMonth(parseInt(change.target.value));
-					break;
+					case month:
+						calendar.setMonth(parseInt(change.target.value));
+						break;
 
-				case year:
-					calendar.setFullYear(change.target.valueAsNumber);
-					break;
+					case year:
+						calendar.setFullYear(change.target.valueAsNumber);
+						break;
 				}
 				fillCalendar(calendar, cal, input);
 			});

@@ -117,19 +117,19 @@ export default async (...shares) => {
 						}
 
 						switch (share.action) {
-						case 'clipboard':
-							if ('clipboard' in navigator && navigator.clipboard.writeText instanceof Function) {
-								container.addEventListener('click', async ({target}) => {
-									const container = target.closest('.share-element');
-									await navigator.clipboard.writeText(`${container.dataset.title} | ${container.dataset.url}`);
-									await toast.close();
-								});
-							} else {
-								return;
-							}
-							break;
+							case 'clipboard':
+								if ('clipboard' in navigator && navigator.clipboard.writeText instanceof Function) {
+									container.addEventListener('click', async ({target}) => {
+										const container = target.closest('.share-element');
+										await navigator.clipboard.writeText(`${container.dataset.title} | ${container.dataset.url}`);
+										await toast.close();
+									});
+								} else {
+									return;
+								}
+								break;
 
-						default: throw new Error(`Unhandled action: ${share.action}`);
+							default: throw new Error(`Unhandled action: ${share.action}`);
 						}
 
 						container.append(icon, document.createElement('br'), share.label);
