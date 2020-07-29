@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Notification shim using `<html-notification>`, checking for false support (Chrome Android)
+
 ### Changed
 - Update `.editorconfig` to specifiy tab style and width
 
