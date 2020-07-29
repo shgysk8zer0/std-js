@@ -1,5 +1,3 @@
-import Notification from './Notification.js';
-
 if (! (navigator.setAppBadge instanceof Function)) {
 	navigator.setAppBadge = () => Promise.reject('Not Supported');
 }
@@ -44,10 +42,6 @@ if (! window.hasOwnProperty('CustomEvent')) {
 			return evt;
 		}
 	};
-}
-
-if (! window.hasOwnProperty('Notification')) {
-	window.Notification = Notification;
 }
 
 if (window.hasOwnProperty('Animation') && ! Animation.prototype.hasOwnProperty('finished')) {
