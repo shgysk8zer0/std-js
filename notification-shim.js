@@ -1,6 +1,6 @@
 import { HTMLNotificationElement } from 'https://cdn.kernvalley.us/components/notification/html-notification.js';
 
-function supportsNotification() {
+export function supportsNotification() {
 	try {
 		if ('Notification' in window) {
 			new Notification('');
