@@ -16,3 +16,11 @@ export function supportsNotification() {
 if (! supportsNotification()) {
 	window.Notification = HTMLNotificationElement;
 }
+
+export function notify(title, init = {}) {
+	if (Notification.permission === 'granted') {
+		return new Notification(title, init);
+	} else {
+		return new HTMLNotificationElement(title, init);
+	}
+}
