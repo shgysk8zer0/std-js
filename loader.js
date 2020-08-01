@@ -29,10 +29,11 @@ export async function loadScript(src, {
 	async = true,
 	defer = false,
 	noModule = false,
-	type = 'application/javascript',
+	type = 'text/javascript',
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
 	integrity = null,
+	nonce = null,
 	parent = document.head,
 } = {}) {
 	const script = document.createElement('script');
@@ -47,6 +48,10 @@ export async function loadScript(src, {
 		script.integrity = integrity;
 	}
 
+	if (typeof nonce === 'string') {
+		script.nonce = nonce;
+	}
+
 	await load(script, parent, 'src', src);
 }
 
@@ -59,6 +64,7 @@ export async function loadStylesheet(href, {
 	disabled = false,
 	importance = 'auto',
 	title = null,
+	nonce = null,
 	parent = document.head,
 } = {}) {
 	const link = document.createElement('link');
@@ -71,6 +77,10 @@ export async function loadStylesheet(href, {
 
 	if (typeof integrity === 'string') {
 		link.integrity = integrity;
+	}
+
+	if (typeof nonce === 'string') {
+		link.nonce = nonce;
 	}
 
 	if (typeof title === 'string') {
