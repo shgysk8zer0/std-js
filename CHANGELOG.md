@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `google-analytics.js`, exporting functions to import Google Analytics script
+
 ## [v2.4.4] - 2020-08-01
 
 ### Added
