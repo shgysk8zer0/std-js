@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `google-analytics.js`, exporting functions to import Google Analytics script
+- `debounce()` function in `functions.js`
+- `$.debounce()`
+
+### Changed
+- Mark several functions and methods as deprecated, for removal in v3.0.0
 
 ## [v2.4.4] - 2020-08-01
 

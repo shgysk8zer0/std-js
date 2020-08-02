@@ -67,6 +67,39 @@ export async function createCustomElement(tag, ...args) {
 	return new Pro(...args);
 }
 
+/**
+ * Control the execution rate of callbacks, i.e. for listeners
+ * https://davidwalsh.name/function-debounce
+ *
+ * @param  Callable callback    The callback
+ * @param  int      [ms]        Number of milliseconds, defaulting to 1/60th a second
+ * @param  bool     [immediate] Trigger function immediately instead of after wait ms
+ * @return function             Rate limited function
+ */
+export function debounce(func, wait = 17, immediate = false) {
+	let timeout;
+
+	return function(...args) {
+		const later = () => {
+			timeout = null;
+
+			if (! immediate) {
+				func.apply(this, args);
+			}
+		};
+
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+
+		if (immediate && ! timeout) {
+			func.apply(this, args);
+		}
+	};
+}
+
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export function reportError(err) {
 	if (err instanceof ErrorEvent) {
 		const url = new URL('Errors/Client/', document.documentElement.dataset.endpoint || 'https://api.kernvalley.us');
@@ -114,6 +147,10 @@ export async function loaded(...requires) {
 	await defined(...requires);
 }
 
+
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export async function importsLoaded() {
 	await $('link[rel~="import"]:not([async])').map(async link => {
 		if (link.import === null) {
@@ -125,6 +162,10 @@ export async function importsLoaded() {
 	});
 }
 
+
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export async function getImports() {
 	await importsLoaded();
 	const imports = await $('link[rel~="import"][name]').map(link => link.getAttribute('name'));
@@ -136,6 +177,10 @@ export async function getImports() {
 	}));
 }
 
+
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export async function importLink(name) {
 	await importsLoaded();
 	const link = document.querySelector(`link[rel~="import"][name="${name}"]`);
@@ -159,6 +204,7 @@ export async function waitUntil(target, event) {
 	});
 	await prom;
 }
+
 export async function pageVisible() {
 	await new Promise(resolve => {
 		if (document.visibilityState === 'visible') {
@@ -206,7 +252,7 @@ export function setIncrementor(obj, {
 	increment = 1,
 } = {}) {
 	const inc = (function* (n = 0) {
-		/*eslint no-constant-condition: "off" */
+		/* eslint no-constant-condition: "off" */
 		while (true) {
 			yield n;
 			n += increment;
@@ -219,6 +265,9 @@ export function setIncrementor(obj, {
 	});
 }
 
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export function selectElement(el) {
 	if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
 		el.select();
@@ -237,6 +286,10 @@ export function selectElement(el) {
 	}
 }
 
+
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export async function imgur(url, {
 	sizes = ['100vw'],
 	alt = '',
@@ -323,6 +376,9 @@ export function chunkText(string, length) {
 	return chunks;
 }
 
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export function query(selector, node = document) {
 	let results = Array.from(node.querySelectorAll(selector));
 	if (node.matches(selector)) {
@@ -331,10 +387,16 @@ export function query(selector, node = document) {
 	return results;
 }
 
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export function isOnline() {
 	return navigator.onLine === true;
 }
 
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export async function notify(title, {
 	body = '',
 	icon = '',
@@ -414,10 +476,16 @@ export async function notify(title, {
 	});
 }
 
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export function isInternalLink(link) {
 	return link.origin === location.origin;
 }
 
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export async function parseResponse(resp) {
 	if (!resp.headers.has('Content-Type')) {
 		throw new Error(`No Content-Type header in request to "${resp.url}"`);
@@ -441,7 +509,7 @@ export async function parseResponse(resp) {
 }
 
 export async function getLocation(options = {}) {
-	/*https://developer.mozilla.org/en-US/docs/Web/API/Geolocation.getCurrentPosition*/
+	/* https://developer.mozilla.org/en-US/docs/Web/API/Geolocation.getCurrentPosition */
 	return new Promise((resolve, reject) => {
 		if (!('geolocation' in navigator)) {
 			reject('Your browser does not support GeoLocation');
@@ -450,6 +518,9 @@ export async function getLocation(options = {}) {
 	});
 }
 
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export async function registerServiceWorker(path) {
 	return new Promise(async (resolve, reject) => {
 		try {
@@ -477,6 +548,9 @@ export async function registerServiceWorker(path) {
 	});
 }
 
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export async function marquee({
 	parent,
 	delay = 200,
