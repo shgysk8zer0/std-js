@@ -1,4 +1,4 @@
-import { read, prefersReducedMotion } from './functions.js';
+import { read, debounce, prefersReducedMotion } from './functions.js';
 
 const PREFIXES = [
 	'',
@@ -133,6 +133,9 @@ export default class esQuery extends Set {
 		return this.every(el => el.matches(selector));
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async import(selector = 'body > *') {
 		const imports = this.toArray().filter(node => node.tagName === 'LINK'
 			&& node.relList.contains('import'));
@@ -197,6 +200,9 @@ export default class esQuery extends Set {
 		return this;
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async animateFilter({
 		duration = 400,
 		delay = 0,
@@ -222,6 +228,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterDropShadow({
 		duration = 400,
 		delay = 0,
@@ -247,6 +256,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterGrayscale({
 		duration = 400,
 		delay = 0,
@@ -271,6 +283,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterBlur({
 		duration = 400,
 		delay = 0,
@@ -295,6 +310,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterInvert({
 		duration = 400,
 		delay = 0,
@@ -319,6 +337,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterHueRotate({
 		duration = 400,
 		delay = 0,
@@ -343,6 +364,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterBrightness({
 		duration = 400,
 		delay = 0,
@@ -367,6 +391,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterContrast({
 		duration = 400,
 		delay = 0,
@@ -391,6 +418,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterSaturate({
 		duration = 400,
 		delay = 0,
@@ -415,6 +445,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterOpacity({
 		duration = 400,
 		delay = 0,
@@ -439,6 +472,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterSepia({
 		duration = 400,
 		delay = 0,
@@ -767,6 +803,9 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async loadHTML(href) {
 		const url = new URL(href, location.origin);
 		const resp = await fetch(url);
@@ -925,42 +964,8 @@ export default class esQuery extends Set {
 		return this.each(el => el.toggleAttribute(...args));
 	}
 
-	async attr(attrs = {}) {
-		this.forEach(node => {
-			for (const [key, value] of Object.entries(attrs)) {
-				switch (typeof (value)) {
-					case 'string':
-					case 'number':
-						node.setAttribute(key, value);
-						break;
-					case 'boolean':
-						value ? node.setAttribute(key, '') : node.removeAttribute(key);
-						break;
-					default:
-						node.removeAttribute(key);
-				}
-			}
-		});
-		return this;
-	}
-
 	async value(val) {
 		return this.each(el => el.value = val);
-	}
-
-	async data(props = {}) {
-		this.forEach(node => {
-			for (const [key, value] of Object.entries(props)) {
-				if (value === false) {
-					delete node.dataset[key];
-				} else if (value === true || value === null) {
-					node.dataset[key] = '';
-				} else {
-					node.dataset[key] = typeof (value) === 'string' ? value : JSON.stringify(value);
-				}
-			}
-		});
-		return this;
 	}
 
 	async pause() {
@@ -995,6 +1000,10 @@ export default class esQuery extends Set {
 
 	async once(event, callback) {
 		return this.on(event, callback, { once: true });
+	}
+
+	async debounce(event, callback, wait = 17, immediate = false) {
+		return this.on(event, debounce(callback, wait, immediate));
 	}
 
 	async ready(callback, ...args) {
@@ -1166,10 +1175,6 @@ export default class esQuery extends Set {
 		return this.on('hashchange', callback, ...args);
 	}
 
-	/*visibilitychange(callback) {
-		return this.on('visibilitychange', callback);
-	}*/
-
 	async popstate(callback, ...args) {
 		return this.on('popstate', callback, ...args);
 	}
@@ -1204,11 +1209,45 @@ export default class esQuery extends Set {
 		return this;
 	}
 
+	async attr(attrs = {}) {
+		this.forEach(node => {
+			for (const [key, value] of Object.entries(attrs)) {
+				switch (typeof (value)) {
+					case 'string':
+					case 'number':
+						node.setAttribute(key, value);
+						break;
+					case 'boolean':
+						value ? node.setAttribute(key, '') : node.removeAttribute(key);
+						break;
+					default:
+						node.removeAttribute(key);
+				}
+			}
+		});
+		return this;
+	}
+
 	async css(props = {}) {
 		this.forEach(node => {
 			Object.entries(props).forEach(([prop, value]) => {
 				node.style.setProperty(prop, value);
 			});
+		});
+		return this;
+	}
+
+	async data(props = {}) {
+		this.forEach(node => {
+			for (const [key, value] of Object.entries(props)) {
+				if (value === false) {
+					delete node.dataset[key];
+				} else if (value === true || value === null) {
+					node.dataset[key] = '';
+				} else {
+					node.dataset[key] = typeof (value) === 'string' ? value : JSON.stringify(value);
+				}
+			}
 		});
 		return this;
 	}
