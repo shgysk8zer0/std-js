@@ -30,6 +30,24 @@ if (! (Element.prototype.replaceChildren instanceof Function)) {
 	}
 }
 
+if (! (Array.from instanceof Function)) {
+	Array.from = function(args, mapFn, thisArg) {
+		if (mapFn instanceof Function) {
+			return typeof thisArg === 'undefined'
+				? Array.prototype.slice.call(args).map(mapFn)
+				: Array.prototype.slice.call(args).map(mapFn.bind(thisArg));
+		} else {
+			return Array.prototype.slice.call(args);
+		}
+	};
+}
+
+if (! (Array.of instanceof Function)) {
+	Array.of = function() {
+		return Array.fromx(arguments);
+	};
+}
+
 if (! (Object.entries instanceof Function)) {
 	Object.entries = function(obj) {
 		return Object.keys(obj).map(key => [key, obj[key]]);
