@@ -30,6 +30,81 @@ if (! (Element.prototype.replaceChildren instanceof Function)) {
 	}
 }
 
+if (! (Array.from instanceof Function)) {
+	Array.from = function(args, mapFn, thisArg) {
+		if (mapFn instanceof Function) {
+			return typeof thisArg === 'undefined'
+				? Array.prototype.slice.call(args).map(mapFn)
+				: Array.prototype.slice.call(args).map(mapFn.bind(thisArg));
+		} else {
+			return Array.prototype.slice.call(args);
+		}
+	};
+}
+
+if (! (Array.of instanceof Function)) {
+	Array.of = function() {
+		return Array.fromx(arguments);
+	};
+}
+
+if (! (Object.entries instanceof Function)) {
+	Object.entries = function(obj) {
+		return Object.keys(obj).map(key => [key, obj[key]]);
+	};
+}
+
+if (! (Object.fromEntries instanceof Function)) {
+	Object.fromEntries = function(arr) {
+		if (Array.isArray(arr)) {
+			return arr.reduce((obj, [key, val]) => {
+				obj[key] = val;
+				return obj;
+			}, {});
+		} else {
+			return Object.fromEntries(Array.from(arr));
+		}
+	};
+}
+
+if (! HTMLImageElement.prototype.hasOwnProperty('complete')) {
+	/**
+	 * Note: This shim cannot detect if an image has an error while loading
+	 * and will return false on an invalid URL, for example. It also does not
+	 * work for 0-sized images, if such a thing is possible.
+	 */
+	Object.defineProperty(HTMLImageElement.prototype, 'complete', {
+		get: function() {
+			return this.src === '' || this.naturalHeight > 0;
+		}
+	});
+}
+
+if(! (HTMLImageElement.prototype.decode instanceof Function)) {
+	HTMLImageElement.prototype.decode = function () {
+		if (this.complete) {
+			return Promise.resolve();
+		} else {
+			return new Promise((resolve, reject) => {
+				const load = () => {
+					this.removeEventListener('error', error);
+					this.removeEventListener('load', load);
+					resolve();
+				};
+
+				const error = (err) => {
+					this.removeEventListener('error', error);
+					this.removeEventListener('load', load);
+					reject(err);
+				};
+
+				this.addEventListener('load', load);
+				this.addEventListener('error', error);
+			});
+		}
+	};
+}
+
 if (! window.hasOwnProperty('CustomEvent')) {
 	window.CustomEvent = class CustomEvent {
 		constructor(event, {
@@ -51,8 +126,8 @@ if (window.hasOwnProperty('Animation') && ! Animation.prototype.hasOwnProperty('
 				if (this.playState === 'finished') {
 					resolve(this);
 				} else {
-					this.addEventListener('finish', () => resolve(this));
-					this.addEventListener('error', event => reject(event));
+					this.addEventListener('finish', () => resolve(this), { once: true });
+					this.addEventListener('error', event => reject(event), { once: true });
 				}
 			});
 		}
@@ -66,21 +141,12 @@ if (window.hasOwnProperty('Animation') && ! Animation.prototype.hasOwnProperty('
 				if (! this.pending) {
 					resolve(this);
 				} else {
-					this.addEventListener('ready', () => resolve(this));
-					this.addEventListener('error', event => reject(event));
+					this.addEventListener('ready', () => resolve(this), { once: true });
+					this.addEventListener('error', event => reject(event), { once: true });
 				}
 			});
 		}
 	});
-}
-
-if (! Object.hasOwnProperty('fromEntries')) {
-	Object.fromEntries = function(iterable) {
-		return [...iterable].reduce((obj, [key, value]) => {
-			obj[key] = value;
-			return obj;
-		}, {});
-	};
 }
 
 if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
@@ -113,10 +179,17 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 			document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
 		}
 	}, {passive: true});
+
+	/**
+	 * @TODO Only set this for `HTMLUnknownElement`
+	 */
 	HTMLElement.prototype.show = function() {
 		this.open = true;
 	};
 
+	/**
+	 * @TODO Only set this for `HTMLUnknownElement`
+	 */
 	HTMLElement.prototype.close = function(returnValue = null) {
 		this.open = false;
 		if (this.tagName === 'DIALOG') {
@@ -130,6 +203,9 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 		}
 	};
 
+	/**
+	 * @TODO Only set this for `HTMLUnknownElement`
+	 */
 	Object.defineProperty(HTMLElement.prototype, 'open', {
 		set: function(open) {
 			if (this.tagName === 'DETAILS') {
@@ -151,7 +227,11 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 		}
 	});
 }
+
 if (! document.createElement('dialog').hasOwnProperty('showModal')) {
+	/**
+	 * @TODO Only set this for `HTMLUnknownElement`
+	 */
 	HTMLElement.prototype.showModal = function() {
 		this.open = true;
 		this.classList.add('modal');
@@ -185,6 +265,9 @@ if (! HTMLElement.prototype.hasOwnProperty('contextMenu')){
 	});
 }
 
+/**
+ * @deprecated [to be removed in 3.0.0]
+ */
 if (! HTMLLinkElement.prototype.hasOwnProperty('import')) {
 	[...document.querySelectorAll('link[rel~="import"]')].forEach(async link => {
 		link.import = null;
