@@ -169,8 +169,12 @@ export async function loadImage(src, {
 	 * `lazy` would make the image not start to load until appended.
 	 * For this reason, we cannot wait for the `load` event because it will never occur
 	 */
-	if (loading === 'lazy') {
+	if (loading === 'lazy' || img.complete === true) {
 		img.src = src;
+		return img;
+	} else if (img.decode instanceof Function) {
+		img.src = src;
+		await img.decode();
 		return img;
 	} else {
 		return new Promise((resolve, reject) => {

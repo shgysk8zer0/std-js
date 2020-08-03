@@ -30,6 +30,44 @@ if (! (Element.prototype.replaceChildren instanceof Function)) {
 	}
 }
 
+if (! HTMLImageElement.prototype.hasOwnProperty('complete')) {
+	/**
+	 * Note: This shim cannot detect if an image has an error while loading
+	 * and will return false on an invalid URL, for example. It also does not
+	 * work for 0-sized images, if such a thing is possible.
+	 */
+	Object.defineProperty(HTMLImageElement.prototype, 'complete', {
+		get: function() {
+			return this.src === '' || this.naturalHeight > 0;
+		}
+	});
+}
+
+if(! (HTMLImageElement.prototype.decode instanceof Function)) {
+	HTMLImageElement.prototype.decode = function () {
+		if (this.complete) {
+			return Promise.resolve();
+		} else {
+			return new Promise((resolve, reject) => {
+				const load = () => {
+					this.removeEventListener('error', error);
+					this.removeEventListener('load', load);
+					resolve();
+				};
+
+				const error = (err) => {
+					this.removeEventListener('error', error);
+					this.removeEventListener('load', load);
+					reject(err);
+				};
+
+				this.addEventListener('load', load);
+				this.addEventListener('error', error);
+			});
+		}
+	};
+}
+
 if (! window.hasOwnProperty('CustomEvent')) {
 	window.CustomEvent = class CustomEvent {
 		constructor(event, {
