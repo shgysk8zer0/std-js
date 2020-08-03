@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `$.debounce()`
 - `loadImage()` function to load images after they have been fetched
 - Polyfill for `img.complete` and `img.decode()`
+- Polyfill for `Object.entries()`
 
 ### Changed
 - Mark several functions and methods as deprecated, for removal in v3.0.0

@@ -30,6 +30,25 @@ if (! (Element.prototype.replaceChildren instanceof Function)) {
 	}
 }
 
+if (! (Object.entries instanceof Function)) {
+	Object.entries = function(obj) {
+		return Object.keys(obj).map(key => [key, obj[key]]);
+	};
+}
+
+if (! (Object.fromEntries instanceof Function)) {
+	Object.fromEntries = function(arr) {
+		if (Array.isArray(arr)) {
+			return arr.reduce((obj, [key, val]) => {
+				obj[key] = val;
+				return obj;
+			}, {});
+		} else {
+			return Object.fromEntries(Array.from(arr));
+		}
+	};
+}
+
 if (! HTMLImageElement.prototype.hasOwnProperty('complete')) {
 	/**
 	 * Note: This shim cannot detect if an image has an error while loading
@@ -89,8 +108,8 @@ if (window.hasOwnProperty('Animation') && ! Animation.prototype.hasOwnProperty('
 				if (this.playState === 'finished') {
 					resolve(this);
 				} else {
-					this.addEventListener('finish', () => resolve(this));
-					this.addEventListener('error', event => reject(event));
+					this.addEventListener('finish', () => resolve(this), { once: true });
+					this.addEventListener('error', event => reject(event), { once: true });
 				}
 			});
 		}
@@ -104,21 +123,12 @@ if (window.hasOwnProperty('Animation') && ! Animation.prototype.hasOwnProperty('
 				if (! this.pending) {
 					resolve(this);
 				} else {
-					this.addEventListener('ready', () => resolve(this));
-					this.addEventListener('error', event => reject(event));
+					this.addEventListener('ready', () => resolve(this), { once: true });
+					this.addEventListener('error', event => reject(event), { once: true });
 				}
 			});
 		}
 	});
-}
-
-if (! Object.hasOwnProperty('fromEntries')) {
-	Object.fromEntries = function(iterable) {
-		return [...iterable].reduce((obj, [key, value]) => {
-			obj[key] = value;
-			return obj;
-		}, {});
-	};
 }
 
 if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
@@ -151,10 +161,17 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 			document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
 		}
 	}, {passive: true});
+
+	/**
+	 * @TODO Only set this for `HTMLUnknownElement`
+	 */
 	HTMLElement.prototype.show = function() {
 		this.open = true;
 	};
 
+	/**
+	 * @TODO Only set this for `HTMLUnknownElement`
+	 */
 	HTMLElement.prototype.close = function(returnValue = null) {
 		this.open = false;
 		if (this.tagName === 'DIALOG') {
@@ -168,6 +185,9 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 		}
 	};
 
+	/**
+	 * @TODO Only set this for `HTMLUnknownElement`
+	 */
 	Object.defineProperty(HTMLElement.prototype, 'open', {
 		set: function(open) {
 			if (this.tagName === 'DETAILS') {
@@ -189,7 +209,11 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 		}
 	});
 }
+
 if (! document.createElement('dialog').hasOwnProperty('showModal')) {
+	/**
+	 * @TODO Only set this for `HTMLUnknownElement`
+	 */
 	HTMLElement.prototype.showModal = function() {
 		this.open = true;
 		this.classList.add('modal');
@@ -223,6 +247,9 @@ if (! HTMLElement.prototype.hasOwnProperty('contextMenu')){
 	});
 }
 
+/**
+ * @deprecated [to be removed in 3.0.0]
+ */
 if (! HTMLLinkElement.prototype.hasOwnProperty('import')) {
 	[...document.querySelectorAll('link[rel~="import"]')].forEach(async link => {
 		link.import = null;
