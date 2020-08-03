@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `google-analytics.js`, exporting functions to import Google Analytics script
 - `debounce()` function in `functions.js`
 - `$.debounce()`
+- `loadImage()` function to load images after they have been fetched
 
 ### Changed
 - Mark several functions and methods as deprecated, for removal in v3.0.0
