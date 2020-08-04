@@ -147,7 +147,7 @@ export async function loadImage(src, {
 		img.classList.add(...classes);
 	}
 
-	if (typeof srcset === 'object' && 'prototype' in srcset) {
+	if (typeof srcset === 'object' && srcset !== null) {
 		img.srcset = Object.entries(srcset).map(([size, src]) => `${src} ${size}`).join(', ');
 	} else if (Array.isArray(srcset) && srcset.length !== 0) {
 		img.srcset = srcset.join(', ');
