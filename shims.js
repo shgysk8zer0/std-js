@@ -315,5 +315,5 @@ if ('Promise' in window && ! (Promise.allSettled instanceof Function)) {
 				});
 			});
 		}));
-	}
+	};
 }
