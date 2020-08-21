@@ -17,6 +17,10 @@ ready().then(async () => {
 		}));
 	}
 
+	if (! ('permissions' in navigator)) {
+		loads.push('/permissions.js', { type: 'module' });
+	}
+
 	await Promise.allSettled(loads);
 
 	const $body = $('body');

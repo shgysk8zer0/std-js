@@ -42,7 +42,9 @@
 						this.style.setProperty('z-index', 999);
 						const shadow = this.attachShadow({mode: 'closed'});
 						const span = document.createElement('span');
-						span.part.add('content');
+						if ('part' in span) {
+							span.part.add('content');
+						}
 						span.textContent = text;
 						shadow.append(span);
 					}
