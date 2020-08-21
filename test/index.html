@@ -20,35 +20,6 @@
 		<link rel="import" name="address-template" href="components/address-template.html" async="" />
 		<script type="module" src="./index.js" async=""></script>
 		<script type="application/javascript" src="./index.min.js" async="" nomodule=""></script>
-		<script type="module">
-			import {$, read} from '../functions.js';
-			window.$ = $;
-			window.read = read;
-		</script>
-		<script>
-			import('../functions.js').then(async ({ registerCustomElement, createCustomElement }) =>{
-				createCustomElement('my-el', 'Testing').then(el => document.body.append(el));
-
-				registerCustomElement('my-el', class HTMLMyElement extends HTMLElement {
-					constructor(text = '') {
-						super();
-						this.style.setProperty('display', 'block');
-						this.style.setProperty('background', 'inherit');
-						this.style.setProperty('position', 'fixed');
-						this.style.setProperty('left', '3em');
-						this.style.setProperty('right', '3em');
-						this.style.setProperty('top', '3em');
-						this.style.setProperty('bottom', '3em');
-						this.style.setProperty('z-index', 999);
-						const shadow = this.attachShadow({mode: 'closed'});
-						const span = document.createElement('span');
-						span.part.add('content');
-						span.textContent = text;
-						shadow.append(span);
-					}
-				});
-			});
-		</script>
 		<link rel="icon" type="image/svg+xml" href="./javascript.svg" sizes="any"/>
 		<link rel="stylesheet" type="text/css" href="./index.css" />
 	</head>

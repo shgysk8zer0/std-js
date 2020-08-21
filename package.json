@@ -47,13 +47,16 @@
     "npm": ">=3.5"
   },
   "scripts": {
-    "test": "eslint .",
+    "test": "npm run lint:js && npm run lint:html",
     "fix": "eslint . --fix",
+    "lint:js": "eslint .",
+    "lint:html": "htmlhint \"**/*.html\"",
     "start": "http-server ${npm_package_config_serve_path} -p ${npm_package_config_serve_port} -a ${npm_package_config_serve_domain} -o"
   },
   "devDependencies": {
     "eslint": "^7.3.1",
     "eslint-plugin-async-await": "0.0.0",
+    "htmlhint": "^0.14.1",
     "http-server": "^0.12.3"
   },
   "dependencies": {}

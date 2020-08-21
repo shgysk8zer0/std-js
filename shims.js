@@ -300,3 +300,20 @@ if (! ('connection' in navigator)) {
 } else if (! ('type' in navigator.connection)) {
 	navigator.connection.type = 'unknown';
 }
+
+if ('Promise' in window && ! (Promise.allSettled instanceof Function)) {
+	Promise.allSettled = function(promises) {
+		return Promise.all(Array.from(promises).map(function(call) {
+			return new Promise(function(resolve) {
+				if (! (call instanceof Promise)) {
+					call = Promise.resolve(call);
+				}
+				call.then(function(value) {
+					resolve({ status: 'fulfilled', value: value });
+				}).catch(function(reason) {
+					resolve({ status: 'rejected', reason: reason });
+				});
+			});
+		}));
+	};
+}
