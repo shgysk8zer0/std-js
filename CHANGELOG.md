@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.5.1] - 2020-08-21
+
+### Added
+- `Promise.allSettled()` shim
+- Polyfill for `navigator.permissions.query()` and `navigator.permissions.request()`
+- `google-analytics.js`, exporting functions to import Google Analytics script
+
 ## [v2.5.0] 2020-08-03
 
 ### Added
-- `google-analytics.js`, exporting functions to import Google Analytics script
 - `debounce()` function in `functions.js`
 - `$.debounce()`
 - `loadImage()` function to load images after they have been fetched
