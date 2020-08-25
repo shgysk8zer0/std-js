@@ -6,6 +6,10 @@ if (! (navigator.clearAppBadge instanceof Function)) {
 	navigator.clearAppBadge = () => navigator.setAppBadge(0);
 }
 
+if (! (navigator.getInstalledRelatedApps instanceof Function)) {
+	navigator.getInstalledRelatedApps = async () => [];
+}
+
 if (! (Element.prototype.replaceChildren instanceof Function)) {
 	Element.prototype.replaceChildren = function(...items) {
 		[...this.children].forEach(el => el.remove());
