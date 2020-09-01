@@ -305,6 +305,18 @@ if (! ('connection' in navigator)) {
 	navigator.connection.type = 'unknown';
 }
 
+if ('Promise' in window && ! (Promise.prototype.finally instanceof Function)) {
+	Promise.prototype.finally = function(callback) {
+		return this.then(async val => {
+			await callback();
+			return val;
+		}, async val => {
+			await callback();
+			return val;
+		});
+	};
+}
+
 if ('Promise' in window && ! (Promise.allSettled instanceof Function)) {
 	Promise.allSettled = function(promises) {
 		return Promise.all(Array.from(promises).map(function(call) {
