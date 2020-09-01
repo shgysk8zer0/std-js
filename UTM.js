@@ -95,7 +95,7 @@ export default class UTM extends URL {
 	}
 
 	get valid() {
-		return ['utm_source', 'utm_medium', 'utm_campaign'].every(param => this.searchParams.has(param));
+		return this.searchParams.has('utm_source');
 	}
 
 	clear() {
