@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `UTM` generator and validator class, extending `URL`
 - `Promise.prototype.finally` shim
 - `preload()` function, creating a `<link rel="preload">`
+- Add `parseHTML()` function, which parses text and returns a document fragment
 
 ## [v2.5.1] - 2020-08-21
 
