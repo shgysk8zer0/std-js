@@ -54,7 +54,8 @@ export async function preload(href, {
 		link.media = media;
 	}
 
-	await load(link, document.head, 'href', href);
+	link.href = href;
+	document.head.append(link);
 }
 
 export async function loadScript(src, {
