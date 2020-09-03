@@ -25,6 +25,38 @@ export async function loaded(target) {
 	});
 }
 
+export async function preload(href, {
+	as = 'fetch',
+	type = null,
+	crossOrigin = 'anonymous',
+	referrerPolicy = 'no-referrer',
+	importance = 'auto',
+	media = null,
+	integrity = null,
+} = {}) {
+	const link = document.createElement('link');
+
+	link.relList.add('preload');
+	link.as = as;
+	link.crossOrigin = crossOrigin;
+	link.referrerPolicy = referrerPolicy;
+	link.importance = importance;
+
+	if (typeof type === 'string') {
+		link.type = type;
+	}
+
+	if (typeof integrity === 'string') {
+		link.integrity = integrity;
+	}
+
+	if (typeof media === 'string') {
+		link.media = media;
+	}
+
+	await load(link, document.head, 'href', href);
+}
+
 export async function loadScript(src, {
 	async = true,
 	defer = false,
