@@ -67,6 +67,14 @@ export async function createCustomElement(tag, ...args) {
 	return new Pro(...args);
 }
 
+export function parseHTML(text, type = 'text/html') {
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(text, type);
+	const frag = document.createDocumentFragment();
+	[...doc.body.childNodes].forEach(el => frag.append(el));
+	return frag;
+}
+
 /**
  * Control the execution rate of callbacks, i.e. for listeners
  * https://davidwalsh.name/function-debounce
