@@ -1,8 +1,13 @@
 export async function load(target, parent, srcAttr, value) {
-	const promise = loaded(target);
-	target[srcAttr] = value;
-	parent.append(target);
-	await promise;
+	if (parent instanceof HTMLElement) {
+		const promise = loaded(target);
+		target[srcAttr] = value;
+		parent.append(target);
+		return await promise;
+	} else {
+		target[srcAttr] = parent;
+		return target;
+	}
 }
 
 export async function loaded(target) {
@@ -10,7 +15,7 @@ export async function loaded(target) {
 		function load() {
 			this.removeEventListener('load', load);
 			this.removeEventListener('error', error);
-			resolve();
+			resolve(target);
 		}
 
 		function error(err) {
@@ -25,6 +30,81 @@ export async function loaded(target) {
 	});
 }
 
+export async function loadLink(href = null, {
+	rel = [],
+	type = null,
+	as = null,
+	crossOrigin = 'anonymous',
+	referrerPolicy = 'no-referrer',
+	importance = 'auto',
+	integrity = null,
+	nonce = null,
+	media = 'all',
+	disabled = false,
+	title = null,
+	sizes = [],
+}) {
+	const link = document.createElement('link');
+
+	if (Array.isArray(rel)) {
+		link.relList.add(...rel);
+	} else if (typeof rel === 'string') {
+		link.relList.add(rel);
+	}
+
+	if (typeof type === 'string') {
+		link.type = type;
+	}
+
+	if (typeof as === 'string') {
+		link.as = as;
+	}
+
+	if (typeof crossOrigin === 'string') {
+		link.crossOrigin = crossOrigin;
+	}
+
+	if (typeof referrerPolicy === 'string') {
+		link.referrerPolicy = referrerPolicy;
+	}
+
+	if (typeof importance === 'string') {
+		link.importance = importance;
+	}
+
+	if (typeof integrity === 'string') {
+		link.integrity = integrity;
+	}
+
+	if (typeof nonce === 'string') {
+		link.nonce = nonce;
+	}
+
+	if (typeof media === 'string') {
+		link.media = media;
+	}
+
+	if (typeof href === 'string') {
+		link.href = href;
+	}
+
+	if (disabled) {
+		link.disabled = true;
+	}
+
+	if (typeof title === 'string') {
+		link.title = title;
+	}
+
+	if (Array.isArray(sizes) && sizes.length !== 0) {
+		link.sizes.add(...sizes);
+	} else if (typeof sizes === 'string') {
+		link.sizes.add(sizes);
+	}
+
+	return link;
+}
+
 export async function preload(href, {
 	as = 'fetch',
 	type = null,
@@ -34,28 +114,39 @@ export async function preload(href, {
 	media = null,
 	integrity = null,
 } = {}) {
+	const link = await loadLink(href, {
+		rel: ['preload'], as, type, crossOrigin, referrerPolicy,
+		importance, media, integrity,
+	});
+
+	document.head.append(link);
+	return link;
+}
+
+export async function preconnect(href, {
+	crossOrigin = 'anonymous',
+	referrerPolicy = 'no-referrer',
+} = {}) {
+	const link = await loadLink(href, {rel: ['preconnect'], crossOrigin, referrerPolicy });
+	document.head.append(link);
+	return link;
+}
+
+export async function dnsPrefetch(href, {
+	crossOrigin = 'anonymous',
+	referrerPolicy = 'no-referrer',
+} = {}) {
+	const link = await loadLink(href, {rel: ['dsn-prefetch'], crossOrigin, referrerPolicy });
+	document.head.append(link);
+	return link;
+}
+
+export async function prerender(href) {
 	const link = document.createElement('link');
-
-	link.relList.add('preload');
-	link.as = as;
-	link.crossOrigin = crossOrigin;
-	link.referrerPolicy = referrerPolicy;
-	link.importance = importance;
-
-	if (typeof type === 'string') {
-		link.type = type;
-	}
-
-	if (typeof integrity === 'string') {
-		link.integrity = integrity;
-	}
-
-	if (typeof media === 'string') {
-		link.media = media;
-	}
-
+	link.relList.add('prerender');
 	link.href = href;
 	document.head.append(link);
+	return link;
 }
 
 export async function loadScript(src, {
@@ -86,6 +177,7 @@ export async function loadScript(src, {
 	}
 
 	await load(script, parent, 'src', src);
+	return script;
 }
 
 export async function loadStylesheet(href, {
@@ -100,31 +192,17 @@ export async function loadStylesheet(href, {
 	nonce = null,
 	parent = document.head,
 } = {}) {
-	const link = document.createElement('link');
-	link.rel = rel;
-	link.media = media;
-	link.crossOrigin = crossOrigin;
-	link.referrerPolicy = referrerPolicy;
-	link.disabled = disabled;
-	link.importance = importance;
-
-	if (typeof integrity === 'string') {
-		link.integrity = integrity;
-	}
-
-	if (typeof nonce === 'string') {
-		link.nonce = nonce;
-	}
-
-	if (typeof title === 'string') {
-		link.title = title;
-	}
-
+	const link = loadLink(null, {
+		rel, media, crossOrigin, referrerPolicy, integrity, disabled, importance,
+		title, nonce,
+	});
 	/* Do not wait for load event if disabled */
 	if (disabled) {
 		load(link, parent, 'href', href);
+		return link;
 	} else {
 		await load(link, parent, 'href', href);
+		return link;
 	}
 }
 
@@ -214,7 +292,7 @@ export async function loadImage(src, {
 			img.addEventListener('load', () => resolve(img), { once: true });
 			img.addEventListener('error', (err) => reject(err), { once: true });
 			img.src = src;
-			img.decode().then(console.log, console.error);
+			img.decode().catch(console.error);
 		});
 	}
 }
