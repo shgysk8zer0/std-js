@@ -192,7 +192,7 @@ export async function loadStylesheet(href, {
 	nonce = null,
 	parent = document.head,
 } = {}) {
-	const link = loadLink(null, {
+	const link = await loadLink(null, {
 		rel, media, crossOrigin, referrerPolicy, integrity, disabled, importance,
 		title, nonce,
 	});
