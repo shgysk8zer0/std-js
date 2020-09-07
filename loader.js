@@ -1,5 +1,5 @@
 export async function load(target, parent, srcAttr, value) {
-	if (parent instanceof HTMLElement) {
+	if (parent instanceof Node) {
 		const promise = loaded(target);
 		target[srcAttr] = value;
 		parent.append(target);
