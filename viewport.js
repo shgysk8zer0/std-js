@@ -91,3 +91,19 @@ export async function whenNotInViewport(el) {
 		return await observe(el, false);
 	}
 }
+
+export async function whenInViewportFor(el, ms = 1000) {
+	return await new Promise(async resolve => {
+		let done = false;
+
+		while (! done) {
+			await whenInViewport(el);
+			const timer = setTimeout(() => {
+				done = true;
+				resolve(el);
+			}, ms);
+
+			await whenNotInViewport(el).then(() => clearTimeout(timer));
+		}
+	});
+}

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `async whenInViewportFor(el, ms)` to track timed visiblity of elements
+
 ## 2.5.2 - 2020-09-09
 
 ### Added
