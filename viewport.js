@@ -93,17 +93,23 @@ export async function whenNotInViewport(el) {
 }
 
 export async function whenInViewportFor(el, ms = 1000) {
-	return await new Promise(async resolve => {
-		let done = false;
+	if (typeof el === 'string') {
+		return whenInViewportFor(document.querySelector(el, ms));
+	} else if (! (el instanceof Element)) {
+		throw new Error('Invalid element or selector');
+	} else {
+		return await new Promise(async resolve => {
+			let done = false;
 
-		while (! done) {
-			await whenInViewport(el);
-			const timer = setTimeout(() => {
-				done = true;
-				resolve(el);
-			}, ms);
+			while (! done) {
+				await whenInViewport(el);
+				const timer = setTimeout(() => {
+					done = true;
+					resolve(el);
+				}, ms);
 
-			await whenNotInViewport(el).then(() => clearTimeout(timer));
-		}
-	});
+				await whenNotInViewport(el).then(() => clearTimeout(timer));
+			}
+		});
+	}
 }
