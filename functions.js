@@ -1,5 +1,9 @@
 import esQuery from './esQuery.js';
 
+export function between(min, val, max) {
+	return val >= min && val <= max;
+}
+
 export function clone(thing) {
 	if (thing instanceof Array) {
 		return [...thing].map(clone);
@@ -37,6 +41,20 @@ export function displayMode() {
 	return typeof matchMedia === 'function'
 		? displays.find(mode => matchMedia(`(display-mode: ${mode})`).matches)
 		: 'browser';
+}
+
+export function isInViewport(el) {
+	if (typeof el === 'string') {
+		return isInViewport(document.querySelector(el));
+	} else if (el instanceof Element) {
+		const { top, bottom, left, right } = el.getBoundingClientRect();
+		const { height, width } = screen;
+
+		return (between(0, top, height) || between(0, bottom, height))
+			&& (between(0, left, width) || between(0, right, width));
+	} else {
+		throw new Error('Not a valid element or selector');
+	}
 }
 
 export function registerCustomElement(tag, cls, ...rest) {
