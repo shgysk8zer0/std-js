@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 2.5.2 - 2020-09-09
+
 ### Added
 - `navigator.getInstalledRelatedApps()` shim
 - Add `UTM` generator and validator class, extending `URL`
@@ -14,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `preload()` function, creating a `<link rel="preload">`
 - Add `parseHTML()` function, which parses text and returns a document fragment
 - More functions for other preloading techniques
+- Add module containing functions to wait for visibility in viewport
+- Add function to check if an element is visible withing the viewport (no waiting)
+- Create function to get bounds of current viewport
+
+### Changed
+- Update `$.visible()` to be more similar to jQuery's `.visible()`
+- Make `$.matches()` able to test all elements or any element
 
 ## [v2.5.1] - 2020-08-21
 

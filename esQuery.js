@@ -1,5 +1,4 @@
-import { read, debounce, prefersReducedMotion } from './functions.js';
-
+import { read, debounce, prefersReducedMotion, isInViewport } from './functions.js';
 const PREFIXES = [
 	'',
 	'moz',
@@ -80,12 +79,12 @@ export default class esQuery extends Set {
 		return this;
 	}
 
-	async visible() {
-		return this.css({ visibility: 'visible' });
-	}
-
-	async invisible() {
-		return this.css({ visibility: 'hidden' });
+	async visible(any = false) {
+		if (any) {
+			return this.some(isInViewport);
+		} else {
+			return this.every(isInViewport);
+		}
 	}
 
 	async each(callback, thisArg = this) {
@@ -129,8 +128,12 @@ export default class esQuery extends Set {
 		return new esQuery([...this].map(el => el.closest(selector)));
 	}
 
-	async matches(selector) {
-		return this.every(el => el.matches(selector));
+	async matches(selector, any = false) {
+		if (any) {
+			return this.some(el => el.matches(selector));
+		} else {
+			return this.every(el => el.matches(selector));
+		}
 	}
 
 	/**
