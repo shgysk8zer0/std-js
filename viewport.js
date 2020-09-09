@@ -94,7 +94,7 @@ export async function whenNotInViewport(el) {
 
 export async function whenInViewportFor(el, ms = 1000) {
 	if (typeof el === 'string') {
-		return whenInViewportFor(document.querySelector(el, ms));
+		return whenInViewportFor(document.querySelector(el), ms);
 	} else if (! (el instanceof Element)) {
 		throw new Error('Invalid element or selector');
 	} else {
