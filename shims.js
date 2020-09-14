@@ -1,5 +1,5 @@
-if (! (window.requestIdleCallbackx instanceof Function)) {
-	window.requestIdleCallbackx = function(callback, { timeout = 50 } = {}) {
+if (! (window.requestIdleCallback instanceof Function)) {
+	window.requestIdleCallback = function(callback, { timeout = 50 } = {}) {
 		const now = Date.now();
 
 		return requestAnimationFrame(function() {
@@ -16,8 +16,8 @@ if (! (window.requestIdleCallbackx instanceof Function)) {
 	};
 }
 
-if (! ( window.cancelIdleCallbackx instanceof Function)) {
-	window.cancelIdleCallbackx = function(id) {
+if (! ( window.cancelIdleCallback instanceof Function)) {
+	window.cancelIdleCallback = function(id) {
 		cancelAnimationFrame(id);
 	};
 }
