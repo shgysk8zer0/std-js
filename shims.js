@@ -1,3 +1,22 @@
+if (! (window.requestIdleCallback instanceof Function)) {
+	window.requestIdleCallback = function(callback, { timeout = 60 } = {}) {
+		return setTimeout(function() {
+			callback({
+				didTimeout: true,
+				timeRemaining: function() {
+					return 0;
+				}
+			});
+		}, Math.max(timeout, 1) || 1);
+	};
+}
+
+if (! ( window.cancelIdleCallback instanceof Function)) {
+	window.cancelIdleCallback = function(id) {
+		clearTimeout(id);
+	};
+}
+
 if (! (navigator.setAppBadge instanceof Function)) {
 	navigator.setAppBadge = () => Promise.reject('Not Supported');
 }
