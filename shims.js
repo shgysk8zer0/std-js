@@ -1,19 +1,24 @@
-if (! (window.requestIdleCallback instanceof Function)) {
-	window.requestIdleCallback = function(callback, { timeout = 60 } = {}) {
-		return setTimeout(function() {
-			callback({
-				didTimeout: true,
+if (! (window.requestIdleCallbackx instanceof Function)) {
+	window.requestIdleCallbackx = function(callback, { timeout = 50 } = {}) {
+		const now = Date.now();
+
+		return requestAnimationFrame(function() {
+			const idle = {
 				timeRemaining: function() {
-					return 0;
+					return Math.max(0, timeout - (Date.now() - now));
 				}
-			});
-		}, Math.max(timeout, 1) || 1);
+			};
+
+			idle.didTimeout = idle.timeRemaining() > 0;
+
+			callback(idle);
+		});
 	};
 }
 
-if (! ( window.cancelIdleCallback instanceof Function)) {
-	window.cancelIdleCallback = function(id) {
-		clearTimeout(id);
+if (! ( window.cancelIdleCallbackx instanceof Function)) {
+	window.cancelIdleCallbackx = function(id) {
+		cancelAnimationFrame(id);
 	};
 }
 
