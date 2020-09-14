@@ -1,3 +1,27 @@
+if (! (window.requestIdleCallbackx instanceof Function)) {
+	window.requestIdleCallbackx = function(callback, { timeout = 50 } = {}) {
+		const now = Date.now();
+
+		return requestAnimationFrame(function() {
+			const idle = {
+				timeRemaining: function() {
+					return Math.max(0, timeout - (Date.now() - now));
+				}
+			};
+
+			idle.didTimeout = idle.timeRemaining() > 0;
+
+			callback(idle);
+		});
+	};
+}
+
+if (! ( window.cancelIdleCallbackx instanceof Function)) {
+	window.cancelIdleCallbackx = function(id) {
+		cancelAnimationFrame(id);
+	};
+}
+
 if (! (navigator.setAppBadge instanceof Function)) {
 	navigator.setAppBadge = () => Promise.reject('Not Supported');
 }
