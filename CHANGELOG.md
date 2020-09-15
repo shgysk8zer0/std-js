@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add shims for `requestIdleCallback()` and `cancelIdleCallback()`
 - Add default handlers for Google Analytics (`tel;`, `mailto:`, etc)
 
+### Changed
+- `whenInViewport()` and `whenNotInViewport()` now return intersection data
+
 ## 2.5.2 - 2020-09-09
 
 ### Added
