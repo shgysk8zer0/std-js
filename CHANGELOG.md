@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `async whenInViewportFor(el, ms)` to track timed visiblity of elements
 - Add shims for `requestIdleCallback()` and `cancelIdleCallback()`
+- Add default handlers for Google Analytics (`tel;`, `mailto:`, etc)
 
 ## 2.5.2 - 2020-09-09
 
