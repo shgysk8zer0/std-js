@@ -7,35 +7,33 @@ if (IntersectionObserver instanceof Function) {
 	observer = new IntersectionObserver(lazyLoad, {rootMargin: '500px 0px 0px 0px'});
 }
 
-function infiniteScroll(entries, observer) {
-	entries.filter(entry => entry.isIntersecting).forEach(async entry => {
-		observer.unobserve(entry.target);
-		const url = new URL(entry.target.dataset.infiniteScroll, location.origin);
+async function infiniteScroll({ target, isIntersecting }, observer) {
+	if (isIntersecting) {
+		const url = new URL(target.dataset.infiniteScroll, location.origin);
+
 		try {
 			const resp = await fetch(url);
+
 			if (url.searchParams.has('page')) {
 				url.searchParams.set('page', parseInt(url.searchParams.get('page')) + 1);
-				entry.target.dataset.infiniteScroll = url;
+				target.dataset.infiniteScroll = url;
 			}
+
 			if (resp.ok) {
 				const parser = new DOMParser();
 				const html = await resp.text();
 				const doc = parser.parseFromString(html, 'text/html');
-
-				if (url.hash !== '') {
-					entry.target.before(doc.getElementById(url.hash.substring(1)));
-				} else {
-					entry.target.before(...doc.body.childNodes);
-				}
-				observer.observe(entry.target);
+				const frag = document.createDocumentFragment();
+				frag.append(...doc.body.children);
+				target.before(frag);
 			} else {
 				throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
 			}
 		} catch (error) {
 			console.error(error);
-			observer.observe(entry.target);
+			observer.observe(target);
 		}
-	});
+	}
 }
 
 function lazyLoad(entries, observer) {

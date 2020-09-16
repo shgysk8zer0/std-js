@@ -1204,7 +1204,10 @@ export default class esQuery extends Set {
 	 */
 	async intersect(callback, options = {}) {
 		try {
-			const observer = new IntersectionObserver(callback, options);
+			const observer = new IntersectionObserver((entries, observer) => {
+				entries.forEach(entry => callback(entry, observer));
+			}, options);
+
 			this.forEach(node => observer.observe(node));
 		} catch (err) {
 			console.error(err);
