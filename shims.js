@@ -1,3 +1,9 @@
+import CookieStore from  './CookieStore.js';
+
+if (! ('cookieStore' in window)) {
+	window.cookieStore = new CookieStore();
+}
+
 if (! (window.requestIdleCallback instanceof Function)) {
 	window.requestIdleCallback = function(callback, { timeout = 50 } = {}) {
 		const now = Date.now();
