@@ -1,6 +1,7 @@
 /**
  * @SEE https://wicg.github.io/cookie-store/
  * @NOTE: This offers similar methods but is not a substitute
+ * @TODO verify spec compliance as best as is possible
  */
 
 function getter({ name }) {
