@@ -1,8 +1,22 @@
 /**
  * @SEE https://wicg.github.io/cookie-store/
+ * @SEE https://wicg.github.io/cookie-store/explainer.html
  * @NOTE: This offers similar methods but is not a substitute
  * @TODO verify spec compliance as best as is possible
  */
+
+function defaultParams({
+	name,
+	value = null,
+	domain = location.hostname,
+	path = '/',
+	expires = null,
+	sameSite = 'strict',
+	secure = false,
+	httpOnly = false,
+}) {
+	return { name, value, domain, path, expires, sameSite, secure, httpOnly };
+}
 
 function getter({ name }) {
 	const encodedName = encodeURIComponent(name);
@@ -10,14 +24,23 @@ function getter({ name }) {
 
 	if (Array.isArray(found)) {
 		return found.map(c => {
-			return { name, value: decodeURIComponent(c.substr(name.length + 1)), path: undefined, domain: undefined, sameSite: undefined, expires: undefined };
+			return { name, value: decodeURIComponent(c.substr(name.length + 1)), path: undefined, domain: undefined, sameSite: undefined, expires: undefined, secure: undefined };
 		});
 	} else {
 		return [];
 	}
 }
 
-function setter({ name, value, expires = null, path = '/', sameSite = 'strict', domain = null }) {
+function setter({
+	name,
+	value,
+	expires = null,
+	path = '/',
+	sameSite = 'strict',
+	domain = null,
+	secure = false,
+	httpOnly = false,
+}) {
 	let cookie = `${encodeURIComponent(name)}=`;
 
 	if (value) {
@@ -40,6 +63,17 @@ function setter({ name, value, expires = null, path = '/', sameSite = 'strict', 
 
 	if (typeof sameSite === 'string') {
 		cookie += `;sameSite=${sameSite}`;
+	}
+
+	if (secure === true) {
+		cookie += ';secure';
+	}
+
+	/**
+	 * Does not work in any browser, but set regardless
+	 */
+	if (httpOnly === true) {
+		cookie += ';httponly';
 	}
 
 	document.cookie = cookie;
@@ -67,10 +101,10 @@ export default class CookieStore extends EventTarget {
 
 	async set(...args) {
 		if (args.length === 1 && typeof args[0].name === 'string') {
-			const { name, value, expires = undefined, path = '/', domain = null, sameSite = 'strict' } = args[0];
-			setter({ name, value, expires, path, domain, sameSite });
-			const event = new Event('cookiechange');
-			event.changed = [{ name, value, expires, path, domain, sameSite }];
+			const cookie = defaultParams(args[0]);
+			setter(cookie);
+			const event = new Event('change');
+			event.changed = [cookie];
 			event.deleted = [];
 
 			this.dispatchEvent(event);
@@ -85,14 +119,21 @@ export default class CookieStore extends EventTarget {
 		if (typeof args === 'string') {
 			this.delete({ name: args });
 		} else if (typeof args.name === 'string') {
-			const event = new Event('cookiechange');
-			const { name, sameSite = 'strict', path = '/', domain = null } = args;
-			setter({ name, value: '', expires: 1, path, domain, sameSite });
-			event.changed = [];
-			event.deleted = [{ name, value: '', expires: 1, path, domain, sameSite }];
-			this.dispatchEvent(event);
+			const cookie = await this.get(args);
+
+			if (typeof cookie !== 'undefined') {
+				const event = new Event('change');
+				cookie.expires = 1;
+				cookie.value = null;
+				event.changed = [];
+				event.deleted = [cookie];
+				this.dispatchEvent(event);
+				setter({...cookie, ...args });
+			} else {
+				throw new Error(`Cookie not found: ${cookie.name}`);
+			}
+		} else {
+			throw new Error('Invalid cookie params. Needs name');
 		}
 	}
 }
-
-window.cookieStore = new CookieStore();

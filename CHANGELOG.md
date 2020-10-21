@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add missing params to `CookieStore`
+
+### Changed
+- Get existing cookie when deleting them (for change events)
+- Normalize params for `CookieStore`
+
 # [v2.5.3] - 2020-10-20
 
 ### Added
