@@ -13,7 +13,7 @@ export async function importGa(id, params = {}) {
 	Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
 	await loadScript(url.href, {
-		crossOrigin: 'include-credentials',
+		crossOrigin: 'use-credentials',
 	}).then(() => {
 		gtag('js', new Date());
 		gtag('config', id);
