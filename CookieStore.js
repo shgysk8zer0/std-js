@@ -79,13 +79,14 @@ function setter({
 	document.cookie = cookie;
 }
 
-
 export default class CookieStore extends EventTarget {
 	async get(args) {
 		const cookies = await this.getAll(args);
 
 		if (Array.isArray(cookies) && cookies.length !== 0) {
 			return cookies[0];
+		} else {
+			return null;
 		}
 	}
 
@@ -121,16 +122,14 @@ export default class CookieStore extends EventTarget {
 		} else if (typeof args.name === 'string') {
 			const cookie = await this.get(args);
 
-			if (typeof cookie !== 'undefined') {
+			if (cookie) {
 				const event = new Event('change');
 				cookie.expires = 1;
-				cookie.value = null;
+				cookie.value = undefined;
 				event.changed = [];
 				event.deleted = [cookie];
 				this.dispatchEvent(event);
 				setter({...cookie, ...args });
-			} else {
-				throw new Error(`Cookie not found: ${cookie.name}`);
 			}
 		} else {
 			throw new Error('Invalid cookie params. Needs name');
