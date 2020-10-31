@@ -5,40 +5,64 @@
  * @TODO verify spec compliance as best as is possible
  */
 
+function getAllCookies() {
+	return document.cookie.split(';').map(str => {
+		const [name, value = null] = str.split('=');
+		return {
+			name: decodeURIComponent(name.trim()),
+			value: typeof value === 'string' ? decodeURIComponent(value.trim()) : null,
+			path: undefined,
+			expires: undefined,
+			domain: undefined,
+			sameSite: undefined,
+			secure: undefined,
+		};
+	});
+}
+
 function defaultParams({
 	name,
-	value = null,
-	domain = location.hostname,
-	path = '/',
-	expires = null,
+	value    = null,
+	domain   = null,
+	path     = '/',
+	expires  = null,
 	sameSite = 'strict',
-	secure = false,
+	secure   = false,
 	httpOnly = false,
 }) {
 	return { name, value, domain, path, expires, sameSite, secure, httpOnly };
 }
 
-function getter({ name }) {
-	const encodedName = encodeURIComponent(name);
-	const found = document.cookie.split(';').map(c => c.trim()).filter(c => c.startsWith(`${encodedName}=`));
+function getter({ name = null, value = null } = {}) {
+	if (typeof name === 'string') {
+		name = decodeURIComponent(name);
+	}
 
-	if (Array.isArray(found)) {
-		return found.map(c => {
-			return { name, value: decodeURIComponent(c.substr(name.length + 1)), path: undefined, domain: undefined, sameSite: undefined, expires: undefined, secure: undefined };
-		});
+	if (typeof value === 'string') {
+		value = decodeURIComponent(value);
+	}
+
+	if (typeof name === 'string' && typeof value === 'string') {
+		return getAllCookies().filter((cookie) =>
+			cookie.name === name && cookie.value === value
+		);
+	} else if (typeof name === 'string') {
+		return getAllCookies().filter(cookie => cookie.name === name);
+	} else if (typeof value === 'string') {
+		return getAllCookies().filter(cookie => cookie.value === value);
 	} else {
-		return [];
+		return getAllCookies();
 	}
 }
 
 function setter({
 	name,
 	value,
-	expires = null,
-	path = '/',
+	expires  = null,
+	path     = '/',
 	sameSite = 'strict',
-	domain = null,
-	secure = false,
+	domain   = null,
+	secure   = false,
 	httpOnly = false,
 }) {
 	let cookie = `${encodeURIComponent(name)}=`;
@@ -93,10 +117,8 @@ export default class CookieStore extends EventTarget {
 	async getAll(args) {
 		if (typeof args === 'string') {
 			return getter({ name: args });
-		} else if (typeof args.name === 'string') {
-			return getter(args);
 		} else {
-			throw new Error('No name given');
+			return getter(args);
 		}
 	}
 
@@ -119,20 +141,28 @@ export default class CookieStore extends EventTarget {
 	async delete(args) {
 		if (typeof args === 'string') {
 			this.delete({ name: args });
-		} else if (typeof args.name === 'string') {
-			const cookie = await this.get(args);
-
-			if (cookie) {
-				const event = new Event('change');
-				cookie.expires = 1;
-				cookie.value = undefined;
-				event.changed = [];
-				event.deleted = [cookie];
-				this.dispatchEvent(event);
-				setter({...cookie, ...args });
-			}
 		} else {
-			throw new Error('Invalid cookie params. Needs name');
+			const cookies = await this.getAll(args);
+
+			if (cookies.length !== 0) {
+				const event = new Event('change');
+				event.changed = [];
+				event.deleted = new Array(cookies.length);
+
+				cookies.forEach((cookie, i) => {
+					cookie.expires = 1;
+					cookie.path = args.path || '/';
+					cookie.domain = args.domain;
+					cookie.secure = args.secure;
+					cookie.sameSite = args.sameSite || 'strict';
+
+					cookie.value = undefined;
+					event.changed[i] = cookie;
+					setter(cookie);
+				});
+
+				this.dispatchEvent(event);
+			}
 		}
 	}
 }

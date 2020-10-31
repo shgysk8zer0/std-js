@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Get existing cookie when deleting them (for change events)
 - Normalize params for `CookieStore`
 
+### Fixed
+- Update `cookieStore` to match behavior experienced in Origin-Trail in Chrome
+- Fix missing params in `cookieStore.delete()` causing cookies to not be deleted
+- Fix `cookieStore.delete()` only deleting single cookie
+
 # [v2.5.3] - 2020-10-20
 
 ### Added
