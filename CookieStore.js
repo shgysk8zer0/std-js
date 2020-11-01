@@ -1,7 +1,9 @@
 /**
  * @SEE https://wicg.github.io/cookie-store/
  * @SEE https://wicg.github.io/cookie-store/explainer.html
- * @NOTE: This offers similar methods but is not a substitute
+ * @NOTE: This offers similar methods but is not a substitute and cannot get extended
+ * cookie properties, such as expires, etc.
+ *
  * @TODO verify spec compliance as best as is possible
  */
 
@@ -26,11 +28,12 @@ function defaultParams({
 	domain   = null,
 	path     = '/',
 	expires  = null,
+	maxAge   = null,
 	sameSite = 'strict',
 	secure   = false,
 	httpOnly = false,
 }) {
-	return { name, value, domain, path, expires, sameSite, secure, httpOnly };
+	return { name, value, domain, path, expires, maxAge, sameSite, secure, httpOnly };
 }
 
 function getter({ name = null, value = null } = {}) {
@@ -59,48 +62,55 @@ function setter({
 	name,
 	value,
 	expires  = null,
+	maxAge   = null,
 	path     = '/',
 	sameSite = 'strict',
 	domain   = null,
 	secure   = false,
 	httpOnly = false,
 }) {
-	let cookie = `${encodeURIComponent(name)}=`;
+	if (Number.isInteger(maxAge)) {
+		setter({
+			name, value, expires: Date.now() + maxAge, path, sameSite, domain, secure, httpOnly,
+		});
+	} else {
+		let cookie = `${encodeURIComponent(name)}=`;
 
-	if (value) {
-		cookie += encodeURIComponent(value);
+		if (value) {
+			cookie += encodeURIComponent(value);
+		}
+
+		if (Number.isInteger(expires)) {
+			cookie += `;expires=${new Date(expires).toUTCString()}`;
+		} else if (expires instanceof Date) {
+			cookie += `;expires=${expires.toUTCString()}`;
+		}
+
+		if (typeof path === 'string') {
+			cookie += `;path=${path}`;
+		}
+
+		if (typeof domain === 'string') {
+			cookie += `;domain=${domain}`;
+		}
+
+		if (typeof sameSite === 'string') {
+			cookie += `;sameSite=${sameSite}`;
+		}
+
+		if (secure === true) {
+			cookie += ';secure';
+		}
+
+		/**
+		 * Does not work in any browser, but set regardless
+		 */
+		if (httpOnly === true) {
+			cookie += ';httponly';
+		}
+
+		document.cookie = cookie;
 	}
-
-	if (Number.isInteger(expires)) {
-		cookie += `;expires=${new Date(expires).toUTCString()}`;
-	} else if (expires instanceof Date) {
-		cookie += `;expires=${expires.toUTCString()}`;
-	}
-
-	if (typeof path === 'string') {
-		cookie += `;path=${path}`;
-	}
-
-	if (typeof domain === 'string') {
-		cookie += `;domain=${domain}`;
-	}
-
-	if (typeof sameSite === 'string') {
-		cookie += `;sameSite=${sameSite}`;
-	}
-
-	if (secure === true) {
-		cookie += ';secure';
-	}
-
-	/**
-	 * Does not work in any browser, but set regardless
-	 */
-	if (httpOnly === true) {
-		cookie += ';httponly';
-	}
-
-	document.cookie = cookie;
 }
 
 export default class CookieStore extends EventTarget {
@@ -138,10 +148,10 @@ export default class CookieStore extends EventTarget {
 		}
 	}
 
-	async delete(args) {
+	async delete(args = {}) {
 		if (typeof args === 'string') {
 			this.delete({ name: args });
-		} else {
+		} else if (typeof args.name === 'string') {
 			const cookies = await this.getAll(args);
 
 			if (cookies.length !== 0) {
@@ -150,19 +160,20 @@ export default class CookieStore extends EventTarget {
 				event.deleted = new Array(cookies.length);
 
 				cookies.forEach((cookie, i) => {
-					cookie.expires = 1;
 					cookie.path = args.path || '/';
-					cookie.domain = args.domain;
-					cookie.secure = args.secure;
+					cookie.domain = args.domain || null;
+					cookie.secure = args.secure || null;
+					delete cookie.value;
 					cookie.sameSite = args.sameSite || 'strict';
 
-					cookie.value = undefined;
-					event.changed[i] = cookie;
-					setter(cookie);
+					event.deleted[i] = cookie;
+					setter({...cookie, value: null, expires: 1 });
 				});
 
 				this.dispatchEvent(event);
 			}
+		} else {
+			throw new TypeError('Failed to execute \'delete\' on \'CookieStore\': required member name is undefined.');
 		}
 	}
 }
