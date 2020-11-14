@@ -8,18 +8,22 @@
  */
 
 function getAllCookies() {
-	return document.cookie.split(';').map(str => {
-		const [name, value = null] = str.split('=');
-		return {
-			name: decodeURIComponent(name.trim()),
-			value: typeof value === 'string' ? decodeURIComponent(value.trim()) : null,
-			path: undefined,
-			expires: undefined,
-			domain: undefined,
-			sameSite: undefined,
-			secure: undefined,
-		};
-	});
+	if (document.cookie.length === 0) {
+		return [];
+	} else {
+		return document.cookie.split(';').map(str => {
+			const [name, value = null] = str.split('=');
+			return {
+				name: decodeURIComponent(name.trim()),
+				value: typeof value === 'string' ? decodeURIComponent(value.trim()) : null,
+				path: undefined,
+				expires: undefined,
+				domain: undefined,
+				sameSite: undefined,
+				secure: undefined,
+			};
+		});
+	}
 }
 
 function defaultParams({
