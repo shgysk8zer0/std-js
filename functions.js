@@ -18,6 +18,35 @@ export function clone(thing) {
 	}
 }
 
+export function changeTagName(target, tag = 'div', { replace = true, is = null } = {}) {
+	if (typeof target === 'string') {
+		target = document.querySelector(target);
+	}
+
+	let el;
+
+	if (tag.includes('-')) {
+		const ElementClass = customElements.get(tag);
+		el = new ElementClass();
+	} else {
+		el = document.createElement(tag, { is });
+	}
+
+	Array.from(target.attributes).forEach(({ name, value }) => el.setAttribute(name, value));
+
+	if (replace === true) {
+		el.append(...target.children);
+
+		if (target.isConnected) {
+			target.replaceWith(el);
+		}
+	} else {
+		[...target.children].forEach(child => el.append(child.cloneNode(true)));
+	}
+
+	return el;
+}
+
 export function mediaQuery(query = {}) {
 	if (typeof matchMedia !== 'function') {
 		return false;

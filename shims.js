@@ -1,5 +1,11 @@
 import CookieStore from  './CookieStore.js';
 
+if (! (Element.prototype.getAttributeNames instanceof Function)) {
+	Element.prototype.getAttributeNames = function() {
+		return Array.from(this.attributes).map(({ name }) => name);
+	};
+}
+
 if (! ('cookieStore' in window)) {
 	window.cookieStore = new CookieStore();
 }
