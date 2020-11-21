@@ -449,6 +449,49 @@ export function isOnline() {
 	return navigator.onLine === true;
 }
 
+export async function getNotificationPermission() {
+	if (Notification.permission === 'default') {
+		return createCustomElement('html-notification', 'Allow Notifications?', {
+			body: 'This site would like permission to show notifications',
+			lang: 'en',
+			dir: 'ltr',
+			tag: 'notification-request',
+			requireInteraction: true,
+			vibrate: [],
+			actions: [{
+				title: 'Allow',
+				action: 'request',
+			}, {
+				title: 'Deny',
+				action: 'deny',
+			}]
+		}).then(notification => {
+			return new Promise(resolve => {
+				notification.addEventListener('notificationclick', ({ action, target }) => {
+					switch(action) {
+						case 'request':
+							resolve(Notification.requestPermission());
+							target.close();
+							break;
+
+						case 'deny':
+							resolve('denied');
+							target.close();
+							break;
+					}
+				});
+				notification.addEventListener('close', () => resolve('denied'));
+			});
+		});
+	} else {
+		return Notification.permission;
+	}
+}
+
+export async function notificationsAllowed() {
+	return getNotificationPermission().then(perm => perm === 'granted');
+}
+
 /**
  * @deprecated [will be removed in v3.0.0]
  */
