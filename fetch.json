@@ -24,10 +24,5 @@
 			"contenteditable": "true"
 		}
 	},
-	"info": "This done though fetch api and JSON.",
-	"notify": {
-		"title": "Notification",
-		"body": "Courtesey of JSON",
-		"icon": "javascript.svg"
-	}
+	"info": "This done though fetch api and JSON."
 }
