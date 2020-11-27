@@ -21,6 +21,7 @@ function fadeIn(dialog) {
 
 const btnStyles = {
 	'max-width': '180px',
+	'min-width': '60px',
 };
 
 const btnContainerStyles = {
