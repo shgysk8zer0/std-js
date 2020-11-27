@@ -981,13 +981,25 @@ export default class esQuery extends Set {
 	}
 
 	/*==================== Listener Functions =================================*/
-	async on(event, callback, ...args) {
-		this.forEach(node => node.addEventListener(event, callback, ...args));
+	async on(event, ...args) {
+		if (typeof event === 'string') {
+			this.forEach(node => node.addEventListener(event, ...args));
+		} else if (Array.isArray(event)) {
+			event.forEach(e => this.on(e, ...args));
+		} else {
+			Object.entries(event).forEach(([e, c]) => this.on(e, c, ...args));
+		}
 		return this;
 	}
 
-	async off(event, callback, ...args) {
-		this.forEach(node => node.removeEventListener(event, callback, ...args));
+	async off(event, ...args) {
+		if (typeof event === 'string') {
+			this.forEach(node => node.removeEventListener(event, ...args));
+		} else if (Array.isArray(event)) {
+			event.forEach(e => this.off(e, ...args));
+		} else {
+			Object.entries(event).forEach(([e, c]) => this.off(e, c, ...args));
+		}
 		return this;
 	}
 

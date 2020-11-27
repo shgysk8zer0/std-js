@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Get existing cookie when deleting them (for change events)
 - Normalize params for `CookieStore`
+- `$.on()` and `$.off()` now also accept an array of events or an object of `{ event: callback }`
 
 ### Fixed
 - Update `cookieStore` to match behavior experienced in Origin-Trail in Chrome
