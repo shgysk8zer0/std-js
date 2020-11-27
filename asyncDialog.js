@@ -2,6 +2,23 @@ function css(el, rules) {
 	Object.entries(rules).forEach(([prop, value]) => el.style.setProperty(prop, value));
 }
 
+function fadeIn(dialog) {
+	if (dialog.animate instanceof Function) {
+		dialog.animate([{
+			opacity: 0,
+			transform: 'translate(0, -50vh)',
+		}, {
+			opacity: 1,
+			transform: 'none',
+		}], {
+			duration: 400,
+			easing: 'ease-in-out',
+		});
+	}
+	document.body.append(dialog);
+	dialog.showModal();
+}
+
 const btnStyles = {
 	'max-width': '180px',
 };
@@ -22,7 +39,7 @@ export async function alert(text) {
 		close.classList.add('btn', 'btn-primary', 'grow-1');
 		css(close, btnStyles);
 
-		dialog.classList.add('clearfix', 'animation-speed-normal', 'animation-ease-in', 'fadeInUp');
+		dialog.classList.add('clearfix');
 		msg.textContent = text;
 		close.textContent = 'Ok';
 
@@ -33,8 +50,7 @@ export async function alert(text) {
 		close.addEventListener('click', event => event.target.closest('dialog[open]').close());
 		btns.append(close);
 		dialog.append(msg, document.createElement('br'), btns);
-		document.body.append(dialog);
-		dialog.showModal();
+		fadeIn(dialog);
 	});
 }
 
@@ -51,7 +67,6 @@ export async function confirm(text) {
 		ok.type = 'button';
 		ok.classList.add('btn', 'btn-accept', 'grow-1');
 		close.classList.add('btn', 'btn-reject', 'grow-1');
-		dialog.classList.add('animation-speed-normal', 'animation-ease-in', 'fadeInUp');
 		btns. classList.add('flex', 'row', 'no-wrap');
 		css(ok, btnStyles);
 		css(close, btnStyles);
@@ -76,8 +91,7 @@ export async function confirm(text) {
 		btns.append(ok, close);
 
 		dialog.append(msg, document.createElement('br'), btns);
-		document.body.append(dialog);
-		dialog.showModal();
+		fadeIn(dialog);
 	});
 }
 
@@ -113,7 +127,6 @@ export async function prompt(text, defaultValue = '') {
 
 		ok.classList.add('btn', 'btn-primary', 'grow-1', 'shrink-0');
 		close.classList.add('btn', 'btn-reject', 'grow-1');
-		dialog.classList.add('animation-speed-normal', 'animation-ease-in', 'fadeInUp');
 		btns.classList.add('flex', 'row', 'no-wrap', 'center');
 
 		msg.textContent = text;
@@ -139,8 +152,7 @@ export async function prompt(text, defaultValue = '') {
 		form.append(input, document.createElement('br'), btns);
 
 		dialog.append(msg, form);
-		document.body.append(dialog);
-		dialog.showModal();
+		fadeIn(dialog);
 		input.select();
 	});
 }
