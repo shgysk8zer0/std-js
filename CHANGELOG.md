@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add missing params to `CookieStore`
 - `changeTagName` function
 - `Element.prototype.getAttributeNames` shim
-- New functions: `css()`, `attr()`, `data()`, and `toggleClass()`
+- New functions: `css()`, `attr()`, `data()`, `on()`, `off()`, and `toggleClass()`
 
 ### Changed
 - Get existing cookie when deleting them (for change events)

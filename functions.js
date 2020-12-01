@@ -108,6 +108,38 @@ export function toggleClass(what, classes, { base = document, force = undefined 
 	}
 }
 
+export function on(what, when, ...args) {
+	if (what instanceof Element) {
+		if (typeof when === 'string') {
+			what.addEventListener(when, ...args);
+		} else if (Array.isArray(when)) {
+			when.forEach(e => on(what, e, ...args));
+		} else {
+			Object.entries(when).forEach(([ev, cb]) => on(what, ev, cb, ...args));
+		}
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => on(el, when, ...args));
+	} else if (typeof what === 'string') {
+		on(document.querySelectorAll(what), when, ...args);
+	}
+}
+
+export function off(what, when, ...args) {
+	if (what instanceof Element) {
+		if (typeof when === 'string') {
+			what.removeEventListener(when, ...args);
+		} else if (Array.isArray(when)) {
+			when.forEach(e => off(what, e, ...args));
+		} else {
+			Object.entries(when).forEach(([ev, cb]) => off(what, ev, cb, ...args));
+		}
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => off(el, when, ...args));
+	} else if (typeof what === 'string') {
+		off(document.querySelectorAll(what), when, ...args);
+	}
+}
+
 export function clone(thing) {
 	if (thing instanceof Array) {
 		return [...thing].map(clone);

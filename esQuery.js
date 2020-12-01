@@ -1,4 +1,6 @@
-import { attr, css, data, toggleClass , read, debounce, prefersReducedMotion, isInViewport } from './functions.js';
+import { attr, css, data, toggleClass, on, off, read, debounce,
+	prefersReducedMotion, isInViewport } from './functions.js';
+
 const PREFIXES = [
 	'',
 	'moz',
@@ -975,25 +977,13 @@ export default class esQuery extends Set {
 	}
 
 	/*==================== Listener Functions =================================*/
-	async on(event, ...args) {
-		if (typeof event === 'string') {
-			this.forEach(node => node.addEventListener(event, ...args));
-		} else if (Array.isArray(event)) {
-			event.forEach(e => this.on(e, ...args));
-		} else {
-			Object.entries(event).forEach(([e, c]) => this.on(e, c, ...args));
-		}
+	async on(...args) {
+		on(this, ...args)
 		return this;
 	}
 
-	async off(event, ...args) {
-		if (typeof event === 'string') {
-			this.forEach(node => node.removeEventListener(event, ...args));
-		} else if (Array.isArray(event)) {
-			event.forEach(e => this.off(e, ...args));
-		} else {
-			Object.entries(event).forEach(([e, c]) => this.off(e, c, ...args));
-		}
+	async off(...args) {
+		off(this, ...args);
 		return this;
 	}
 
