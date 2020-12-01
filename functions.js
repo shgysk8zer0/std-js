@@ -23,10 +23,36 @@ export function css(what, props = {}, { base = document, priority = undefined } 
 export function data(what, props = {}, { base = document } = {}) {
 	if (what instanceof Element) {
 		Object.entries(props).forEach(([p, v]) => {
-			if (typeof v === 'string' || typeof v === 'number') {
-				what.dataset[p] = v;
-			} else {
-				delete what.dataset[p];
+			if (v instanceof Date) {
+				v = v.toISOString();
+			} else if (v instanceof URL) {
+				v = v.href;
+			}
+
+			switch (typeof v) {
+				case 'string':
+				case 'number':
+					what.dataset[p] = v;
+					break;
+
+				case 'boolean':
+					if (v) {
+						what.dataset[p] = '';
+					} else {
+						delete what.dataset[p];
+					}
+					break;
+
+				case 'undefined':
+					delete what.dataset[p];
+					break;
+
+				default:
+					if (v === null) {
+						delete what.dataset[p];
+					} else {
+						what.dataset[p] = JSON.stringify(v);
+					}
 			}
 		});
 	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
@@ -43,8 +69,14 @@ export function attr(what, props = {}, { base = document } = {}) {
 				what.setAttribute(p, v);
 			} else if (typeof v === 'boolean') {
 				what.toggleAttribute(p, v);
-			} else {
+			} else if (v instanceof Date) {
+				what.setAttribute(p, v.toISOString());
+			} else if (v instanceof URL) {
+				what.setAttribute(p, v.href);
+			} else if (typeof v === 'undefined' || v === null) {
 				what.removeAttribute(p);
+			} else {
+				what.setAttribute(p, JSON.stringify(v));
 			}
 		});
 	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {

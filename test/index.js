@@ -28,7 +28,7 @@ ready().then(async () => {
 	const $body = $('body');
 	const $doc = $(':root');
 	$doc.replaceClass('no-js', 'js');
-	$doc.data({foo: {a: 1, b: [1,2]}, fooBar: false});
+	$doc.data({foo: {a: 1, b: [1,2]}, fooBar: false, url: new URL('./foo', document.baseURI), now: new Date()});
 	$doc.attr({lang: 'en', dir: 'ltr'});
 	$body.attr({contextmenu: 'context-menu'});
 	$doc.keypress(kbdShortcuts);
