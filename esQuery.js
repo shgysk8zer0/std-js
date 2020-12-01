@@ -1,4 +1,6 @@
-import { read, debounce, prefersReducedMotion, isInViewport } from './functions.js';
+import { attr, css, data, toggleClass, on, off, read, debounce,
+	prefersReducedMotion, isInViewport } from './functions.js';
+
 const PREFIXES = [
 	'',
 	'moz',
@@ -862,14 +864,8 @@ export default class esQuery extends Set {
 		return this.some(el => el.classList.contains(cname));
 	}
 
-	async toggleClass(cname, force = null) {
-		if (force instanceof Function) {
-			this.forEach(node => node.classList.toggle(cname, force(node)));
-		} else if (typeof force === 'boolean') {
-			this.forEach(node => node.classList.toggle(cname, force));
-		} else {
-			this.forEach(node => node.classList.toggle(cname));
-		}
+	async toggleClass(...args) {
+		toggleClass(this, args);
 		return this;
 	}
 
@@ -981,25 +977,13 @@ export default class esQuery extends Set {
 	}
 
 	/*==================== Listener Functions =================================*/
-	async on(event, ...args) {
-		if (typeof event === 'string') {
-			this.forEach(node => node.addEventListener(event, ...args));
-		} else if (Array.isArray(event)) {
-			event.forEach(e => this.on(e, ...args));
-		} else {
-			Object.entries(event).forEach(([e, c]) => this.on(e, c, ...args));
-		}
+	async on(...args) {
+		on(this, ...args)
 		return this;
 	}
 
-	async off(event, ...args) {
-		if (typeof event === 'string') {
-			this.forEach(node => node.removeEventListener(event, ...args));
-		} else if (Array.isArray(event)) {
-			event.forEach(e => this.off(e, ...args));
-		} else {
-			Object.entries(event).forEach(([e, c]) => this.off(e, c, ...args));
-		}
+	async off(...args) {
+		off(this, ...args);
 		return this;
 	}
 
@@ -1017,8 +1001,8 @@ export default class esQuery extends Set {
 		return this.on(event, callback, { once: true });
 	}
 
-	async debounce(event, callback, wait = 17, immediate = false) {
-		return this.on(event, debounce(callback, wait, immediate));
+	async debounce(event, callback, wait = 17, immediate = false, ...attrs) {
+		return this.on(event, debounce(callback, wait, immediate), ...attrs);
 	}
 
 	async ready(callback, ...args) {
@@ -1228,45 +1212,17 @@ export default class esQuery extends Set {
 	}
 
 	async attr(attrs = {}) {
-		this.forEach(node => {
-			for (const [key, value] of Object.entries(attrs)) {
-				switch (typeof (value)) {
-					case 'string':
-					case 'number':
-						node.setAttribute(key, value);
-						break;
-					case 'boolean':
-						value ? node.setAttribute(key, '') : node.removeAttribute(key);
-						break;
-					default:
-						node.removeAttribute(key);
-				}
-			}
-		});
+		attr(this, attrs);
 		return this;
 	}
 
-	async css(props = {}) {
-		this.forEach(node => {
-			Object.entries(props).forEach(([prop, value]) => {
-				node.style.setProperty(prop, value);
-			});
-		});
+	async css(props = {}, { priority = undefined } = {}) {
+		css(this, props, { priority });
 		return this;
 	}
 
 	async data(props = {}) {
-		this.forEach(node => {
-			for (const [key, value] of Object.entries(props)) {
-				if (value === false) {
-					delete node.dataset[key];
-				} else if (value === true || value === null) {
-					node.dataset[key] = '';
-				} else {
-					node.dataset[key] = typeof (value) === 'string' ? value : JSON.stringify(value);
-				}
-			}
-		});
+		data(this, props);
 		return this;
 	}
 }

@@ -4,6 +4,142 @@ export function between(min, val, max) {
 	return val >= min && val <= max;
 }
 
+export function css(what, props = {}, { base = document, priority = undefined } = {}) {
+	if (what instanceof Element) {
+		Object.entries(props).forEach(([p, v]) => {
+			if (typeof v === 'string' || typeof v === 'number') {
+				what.style.setProperty(p, v, priority);
+			} else {
+				what.style.removeProperty(p);
+			}
+		});
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => css(el, props, { base, priority }));
+	} else if (typeof what === 'string') {
+		css(base.querySelectorAll(what), props, { base, priority });
+	}
+}
+
+export function data(what, props = {}, { base = document } = {}) {
+	if (what instanceof Element) {
+		Object.entries(props).forEach(([p, v]) => {
+			if (v instanceof Date) {
+				v = v.toISOString();
+			} else if (v instanceof URL) {
+				v = v.href;
+			}
+
+			switch (typeof v) {
+				case 'string':
+				case 'number':
+					what.dataset[p] = v;
+					break;
+
+				case 'boolean':
+					if (v) {
+						what.dataset[p] = '';
+					} else {
+						delete what.dataset[p];
+					}
+					break;
+
+				case 'undefined':
+					delete what.dataset[p];
+					break;
+
+				default:
+					if (v === null) {
+						delete what.dataset[p];
+					} else {
+						what.dataset[p] = JSON.stringify(v);
+					}
+			}
+		});
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => data(el, props, { base }));
+	} else if (typeof what === 'string') {
+		data(base.querySelectorAll(what), props);
+	}
+}
+
+export function attr(what, props = {}, { base = document } = {}) {
+	if (what instanceof Element) {
+		Object.entries(props).forEach(([p, v]) => {
+			if (typeof v === 'string' || typeof v === 'number') {
+				what.setAttribute(p, v);
+			} else if (typeof v === 'boolean') {
+				what.toggleAttribute(p, v);
+			} else if (v instanceof Date) {
+				what.setAttribute(p, v.toISOString());
+			} else if (v instanceof URL) {
+				what.setAttribute(p, v.href);
+			} else if (typeof v === 'undefined' || v === null) {
+				what.removeAttribute(p);
+			} else {
+				what.setAttribute(p, JSON.stringify(v));
+			}
+		});
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => attr(el, props, { base }));
+	} else if (typeof what === 'string') {
+		attr(base.querySelectorAll(what), props);
+	}
+}
+
+export function toggleClass(what, classes, { base = document, force = undefined } = {}) {
+	if (what instanceof Element) {
+		if (typeof classes === 'string') {
+			what.classList.toggle(classes, force);
+		} else if (Array.isArray(classes)) {
+			classes.forEach(cn => toggleClass(what, cn, { force }));
+		} else {
+			Object.entries(classes).forEach(([cl, cond]) => {
+				if (cond instanceof Function) {
+					what.classList.toggle(cl, cond.apply(what, [cl]));
+				} else {
+					what.classList.toggle(cl, cond);
+				}
+			});
+		}
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => toggleClass(el, classes, { force }));
+	} else if (typeof what === 'string') {
+		toggleClass(base.querySelectorAll(what), classes, { force });
+	}
+}
+
+export function on(what, when, ...args) {
+	if (what instanceof Element) {
+		if (typeof when === 'string') {
+			what.addEventListener(when, ...args);
+		} else if (Array.isArray(when)) {
+			when.forEach(e => on(what, e, ...args));
+		} else {
+			Object.entries(when).forEach(([ev, cb]) => on(what, ev, cb, ...args));
+		}
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => on(el, when, ...args));
+	} else if (typeof what === 'string') {
+		on(document.querySelectorAll(what), when, ...args);
+	}
+}
+
+export function off(what, when, ...args) {
+	if (what instanceof Element) {
+		if (typeof when === 'string') {
+			what.removeEventListener(when, ...args);
+		} else if (Array.isArray(when)) {
+			when.forEach(e => off(what, e, ...args));
+		} else {
+			Object.entries(when).forEach(([ev, cb]) => off(what, ev, cb, ...args));
+		}
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => off(el, when, ...args));
+	} else if (typeof what === 'string') {
+		off(document.querySelectorAll(what), when, ...args);
+	}
+}
+
 export function clone(thing) {
 	if (thing instanceof Array) {
 		return [...thing].map(clone);

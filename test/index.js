@@ -6,6 +6,8 @@ import kbdShortcuts from '../kbd_shortcuts.js';
 import { loadScript } from '../loader.js';
 document.documentElement.classList.toggle('no-dialog', document.createElement('dialog') instanceof HTMLUnknownElement);
 
+window.$ = $;
+
 ready().then(async () => {
 	const loads = [
 		loadScript('https://cdn.polyfill.io/v3/polyfill.min.js'),
@@ -26,7 +28,7 @@ ready().then(async () => {
 	const $body = $('body');
 	const $doc = $(':root');
 	$doc.replaceClass('no-js', 'js');
-	$doc.data({foo: {a: 1, b: [1,2]}, fooBar: false});
+	$doc.data({foo: {a: 1, b: [1,2]}, fooBar: false, url: new URL('./foo', document.baseURI), now: new Date()});
 	$doc.attr({lang: 'en', dir: 'ltr'});
 	$body.attr({contextmenu: 'context-menu'});
 	$doc.keypress(kbdShortcuts);
