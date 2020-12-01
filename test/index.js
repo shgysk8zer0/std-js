@@ -6,6 +6,8 @@ import kbdShortcuts from '../kbd_shortcuts.js';
 import { loadScript } from '../loader.js';
 document.documentElement.classList.toggle('no-dialog', document.createElement('dialog') instanceof HTMLUnknownElement);
 
+window.$ = $;
+
 ready().then(async () => {
 	const loads = [
 		loadScript('https://cdn.polyfill.io/v3/polyfill.min.js'),

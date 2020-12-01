@@ -7,20 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.5.4] - 2020-12-01
+
 ### Added
 - Add missing params to `CookieStore`
 - `changeTagName` function
 - `Element.prototype.getAttributeNames` shim
+- New functions: `css()`, `attr()`, `data()`, and `toggleClass()`
 
 ### Changed
 - Get existing cookie when deleting them (for change events)
 - Normalize params for `CookieStore`
 - `$.on()` and `$.off()` now also accept an array of events or an object of `{ event: callback }`
+- Update `esQuery` methods to use new functions
 
 ### Fixed
 - Update `cookieStore` to match behavior experienced in Origin-Trail in Chrome
 - Fix missing params in `cookieStore.delete()` causing cookies to not be deleted
 - Fix `cookieStore.delete()` only deleting single cookie
+- Add missing optional arguments to `$.debounce()`, allowing passive listeners
 
 # [v2.5.3] - 2020-10-20
 

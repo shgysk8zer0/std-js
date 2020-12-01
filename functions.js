@@ -4,6 +4,78 @@ export function between(min, val, max) {
 	return val >= min && val <= max;
 }
 
+export function css(what, props = {}, { base = document, priority = undefined } = {}) {
+	if (what instanceof Element) {
+		Object.entries(props).forEach(([p, v]) => {
+			if (typeof v === 'string' || typeof v === 'number') {
+				what.style.setProperty(p, v, priority);
+			} else {
+				what.style.removeProperty(p);
+			}
+		});
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => css(el, props, { base, priority }));
+	} else if (typeof what === 'string') {
+		css(base.querySelectorAll(what), props, { base, priority });
+	}
+}
+
+export function data(what, props = {}, { base = document } = {}) {
+	if (what instanceof Element) {
+		Object.entries(props).forEach(([p, v]) => {
+			if (typeof v === 'string' || typeof v === 'number') {
+				what.dataset[p] = v;
+			} else {
+				delete what.dataset[p];
+			}
+		});
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => data(el, props, { base }));
+	} else if (typeof what === 'string') {
+		data(base.querySelectorAll(what), props);
+	}
+}
+
+export function attr(what, props = {}, { base = document } = {}) {
+	if (what instanceof Element) {
+		Object.entries(props).forEach(([p, v]) => {
+			if (typeof v === 'string' || typeof v === 'number') {
+				what.setAttribute(p, v);
+			} else if (typeof v === 'boolean') {
+				what.toggleAttribute(p, v);
+			} else {
+				what.removeAttribute(p);
+			}
+		});
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => attr(el, props, { base }));
+	} else if (typeof what === 'string') {
+		attr(base.querySelectorAll(what), props);
+	}
+}
+
+export function toggleClass(what, classes, { base = document, force = undefined } = {}) {
+	if (what instanceof Element) {
+		if (typeof classes === 'string') {
+			what.classList.toggle(classes, force);
+		} else if (Array.isArray(classes)) {
+			classes.forEach(cn => toggleClass(what, cn, { force }));
+		} else {
+			Object.entries(classes).forEach(([cl, cond]) => {
+				if (cond instanceof Function) {
+					what.classList.toggle(cl, cond.apply(what, [cl]));
+				} else {
+					what.classList.toggle(cl, cond);
+				}
+			});
+		}
+	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
+		what.forEach(el => toggleClass(el, classes, { force }));
+	} else if (typeof what === 'string') {
+		toggleClass(base.querySelectorAll(what), classes, { force });
+	}
+}
+
 export function clone(thing) {
 	if (thing instanceof Array) {
 		return [...thing].map(clone);
