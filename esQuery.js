@@ -978,7 +978,7 @@ export default class esQuery extends Set {
 
 	/*==================== Listener Functions =================================*/
 	async on(...args) {
-		on(this, ...args)
+		on(this, ...args);
 		return this;
 	}
 
