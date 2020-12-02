@@ -29,6 +29,7 @@ ready().then(async () => {
 	const $body = $('body');
 	const $doc = $(':root');
 
+	$('[data-remove]').click(handlers.remove);
 	$('[data-show]').click(handlers.show);
 	$('[data-close]').click(handlers.close);
 	$('[data-show-modal]').click(handlers.showModal);

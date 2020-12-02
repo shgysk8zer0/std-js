@@ -1,3 +1,8 @@
+export function remove() {
+	const els = document.querySelectorAll(this.dataset.remove);
+	els.forEach(el => el.remove());
+}
+
 export function scrollTo() {
 	const { scrollTo, behavior = 'smooth', block = 'start' } = this.dataset;
 	const target = document.querySelector(scrollTo);
