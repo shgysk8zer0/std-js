@@ -6,4 +6,12 @@
 @import url("https://cdn.kernvalley.us/css/core-css/scrollbar.css");
 @import url("https://cdn.kernvalley.us/css/core-css/layout/default/index.css");
 @import url("https://cdn.kernvalley.us/css/core-css/theme/properties.css");
-@import url("https://cdn.kernvalley.us/css/core-css/theme/default/index.css");
+@import url("https://cdn.kernvalley.us/css/core-css/theme/adwaita/index.css");
+
+#nav {
+	gap: 0.5em;
+}
+
+#nav .btn {
+	max-width: 250px;
+}
