@@ -27,7 +27,6 @@ ready().then(async () => {
 
 	await Promise.allSettled(loads);
 
-	const $body = $('body');
 	const $doc = $(':root');
 
 	$('[data-remove]').click(handlers.remove);
