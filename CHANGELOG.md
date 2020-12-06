@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Create script with event(click) handlers using `data-*` attributes
+- Create module for working with files, consisting of `open()` and `save()` functions
 
 ## [v2.5.4] - 2020-12-01
 
