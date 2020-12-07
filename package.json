@@ -1,6 +1,6 @@
 {
   "name": "std-js",
-  "version": "2.5.4",
+  "version": "2.6.4",
   "description": "A JavaScript library for making front-end development sane!",
   "config": {
     "serve": {

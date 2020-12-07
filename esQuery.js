@@ -1,5 +1,6 @@
 import { attr, css, data, toggleClass, on, off, read, debounce,
-	prefersReducedMotion, isInViewport } from './functions.js';
+	prefersReducedMotion, isInViewport, mediaQuery, getLocation, ready, loaded }
+	from './functions.js';
 
 const PREFIXES = [
 	'',
@@ -142,6 +143,7 @@ export default class esQuery extends Set {
 	 * @deprecated [will be removed in v3.0.0]
 	 */
 	async import(selector = 'body > *') {
+		console.warn('`esQuery.import()` is deprecated and will be removed');
 		const imports = this.toArray().filter(node => node.tagName === 'LINK'
 			&& node.relList.contains('import'));
 		const docs = await Promise.all(imports.map(link => {
@@ -170,7 +172,9 @@ export default class esQuery extends Set {
 	}
 
 	async animate(keyframes, opts = 400) {
-		if (('animate' in Element.prototype) && !prefersReducedMotion()) {
+		if (typeof keyframes === 'string') {
+			return this.css({ 'animation-name': keyframes });
+		} else if (('animate' in Element.prototype) && ! prefersReducedMotion()) {
 			await this.map(node => node.animate(keyframes, opts).finished);
 			return this;
 		} else {
@@ -219,6 +223,7 @@ export default class esQuery extends Set {
 		to = 'none',
 		id = 'grayscale',
 	} = {}) {
+		console.warn('`esQuery.animateFilter()` is deprecated and will be removed');
 		return this.animate([
 			{ filter: `${from}` },
 			{ filter: `${to}` },
@@ -247,6 +252,7 @@ export default class esQuery extends Set {
 		to = '0.5em 0.5em 0.5em rgba(0,0,0,0.3)',
 		id = 'drop-shadow',
 	} = {}) {
+		console.warn('`esQuery.anifilterDropShadow()` is deprecated and will be removed');
 		return this.animate([
 			{ filter: `drop-shadow(${from})` },
 			{ filter: `drop-shadow(${to})` },
@@ -275,6 +281,7 @@ export default class esQuery extends Set {
 		to = 1,
 		id = 'grayscale',
 	} = {}) {
+		console.warn('`esQuery.filterGrayScale()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `grayscale(${from})`,
 			to: `grayscale(${to})`,
@@ -302,6 +309,7 @@ export default class esQuery extends Set {
 		to = '5px',
 		id = 'blur',
 	} = {}) {
+		console.warn('`esQuery.filterBlur()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `blur(${from})`,
 			to: `blur(${to})`,
@@ -329,6 +337,7 @@ export default class esQuery extends Set {
 		to = '100%',
 		id = 'invert',
 	} = {}) {
+		console.warn('`esQuery.filterInvert()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `invert(${from})`,
 			to: `invert(${to})`,
@@ -356,6 +365,7 @@ export default class esQuery extends Set {
 		to = '90deg',
 		id = 'hue-rotate',
 	} = {}) {
+		console.warn('`esQuery.filterHueRotate()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `hue-rotate(${from})`,
 			to: `hue-rotate(${to})`,
@@ -383,6 +393,7 @@ export default class esQuery extends Set {
 		to = 1,
 		id = 'brightness',
 	} = {}) {
+		console.warn('`esQuery.filterBrightness()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `brightness(${from})`,
 			to: `brightness(${to})`,
@@ -410,6 +421,7 @@ export default class esQuery extends Set {
 		to = 1,
 		id = 'contrast',
 	} = {}) {
+		console.warn('`esQuery.filterContrast()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `contrast(${from})`,
 			to: `contrast(${to})`,
@@ -437,6 +449,7 @@ export default class esQuery extends Set {
 		to = 1,
 		id = 'saturate',
 	} = {}) {
+		console.warn('`esQuery.filterSaturate()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `saturate(${from})`,
 			to: `saturate(${to})`,
@@ -464,6 +477,7 @@ export default class esQuery extends Set {
 		to = 1,
 		id = 'saturate',
 	} = {}) {
+		console.warn('`esQuery.filerOpacity()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `opacity(${from})`,
 			to: `opacity(${to})`,
@@ -491,6 +505,7 @@ export default class esQuery extends Set {
 		to = 1,
 		id = 'sepia',
 	} = {}) {
+		console.warn('`esQuery.filterSepia()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `sepia(${from})`,
 			to: `sepia(${to})`,
@@ -812,6 +827,7 @@ export default class esQuery extends Set {
 	 * @deprecated [will be removed in v3.0.0]
 	 */
 	async loadHTML(href) {
+		console.warn('`esQuery.loadHTML()` is deprecated and will be removed');
 		const url = new URL(href, location.origin);
 		const resp = await fetch(url);
 
@@ -1182,7 +1198,7 @@ export default class esQuery extends Set {
 		return this.on('pagehide', callback, ...args);
 	}
 
-	async watch(watching, options = [], attributeFilter = []) {
+	async mutate(watching, options = [], attributeFilter = []) {
 		/*https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver*/
 		const watcher = new MutationObserver(mutations => {
 			mutations.forEach(mutation => watching[mutation.type].call(mutation));
@@ -1193,6 +1209,11 @@ export default class esQuery extends Set {
 		}, { attributeFilter });
 		this.forEach(el => watcher.observe(el, obs));
 		return this;
+	}
+
+	async watch(...args) {
+		console.warn('`esQuery.watch()` is deprecated, please use `esQuery.mutate()` instead');
+		return await this.mutate(...args);
 	}
 
 	/**
@@ -1211,18 +1232,34 @@ export default class esQuery extends Set {
 		return this;
 	}
 
-	async attr(attrs = {}) {
-		attr(this, attrs);
+	async attr(...args) {
+		attr(this, ...args);
 		return this;
 	}
 
-	async css(props = {}, { priority = undefined } = {}) {
-		css(this, props, { priority });
+	async css(...args) {
+		css(this, ...args);
 		return this;
 	}
 
-	async data(props = {}) {
-		data(this, props);
+	async data(...args) {
+		data(this, ...args);
 		return this;
+	}
+
+	static mediaQuery(query) {
+		return mediaQuery(query);
+	}
+
+	static async getLocation(...args) {
+		return await getLocation(...args);
+	}
+
+	static get loaded() {
+		return loaded();
+	}
+
+	static get ready() {
+		return ready();
 	}
 }

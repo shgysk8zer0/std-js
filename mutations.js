@@ -1,6 +1,6 @@
 import * as handlers from './dataHandlers.js';
-import {$} from './functions.js';
-import {clickHandler} from './actions.js';
+import { $ } from './functions.js';
+import { clickHandler } from './actions.js';
 let observer = null;
 
 if (IntersectionObserver instanceof Function) {

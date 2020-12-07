@@ -98,12 +98,16 @@ export default class UTM extends URL {
 		return this.searchParams.has('utm_source');
 	}
 
-	clear() {
+	clear(replaceState = false) {
 		this.searchParams.delete('utm_source');
 		this.searchParams.delete('utm_medium');
 		this.searchParams.delete('utm_campaign');
 		this.searchParams.delete('utm_content');
 		this.searchParams.delete('utm_term');
+
+		if (replaceState) {
+			history.replaceState(history.state, document.title, this.href);
+		}
 		return this;
 	}
 }
