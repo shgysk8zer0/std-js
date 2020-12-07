@@ -1,7 +1,8 @@
 /**
  * HTML API using data-* attributes
  */
-import {selectElement} from './functions.js';
+import {selectElement} from './deprecatedFunctions.js';
+
 export function copy() {
 	let el = null;
 	if (this.dataset.copy.length) {

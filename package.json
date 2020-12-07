@@ -1,6 +1,6 @@
 {
   "name": "std-js",
-  "version": "2.5.4",
+  "version": "2.6.4",
   "description": "A JavaScript library for making front-end development sane!",
   "config": {
     "serve": {
@@ -55,7 +55,6 @@
   },
   "devDependencies": {
     "eslint": "^7.3.1",
-    "eslint-plugin-async-await": "0.0.0",
     "htmlhint": "^0.14.1",
     "http-server": "^0.12.3"
   },

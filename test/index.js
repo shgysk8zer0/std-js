@@ -1,16 +1,22 @@
 import '../shims.js';
 import '../deprefixer.js';
 import { loadHandler } from './funcs.js';
-import { $, ready } from '../functions.js';
+import { $ } from '../functions.js';
 // import kbdShortcuts from '../kbd_shortcuts.js';
 import { loadScript } from '../loader.js';
 import * as handlers from '../data-handlers.js';
 
-document.documentElement.classList.toggle('no-dialog', document.createElement('dialog') instanceof HTMLUnknownElement);
+$(document.documentElement, {
+	'no-dialog': document.createElement('dialog') instanceof HTMLUnknownElement,
+	'no-details': document.createElement('details') instanceof HTMLUnknownElement,
+	'js': true,
+	'no-js': false,
+	'no-custom-elements': 'customElements' in window,
+});
 
 window.$ = $;
 
-ready().then(async () => {
+$.ready.then(async () => {
 	const loads = [
 		loadScript('https://cdn.polyfill.io/v3/polyfill.min.js'),
 	];

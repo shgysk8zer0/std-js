@@ -132,12 +132,11 @@ export function supports(type) {
 		return false;
 	}
 }
+
 export function supportsAsClasses(...feats) {
-	if (feats instanceof Array) {
-		feats.forEach(feat => {
-			supports(feat)
-				? document.documentElement.classList.add(feat)
-				: document.documentElement.classList.add(`no-${feat}`);
-		});
-	}
+	feats.forEach(feat => {
+		supports(feat)
+			? document.documentElement.classList.add(feat)
+			: document.documentElement.classList.add(`no-${feat}`);
+	});
 }

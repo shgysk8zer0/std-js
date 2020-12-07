@@ -193,19 +193,16 @@ export function mediaQuery(query = {}) {
 }
 
 export function prefersReducedMotion() {
-	return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+	return mediaQuery({ 'prefers-reduced-motion': 'reduce' });
 }
 
 export function prefersColorScheme() {
-	return typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches
-		? 'dark' : 'light';
+	return mediaQuery({ 'prefers-color-scheme': 'dark' }) ? 'dark': 'light';
 }
 
 export function displayMode() {
 	const displays = ['browser', 'standalone', 'minimal-ui', 'fullscreen'];
-	return typeof matchMedia === 'function'
-		? displays.find(mode => matchMedia(`(display-mode: ${mode})`).matches)
-		: 'browser';
+	return displays.find(mode => mediaQuery({ 'display-mode': mode })) || 'browser';
 }
 
 export function isInViewport(el) {
@@ -288,144 +285,56 @@ export function debounce(func, wait = 17, immediate = false) {
 	};
 }
 
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export function reportError(err) {
-	if (err instanceof ErrorEvent) {
-		const url = new URL('Errors/Client/', document.documentElement.dataset.endpoint || 'https://api.kernvalley.us');
-		const data = new FormData();
-		data.set('name', err.type);
-		data.set('message', err.message);
-		data.set('lineNumber', err.lineno);
-		data.set('columnNumber', err.colno);
-		data.set('fileName', err.filename);
-		return navigator.sendBeacon(url, data);
-	} else {
-		return false;
-	}
-}
-
-export function $(selector, parent = document) {
+function $(selector, parent = document) {
 	return new esQuery(selector, parent);
 }
 
+export async function sleep(ms, ...args) {
+	await new Promise(resolve => setTimeout(() => resolve(...args), ms));
+}
+
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export async function wait(ms) {
-	return new Promise(resolve => {
-		setTimeout(resolve, ms);
-	});
+	console.warn('`wait()` is deprecated. Please use `sleep()` instead.');
+	await sleep(ms);
 }
 
 export async function ready(...requires) {
 	if (document.readyState === 'loading') {
 		await waitUntil(document, 'DOMContentLoaded');
 	}
+
 	await defined(...requires);
-	await importsLoaded();
 }
 
 export async function defined(...els) {
-	if (els.length !== 0) {
-		await Promise.all(els.map(el => customElements.whenDefined(el)));
-	}
+	await Promise.all(els.map(el => customElements.whenDefined(el)));
 }
 
 export async function loaded(...requires) {
 	if (document.readyState !== 'complete') {
 		await waitUntil(window, 'load');
 	}
-	await importsLoaded();
+
 	await defined(...requires);
 }
 
-
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export async function importsLoaded() {
-	await $('link[rel~="import"]:not([async])').map(async link => {
-		if (link.import === null) {
-			await new Promise((resolve, reject) => {
-				link.addEventListener('load', () => resolve());
-				link.addEventListener('error', reject);
-			});
-		}
-	});
-}
-
-
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export async function getImports() {
-	await importsLoaded();
-	const imports = await $('link[rel~="import"][name]').map(link => link.getAttribute('name'));
-	return await Promise.all(imports.map(async name => {
-		return {
-			name,
-			content: await importLink(name),
-		};
-	}));
-}
-
-
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export async function importLink(name) {
-	await importsLoaded();
-	const link = document.querySelector(`link[rel~="import"][name="${name}"]`);
-	if (link instanceof HTMLLinkElement) {
-		return new Promise((resolve, reject) => {
-			link.addEventListener('error', reject);
-			if (link.import === null) {
-				link.addEventListener('load', () => resolve(link.import), { once: true });
-			} else {
-				resolve(link.import);
-			}
-		});
-	} else {
-		throw new Error(`Link named "${name}" has no content to import`);
-	}
-}
-
 export async function waitUntil(target, event) {
-	const prom = new Promise(resolve => {
-		target.addEventListener(event, () => resolve(), { once: true });
-	});
-	await prom;
+	await new Promise(resolve => target.addEventListener(event, resolve, { once: true }));
 }
 
 export async function pageVisible() {
-	await new Promise(resolve => {
-		if (document.visibilityState === 'visible') {
-			resolve();
-		} else {
-			const handler = () => {
-				if (document.visibilityState === 'visible') {
-					document.removeEventListener('visibilitychange', handler);
-					resolve();
-				}
-			};
-			document.addEventListener('visibilitychange', handler);
-		}
-	});
+	if (document.visibilityState !== 'visible') {
+		await waitUntil(document, 'visibilitychange');
+	}
 }
 
 export async function pageHidden() {
-	await new Promise(resolve => {
-		if (document.visibilityState === 'hidden') {
-			resolve();
-		} else {
-			const handler = () => {
-				if (document.visibilityState === 'hidden') {
-					document.removeEventListener('visibilitychange', handler);
-					resolve();
-				}
-			};
-			document.addEventListener('visibilitychange', handler);
-		}
-	});
+	if (document.visibilityState !== 'hidden') {
+		await waitUntil(document, 'visibilitychange');
+	}
 }
 
 export function* toGenerator(...items) {
@@ -456,80 +365,8 @@ export function setIncrementor(obj, {
 	});
 }
 
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export function selectElement(el) {
-	if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-		el.select();
-	} else if (window.getSelection) {
-		const selection = getSelection();
-		const range = document.createRange();
-		range.selectNodeContents(el);
-		selection.removeAllRanges();
-		selection.addRange(range);
-	} else if (document.body.createTextRange) {
-		const range = document.body.createTextRange();
-		range.moveToElementText(el);
-		range.select();
-	} else {
-		throw new Error('Text selection is not supported');
-	}
-}
-
-
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export async function imgur(url, {
-	sizes = ['100vw'],
-	alt = '',
-	defaultSize = 'h',
-} = {}) {
-	const imgurSizes = {
-		h: 1024,
-		l: 640,
-		m: 320,
-		t: 160,
-	};
-
-	const formats = {
-		'image/webp': '.webp',
-		'image/png': '.png',
-	};
-
-	const picture = document.createElement('picture');
-	const imgur = new URL(url, 'https://i.imgur.com/');
-	const image = new Image();
-
-
-	imgur.host = 'i.imgur.com';
-	imgur.protocol = 'https:';
-	imgur.pathname = imgur.pathname.replace(/\.[A-z]+$/, '');
-	Object.entries(formats).forEach(format => {
-		const [type, ext] = format;
-		const source = document.createElement('source');
-		source.type = type;
-		source.sizes = sizes.join(', ');
-		const srcset = Object.entries(imgurSizes).map(size => {
-			const [suffix, width] = size;
-			return `${imgur}${suffix}${ext} ${width}w`;
-		});
-		source.srcset = srcset.join(', ');
-		picture.append(source);
-	});
-
-	return new Promise((resolve, reject) => {
-		picture.append(image);
-		image.alt = alt;
-		image.addEventListener('load', (event) => resolve(event.target.parentElement), { once: true });
-		image.addEventListener('error', event => reject(event.target));
-		image.src = `${imgur}${defaultSize}.png`;
-	});
-}
-
 export async function read(...nodes) {
-	if (!window.hasOwnProperty('speechSynthesis')) {
+	if (! window.hasOwnProperty('speechSynthesis')) {
 		throw new Error('SpeechSynthesis not supported');
 	}
 
@@ -565,24 +402,6 @@ export function chunkText(string, length) {
 		chunks[i] = string.substr(offset, length);
 	}
 	return chunks;
-}
-
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export function query(selector, node = document) {
-	let results = Array.from(node.querySelectorAll(selector));
-	if (node.matches(selector)) {
-		results.unshift(node);
-	}
-	return results;
-}
-
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export function isOnline() {
-	return navigator.onLine === true;
 }
 
 export async function getNotificationPermission() {
@@ -628,204 +447,18 @@ export async function notificationsAllowed() {
 	return getNotificationPermission().then(perm => perm === 'granted');
 }
 
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export async function notify(title, {
-	body = '',
-	icon = '',
-	dir = document.dir,
-	lang = document.documentElement.lang,
-	tag = '',
-	data = null,
-	vibrate = false,
-	renotify = false,
-	requireInteraction = false,
-	actions = [],
-	silent = false,
-	noscreen = false,
-	sticky = false,
-} = {}) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			if (!(window.Notification instanceof Function)) {
-				throw new Error('Notifications not supported');
-			} else if (Notification.permission === 'denied') {
-				throw new Error('Notification permission denied');
-			} else if (Notification.permission === 'default') {
-				await new Promise(async (resolve, reject) => {
-					const resp = await Notification.requestPermission();
-
-					if (resp === 'granted') {
-						resolve();
-					} else {
-						reject(new Error('Notification permission not granted'));
-					}
-				});
-			}
-
-			if (('serviceWorker' in navigator) && navigator.serviceWorker.controller !== null) {
-				const reg = await navigator.serviceWorker.getRegistration();
-				await reg.showNotification(title, {
-					body,
-					icon,
-					dir,
-					lang,
-					tag,
-					actions,
-					data,
-					vibrate,
-					renotify,
-					requireInteraction,
-					silent,
-					noscreen,
-					sticky,
-				});
-				const notifications = await reg.getNotifications();
-				resolve(notifications[notifications.length - 1]);
-			} else {
-				const notification = new Notification(title, {
-					body,
-					icon,
-					dir,
-					lang,
-					tag,
-					data,
-					vibrate,
-					renotify,
-					requireInteraction,
-					actions,
-					silent,
-					noscreen,
-					sticky,
-				});
-
-				notification.addEventListener('show', event => resolve(event.target), { once: true });
-				notification.addEventListener('error', event => reject(event.target), { once: true });
-			}
-
-		} catch (err) {
-			reject(err);
-		}
-	});
-}
-
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export function isInternalLink(link) {
-	return link.origin === location.origin;
-}
-
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export async function parseResponse(resp) {
-	if (!resp.headers.has('Content-Type')) {
-		throw new Error(`No Content-Type header in request to "${resp.url}"`);
-	} else if (resp.headers.get('Content-Length') === 0) {
-		throw new Error(`No response body for "${resp.url}"`);
-	}
-	const type = resp.headers.get('Content-Type');
-	if (type.startsWith('application/json')) {
-		return resp.json();
-	} else if (type.startsWith('application/xml')) {
-		return new DOMParser().parseFromString(await resp.text(), 'application/xml');
-	} else if (type.startsWith('image/svg+xml')) {
-		return new DOMParser().parseFromString(await resp.text(), 'image/svg+xml');
-	} else if (type.startsWith('text/html')) {
-		return new DOMParser().parseFromString(await resp.text(), 'text/html');
-	} else if (type.startsWith('text/plain')) {
-		return resp.text();
-	} else {
-		throw new TypeError(`Unsupported Content-Type: ${type}`);
-	}
-}
-
-export async function getLocation(options = {}) {
+export async function getLocation({ maximumAge, timeout, enableHighAccuracy = false } = {}) {
 	/* https://developer.mozilla.org/en-US/docs/Web/API/Geolocation.getCurrentPosition */
 	return new Promise((resolve, reject) => {
-		if (!('geolocation' in navigator)) {
+		if (! ('geolocation' in navigator)) {
 			reject('Your browser does not support GeoLocation');
 		}
-		navigator.geolocation.getCurrentPosition(resolve, reject, options);
+		navigator.geolocation.getCurrentPosition(resolve, reject, { maximumAge, timeout, enableHighAccuracy });
 	});
 }
 
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export async function registerServiceWorker(path) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			if (!Navigator.prototype.hasOwnProperty('serviceWorker')) {
-				throw new Error('Service worker not supported');
-			} else if (!navigator.onLine) {
-				throw new Error('Offline');
-			}
-
-			const url = new URL(path, document.baseURI);
-			const reg = await navigator.serviceWorker.register(url, { scope: document.baseURI });
-
-			if (navigator.onLine) {
-				reg.update();
-			}
-
-			reg.addEventListener('updatefound', event => resolve(event.target));
-			reg.addEventListener('install', event => resolve(event.target));
-			reg.addEventListener('activate', event => resolve(event.target));
-			reg.addEventListener('error', event => reject(event.target));
-			reg.addEventListener('fetch', console.info);
-		} catch (error) {
-			reject(error);
-		}
-	});
-}
-
-/**
- * @deprecated [will be removed in v3.0.0]
- */
-export async function marquee({
-	parent,
-	delay = 200,
-	cursor = '|',
-	blinkRate = 800,
-	pause = 1000,
-	containerTag = 'span',
-	cursorTag = 'span',
-} = {}, ...sentences) {
-	const cursorEl = document.createElement(cursorTag);
-	const container = document.createElement(containerTag);
-
-	if (Element.prototype.animate) {
-		cursorEl.animate([
-			{ opacity: 0 },
-			{ opacity: 1 }
-		], {
-			duration: blinkRate,
-			iterations: Infinity,
-			direction: 'alternate',
-		});
-	}
-
-	cursorEl.textContent = cursor;
-	parent.prepend(container, cursorEl);
-
-	for (const text of toGenerator(...sentences)) {
-		container.textContent = '';
-
-		for (const char of text.split('')) {
-			container.append(char);
-			await wait(delay);
-		}
-
-		await wait(pause);
-
-		while (container.textContent !== '') {
-			const chars = container.textContent.split('');
-			chars.pop();
-			container.textContent = chars.join('');
-			await wait(delay);
-		}
-	}
-}
+$.mediaQuery = esQuery.mediaQuery;
+$.getLocation = esQuery.getLocation;
+$.loaded = esQuery.loaded;
+$.ready = esQuery.ready;
+export { $ };

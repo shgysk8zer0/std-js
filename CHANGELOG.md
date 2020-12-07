@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.6.0] - 2020-12-07
+
 ### Added
 - Create script with event(click) handlers using `data-*` attributes
 - Create module for working with files, consisting of `open()` and `save()` functions
+- Add `ready`, `loaded`, `mediaQuery`, & `getLocation` static methods to `esQuery`
+
+### Changed
+- Move deprecated function in `functions.js` to separate script
+- Set `esQuery` static methods on the `$` function when exporting
+- Rename `wait()` to `sleep()` and alias old function with warning
+- Misc. updates to reuse functions instead of repeating them
+- Update linting & dependencies
 
 ## [v2.5.4] - 2020-12-01
 
