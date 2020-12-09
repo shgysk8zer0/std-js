@@ -979,8 +979,8 @@ export default class esQuery extends Set {
 		return this.each(el => el.toggleAttribute(...args));
 	}
 
-	async value(val) {
-		return this.each(el => el.value = val);
+	async value(value) {
+		return this.attr({ value });
 	}
 
 	async pause() {
