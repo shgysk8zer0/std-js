@@ -1,3 +1,7 @@
+if (! ('crypto' in window) && 'msCrypto' in window) {
+	window.crypto = window.msCrypto;
+}
+
 if (!('Notification' in window)) {
 	window.Notification = window.notifications || window.webkitNotifications || window.oNotifications || window.msNotifications || false;
 }

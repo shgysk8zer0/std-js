@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `uuidv4()` and `uuidv6()` funcions in module
+
 ## [v2.6.0] - 2020-12-07
 
 ### Added
