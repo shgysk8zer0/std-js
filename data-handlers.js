@@ -1,4 +1,4 @@
-import { $ } from '/functions.js';
+import { $ } from './functions.js';
 
 export function remove() {
 	$(this.dataset.remove).remove();
