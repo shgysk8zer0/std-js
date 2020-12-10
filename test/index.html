@@ -29,12 +29,14 @@
 			<h1>JavaScript module testing</h1>
 		</header>
 		<nav id="nav" class="sticky top shadow z-3 flex row no-wrap adwaita-toolbar justify-space-around">
-			<button type="button" class="btn btn-default grow-1" data-selector="#header" data-toggle-attribute="hidden">Hide</button>
+			<button type="button" class="btn btn-default grow-1" data-hide="#header" data-disable="#hide" data-enable="#unhide" id="hide">Hide</button>
+			<button type="button" class="btn btn-default grow-1" data-unhide="#header" data-disable="#unhide" data-enable="#hide" id="unhide" disabled="">Show</button>
 			<button type="button" class="btn btn-default grow-1" data-selector="body" data-toggle-class="grid">Grid</button>
 			<button type="button" class="btn btn-default grow-1" data-scroll-to="#header">Top</button>
 			<button type="button" class="btn btn-default grow-1" data-scroll-to="#footer">Bottom</button>
 			<button type="button" class="btn btn-default grow-1" data-remove="article">Delete Articles</button>
-
+			<button type="button" class="btn btn-default grow-1" data-cookie="foo" data-path="/test/" data-value="bar" data-secure="" data-expires="2020-12-25T12:00:00">Set Cookie</button>
+			<button type="button" class="btn btn-default grow-1" data-cookie="foo" data-path="/test/" data-secure="">Delete Cookie</button>
 		</nav>
 		<main id="main">
 			<div data-infinite-scroll="/test/assets/article.html?page=1"></div>

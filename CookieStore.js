@@ -7,6 +7,8 @@
  * @TODO verify spec compliance as best as is possible
  */
 
+let onchange = null;
+
 function getAllCookies() {
 	if (document.cookie.length === 0) {
 		return [];
@@ -118,6 +120,21 @@ function setter({
 }
 
 export default class CookieStore extends EventTarget {
+	get onchange() {
+		return onchange;
+	}
+
+	set onchange(callback) {
+		if (callback instanceof Function) {
+			this.removeEventListener('change', onchange);
+			this.addEventListener('change', callback);
+			onchange = callback;
+		} else {
+			this.removeEventListener('change', onchange);
+			onchange = null;
+		}
+	}
+
 	async get(args) {
 		const cookies = await this.getAll(args);
 
