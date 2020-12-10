@@ -105,7 +105,7 @@ export async function init(base = document, { passive = true, capture = true, on
 	$('[data-unhide]', base).click(unhide, { passive, capture, once });
 	$('[data-disable]', base).click(disable, { passive, capture, once });
 	$('[data-enable]', base).click(enable, { passive, capture, once });
-	$('[data-scrollTo]', base).click(scrollTo, { passive, capture, once });
+	$('[data-scroll-to]', base).click(scrollTo, { passive, capture, once });
 	$('[data-show]', base).click(show, { passive, capture, once });
 	$('[data-open]', base).click(open, { passive, capture, once });
 	$('[data-show-modal]', base).click(showModal, { passive, capture, once });
