@@ -1,12 +1,12 @@
 import '../shims.js';
 import '../deprefixer.js';
 import { loadHandler } from './funcs.js';
-import { $ } from '../functions.js';
+import { $, sleep } from '../functions.js';
 // import kbdShortcuts from '../kbd_shortcuts.js';
 import { loadScript } from '../loader.js';
-import * as handlers from '../data-handlers.js';
+import { init } from '../data-handlers.js';
 
-$(document.documentElement, {
+$(document.documentElement).toggleClass({
 	'no-dialog': document.createElement('dialog') instanceof HTMLUnknownElement,
 	'no-details': document.createElement('details') instanceof HTMLUnknownElement,
 	'js': true,
@@ -15,6 +15,40 @@ $(document.documentElement, {
 });
 
 window.$ = $;
+init();
+
+cookieStore.addEventListener('change', async ({ changed, deleted }) => {
+	const dialog = document.createElement('dialog');
+	const header = document.createElement('h2');
+	const changeList = document.createElement('details');
+	const delList = document.createElement('details');
+	const changeSum = document.createElement('summary');
+	const delSum = document.createElement('summary');
+
+	delList.classList.add('accordion');
+	delList.open = deleted.length !== 0;
+	changeList.classList.add('accordion');
+	changeList.open = changed.length !== 0;
+
+	header.textContent = 'Cookies';
+	changeSum.textContent = 'Changed';
+	delSum.textContent = 'Deleted';
+
+	const makeItems = ({ name, value }) => {
+		const item = document.createElement('div');
+		item.textContent = `${name}: ${value}`;
+		return item;
+	};
+
+	changeList.append(changeSum, ...changed.map(makeItems));
+	delList.append(delSum, ...deleted.map(makeItems));
+	dialog.append(header, changeList, delList);
+	dialog.addEventListener('close', ({ target }) => target.close());
+	document.body.append(dialog);
+	dialog.showModal();
+	await sleep(8000);
+	dialog.close();
+});
 
 $.ready.then(async () => {
 	const loads = [
@@ -34,14 +68,6 @@ $.ready.then(async () => {
 	await Promise.allSettled(loads);
 
 	const $doc = $(':root');
-
-	$('[data-remove]').click(handlers.remove);
-	$('[data-show]').click(handlers.show);
-	$('[data-close]').click(handlers.close);
-	$('[data-show-modal]').click(handlers.showModal);
-	$('[data-scroll-to]').click(handlers.scrollTo);
-	$('[data-toggle-class]').click(handlers.toggleClass);
-	$('[data-toggle-attribute]').click(handlers.toggleAttribute);
 	$doc.replaceClass('no-js', 'js');
 	$doc.data({foo: {a: 1, b: [1,2]}, fooBar: false, url: new URL('./foo', document.baseURI), now: new Date()});
 	$doc.attr({lang: 'en', dir: 'ltr'});

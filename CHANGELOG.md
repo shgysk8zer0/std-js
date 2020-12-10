@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `uuidv4()` and `uuidv6()` funcions in module
+- `cookieStore.onchange`
+- `hide`, `unhide`, `enable`, `disable`, and `cookie` event handlers for `data-*` attributes
+- An `init()` function for `data-*` module
 
 ## [v2.6.0] - 2020-12-07
 
