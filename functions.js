@@ -183,6 +183,39 @@ export function changeTagName(target, tag = 'div', { replace = true, is = null }
 	return el;
 }
 
+export function createSVG({ fill = null, height = null, width = null } = {}) {
+	const xmlns = 'http://www.w3.org/2000/svg';
+	const svg = document.createElementNS(xmlns, 'svg');
+
+	if (typeof height === 'number') {
+		svg.setAttribute('height', height);
+	}
+
+	if (typeof width === 'number') {
+		svg.setAttribute('width', width);
+	}
+
+	if (typeof fill === 'string') {
+		svg.setAttribute('fill', fill);
+	}
+
+	return svg;
+}
+
+export function useSVG(sprite, { src = '/img/icons.svg', fill = null, height = null, width = null } = {}) {
+	const url = new URL(src, document.baseURI);
+	const xmlns = 'http://www.w3.org/2000/svg';
+	const xlink = 'http://www.w3.org/1999/xlink';
+	const svg = createSVG({ fill, height, width });
+	const use = document.createElementNS(xmlns, 'use');
+
+	url.hash = `#${sprite}`;
+	use.setAttributeNS(xlink, 'xlink:href', url.href);
+	svg.append(use);
+
+	return svg;
+}
+
 export function mediaQuery(query = {}) {
 	if (typeof matchMedia !== 'function') {
 		return false;
