@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `hide`, `unhide`, `enable`, `disable`, and `cookie` event handlers for `data-*` attributes
 - An `init()` function for `data-*` module
 - Add `data-*` handlers for `full-screen`, `copy`, and `navigate`
+- Create functions for creating `<svg>` and `<use>`
 
 ## [v2.6.0] - 2020-12-07
 
