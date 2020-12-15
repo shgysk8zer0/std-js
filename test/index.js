@@ -1,6 +1,6 @@
 import '../shims.js';
 import '../deprefixer.js';
-import '../cookie-theme.js';
+import '../theme-cookie.js';
 import { loadHandler } from './funcs.js';
 import { $, sleep } from '../functions.js';
 // import kbdShortcuts from '../kbd_shortcuts.js';

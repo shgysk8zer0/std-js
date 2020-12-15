@@ -20,6 +20,20 @@ export function enable() {
 	$(this.dataset.enable).enable();
 }
 
+export function fullScreen() {
+	const target = document.querySelector(this.dataset.fullScreen);
+
+	if (target instanceof Element) {
+		if (document.fullscreenElement instanceof Element && document.fullscreenElement.isSameNode(target)) {
+			document.exitFullscreen();
+		} else {
+			target.requestFullscreen();
+		}
+	} else if (document.fullscreenElement instanceof Element) {
+		document.exitFullscreen();
+	}
+}
+
 export async function cookie() {
 	const { cookie: name, value = null, domain = null, maxAge, expires, sameSite = 'Strict', path = '/' } = this.dataset;
 	if (typeof value === 'string') {
@@ -34,11 +48,11 @@ export async function cookie() {
 }
 
 export function scrollTo() {
-	const { scrollTo, behavior = 'smooth', block = 'start' } = this.dataset;
+	const { scrollTo, behavior = 'smooth', block = 'start', inline = 'nearest' } = this.dataset;
 	const target = document.querySelector(scrollTo);
 
 	if (target instanceof Element) {
-		target.scrollIntoView({ behavior, block });
+		target.scrollIntoView({ behavior, block, inline });
 	}
 }
 
@@ -80,7 +94,31 @@ export function toggleAttribute() {
 	} else {
 		els.forEach(el => el.toggleAttribute(toggleAttribute));
 	}
+}
 
+export function copy() {
+	if (navigator.clipboard && navigator.clipboard.writeText instanceof Function) {
+		navigator.clipboard.writeText(this.dataset.copy);
+	}
+}
+
+export function navigate() {
+	switch(this.dataset.navigate) {
+		case 'back':
+			history.back();
+			break;
+
+		case 'forward':
+			history.forward();
+			break;
+
+		case 'reload':
+			location.reload();
+			break;
+
+		default:
+			throw new DOMException(`Invalid value for data-navigate: ${this.dataset.navigate}`);
+	}
 }
 
 export function toggleClass() {
@@ -100,17 +138,22 @@ export function toggleClass() {
 
 export async function init(base = document, { passive = true, capture = true, once = false } = {}) {
 	await $.ready;
-	$('[data-remove]', base).click(remove, { passive, capture, once });
-	$('[data-hide]', base).click(hide, { passive, capture, once });
-	$('[data-unhide]', base).click(unhide, { passive, capture, once });
-	$('[data-disable]', base).click(disable, { passive, capture, once });
-	$('[data-enable]', base).click(enable, { passive, capture, once });
-	$('[data-scroll-to]', base).click(scrollTo, { passive, capture, once });
-	$('[data-show]', base).click(show, { passive, capture, once });
-	$('[data-open]', base).click(open, { passive, capture, once });
-	$('[data-show-modal]', base).click(showModal, { passive, capture, once });
-	$('[data-close]', base).click(close, { passive, capture, once });
-	$('[data-toggle-attribute]', base).click(toggleAttribute, { passive, capture, once });
-	$('[data-toggle-class]', base).click(toggleClass, { passive, capture, once });
-	$('[data-cookie]', base).click(cookie);
+	await Promise.allSettled([
+		$('[data-remove]', base).click(remove, { passive, capture, once }),
+		$('[data-hide]', base).click(hide, { passive, capture, once }),
+		$('[data-unhide]', base).click(unhide, { passive, capture, once }),
+		$('[data-disable]', base).click(disable, { passive, capture, once }),
+		$('[data-enable]', base).click(enable, { passive, capture, once }),
+		$('[data-scroll-to]', base).click(scrollTo, { passive, capture, once }),
+		$('[data-show]', base).click(show, { passive, capture, once }),
+		$('[data-open]', base).click(open, { passive, capture, once }),
+		$('[data-show-modal]', base).click(showModal, { passive, capture, once }),
+		$('[data-close]', base).click(close, { passive, capture, once }),
+		$('[data-toggle-attribute]', base).click(toggleAttribute, { passive, capture, once }),
+		$('[data-toggle-class]', base).click(toggleClass, { passive, capture, once }),
+		$('[data-cookie]', base).click(cookie),
+		$('[data-navigate]', base).click(navigate),
+		$('[data-full-screen]', base).click(fullScreen),
+		$('[data-copy]', base).click(copy),
+	]);
 }
