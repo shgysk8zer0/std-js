@@ -25,8 +25,14 @@ export async function loaded(target) {
 			reject(err);
 		}
 
-		target.addEventListener('load', load);
-		target.addEventListener('error', error);
+		if (target instanceof HTMLScriptElement && target.noModule === true) {
+			resolve(target);
+		} else if (target instanceof HTMLLinkElement && target.disabled === true) {
+			resolve(target);
+		} else {
+			target.addEventListener('load', load);
+			target.addEventListener('error', error);
+		}
 	});
 }
 
@@ -214,24 +220,18 @@ export async function loadImage(src, {
 	importance = 'auto',
 	sizes = null,
 	srcset = null,
-	height = null,
-	width = null,
+	height = undefined,
+	width = undefined,
+	slot = null,
+	part = [],
 	classes = [],
 	role = 'img',
 	alt = '',
 } = {}) {
-	const img = new Image();
+	const img = new Image(width, height);
 
 	if (typeof loading === 'string') {
 		img.loading = loading;
-	}
-
-	if (Number.isInteger(height)) {
-		img.height = height;
-	}
-
-	if (Number.isInteger(width)) {
-		img.width = width;
 	}
 
 	if (typeof decoding === 'string') {
@@ -276,23 +276,37 @@ export async function loadImage(src, {
 		img.alt = alt;
 	}
 
+	if (typeof slot === 'string') {
+		img.slot = slot;
+	}
+
+	if (Array.isArray(part) && part.length !== 0 && 'part' in img) {
+		img.part.add(...part);
+	} else if (typeof part === 'string' && 'part' in img) {
+		img.part.add(part);
+	}
+
 	/**
 	 * `lazy` would make the image not start to load until appended.
 	 * For this reason, we cannot wait for the `load` event because it will never occur
 	 */
-	if (loading === 'lazy' || img.complete === true) {
+	if (loading === 'lazy') {
 		img.src = src;
 		return img;
 	} else if (img.decode instanceof Function) {
-		img.src = src;
-		await img.decode();
-		return img;
+		try {
+			img.src = src;
+			await img.decode();
+			return img;
+		} catch(err) {
+			console.error(err);
+			throw new DOMException(`Error loading image: ${img.src}`);
+		}
 	} else {
 		return new Promise((resolve, reject) => {
 			img.addEventListener('load', () => resolve(img), { once: true });
 			img.addEventListener('error', (err) => reject(err), { once: true });
 			img.src = src;
-			img.decode().catch(console.error);
 		});
 	}
 }
