@@ -25,11 +25,11 @@ export const Twitter = {
 		type: 'image/svg+xml',
 	}],
 	share_target: {
-		action: 'https://twitter.com/intent/tweet/',
+		action: 'https://twitter.com/compose/tweet/',
 		method: 'GET',
 		enctype: 'application/x-www-form-urlencoded',
 		params: {
-			title: null,
+			title: 'title',
 			text: 'text',
 			url: 'url',
 		}
