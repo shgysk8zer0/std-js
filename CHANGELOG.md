@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - An `init()` function for `data-*` module
 - Add `data-*` handlers for `full-screen`, `copy`, and `navigate`
 - Create functions for creating `<svg>` and `<use>`
+- New handling for sharing based on the [Share Target API](https://web.dev/web-share-target/)
+
+### Changed
+- Swap order of ok and cancel buttons in `confirm()` in `asyncDialog.js`
 
 ## [v2.6.0] - 2020-12-07
 

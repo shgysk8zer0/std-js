@@ -89,7 +89,7 @@ export async function confirm(text) {
 			event.target.closest('dialog[open]').close('confirm');
 		});
 
-		btns.append(ok, close);
+		btns.append(close, ok);
 
 		dialog.append(msg, document.createElement('br'), btns);
 		fadeIn(dialog);
