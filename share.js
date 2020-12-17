@@ -107,7 +107,6 @@ export async function config(...targets) {
 
 			if ('clipboard' in navigator && navigator.clipboard.writeText instanceof Function) {
 				const cpy = await getCopyBtn({ title, text, url });
-				console.info({ cpy });
 				cpy.addEventListener('click', callback, { capture: true });
 				children.push(cpy);
 			}
