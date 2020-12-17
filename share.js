@@ -59,16 +59,16 @@ async function getCopyBtn({ title, text, url } = {}) {
 	return btn;
 }
 
-export async function config(...targets) {
-	await customElements.whenDefined('toast-message');
-	const ToastMessage = customElements.get('toast-message');
-
+export function config(...targets) {
 	return async function share({ title, text, url, files }) {
+		await customElements.whenDefined('toast-message');
+		const ToastMessage = customElements.get('toast-message');
 		const toast = new ToastMessage();
 		const container = document.createElement('div');
 		const header = document.createElement('header');
 		const heading = document.createElement('h3');
 		const items = document.createElement('div');
+
 		toast.backdrop = true;
 		heading.textContent = 'Share via';
 		container.slot = 'content';
@@ -126,6 +126,21 @@ export async function config(...targets) {
 	};
 }
 
-export async function autoConfig() {
-	return await config(...ALL_TARGETS);
+export function autoConfig() {
+	return config(...ALL_TARGETS);
+}
+
+export function shim(targets = ALL_TARGETS) {
+	if (! (navigator.share instanceof Function)) {
+		navigator.share = config(...targets);
+	}
+
+	if (! (navigator.canShare instanceof Function)) {
+		navigator.canShare = ({ title, text, url, files }) => {
+			return (! Array.isArray(files) || files.length === 0) && (
+				typeof title === 'string' || typeof text === 'string'
+				|| typeof url === 'string' || url instanceof URL
+			);
+		};
+	}
 }

@@ -13,13 +13,14 @@ import * as KEYS from './keys.js';
 import * as mutations from '../mutations.js';
 import GitHub from '../GitHub.js';
 import Gravatar from '../Gravatar.js';
-import * as shares from '../share-config.js';
-import WebShareAPI from '../webShareApi.js';
+import { shim } from '../share.js';
 import Cookie from '../Cookie.js';
 import {alert, prompt} from '../asyncDialog.js';
+import 'https://cdn.kernvalley.us/components/toast-message.js';
 
 export async function loadHandler() {
-	WebShareAPI(...Object.values(shares));
+	shim();
+	import('https://cdn.kernvalley.us/components/share-button.js').catch(console.error);
 
 	if (document.createElement('details') instanceof HTMLUnknownElement) {
 		$('details > summary').click(function() {
