@@ -301,12 +301,21 @@ export async function createCustomElement(tag, ...args) {
 	return new Pro(...args);
 }
 
-export function parseHTML(text, type = 'text/html') {
+export function parseHTML(text, { type = 'text/html', asFrag = true, head = true } = {}) {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(text, type);
-	const frag = document.createDocumentFragment();
-	[...doc.body.childNodes].forEach(el => frag.append(el));
-	return frag;
+
+	if (asFrag === false) {
+		return doc;
+	} else if (head === false) {
+		const frag = document.createDocumentFragment();
+		[...doc.body.childNodes].forEach(el => frag.append(el));
+		return frag;
+	} else {
+		const frag = document.createDocumentFragment();
+		[...doc.head.childNodes, ...doc.body.childNodes].forEach(el => frag.append(el));
+		return frag;
+	}
 }
 
 /**
@@ -428,6 +437,11 @@ export async function pageHidden() {
 	if (document.visibilityState !== 'hidden') {
 		await when(document, 'visibilitychange');
 	}
+}
+
+export function isModule() {
+	// Cannot check `import.meta` due to syntax errors, so check `currentScript`
+	return ! (document.currentScript instanceof HTMLScriptElement);
 }
 
 /**
@@ -566,6 +580,8 @@ $.post = esQuery.post;
 $.delete = esQuery.delete;
 $.getHTML = esQuery.getHTML;
 $.getJSON = esQuery.getJSON;
+$.getText = esQuery.getText;
 $.postHTML = esQuery.postHTML;
 $.postJSON = esQuery.postJSON;
+$.postText = esQuery.postText;
 export { $ };
