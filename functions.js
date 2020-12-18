@@ -430,6 +430,9 @@ export async function pageHidden() {
 	}
 }
 
+/**
+ * Do not export immediately as it still needs static methods assigned
+ */
 function $(selector, parent = document) {
 	return new esQuery(selector, parent);
 }
@@ -554,9 +557,15 @@ export async function getLocation({ maximumAge, timeout, enableHighAccuracy = fa
 	});
 }
 
-console.info(Object.entries(esQuery));
 $.mediaQuery = esQuery.mediaQuery;
 $.getLocation = esQuery.getLocation;
 $.loaded = esQuery.loaded;
 $.ready = esQuery.ready;
+$.get = esQuery.get;
+$.post = esQuery.post;
+$.delete = esQuery.delete;
+$.getHTML = esQuery.getHTML;
+$.getJSON = esQuery.getJSON;
+$.postHTML = esQuery.postHTML;
+$.postJSON = esQuery.postJSON;
 export { $ };

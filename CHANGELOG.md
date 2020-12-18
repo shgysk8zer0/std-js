@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.6.1] - 2020-12-18
+
 ### Added
 - `uuidv4()` and `uuidv6()` funcions in module
 - `cookieStore.onchange`
@@ -16,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Create functions for creating `<svg>` and `<use>`
 - New handling for sharing based on the [Share Target API](https://web.dev/web-share-target/)
 - Various new async event handling functions
+- Add HTTP library with `GET`, `POST`, `DELETE`, and other methods
 
 ### Changed
 - Swap order of ok and cancel buttons in `confirm()` in `asyncDialog.js`

@@ -2,6 +2,8 @@ import { attr, css, data, toggleClass, on, off, read, debounce,
 	prefersReducedMotion, isInViewport, mediaQuery, getLocation, ready, loaded }
 	from './functions.js';
 
+import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON } from './http.js';
+
 const PREFIXES = [
 	'',
 	'moz',
@@ -1245,6 +1247,34 @@ export default class esQuery extends Set {
 	async data(...args) {
 		data(this, ...args);
 		return this;
+	}
+
+	static async get(...args) {
+		return await GET(...args);
+	}
+
+	static async post(...args) {
+		return await POST(...args);
+	}
+
+	static async delete(...args) {
+		return await DELETE(...args);
+	}
+
+	static async getHTML(...args) {
+		return await getHTML(...args);
+	}
+
+	static async getJSON(...args) {
+		return await getJSON(...args);
+	}
+
+	static async postHTML(...args) {
+		return await postHTML(...args);
+	}
+
+	static async postJSON(...args) {
+		return await postJSON(...args);
 	}
 
 	static mediaQuery(query) {
