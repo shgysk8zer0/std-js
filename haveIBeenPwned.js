@@ -1,26 +1,31 @@
 import sha1 from './sha1.js';
+import { GET } from './http.js';
 const HAVE_I_BEEN_PWNED = 'https://api.pwnedpasswords.com/range/';
 
 export default async function isPwned(pwd) {
 	const hash = await sha1(pwd);
 
-	const prefix = hash.substring(0,5);
-	const rest   = hash.substring(5);
+	const prefix = hash.substring(0,5).toUpperCase();
+	const rest   = `${hash.substring(5).toUpperCase()}:`;
 	const url    = new URL(`./${prefix}`, HAVE_I_BEEN_PWNED);
-	const resp   = await fetch(url, {
-		method:         'GET',
-		mode:           'cors',
-		referrer:       'no-referrer',
-		referrerPolicy: 'no-referrer',
-		credentials:    'omit',
-	});
 
-	if (resp.ok) {
-		const hashes  = await resp.text();
-		const matches = hashes.split('\r\n').filter(h => h.startsWith(`${rest}:`));
+	try {
+		const resp   = await GET(url);
 
-		return matches.length === 0 ? 0 : parseInt(matches[0].split(':')[1]);
-	} else {
+		if (! resp.ok) {
+			throw new Error(await resp.json());
+		}
+
+		const hashes  = await resp.text().then(lines => lines.split('\r\n'));
+		const match = hashes.find(h => h.startsWith(rest));
+
+		if (typeof match === 'string') {
+			return parseInt(match.split(':')[1]);
+		} else {
+			return 0;
+		}
+	} catch(err) {
+		console.error(err);
 		return 0;
 	}
 }
