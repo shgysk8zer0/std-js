@@ -2,7 +2,7 @@ import { attr, css, data, toggleClass, on, off, read, debounce,
 	prefersReducedMotion, isInViewport, mediaQuery, getLocation, ready, loaded }
 	from './functions.js';
 
-import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON } from './http.js';
+import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText } from './http.js';
 
 const PREFIXES = [
 	'',
@@ -1269,12 +1269,20 @@ export default class esQuery extends Set {
 		return await getJSON(...args);
 	}
 
+	static async getText(...args) {
+		return await getText(...args);
+	}
+
 	static async postHTML(...args) {
 		return await postHTML(...args);
 	}
 
 	static async postJSON(...args) {
 		return await postJSON(...args);
+	}
+
+	static async postText(...args) {
+		return await postText(...args);
 	}
 
 	static mediaQuery(query) {

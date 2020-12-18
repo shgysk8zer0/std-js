@@ -125,11 +125,32 @@ export async function getHTML(url, {
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
+	head = true,
+	asFrag = true,
+} = {}) {
+	const html = await getText(url, { body, mode, credentials, referrerPolicy, headers,
+		cache, redirect, integrity, keepalive, signal, timeout });
+
+	return parseHTML(html, { head, asFrag });
+}
+
+export async function getText(url, {
+	body = undefined,
+	mode = 'cors',
+	cache = 'default',
+	credentials = 'omit',
+	redirect = 'follow',
+	referrerPolicy = 'no-referrer',
+	headers = new Headers({ Accept: 'text/plain' }),
+	integrity = undefined,
+	keepalive = undefined,
+	signal = undefined,
+	timeout = null,
 } = {}) {
 	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout });
 
-	return parseHTML(await resp.text());
+	return await resp.text();
 }
 
 export async function getJSON(url, {
@@ -163,11 +184,13 @@ export async function postHTML(url, {
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
+	head = true,
+	asFrag = true,
 } = {}) {
-	const resp = await POST(url, { body, mode, credentials, referrerPolicy, headers,
+	const html = await postText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout });
 
-	return parseHTML(await resp.text());
+	return parseHTML(html, { head, asFrag });
 }
 
 export async function postJSON(url, {
@@ -187,6 +210,25 @@ export async function postJSON(url, {
 		cache, redirect, integrity, keepalive, signal, timeout });
 
 	return await resp.json();
+}
+
+export async function postText(url, {
+	body = undefined,
+	mode = 'cors',
+	cache = 'default',
+	credentials = 'omit',
+	redirect = 'follow',
+	referrerPolicy = 'no-referrer',
+	headers = new Headers({ Accept: 'text/plain' }),
+	integrity = undefined,
+	keepalive = undefined,
+	signal = undefined,
+	timeout = null,
+} = {}) {
+	const resp = await POST(url, { body, mode, credentials, referrerPolicy, headers,
+		cache, redirect, integrity, keepalive, signal, timeout });
+
+	return await resp.text();
 }
 
 export function getAbortController(ms) {
