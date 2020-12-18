@@ -339,12 +339,44 @@ export function debounce(func, wait = 17, immediate = false) {
 	};
 }
 
-function $(selector, parent = document) {
-	return new esQuery(selector, parent);
+export async function when(target, event, {
+	once = true,
+	capture = true,
+	passive = true,
+} = {}) {
+	await new Promise(resolve => on(target, event, resolve, { once, capture, passive }));
+}
+
+export async function whenOnline() {
+	if (navigator.onLine === false) {
+		await when(window, 'online');
+	}
+}
+
+export async function whenOffline() {
+	if (navigator.onLine === true) {
+		await when(window, 'offline');
+	}
+}
+
+export async function whenVisible() {
+	if (document.visibilityState === 'hidden') {
+		await when(document, 'visibilitychange');
+	}
+}
+
+export async function whenHidden() {
+	if (document.visibilityState === 'visible') {
+		await when(document, 'visibilitychange');
+	}
 }
 
 export async function sleep(ms, ...args) {
 	await new Promise(resolve => setTimeout(() => resolve(...args), ms));
+}
+
+export async function defined(...els) {
+	await Promise.all(els.map(el => customElements.whenDefined(el)));
 }
 
 /**
@@ -357,38 +389,49 @@ export async function wait(ms) {
 
 export async function ready(...requires) {
 	if (document.readyState === 'loading') {
-		await waitUntil(document, 'DOMContentLoaded');
+		await Promise.allSettled([
+			when(document, 'DOMContentLoaded'),
+			defined(...requires),
+		]);
+	} else {
+		await defined(...requires);
 	}
 
-	await defined(...requires);
-}
-
-export async function defined(...els) {
-	await Promise.all(els.map(el => customElements.whenDefined(el)));
 }
 
 export async function loaded(...requires) {
 	if (document.readyState !== 'complete') {
-		await waitUntil(window, 'load');
+		await Promise.allSettled([
+			when(window, 'load'),
+			defined(...requires),
+		]);
+	} else {
+		await defined(...requires);
 	}
-
-	await defined(...requires);
 }
 
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export async function waitUntil(target, event) {
-	await new Promise(resolve => target.addEventListener(event, resolve, { once: true }));
+	console.warn('waitUntil() is deprecated and will be removed. Please use when() instead');
+	await when(target, event);
 }
 
 export async function pageVisible() {
 	if (document.visibilityState !== 'visible') {
-		await waitUntil(document, 'visibilitychange');
+		await when(document, 'visibilitychange');
 	}
 }
 
 export async function pageHidden() {
 	if (document.visibilityState !== 'hidden') {
-		await waitUntil(document, 'visibilitychange');
+		await when(document, 'visibilitychange');
 	}
+}
+
+function $(selector, parent = document) {
+	return new esQuery(selector, parent);
 }
 
 export function* toGenerator(...items) {
@@ -511,6 +554,7 @@ export async function getLocation({ maximumAge, timeout, enableHighAccuracy = fa
 	});
 }
 
+console.info(Object.entries(esQuery));
 $.mediaQuery = esQuery.mediaQuery;
 $.getLocation = esQuery.getLocation;
 $.loaded = esQuery.loaded;
