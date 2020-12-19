@@ -1,5 +1,22 @@
 import { parseHTML } from './functions.js';
 
+function filename(src) {
+	if (typeof src === 'string') {
+		const path = src.split('/');
+		return path[path.length - 1];
+	} else {
+		return '';
+	}
+}
+
+function getType({ headers }) {
+	if (headers instanceof Headers && headers.has('Content-Type')) {
+		return headers.get('Content-Type').split(';')[0];
+	} else {
+		return null;
+	}
+}
+
 export async function GET(url, {
 	body = undefined,
 	mode = 'cors',
@@ -170,6 +187,35 @@ export async function getJSON(url, {
 		cache, redirect, integrity, keepalive, signal, timeout });
 
 	return await resp.json();
+}
+
+export async function getFile(url, {
+	name = null,
+	body = undefined,
+	mode = 'cors',
+	cache = 'default',
+	credentials = 'omit',
+	redirect = 'follow',
+	referrerPolicy = 'no-referrer',
+	headers = new Headers(),
+	integrity = undefined,
+	keepalive = undefined,
+	signal = undefined,
+	timeout = null,
+} = {}) {
+	if (typeof name !== 'string') {
+		name = filename(url);
+	}
+
+	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
+		cache, redirect, integrity, keepalive, signal, timeout });
+
+	if (resp.ok) {
+		const type = getType(resp);
+		return new File([await resp.blob()], name, { type });
+	} else {
+		throw new Error(`Error fetching ${name}`);
+	}
 }
 
 export async function postHTML(url, {
