@@ -218,6 +218,37 @@ export async function getFile(url, {
 	}
 }
 
+export async function getManifest(timeout = null) {
+	const resp = await getLink('link[rel="manifest"][href]', timeout);
+	return await resp.json();
+}
+
+export async function getLink(link, timeout = null) {
+	if (typeof link === 'string') {
+		return await getLink(document.querySelector(link));
+	} else if (! (link instanceof HTMLLinkElement)) {
+		throw new Error('Expected a <link>');
+	} else if (link.href.length === 0) {
+		throw new Error('Missing `href` on <link>');
+	} else {
+		const { href, integrity, type, referrerPolicy } = link;
+
+		let credentials;
+		const mode = ('crossOrigin' in link) ? 'cors' : 'no-cors';
+		const headers = new Headers();
+
+		if (mode === 'cors') {
+			credentials = link.crossOrigin === 'use-credentials' ? 'include' : 'omit';
+		}
+
+		if (typeof type === 'string') {
+			headers.set('Accept', type);
+		}
+
+		return await GET(href, { mode, credentials, headers, integrity, referrerPolicy, timeout });
+	}
+}
+
 export async function postHTML(url, {
 	body = undefined,
 	mode = 'cors',
