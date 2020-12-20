@@ -218,6 +218,29 @@ export async function getFile(url, {
 	}
 }
 
+export async function submitForm(form) {
+	if (typeof form === 'string') {
+		return await submitForm(document.forms[form]);
+	} else if (form instanceof Event) {
+		form.preventDefault();
+		return await submitForm(form.target);
+	} else if (form instanceof HTMLFormElement) {
+		switch (form.method.toLowerCase()) {
+			case 'get':
+				return GET(form.action, { body: new FormData(form) });
+
+			case 'post':
+				return POST(form.action, { body: new FormData(form) });
+
+			case 'delete':
+				return DELETE(form.action, { body: new FormData(form) });
+
+			default:
+				throw new Error(`Unsupported method: ${form.method}`);
+		}
+	}
+}
+
 export async function getManifest(timeout = null) {
 	const resp = await getLink('link[rel="manifest"][href]', timeout);
 	return await resp.json();
