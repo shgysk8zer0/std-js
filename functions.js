@@ -1,4 +1,5 @@
 import esQuery from './esQuery.js';
+import { SVG, XLINK } from './namespaces.js';
 
 export function openWindow(url, {
 	name = '',
@@ -118,27 +119,49 @@ export function data(what, props = {}, { base = document } = {}) {
 	}
 }
 
-export function attr(what, props = {}, { base = document } = {}) {
+export function attr(what, props = {}, { base = document, namespace = null } = {}) {
 	if (what instanceof Element) {
 		Object.entries(props).forEach(([p, v]) => {
 			if (typeof v === 'string' || typeof v === 'number') {
-				what.setAttribute(p, v);
+				if (typeof namespace === 'string') {
+					when.setAttributeNS(namespace, p, v);
+				} else {
+					what.setAttribute(p, v);
+				}
 			} else if (typeof v === 'boolean') {
-				what.toggleAttribute(p, v);
+				if (typeof namespace === 'string') {
+					v ? what.setAttributeNS(namespace, p, '') : what.removeAttributeNS(namespace, p);
+				} else {
+					what.toggleAttribute(p, v);
+				}
 			} else if (v instanceof Date) {
-				what.setAttribute(p, v.toISOString());
+				if (typeof namespace === 'string') {
+					what.setAttributeNS(namespace, p, v.toISOString());
+				} else {
+					what.setAttribute(p, v.toISOString());
+				}
 			} else if (v instanceof URL) {
-				what.setAttribute(p, v.href);
+				if (typeof namespace === 'string') {
+					what.setAttributeNS(namespace, p, v.href);
+				} else {
+					what.setAttribute(p, v.href);
+				}
 			} else if (typeof v === 'undefined' || v === null) {
-				what.removeAttribute(p);
+				if (typeof namespace === 'string') {
+					what.removeAttributeNS(namespace, p);
+				} else {
+					what.removeAttribute(p);
+				}
+			} else if (typeof namespace === 'string') {
+				what.setAttributeNS(namespace, p, JSON.stringify(v));
 			} else {
 				what.setAttribute(p, JSON.stringify(v));
 			}
 		});
 	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => attr(el, props, { base }));
+		what.forEach(el => attr(el, props, { base, namespace }));
 	} else if (typeof what === 'string') {
-		attr(base.querySelectorAll(what), props);
+		attr(base.querySelectorAll(what), props, { namespace });
 	}
 }
 
@@ -241,8 +264,7 @@ export function changeTagName(target, tag = 'div', { replace = true, is = null }
 
 export function createSVG({ fill = null, height = null, width = null, label = null,
 	role = 'img', hidden = false, classes = [] } = {}) {
-	const xmlns = 'http://www.w3.org/2000/svg';
-	const svg = document.createElementNS(xmlns, 'svg');
+	const svg = document.createElementNS(SVG, 'svg');
 
 	svg.setAttribute('role', role);
 
@@ -275,17 +297,15 @@ export function createSVG({ fill = null, height = null, width = null, label = nu
 
 export function useSVG(sprite, { src = '/img/icons.svg', fill = null, height = null,
 	width = null, classes = [], label = null } = {}) {
-	const xmlns = 'http://www.w3.org/2000/svg';
-	const xlink = 'http://www.w3.org/1999/xlink';
 	const svg = createSVG({ fill, height, width, classes, label, hidden: true });
-	const use = document.createElementNS(xmlns, 'use');
+	const use = document.createElementNS(SVG, 'use');
 
 	if (typeof src === 'string') {
 		const url = new URL(src, document.baseURI);
 		url.hash = `#${sprite}`;
-		use.setAttributeNS(xlink, 'xlink:href', url.href);
+		use.setAttributeNS(XLINK, 'xlink:href', url.href);
 	} else {
-		use.setAttributeNS(xlink, 'xlink:href', `#${sprite}`);
+		use.setAttributeNS(XLINK, 'xlink:href', `#${sprite}`);
 	}
 
 	svg.append(use);
