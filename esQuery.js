@@ -16,16 +16,19 @@ export default class esQuery extends Set {
 	constructor(selector, parent = document) {
 		if (typeof selector === 'string') {
 			super(parent.querySelectorAll(selector));
-			if (parent instanceof HTMLElement && parent.matches(selector)) {
+
+			if (parent instanceof Element && parent.matches(selector)) {
 				this.add(parent);
 			}
+		} else if (selector instanceof Element) {
+			super([selector]);
 		} else if (selector[Symbol.iterator] instanceof Function) {
 			super(selector);
 		} else if (typeof selector === 'object') {
 			super([selector]);
 		} else {
 			super();
-			throw new TypeError(`Expected a string or NodeList but got a ${typeof selector}: ${selector}.`);
+			throw new TypeError(`Expected a string, Element, or NodeList but got a ${typeof selector}`);
 		}
 	}
 
