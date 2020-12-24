@@ -74,3 +74,40 @@ export function title(content) {
 		meta({ prooperty: 'og:title', content }),
 	];
 }
+
+export function getDescription(base = document.head) {
+	const found = base.querySelector([
+		'meta[name="description"][content]',
+		'meta[itemprop="description"][content]',
+		'meta[property="og:description"][content]',
+		'meta[name="twitter:description"][content]',
+	].join(','));
+
+	if (found instanceof HTMLMetaElement) {
+		return found.content;
+	} else {
+		return null;
+	}
+}
+
+export function getKeywords(base = document.head) {
+	const found = base.querySelector([
+		'meta[name="keywords"][content]',
+		'meta[itemprop="keywords"][content]',
+		'meta[property="og:keywords"][content]',
+	].join(','));
+
+	if (found instanceof HTMLMetaElement) {
+		return found.content.split(',').map(str => str.trim());
+	} else {
+		return [];
+	}
+}
+
+export function getPageInfo() {
+	return {
+		title: document.title,
+		description: getDescription(),
+		keywords: getKeywords(),
+	};
+}
