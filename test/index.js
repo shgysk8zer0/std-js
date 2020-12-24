@@ -6,6 +6,12 @@ import { $, sleep } from '../functions.js';
 // import kbdShortcuts from '../kbd_shortcuts.js';
 import { loadScript } from '../loader.js';
 import { init } from '../data-handlers.js';
+import { description, keywords, robots, thumbnail } from '../meta.js';
+
+keywords(['javascript', 'ecmascript', 'es6', 'modules', 'library']);
+description('This is a JavaScript library testing page');
+robots(['nofollow', 'noindex', 'noarchive']);
+thumbnail('https://i.imgur.com/CbFnOO9h.jpg');
 
 $(document.documentElement).toggleClass({
 	'no-dialog': document.createElement('dialog') instanceof HTMLUnknownElement,

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Function to get files from URLs (using `Content-Type` header)
 - Functions for `fetch`ing `<link>`s (useful for preloads & manifests)
 - Add function for async submitting of forms
+- Create module for adding and updating `<meta>`s such as keywords, description, etc.
 
 ## [v2.6.1] - 2020-12-18
 
