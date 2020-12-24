@@ -1,4 +1,4 @@
-import {query as $} from './functions.js';
+import { query as $ } from './functions.js';
 
 function getSelectedElement(matching = '[contenteditable="true"] *') {
 	let selected = getSelection().anchorNode;

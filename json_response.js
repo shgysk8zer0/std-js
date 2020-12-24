@@ -1,4 +1,5 @@
-import {notify, $} from './functions.js';
+import { $ } from './functions.js';
+import { notify } from './deprecatedFunctions.js';
 
 export default async function handleJSON(json) {
 	if(typeof json === 'string') {

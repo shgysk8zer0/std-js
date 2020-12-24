@@ -3,7 +3,9 @@
 	<head>
 		<title>std-js test</title>
 		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width" />
 		<meta name="description" content="A testing page for my JavaScript library" />
+		<meta name="robots" content="nofollow,noindex" />
 		<base href="/test/" />
 		<link rel="import" name="contextmenu" href="components/contentextment.html" async="" />
 		<link rel="import" name="contact-form" href="components/contact-form.html" async="" />
@@ -18,28 +20,36 @@
 		<link rel="import" name="article-template" href="components/article-template.html" async="" />
 		<link rel="import" name="keybase-user-template" href="components/keybase-user-template.html" async="" />
 		<link rel="import" name="address-template" href="components/address-template.html" async="" />
-		<script type="application/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js" crossorigin="annonymous" async=""></script>
 		<script type="module" src="./index.js" async=""></script>
 		<script type="application/javascript" src="./index.min.js" async="" nomodule=""></script>
-		<script type="module">
-			import {$, read} from '../functions.js';
-			window.$ = $;
-			window.read = read;
-		</script>
 		<link rel="icon" type="image/svg+xml" href="./javascript.svg" sizes="any"/>
-		<link rel="canonical" href="http://example.com" />
 		<link rel="stylesheet" type="text/css" href="./index.css" />
 	</head>
-	<body>
-		<header>
+	<body class="background-primary color-default font-main grid">
+		<header id="header">
 			<h1>JavaScript module testing</h1>
 		</header>
-		<nav>Nav</nav>
-		<main>
+		<nav id="nav" class="sticky top shadow z-3 flex row no-wrap adwaita-toolbar justify-space-around">
+			<button type="button" class="btn btn-default grow-1" data-hide="#header" data-disable="#hide" data-enable="#unhide" id="hide">Hide</button>
+			<button type="button" class="btn btn-default grow-1" data-unhide="#header" data-disable="#unhide" data-enable="#hide" id="unhide" disabled="">Show</button>
+			<button type="button" class="btn btn-default grow-1" data-selector="body" data-toggle-class="grid">Grid</button>
+			<button type="button" class="btn btn-default grow-1" data-scroll-to="#header">Top</button>
+			<button type="button" class="btn btn-default grow-1" data-scroll-to="#footer">Bottom</button>
+			<button type="button" class="btn btn-default grow-1" data-remove="article">Delete Articles</button>
+			<button type="button" class="btn btn-default grow-1" data-cookie="foo" data-path="/test/" data-value="bar" data-secure="" data-expires="2020-12-25T12:00:00">Set Cookie</button>
+			<button type="button" class="btn btn-default grow-1" data-cookie="foo" data-path="/test/" data-secure="">Delete Cookie</button>
+		</nav>
+		<main id="main">
 			<div data-infinite-scroll="/test/assets/article.html?page=1"></div>
 		</main>
-		<aside data-import="/test/assets/sidebar.html#foo"></aside>
-		<footer data-import="/test/assets/footer.html"></footer>
+		<aside id="sidebar" data-import="/test/assets/sidebar.html#foo"></aside>
+		<footer id="footer" data-import="/test/assets/footer.html"></footer>
 		<noscript>You obviously need JavaScript enabled to test a JavaScript library.</noscript>
+		<button type="button" is="share-button" text="The CDN for KernValley.US" url="https://cdn.kernvalley.us" class="btn btn-primary round fixed bottom right z-4" hidden="">
+			<svg width="16" height="16" fill="currentColor" class="icon" viewBox="0 0 16 16">
+				<path d="M5.969 7.969a2.969 2.969 0 1 1-5.938 0 2.969 2.969 0 1 1 5.938 0zm9.969 5a2.969 2.969 0 1 1-5.938 0 2.969 2.969 0 1 1 5.938 0zm0-10a2.969 2.969 0 1 1-5.938 0 2.969 2.969 0 1 1 5.938 0z" overflow="visible"/>
+				<path d="M12.625 2.156L2.562 7.031.75 7.938l1.812.906 10.032 5.062.906-1.812-8.22-4.156 8.219-4-.875-1.782z" overflow="visible"/>
+			</svg>
+		</button>
 	</body>
 </html>

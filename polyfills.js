@@ -1,5 +1,5 @@
 import * as classes from './polyfills/allClasses.js';
-import dePrefix from './deprefixer.js';
+import './deprefixer.js';
 
 // function checkFunction(functionName, functionObj) {
 // 	if ((functionObj instanceof Function) && ! (functionName in window)) {
@@ -39,7 +39,6 @@ function checkClass(className, classObj) {
 	}
 }
 export default function() {
-	dePrefix();
 	for (let shim in classes) {
 		try {
 			checkClass(shim, classes[shim]);

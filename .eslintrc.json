@@ -6,13 +6,16 @@
     "extends": "eslint:recommended",
     "parserOptions": {
         "sourceType": "module",
-        "ecmaVersion": 2017
+        "ecmaVersion": 2020
     },
-    "plugins": ["async-await", "babel"],
+    "plugins": [],
     "rules": {
         "indent": [
             2,
-            "tab"
+            "tab",
+            {
+              "SwitchCase": 1
+            }
         ],
         "quotes": [
             2,
@@ -23,11 +26,10 @@
             "always"
         ],
         "no-console": 0,
-        "async-await/space-after-async": 2,
-        "async-await/space-after-await": 2
+        "no-async-promise-executor": 0,
+        "no-prototype-builtins": 0
     },
     "globals": {
-        "URLSearchParams": false,
-        "ga": false
+      "cookieStore": "readonly"
     }
 }

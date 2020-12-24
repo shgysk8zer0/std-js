@@ -1,41 +1,39 @@
 import * as handlers from './dataHandlers.js';
-import {$} from './functions.js';
-import {clickHandler} from './actions.js';
+import { $ } from './functions.js';
+import { clickHandler } from './actions.js';
 let observer = null;
 
 if (IntersectionObserver instanceof Function) {
 	observer = new IntersectionObserver(lazyLoad, {rootMargin: '500px 0px 0px 0px'});
 }
 
-function infiniteScroll(entries, observer) {
-	entries.filter(entry => entry.isIntersecting).forEach(async entry => {
-		observer.unobserve(entry.target);
-		const url = new URL(entry.target.dataset.infiniteScroll, location.origin);
+async function infiniteScroll({ target, isIntersecting }, observer) {
+	if (isIntersecting) {
+		const url = new URL(target.dataset.infiniteScroll, location.origin);
+
 		try {
 			const resp = await fetch(url);
+
 			if (url.searchParams.has('page')) {
 				url.searchParams.set('page', parseInt(url.searchParams.get('page')) + 1);
-				entry.target.dataset.infiniteScroll = url;
+				target.dataset.infiniteScroll = url;
 			}
+
 			if (resp.ok) {
 				const parser = new DOMParser();
 				const html = await resp.text();
 				const doc = parser.parseFromString(html, 'text/html');
-
-				if (url.hash !== '') {
-					entry.target.before(doc.getElementById(url.hash.substring(1)));
-				} else {
-					entry.target.before(...doc.body.childNodes);
-				}
-				observer.observe(entry.target);
+				const frag = document.createDocumentFragment();
+				frag.append(...doc.body.children);
+				target.before(frag);
 			} else {
 				throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
 			}
 		} catch (error) {
 			console.error(error);
-			observer.observe(entry.target);
+			observer.observe(target);
 		}
-	});
+	}
 }
 
 function lazyLoad(entries, observer) {
@@ -68,67 +66,67 @@ function toggleDetails() {
 export const events = {
 	attributes: function() {
 		switch(this.attributeName) {
-		case 'data-remove':
-			if (this.target.dataset.hasOwnProperty('remove')) {
-				this.target.addEventListener('click', handlers.remove);
-			} else {
-				this.target.removeEventListener('click', handlers.remove);
-			}
-			break;
-		case 'data-show-modal':
-			if (this.target.dataset.hasOwnProperty('showModal')) {
-				this.target.addEventListener('click', handlers.showModal);
-			} else {
-				this.target.removeEventListener('click', handlers.showModal);
-			}
-			break;
-		case 'data-show':
-			if (this.target.dataset.hasOwnProperty('show')) {
-				this.target.addEventListener('click', handlers.show);
-			} else{
-				this.target.removeEventListener('click', handlers.show);
-			}
-			break;
-		case 'data-close':
-			if (this.target.dataset.hasOwnProperty('close')) {
-				this.target.addEventListener('click', handlers.close);
-			} else {
-				this.target.removeEventListener('click', handlers.close);
-			}
-			break;
-		case 'data-toggle-hidden':
-			if (this.target.dataset.hasOwnProperty('toggleHidden')) {
-				this.target.addEventListener('click', handlers.toggleHidden);
-			} else {
-				this.target.removeEventListener('click', handlers.toggleHidden);
-			}
-			break;
-		case 'data-share':
-			if (this.target.dataset.hasOwnProperty('share')) {
-				this.target.addEventListener('click', handlers.share);
-			} else {
-				this.target.removeEventListener('click', handlers.share);
-			}
-			break;
-		case 'data-fullscreen':
-			if (this.target.dataset.hasOwnProperty('fullscreen')) {
-				this.target.addEventListener('click', handlers.fullscreen);
-			} else {
-				this.target.removeEventListener('click', handlers.fullscreen);
-			}
-			break;
-		case 'data-scroll-to':
-			if (this.target.dataset.hasOwnProperty('scrollTo')) {
-				this.target.addEventListener('click', handlers.scrollTo);
-			} else {
-				this.target.removeEventListener('click', handlers.scrollTo);
-			}
-			break;
-		case 'data-click':
-			clickHandler(this.target);
-			break;
-		default:
-			throw new Error(`Unhandled attribute change [${this.attributeName}]`);
+			case 'data-remove':
+				if (this.target.dataset.hasOwnProperty('remove')) {
+					this.target.addEventListener('click', handlers.remove);
+				} else {
+					this.target.removeEventListener('click', handlers.remove);
+				}
+				break;
+			case 'data-show-modal':
+				if (this.target.dataset.hasOwnProperty('showModal')) {
+					this.target.addEventListener('click', handlers.showModal);
+				} else {
+					this.target.removeEventListener('click', handlers.showModal);
+				}
+				break;
+			case 'data-show':
+				if (this.target.dataset.hasOwnProperty('show')) {
+					this.target.addEventListener('click', handlers.show);
+				} else{
+					this.target.removeEventListener('click', handlers.show);
+				}
+				break;
+			case 'data-close':
+				if (this.target.dataset.hasOwnProperty('close')) {
+					this.target.addEventListener('click', handlers.close);
+				} else {
+					this.target.removeEventListener('click', handlers.close);
+				}
+				break;
+			case 'data-toggle-hidden':
+				if (this.target.dataset.hasOwnProperty('toggleHidden')) {
+					this.target.addEventListener('click', handlers.toggleHidden);
+				} else {
+					this.target.removeEventListener('click', handlers.toggleHidden);
+				}
+				break;
+			case 'data-share':
+				if (this.target.dataset.hasOwnProperty('share')) {
+					this.target.addEventListener('click', handlers.share);
+				} else {
+					this.target.removeEventListener('click', handlers.share);
+				}
+				break;
+			case 'data-fullscreen':
+				if (this.target.dataset.hasOwnProperty('fullscreen')) {
+					this.target.addEventListener('click', handlers.fullscreen);
+				} else {
+					this.target.removeEventListener('click', handlers.fullscreen);
+				}
+				break;
+			case 'data-scroll-to':
+				if (this.target.dataset.hasOwnProperty('scrollTo')) {
+					this.target.addEventListener('click', handlers.scrollTo);
+				} else {
+					this.target.removeEventListener('click', handlers.scrollTo);
+				}
+				break;
+			case 'data-click':
+				clickHandler(this.target);
+				break;
+			default:
+				throw new Error(`Unhandled attribute change [${this.attributeName}]`);
 
 		}
 	},

@@ -33,71 +33,71 @@ const DAYS = [
 function formatDate(date, chars = '') {
 	return chars.split('').reduce((str, char) => {
 		switch(char) {
-		case 'Y':
-			str += date.getFullYear();
-			break;
-		case 'y':
-			str += date.getYear();
-			break;
-		case 'M':
-			str += MONTHS[date.getMonth()].abbr;
-			break;
-		case 'F':
-			str += MONTHS[date.getMonth()].full;
-			break;
-		case 'm':
-			var m = date.getMonth() + 1;
-			str += m < 10 ? `0${m}` : m;
-			break;
-		case 'n':
-			str += date.getMonth() + 1;
-			break;
-		case 'd':
-			var d = date.getDate();
-			str += d < 10 ? `0${d}` : d;
-			break;
-		case 'N':
-			str += date.getDay() + 1;
-			break;
-		case 'j':
-			str += date.getDate();
-			break;
-		case 'D':
-			str += DAYS[date.getDay() - 1].abbr;
-			break;
-		case 'l':
-			str += DAYS[date.getDay() - 1].full;
-			break;
-		case 'H':
-			var h = date.getHours();
-			str += h < 10 ? `0${h}` : h;
-			break;
-		case 'h':
-			var H = (date.getHours() % 12) + 1;
-			str += H < 10 ? `0${H}` : H;
-			break;
-		case 'G':
-			str += date.getHours();
-			break;
-		case 'g':
-			str += (date.getHours() % 12) + 1;
-			break;
-		case 'i':
-			var i = date.getMinutes();
-			str += i < 10 ? `0${i}` : i;
-			break;
-		case 's':
-			var s = date.getSeconds();
-			str += s < 10 ? `0${s}` : s;
-			break;
-		case 'a':
-			str += date.getHours() > 11 ? 'pm' : 'am';
-			break;
-		case 'A':
-			str += date.getHours() > 11 ? 'PM' : 'AM';
-			break;
-		default:
-			str += char;
+			case 'Y':
+				str += date.getFullYear();
+				break;
+			case 'y':
+				str += date.getYear();
+				break;
+			case 'M':
+				str += MONTHS[date.getMonth()].abbr;
+				break;
+			case 'F':
+				str += MONTHS[date.getMonth()].full;
+				break;
+			case 'm':
+				var m = date.getMonth() + 1;
+				str += m < 10 ? `0${m}` : m;
+				break;
+			case 'n':
+				str += date.getMonth() + 1;
+				break;
+			case 'd':
+				var d = date.getDate();
+				str += d < 10 ? `0${d}` : d;
+				break;
+			case 'N':
+				str += date.getDay() + 1;
+				break;
+			case 'j':
+				str += date.getDate();
+				break;
+			case 'D':
+				str += DAYS[date.getDay() - 1].abbr;
+				break;
+			case 'l':
+				str += DAYS[date.getDay() - 1].full;
+				break;
+			case 'H':
+				var h = date.getHours();
+				str += h < 10 ? `0${h}` : h;
+				break;
+			case 'h':
+				var H = (date.getHours() % 12) + 1;
+				str += H < 10 ? `0${H}` : H;
+				break;
+			case 'G':
+				str += date.getHours();
+				break;
+			case 'g':
+				str += (date.getHours() % 12) + 1;
+				break;
+			case 'i':
+				var i = date.getMinutes();
+				str += i < 10 ? `0${i}` : i;
+				break;
+			case 's':
+				var s = date.getSeconds();
+				str += s < 10 ? `0${s}` : s;
+				break;
+			case 'a':
+				str += date.getHours() > 11 ? 'pm' : 'am';
+				break;
+			case 'A':
+				str += date.getHours() > 11 ? 'PM' : 'AM';
+				break;
+			default:
+				str += char;
 		}
 		return str;
 	}, '');
@@ -177,18 +177,18 @@ export default class SchemaTemplate extends DocumentFragment {
 				}
 			} else if (node.hasAttribute('href')) {
 				switch(prop) {
-				case 'email':
-					node.setAttribute('href', `mailto:${thing.get(prop)}`);
-					node.title = thing.get(prop);
-					break;
+					case 'email':
+						node.setAttribute('href', `mailto:${thing.get(prop)}`);
+						node.title = thing.get(prop);
+						break;
 
-				case 'telephone':
-					node.setAttribute('href', `tel:${thing.get(prop)}`);
-					node.title = thing.get(prop);
-					break;
+					case 'telephone':
+						node.setAttribute('href', `tel:${thing.get(prop)}`);
+						node.title = thing.get(prop);
+						break;
 
-				default:
-					node.setAttribute('href', thing.get(prop));
+					default:
+						node.setAttribute('href', thing.get(prop));
 				}
 				if (! node.hasChildNodes()) {
 					node.textContent = thing.get(prop);

@@ -1,4 +1,4 @@
-const BASE = 'https://cdn.chriszuber.com';
+const BASE = 'https://cdn.kernvalley.us';
 
 export const facebook = {
 	url: new URL('https://www.facebook.com/sharer/sharer.php?u&t'),
@@ -40,4 +40,17 @@ export const email = {
 	url: new URL('mailto:?subject&body'),
 	icon: new URL('img/adwaita-icons/actions/mail-send.svg', BASE),
 	label: 'Email',
+};
+
+export const sms = {
+	url: new URL('sms:?body'),
+	icon: new URL('img/octicons/comment-discussion.svg', BASE),
+	label: 'Text Message',
+};
+
+export const clipboard = {
+	url: null,
+	action: 'clipboard',
+	icon: new URL('img/octicons/clippy.svg', BASE),
+	label: 'Copy',
 };

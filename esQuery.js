@@ -1,4 +1,8 @@
-import {read} from './functions.js';
+import { attr, css, data, toggleClass, on, off, read, debounce,
+	prefersReducedMotion, isInViewport, mediaQuery, getLocation, ready, loaded }
+	from './functions.js';
+
+import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText } from './http.js';
 
 const PREFIXES = [
 	'',
@@ -12,16 +16,19 @@ export default class esQuery extends Set {
 	constructor(selector, parent = document) {
 		if (typeof selector === 'string') {
 			super(parent.querySelectorAll(selector));
-			if (parent instanceof HTMLElement && parent.matches(selector)) {
+
+			if (parent instanceof Element && parent.matches(selector)) {
 				this.add(parent);
 			}
+		} else if (selector instanceof Element) {
+			super([selector]);
 		} else if (selector[Symbol.iterator] instanceof Function) {
 			super(selector);
 		} else if (typeof selector === 'object') {
 			super([selector]);
 		} else {
 			super();
-			throw new TypeError(`Expected a string or NodeList but got a ${typeof selector}: ${selector}.`);
+			throw new TypeError(`Expected a string, Element, or NodeList but got a ${typeof selector}`);
 		}
 	}
 
@@ -30,7 +37,7 @@ export default class esQuery extends Set {
 	}
 
 	get children() {
-		return new esQuery(this.toArray().reduce((items, item) => items.concat([...item.children]), []));
+		return new esQuery(this.toArray().map(el => [...el.children]).flat());
 	}
 
 	get found() {
@@ -80,12 +87,12 @@ export default class esQuery extends Set {
 		return this;
 	}
 
-	async visible() {
-		return this.css({visibility: 'visible'});
-	}
-
-	async invisible() {
-		return this.css({visibility: 'hidden'});
+	async visible(any = false) {
+		if (any) {
+			return this.some(isInViewport);
+		} else {
+			return this.every(isInViewport);
+		}
 	}
 
 	async each(callback, thisArg = this) {
@@ -129,11 +136,19 @@ export default class esQuery extends Set {
 		return new esQuery([...this].map(el => el.closest(selector)));
 	}
 
-	async matches(selector) {
-		return this.every(el => el.matches(selector));
+	async matches(selector, any = false) {
+		if (any) {
+			return this.some(el => el.matches(selector));
+		} else {
+			return this.every(el => el.matches(selector));
+		}
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async import(selector = 'body > *') {
+		console.warn('`esQuery.import()` is deprecated and will be removed');
 		const imports = this.toArray().filter(node => node.tagName === 'LINK'
 			&& node.relList.contains('import'));
 		const docs = await Promise.all(imports.map(link => {
@@ -162,11 +177,13 @@ export default class esQuery extends Set {
 	}
 
 	async animate(keyframes, opts = 400) {
-		if ('animate' in Element.prototype) {
-			await this.map(node =>  node.animate(keyframes, opts).finished);
+		if (typeof keyframes === 'string') {
+			return this.css({ 'animation-name': keyframes });
+		} else if (('animate' in Element.prototype) && ! prefersReducedMotion()) {
+			await this.map(node => node.animate(keyframes, opts).finished);
 			return this;
 		} else {
-			return Promise.resolve([]);
+			return Promise.resolve(this);
 		}
 	}
 
@@ -197,20 +214,24 @@ export default class esQuery extends Set {
 		return this;
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async animateFilter({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = 'none',
-		to         = 'none',
-		id         = 'grayscale',
+		from = 'none',
+		to = 'none',
+		id = 'grayscale',
 	} = {}) {
+		console.warn('`esQuery.animateFilter()` is deprecated and will be removed');
 		return this.animate([
-			{filter: `${from}`},
-			{filter: `${to}`},
+			{ filter: `${from}` },
+			{ filter: `${to}` },
 		], {
 			delay,
 			duration,
@@ -222,20 +243,24 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterDropShadow({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = '0 0 0 black',
-		to         = '0.5em 0.5em 0.5em rgba(0,0,0,0.3)',
-		id         = 'drop-shadow',
+		from = '0 0 0 black',
+		to = '0.5em 0.5em 0.5em rgba(0,0,0,0.3)',
+		id = 'drop-shadow',
 	} = {}) {
+		console.warn('`esQuery.anifilterDropShadow()` is deprecated and will be removed');
 		return this.animate([
-			{filter: `drop-shadow(${from})`},
-			{filter: `drop-shadow(${to})`},
+			{ filter: `drop-shadow(${from})` },
+			{ filter: `drop-shadow(${to})` },
 		], {
 			delay,
 			duration,
@@ -247,17 +272,21 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterGrayscale({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = 0,
-		to         = 1,
-		id         = 'grayscale',
+		from = 0,
+		to = 1,
+		id = 'grayscale',
 	} = {}) {
+		console.warn('`esQuery.filterGrayScale()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `grayscale(${from})`,
 			to: `grayscale(${to})`,
@@ -271,17 +300,21 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterBlur({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = '0px',
-		to         = '5px',
-		id         = 'blur',
+		from = '0px',
+		to = '5px',
+		id = 'blur',
 	} = {}) {
+		console.warn('`esQuery.filterBlur()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `blur(${from})`,
 			to: `blur(${to})`,
@@ -295,17 +328,21 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterInvert({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = 0,
-		to         = '100%',
-		id         = 'invert',
+		from = 0,
+		to = '100%',
+		id = 'invert',
 	} = {}) {
+		console.warn('`esQuery.filterInvert()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `invert(${from})`,
 			to: `invert(${to})`,
@@ -319,17 +356,21 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterHueRotate({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = '0deg',
-		to         = '90deg',
-		id         = 'hue-rotate',
+		from = '0deg',
+		to = '90deg',
+		id = 'hue-rotate',
 	} = {}) {
+		console.warn('`esQuery.filterHueRotate()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `hue-rotate(${from})`,
 			to: `hue-rotate(${to})`,
@@ -343,17 +384,21 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterBrightness({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = 0,
-		to         = 1,
-		id         = 'brightness',
+		from = 0,
+		to = 1,
+		id = 'brightness',
 	} = {}) {
+		console.warn('`esQuery.filterBrightness()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `brightness(${from})`,
 			to: `brightness(${to})`,
@@ -367,17 +412,21 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterContrast({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = 0,
-		to         = 1,
-		id         = 'contrast',
+		from = 0,
+		to = 1,
+		id = 'contrast',
 	} = {}) {
+		console.warn('`esQuery.filterContrast()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `contrast(${from})`,
 			to: `contrast(${to})`,
@@ -391,17 +440,21 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterSaturate({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = 0,
-		to         = 1,
-		id         = 'saturate',
+		from = 0,
+		to = 1,
+		id = 'saturate',
 	} = {}) {
+		console.warn('`esQuery.filterSaturate()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `saturate(${from})`,
 			to: `saturate(${to})`,
@@ -415,17 +468,21 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterOpacity({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = 0,
-		to         = 1,
-		id         = 'saturate',
+		from = 0,
+		to = 1,
+		id = 'saturate',
 	} = {}) {
+		console.warn('`esQuery.filerOpacity()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `opacity(${from})`,
 			to: `opacity(${to})`,
@@ -439,17 +496,21 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async filterSepia({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'both',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = 0,
-		to         = 1,
-		id         = 'sepia',
+		from = 0,
+		to = 1,
+		id = 'sepia',
 	} = {}) {
+		console.warn('`esQuery.filterSepia()` is deprecated and will be removed');
 		return this.animateFilter({
 			from: `sepia(${from})`,
 			to: `sepia(${to})`,
@@ -464,19 +525,19 @@ export default class esQuery extends Set {
 	}
 
 	async fade({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'forwards',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'forwards',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = 1,
-		to         = 0,
-		id         = 'fade-in',
+		from = 1,
+		to = 0,
+		id = 'fade-in',
 	} = {}) {
 		return this.animate([
-			{opacity: from},
-			{opacity: to}
+			{ opacity: from },
+			{ opacity: to }
 		], {
 			delay,
 			duration,
@@ -489,15 +550,15 @@ export default class esQuery extends Set {
 	}
 
 	async fadeIn({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'forwards',
-		direction  = 'normal',
-		easing     = 'linear',
+		duration = 400,
+		delay = 0,
+		fill = 'forwards',
+		direction = 'normal',
+		easing = 'linear',
 		iterations = 1,
-		from       = 0,
-		to         = 1,
-		id         = 'fade-in',
+		from = 0,
+		to = 1,
+		id = 'fade-in',
 	} = {}) {
 		return this.fade({
 			delay,
@@ -517,19 +578,19 @@ export default class esQuery extends Set {
 	}
 
 	async scale({
-		duration     = 400,
-		delay        = 0,
-		fill         = 'both',
-		direction    = 'normal',
-		easing       = 'linear',
-		iterations   = 1,
-		id           = 'scale',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
+		iterations = 1,
+		id = 'scale',
 		initialScale = 0,
-		scale        = 1.5,
+		scale = 1.5,
 	} = {}) {
 		return this.animate([
-			{transform: `scale(${initialScale})`},
-			{transform: `scale(${scale})`}
+			{ transform: `scale(${initialScale})` },
+			{ transform: `scale(${scale})` }
 		], {
 			delay,
 			duration,
@@ -542,15 +603,15 @@ export default class esQuery extends Set {
 	}
 
 	async grow({
-		duration     = 400,
-		delay        = 0,
-		fill         = 'both',
-		direction    = 'normal',
-		easing       = 'linear',
-		iterations   = 1,
-		id           = 'grow',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
+		iterations = 1,
+		id = 'grow',
 		initialScale = 0,
-		scale        = 1,
+		scale = 1,
 	} = {}) {
 		return this.scale({
 			delay,
@@ -566,15 +627,15 @@ export default class esQuery extends Set {
 	}
 
 	async shrink({
-		duration     = 400,
-		delay        = 0,
-		fill         = 'both',
-		direction    = 'normal',
-		easing       = 'linear',
-		iterations   = 1,
-		id           = 'shrink',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
+		iterations = 1,
+		id = 'shrink',
 		initialScale = 1,
-		scale        = 0,
+		scale = 0,
 	} = {}) {
 		return this.scale({
 			delay,
@@ -590,19 +651,19 @@ export default class esQuery extends Set {
 	}
 
 	async rotate({
-		duration        = 400,
-		delay           = 0,
-		fill            = 'both',
-		direction       = 'normal',
-		easing          = 'linear',
-		iterations      = 1,
-		id              = 'rotate',
-		rotation        = '1turn',
+		duration = 400,
+		delay = 0,
+		fill = 'both',
+		direction = 'normal',
+		easing = 'linear',
+		iterations = 1,
+		id = 'rotate',
+		rotation = '1turn',
 		initialRotation = '0turn',
 	} = {}) {
 		return this.animate([
-			{transform: `rotate(${initialRotation})`},
-			{transform: `rotate(${rotation})`}
+			{ transform: `rotate(${initialRotation})` },
+			{ transform: `rotate(${rotation})` }
 		], {
 			delay,
 			duration,
@@ -615,18 +676,18 @@ export default class esQuery extends Set {
 	}
 
 	async bounce({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'none',
-		direction  = 'alternate',
-		easing     = 'ease-in-out',
+		duration = 400,
+		delay = 0,
+		fill = 'none',
+		direction = 'alternate',
+		easing = 'ease-in-out',
 		iterations = 1,
-		id         = 'bounce',
-		height     = '-50px',
+		id = 'bounce',
+		height = '-50px',
 	} = {}) {
 		return this.animate([
-			{transform: 'none'},
-			{transform: `translateY(${height})`}
+			{ transform: 'none' },
+			{ transform: `translateY(${height})` }
 		], {
 			delay,
 			duration,
@@ -639,23 +700,23 @@ export default class esQuery extends Set {
 	}
 
 	async shake({
-		duration   = 400,
-		delay      = 0,
-		fill       = 'none',
-		direction  = 'alternate',
-		easing     = 'cubic-bezier(.68,-0.55,.27,1.55)',
+		duration = 400,
+		delay = 0,
+		fill = 'none',
+		direction = 'alternate',
+		easing = 'cubic-bezier(.68,-0.55,.27,1.55)',
 		iterations = 6,
-		id         = 'shake',
-		offsetX    = '60px',
-		offsetY    = '20px',
-		scale      = 0.9,
+		id = 'shake',
+		offsetX = '60px',
+		offsetY = '20px',
+		scale = 0.9,
 	} = {}) {
 		return this.animate([
-			{transform: 'none'},
-			{transform: `translateY(${offsetY}) translateX(-${offsetX}) scale(${scale})`},
-			{transform: 'none'},
-			{transform: `translateY(-${offsetY}) translateX(${offsetX}) scale(${1/scale})`},
-			{transform: 'none'},
+			{ transform: 'none' },
+			{ transform: `translateY(${offsetY}) translateX(-${offsetX}) scale(${scale})` },
+			{ transform: 'none' },
+			{ transform: `translateY(-${offsetY}) translateX(${offsetX}) scale(${1 / scale})` },
+			{ transform: 'none' },
 		], {
 			delay,
 			duration,
@@ -668,19 +729,19 @@ export default class esQuery extends Set {
 	}
 
 	async slideLeft({
-		duration     = 400,
-		delay        = 0,
-		fill         = 'forwards',
-		direction    = 'normal',
-		easing       = 'ease-in',
-		iterations   = 1,
-		id           = 'slide-left',
-		initial      = 0,
-		distance     = '50px',
+		duration = 400,
+		delay = 0,
+		fill = 'forwards',
+		direction = 'normal',
+		easing = 'ease-in',
+		iterations = 1,
+		id = 'slide-left',
+		initial = 0,
+		distance = '50px',
 	} = {}) {
 		return this.animate([
-			{transform: `translateX(${initial})`},
-			{transform: `translateX(-${distance})`}
+			{ transform: `translateX(${initial})` },
+			{ transform: `translateX(-${distance})` }
 		], {
 			delay,
 			duration,
@@ -693,19 +754,19 @@ export default class esQuery extends Set {
 	}
 
 	async slideRight({
-		duration     = 400,
-		delay        = 0,
-		fill         = 'forwards',
-		direction    = 'normal',
-		easing       = 'ease-in',
-		iterations   = 1,
-		id           = 'slide-right',
-		initial      = 0,
-		distance     = '50px',
+		duration = 400,
+		delay = 0,
+		fill = 'forwards',
+		direction = 'normal',
+		easing = 'ease-in',
+		iterations = 1,
+		id = 'slide-right',
+		initial = 0,
+		distance = '50px',
 	} = {}) {
 		return this.animate([
-			{transform: `translateX(${initial})`},
-			{transform: `translateX(${distance})`}
+			{ transform: `translateX(${initial})` },
+			{ transform: `translateX(${distance})` }
 		], {
 			delay,
 			duration,
@@ -718,19 +779,19 @@ export default class esQuery extends Set {
 	}
 
 	async slideUp({
-		duration     = 400,
-		delay        = 0,
-		fill         = 'forwards',
-		direction    = 'normal',
-		easing       = 'ease-in',
-		iterations   = 1,
-		id           = 'slide-up',
-		initial      = 0,
-		distance     = '50px',
+		duration = 400,
+		delay = 0,
+		fill = 'forwards',
+		direction = 'normal',
+		easing = 'ease-in',
+		iterations = 1,
+		id = 'slide-up',
+		initial = 0,
+		distance = '50px',
 	} = {}) {
 		return this.animate([
-			{transform: `translateY(${initial})`},
-			{transform: `translateY(-${distance})`}
+			{ transform: `translateY(${initial})` },
+			{ transform: `translateY(-${distance})` }
 		], {
 			delay,
 			duration,
@@ -743,19 +804,19 @@ export default class esQuery extends Set {
 	}
 
 	async slideDown({
-		duration     = 400,
-		delay        = 0,
-		fill         = 'forwards',
-		direction    = 'normal',
-		easing       = 'ease-in',
-		iterations   = 1,
-		id           = 'slide-down',
-		initial      = 0,
-		distance     = '50px',
+		duration = 400,
+		delay = 0,
+		fill = 'forwards',
+		direction = 'normal',
+		easing = 'ease-in',
+		iterations = 1,
+		id = 'slide-down',
+		initial = 0,
+		distance = '50px',
 	} = {}) {
 		return this.animate([
-			{transform: `translateY(${initial})`},
-			{transform: `translateY(${distance})`}
+			{ transform: `translateY(${initial})` },
+			{ transform: `translateY(${distance})` }
 		], {
 			delay,
 			duration,
@@ -767,7 +828,11 @@ export default class esQuery extends Set {
 		});
 	}
 
+	/**
+	 * @deprecated [will be removed in v3.0.0]
+	 */
 	async loadHTML(href) {
+		console.warn('`esQuery.loadHTML()` is deprecated and will be removed');
 		const url = new URL(href, location.origin);
 		const resp = await fetch(url);
 
@@ -820,14 +885,8 @@ export default class esQuery extends Set {
 		return this.some(el => el.classList.contains(cname));
 	}
 
-	async toggleClass(cname, force = null) {
-		if (force instanceof Function) {
-			this.forEach(node => node.classList.toggle(cname, force(node)));
-		} else if (typeof force === 'boolean') {
-			this.forEach(node => node.classList.toggle(cname, force));
-		} else {
-			this.forEach(node => node.classList.toggle(cname));
-		}
+	async toggleClass(...args) {
+		toggleClass(this, args);
 		return this;
 	}
 
@@ -838,7 +897,7 @@ export default class esQuery extends Set {
 
 	async pickClass(cname1, cname2, condition) {
 		this.toggleClass(cname1, condition);
-		this.toggleClass(cname2, ! condition);
+		this.toggleClass(cname2, !condition);
 		return this;
 	}
 
@@ -865,7 +924,7 @@ export default class esQuery extends Set {
 	}
 
 	async enable(enabled = true) {
-		this.disable(! enabled);
+		this.disable(!enabled);
 	}
 
 	async hide(hidden = true) {
@@ -874,7 +933,7 @@ export default class esQuery extends Set {
 	}
 
 	async unhide(shown = true) {
-		return this.hide(! shown);
+		return this.hide(!shown);
 	}
 
 	async append(...nodes) {
@@ -925,38 +984,8 @@ export default class esQuery extends Set {
 		return this.each(el => el.toggleAttribute(...args));
 	}
 
-	async attr(attrs = {}) {
-		this.forEach(node => {
-			for (const [key, value] of Object.entries(attrs)) {
-				switch (typeof(value)) {
-				case 'string':
-				case 'number':
-					node.setAttribute(key, value);
-					break;
-				case 'boolean':
-					value ? node.setAttribute(key, '') : node.removeAttribute(key);
-					break;
-				default:
-					node.removeAttribute(key);
-				}
-			}
-		});
-		return this;
-	}
-
-	async data(props = {}) {
-		this.forEach(node => {
-			for (const [key, value] of Object.entries(props)) {
-				if (value === false) {
-					delete node.dataset[key];
-				} else if (value === true || value === null) {
-					node.dataset[key] = '';
-				} else {
-					node.dataset[key] = typeof(value) === 'string' ? value : JSON.stringify(value);
-				}
-			}
-		});
-		return this;
+	async value(value) {
+		return this.attr({ value });
 	}
 
 	async pause() {
@@ -969,13 +998,13 @@ export default class esQuery extends Set {
 	}
 
 	/*==================== Listener Functions =================================*/
-	async on(event, callback, ...args) {
-		this.forEach(node => node.addEventListener(event, callback, ...args));
+	async on(...args) {
+		on(this, ...args);
 		return this;
 	}
 
-	async off(event, callback, ...args) {
-		this.forEach(node => node.removeEventListener(event, callback, ...args));
+	async off(...args) {
+		off(this, ...args);
 		return this;
 	}
 
@@ -983,14 +1012,18 @@ export default class esQuery extends Set {
 		return new Promise(resolve => {
 			const callback = event => {
 				resolve(event.target);
-				events.forEach(event => this.off(event, callback, {once: true}));
+				events.forEach(event => this.off(event, callback, { once: true }));
 			};
-			events.forEach(event => this.on(event, callback, {once: true}));
+			events.forEach(event => this.on(event, callback, { once: true }));
 		});
 	}
 
 	async once(event, callback) {
-		return this.on(event, callback, {once: true});
+		return this.on(event, callback, { once: true });
+	}
+
+	async debounce(event, callback, wait = 17, immediate = false, ...attrs) {
+		return this.on(event, debounce(callback, wait, immediate), ...attrs);
 	}
 
 	async ready(callback, ...args) {
@@ -1162,10 +1195,6 @@ export default class esQuery extends Set {
 		return this.on('hashchange', callback, ...args);
 	}
 
-	/*visibilitychange(callback) {
-		return this.on('visibilitychange', callback);
-	}*/
-
 	async popstate(callback, ...args) {
 		return this.on('popstate', callback, ...args);
 	}
@@ -1174,7 +1203,7 @@ export default class esQuery extends Set {
 		return this.on('pagehide', callback, ...args);
 	}
 
-	async watch(watching, options = [], attributeFilter = []) {
+	async mutate(watching, options = [], attributeFilter = []) {
 		/*https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver*/
 		const watcher = new MutationObserver(mutations => {
 			mutations.forEach(mutation => watching[mutation.type].call(mutation));
@@ -1182,9 +1211,14 @@ export default class esQuery extends Set {
 		const obs = Object.keys(watching).concat(options).reduce((watch, event) => {
 			watch[event] = true;
 			return watch;
-		}, {attributeFilter});
+		}, { attributeFilter });
 		this.forEach(el => watcher.observe(el, obs));
 		return this;
+	}
+
+	async watch(...args) {
+		console.warn('`esQuery.watch()` is deprecated, please use `esQuery.mutate()` instead');
+		return await this.mutate(...args);
 	}
 
 	/**
@@ -1192,20 +1226,81 @@ export default class esQuery extends Set {
 	 */
 	async intersect(callback, options = {}) {
 		try {
-			const observer = new IntersectionObserver(callback, options);
+			const observer = new IntersectionObserver((entries, observer) => {
+				entries.forEach(entry => callback(entry, observer));
+			}, options);
+
 			this.forEach(node => observer.observe(node));
-		} catch(err) {
+		} catch (err) {
 			console.error(err);
 		}
 		return this;
 	}
 
-	async css(props = {}) {
-		this.forEach(node => {
-			Object.entries(props).forEach(([prop, value]) => {
-				node.style.setProperty(prop, value);
-			});
-		});
+	async attr(...args) {
+		attr(this, ...args);
 		return this;
+	}
+
+	async css(...args) {
+		css(this, ...args);
+		return this;
+	}
+
+	async data(...args) {
+		data(this, ...args);
+		return this;
+	}
+
+	static async get(...args) {
+		return await GET(...args);
+	}
+
+	static async post(...args) {
+		return await POST(...args);
+	}
+
+	static async delete(...args) {
+		return await DELETE(...args);
+	}
+
+	static async getHTML(...args) {
+		return await getHTML(...args);
+	}
+
+	static async getJSON(...args) {
+		return await getJSON(...args);
+	}
+
+	static async getText(...args) {
+		return await getText(...args);
+	}
+
+	static async postHTML(...args) {
+		return await postHTML(...args);
+	}
+
+	static async postJSON(...args) {
+		return await postJSON(...args);
+	}
+
+	static async postText(...args) {
+		return await postText(...args);
+	}
+
+	static mediaQuery(query) {
+		return mediaQuery(query);
+	}
+
+	static async getLocation(...args) {
+		return await getLocation(...args);
+	}
+
+	static get loaded() {
+		return loaded();
+	}
+
+	static get ready() {
+		return ready();
 	}
 }

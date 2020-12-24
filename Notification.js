@@ -1,7 +1,4 @@
-function css(element, props) {
-	Object.entries(props).forEach(([key, value]) => element.style.setProperty(key, value));
-	return element;
-}
+import { css } from './functions.js';
 
 export default class Notification {
 	constructor(title, {
