@@ -57,6 +57,82 @@ export function openWindow(url, {
 	return window.open(url, name, flags.join(','));
 }
 
+export async function statusDialog(what, { duration = 5000, type = 'info', heading = null } = {}) {
+	const dialog = document.createElement('dialog');
+	const container = document.createElement('div');
+
+	if (typeof heading === 'string') {
+		const header = document.createElement('h3');
+		header.classList.add('center');
+		header.textContent = heading;
+		dialog.append(header);
+	} else if (heading instanceof Element) {
+		dialog.append(heading);
+	}
+
+	if (typeof type === 'string') {
+		dialog.classList.add('status-box', type);
+	}
+
+	switch(typeof what) {
+		case 'string':
+		case 'number':
+			container.textContent = what;
+			dialog.addEventListener('click', () => dialog.close());
+			dialog.classList.add('cursor-pointer');
+			break;
+
+		case 'object':
+			if (what instanceof URL) {
+				const a = document.createElement('a');
+				a.textContent = what.href;
+				a.href = what.href;
+				a.relList.add('noopener', 'noreferrer');
+				a.addEventListener('click', () => dialog.close());
+				container.append(a);
+			} else if (Array.isArray(what)) {
+				container.textContent = what.join(', ');
+				dialog.addEventListener('click', () => dialog.close());
+				dialog.classList.add('cursor-pointer');
+			} else if (what instanceof Error) {
+				container.textContent = what.message;
+				dialog.addEventListener('click', () => dialog.close());
+				dialog.classList.add('cursor-pointer');
+			} else if (what instanceof HTMLTemplateElement) {
+				container.append(what.content.cloneNode(true));
+			} else if (what instanceof DocumentFragment || what instanceof Element) {
+				container.append(what);
+			} else if (what instanceof NodeList) {
+				container.append(...what);
+			} else {
+				const pre = document.createElement('pre');
+				const code = document.createElement('code');
+				code.textContent = JSON.stringify(what, null, 4);
+				pre.append(code);
+				container.append(pre);
+			}
+			break;
+
+		default:
+			throw new TypeError(`Unsupported type: ${typeof what}`);
+	}
+
+	await new Promise(resolve => {
+		dialog.addEventListener('close', ({ target }) => {
+			target.remove();
+			resolve();
+		});
+
+		dialog.append(container);
+		document.body.append(dialog);
+		dialog.showModal();
+
+		if (Number.isFinite(duration)) {
+			setTimeout(() => dialog.close(), duration);
+		}
+	});
+}
+
 export function between(min, val, max) {
 	return val >= min && val <= max;
 }
