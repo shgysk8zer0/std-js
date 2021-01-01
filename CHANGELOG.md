@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add function for async submitting of forms
 - Create module for adding and updating `<meta>`s such as keywords, description, etc.
 - Async helper function `statusDialog()` for creating `<dialog>`s
+- `date-consts.js` module exporting 0-indexed array of days and months
 
 ## [v2.6.1] - 2020-12-18
 
