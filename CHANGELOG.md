@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Async helper function `statusDialog()` for creating `<dialog>`s
 - `date-consts.js` module exporting 0-indexed array of days and months
 
+### Fixed
+- Simplified `ready()` and `loaded()` to be more direct and not check for custom elements defined
+
 ## [v2.6.1] - 2020-12-18
 
 ### Added
