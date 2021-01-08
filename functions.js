@@ -548,26 +548,16 @@ export async function wait(ms) {
 	await sleep(ms);
 }
 
-export async function ready(...requires) {
+export async function ready() {
 	if (document.readyState === 'loading') {
-		await Promise.allSettled([
-			when(document, 'DOMContentLoaded'),
-			defined(...requires),
-		]);
-	} else {
-		await defined(...requires);
+		await new Promise(r => document.addEventListener('DOMContentLoaded', r, { once: true }));
 	}
 
 }
 
-export async function loaded(...requires) {
+export async function loaded() {
 	if (document.readyState !== 'complete') {
-		await Promise.allSettled([
-			when(window, 'load'),
-			defined(...requires),
-		]);
-	} else {
-		await defined(...requires);
+		await new Promise(r => window.addEventListener('load', r, { once: true }));
 	}
 }
 
