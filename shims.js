@@ -10,6 +10,18 @@ if (! ('cookieStore' in window)) {
 	window.cookieStore = new CookieStore();
 }
 
+if (! ('doNotTrack' in Navigator.prototype)) {
+	Object.defineProperty(Navigator.prototype, 'doNotTrack', {
+		get: () => 'unspecified',
+	});
+}
+
+if (! ('globalPrivacyControl' in Navigator.prototype)) {
+	Object.defineProperty(Navigator.prototype, 'globalPrivacyControl', {
+		get: () => false,
+	});
+}
+
 if (! (window.requestIdleCallback instanceof Function)) {
 	window.requestIdleCallback = function(callback, { timeout = 50 } = {}) {
 		const now = Date.now();
@@ -84,7 +96,7 @@ if (! (Array.from instanceof Function)) {
 
 if (! (Array.of instanceof Function)) {
 	Array.of = function() {
-		return Array.fromx(arguments);
+		return Array.from(arguments);
 	};
 }
 
@@ -213,27 +225,16 @@ if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
 	};
 }
 
-if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLElement.prototype.hasOwnProperty('open')) {
-	window.addEventListener('keypress', event => {
-		if (event.key === 'Escape') {
-			document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
-		}
-	}, {passive: true});
-
-	/**
-	 * @TODO Only set this for `HTMLUnknownElement`
-	 */
-	HTMLElement.prototype.show = function() {
+if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLUnknownElement.prototype.hasOwnProperty('open')) {
+	HTMLUnknownElement.prototype.show = function() {
 		this.open = true;
 	};
 
-	/**
-	 * @TODO Only set this for `HTMLUnknownElement`
-	 */
-	HTMLElement.prototype.close = function(returnValue = null) {
+	HTMLUnknownElement.prototype.close = function(returnValue = null) {
 		this.open = false;
 		if (this.tagName === 'DIALOG') {
 			const event = new CustomEvent('close');
+
 			if (typeof returnValue === 'string') {
 				event.returnValue = true;
 				this.returnValue = returnValue;
@@ -243,10 +244,7 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 		}
 	};
 
-	/**
-	 * @TODO Only set this for `HTMLUnknownElement`
-	 */
-	Object.defineProperty(HTMLElement.prototype, 'open', {
+	Object.defineProperty(HTMLUnknownElement.prototype, 'open', {
 		set: function(open) {
 			if (this.tagName === 'DETAILS') {
 				this.dispatchEvent(new CustomEvent('toggle'));
@@ -269,10 +267,7 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLEleme
 }
 
 if (! document.createElement('dialog').hasOwnProperty('showModal')) {
-	/**
-	 * @TODO Only set this for `HTMLUnknownElement`
-	 */
-	HTMLElement.prototype.showModal = function() {
+	HTMLUnknownElement.prototype.showModal = function() {
 		this.open = true;
 		this.classList.add('modal');
 		const backdrop = document.createElement('div');

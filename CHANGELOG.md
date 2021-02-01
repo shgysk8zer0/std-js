@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `navigator.doNotTrack` and `navigator.globalPrivacyControl` shims
 - Function for opening windows/popups
 - Function to get files from URLs (using `Content-Type` header)
 - Functions for `fetch`ing `<link>`s (useful for preloads & manifests)

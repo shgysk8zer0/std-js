@@ -50,7 +50,7 @@ cookieStore.addEventListener('change', async ({ changed, deleted }) => {
 	changeList.append(changeSum, ...changed.map(makeItems));
 	delList.append(delSum, ...deleted.map(makeItems));
 	dialog.append(header, changeList, delList);
-	dialog.addEventListener('close', ({ target }) => target.close());
+	dialog.addEventListener('close', ({ target }) => target.remove());
 	document.body.append(dialog);
 	dialog.showModal();
 	await sleep(8000);
