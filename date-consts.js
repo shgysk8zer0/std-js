@@ -29,7 +29,7 @@ export const days = [{
 	name: 'Friday',
 	short: 'Fri',
 }, {
-	name: 'Satuday',
+	name: 'Saturday',
 	short: 'Sat',
 }];
 
