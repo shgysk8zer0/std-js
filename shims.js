@@ -54,14 +54,14 @@ if (! (navigator.setAppBadge instanceof Function)) {
 			throw new TypeError('Failed to execute \'setAppBadge\' on \'Navigator\': Value is outside the \'unsigned long long\' value range.');
 		} else if (n === 0) {
 			if (document.title.startsWith('(')) {
-				document.title = document.title.replace(/^\((\*|\d{1,2})\)\s/, '');
+				document.title = document.title.replace(/^\((\d{1,2}\+?)\)\s/, '');
 			}
 		} else if (n < 100) {
 			await navigator.clearAppBadge();
 			document.title = `(${n}) ${document.title}`;
 		} else {
 			await navigator.clearAppBadge();
-			document.title = `(*) ${document.title}`;
+			document.title = `(99+) ${document.title}`;
 		}
 	};
 }
