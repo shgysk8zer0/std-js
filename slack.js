@@ -13,7 +13,7 @@ export async function signatureHeaders({ uuid }) {
 	});
 }
 
-export async function send(endpoint, { name, email, phone, subject, body }) {
+export async function send(endpoint, { name, email, phone, subject, body, url }) {
 	try {
 		const uuid = uuidv6();
 		const data = new FormData();
@@ -23,7 +23,9 @@ export async function send(endpoint, { name, email, phone, subject, body }) {
 		data.set('phone', phone);
 		data.set('subject', subject);
 		data.set('body', body);
+		data.set('url', url);
 		data.set('origin', location.origin);
+
 		const resp = await fetch(endpoint, {
 			method: 'POST',
 			mode: 'cors',
