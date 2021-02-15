@@ -2,7 +2,7 @@ import OpenWeatherMap from '../openweathermap.js';
 import GPS from '../GeoLocation.js';
 // import WYSIWYG from '../wysiwyg.js';
 // import FileUpload from '../fileupload.js';
-import {$} from '../functions.js';
+import { $ } from '../esQuery.js';
 import handleJSON from '../json_response.js';
 // import {supportsAsClasses} from '../support_test.js';
 // import popState from '../popstate.js';
@@ -15,7 +15,7 @@ import GitHub from '../GitHub.js';
 import Gravatar from '../Gravatar.js';
 import { shim } from '../share.js';
 import Cookie from '../Cookie.js';
-import {alert, prompt} from '../asyncDialog.js';
+import { alert, prompt } from '../asyncDialog.js';
 import 'https://cdn.kernvalley.us/components/toast-message.js';
 
 export async function loadHandler() {
@@ -176,12 +176,15 @@ function keybaseSearch(submit) {
 			case 'usernames':
 				results = await KeyBase.searchUsers(...query);
 				break;
+
 			case 'twitter':
 				results = await KeyBase.searchTwitter(...query);
 				break;
+
 			case 'github':
 				results = await KeyBase.searchGithub(...query);
 				break;
+
 			default:
 				throw new Error(`Invalid keybase query: "${form.get('keybase[query]')}"`);
 		}
@@ -332,5 +335,4 @@ function draw() {
 	const canvas = document.getElementById('vid-canvas');
 	const context = canvas.getContext('2d');
 	context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
 }

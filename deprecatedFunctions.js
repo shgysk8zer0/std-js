@@ -1,4 +1,5 @@
-import { $, sleep, toGenerator } from './functions.js';
+import { sleep, toGenerator } from './functions.js';
+import { $ } from './esQuery.js';
 /**
  * @deprecated [will be removed in v3.0.0]
  */

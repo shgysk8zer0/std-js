@@ -1,4 +1,4 @@
-import { parseHTML } from './functions.js';
+import { parseHTML } from './dom.js';
 
 function filename(src) {
 	if (typeof src === 'string') {

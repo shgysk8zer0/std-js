@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.6.2] - 2021-02-15
+
 ### Added
 - Numerous enhancements to Google Analytics script
 - `navigator.doNotTrack` and `navigator.globalPrivacyControl` shims
@@ -17,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Create module for adding and updating `<meta>`s such as keywords, description, etc.
 - Async helper function `statusDialog()` for creating `<dialog>`s
 - `date-consts.js` module exporting 0-indexed array of days and months
+- New modules: `dom`, `svg`, `media-queries`, and `custom-elements`
+
+### Changed
+- esQuery module now exports `{ $ }` as well as default class
+- Update `functions.js` to re-export functions from new modules which it used to contain
 
 ### Fixed
 - Simplified `ready()` and `loaded()` to be more direct and not check for custom elements defined
