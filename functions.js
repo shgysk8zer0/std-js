@@ -1,5 +1,6 @@
-import esQuery from './esQuery.js';
-import { SVG, XLINK } from './namespaces.js';
+import { $ } from './esQuery.js';
+import { attr, css, data, toggleClass, on, off, ready, loaded, when, parseHTML } from './dom.js';
+import { getCustomElement, createCustomElement, registerCustomElement, defined } from './custom-elements.js';
 
 export function openWindow(url, {
 	name = '',
@@ -137,164 +138,6 @@ export function between(min, val, max) {
 	return val >= min && val <= max;
 }
 
-export function css(what, props = {}, { base = document, priority = undefined } = {}) {
-	if (what instanceof Element) {
-		Object.entries(props).forEach(([p, v]) => {
-			if (typeof v === 'string' || typeof v === 'number') {
-				what.style.setProperty(p, v, priority);
-			} else {
-				what.style.removeProperty(p);
-			}
-		});
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => css(el, props, { base, priority }));
-	} else if (typeof what === 'string') {
-		css(base.querySelectorAll(what), props, { base, priority });
-	}
-}
-
-export function data(what, props = {}, { base = document } = {}) {
-	if (what instanceof Element) {
-		Object.entries(props).forEach(([p, v]) => {
-			if (v instanceof Date) {
-				v = v.toISOString();
-			} else if (v instanceof URL) {
-				v = v.href;
-			}
-
-			switch (typeof v) {
-				case 'string':
-				case 'number':
-					what.dataset[p] = v;
-					break;
-
-				case 'boolean':
-					if (v) {
-						what.dataset[p] = '';
-					} else {
-						delete what.dataset[p];
-					}
-					break;
-
-				case 'undefined':
-					delete what.dataset[p];
-					break;
-
-				default:
-					if (v === null) {
-						delete what.dataset[p];
-					} else {
-						what.dataset[p] = JSON.stringify(v);
-					}
-			}
-		});
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => data(el, props, { base }));
-	} else if (typeof what === 'string') {
-		data(base.querySelectorAll(what), props);
-	}
-}
-
-export function attr(what, props = {}, { base = document, namespace = null } = {}) {
-	if (what instanceof Element) {
-		Object.entries(props).forEach(([p, v]) => {
-			if (typeof v === 'string' || typeof v === 'number') {
-				if (typeof namespace === 'string') {
-					when.setAttributeNS(namespace, p, v);
-				} else {
-					what.setAttribute(p, v);
-				}
-			} else if (typeof v === 'boolean') {
-				if (typeof namespace === 'string') {
-					v ? what.setAttributeNS(namespace, p, '') : what.removeAttributeNS(namespace, p);
-				} else {
-					what.toggleAttribute(p, v);
-				}
-			} else if (v instanceof Date) {
-				if (typeof namespace === 'string') {
-					what.setAttributeNS(namespace, p, v.toISOString());
-				} else {
-					what.setAttribute(p, v.toISOString());
-				}
-			} else if (v instanceof URL) {
-				if (typeof namespace === 'string') {
-					what.setAttributeNS(namespace, p, v.href);
-				} else {
-					what.setAttribute(p, v.href);
-				}
-			} else if (typeof v === 'undefined' || v === null) {
-				if (typeof namespace === 'string') {
-					what.removeAttributeNS(namespace, p);
-				} else {
-					what.removeAttribute(p);
-				}
-			} else if (typeof namespace === 'string') {
-				what.setAttributeNS(namespace, p, JSON.stringify(v));
-			} else {
-				what.setAttribute(p, JSON.stringify(v));
-			}
-		});
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => attr(el, props, { base, namespace }));
-	} else if (typeof what === 'string') {
-		attr(base.querySelectorAll(what), props, { namespace });
-	}
-}
-
-export function toggleClass(what, classes, { base = document, force = undefined } = {}) {
-	if (what instanceof Element) {
-		if (typeof classes === 'string') {
-			what.classList.toggle(classes, force);
-		} else if (Array.isArray(classes)) {
-			classes.forEach(cn => toggleClass(what, cn, { force }));
-		} else {
-			Object.entries(classes).forEach(([cl, cond]) => {
-				if (cond instanceof Function) {
-					what.classList.toggle(cl, cond.apply(what, [cl]));
-				} else {
-					what.classList.toggle(cl, cond);
-				}
-			});
-		}
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => toggleClass(el, classes, { force }));
-	} else if (typeof what === 'string') {
-		toggleClass(base.querySelectorAll(what), classes, { force });
-	}
-}
-
-export function on(what, when, ...args) {
-	if (what instanceof Element) {
-		if (typeof when === 'string') {
-			what.addEventListener(when, ...args);
-		} else if (Array.isArray(when)) {
-			when.forEach(e => on(what, e, ...args));
-		} else {
-			Object.entries(when).forEach(([ev, cb]) => on(what, ev, cb, ...args));
-		}
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => on(el, when, ...args));
-	} else if (typeof what === 'string') {
-		on(document.querySelectorAll(what), when, ...args);
-	}
-}
-
-export function off(what, when, ...args) {
-	if (what instanceof Element) {
-		if (typeof when === 'string') {
-			what.removeEventListener(when, ...args);
-		} else if (Array.isArray(when)) {
-			when.forEach(e => off(what, e, ...args));
-		} else {
-			Object.entries(when).forEach(([ev, cb]) => off(what, ev, cb, ...args));
-		}
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => off(el, when, ...args));
-	} else if (typeof what === 'string') {
-		off(document.querySelectorAll(what), when, ...args);
-	}
-}
-
 export function clone(thing) {
 	if (thing instanceof Array) {
 		return [...thing].map(clone);
@@ -338,79 +181,6 @@ export function changeTagName(target, tag = 'div', { replace = true, is = null }
 	return el;
 }
 
-export function createSVG({ fill = null, height = null, width = null, label = null,
-	role = 'img', hidden = false, classes = [] } = {}) {
-	const svg = document.createElementNS(SVG, 'svg');
-
-	svg.setAttribute('role', role);
-
-	if (typeof label === 'string') {
-		svg.setAttribute('aria-label', label);
-	}
-
-	if (hidden === true) {
-		svg.setAttribute('aria-hidden', 'true');
-	}
-
-	if (typeof height === 'number') {
-		svg.setAttribute('height', height);
-	}
-
-	if (typeof width === 'number') {
-		svg.setAttribute('width', width);
-	}
-
-	if (typeof fill === 'string') {
-		svg.setAttribute('fill', fill);
-	}
-
-	if (Array.isArray(classes) && classes.length !== 0) {
-		svg.classList.add(...classes);
-	}
-
-	return svg;
-}
-
-export function useSVG(sprite, { src = '/img/icons.svg', fill = null, height = null,
-	width = null, classes = [], label = null } = {}) {
-	const svg = createSVG({ fill, height, width, classes, label, hidden: true });
-	const use = document.createElementNS(SVG, 'use');
-
-	if (typeof src === 'string') {
-		const url = new URL(src, document.baseURI);
-		url.hash = `#${sprite}`;
-		use.setAttributeNS(XLINK, 'xlink:href', url.href);
-	} else {
-		use.setAttributeNS(XLINK, 'xlink:href', `#${sprite}`);
-	}
-
-	svg.append(use);
-
-	return svg;
-}
-
-export function mediaQuery(query = {}) {
-	if (typeof matchMedia !== 'function') {
-		return false;
-	} else {
-		const queries = Object.entries(query).map(([k, v]) => `(${k}: ${v})`).join(' and ');
-		return matchMedia(queries).matches;
-	}
-}
-
-export function prefersReducedMotion() {
-	return mediaQuery({ 'prefers-reduced-motion': 'reduce' });
-}
-
-export function prefersColorScheme() {
-	return mediaQuery({ 'prefers-color-scheme': 'dark' }) ? 'dark': 'light';
-}
-
-export function displayMode() {
-	const displays = ['browser', 'standalone', 'minimal-ui', 'fullscreen'];
-	return displays.find(mode => mediaQuery({ 'display-mode': mode })) || 'browser';
-}
-
 export function isInViewport(el) {
 	if (typeof el === 'string') {
 		return isInViewport(document.querySelector(el));
@@ -422,51 +192,6 @@ export function isInViewport(el) {
 			&& (between(0, left, width) || between(0, right, width));
 	} else {
 		throw new Error('Not a valid element or selector');
-	}
-}
-
-export function registerCustomElement(tag, cls, ...rest) {
-	if (! (window.customElements instanceof Object)) {
-		console.error(new Error('`customElements` not supported'));
-		return false;
-	} else if (typeof customElements.get(tag) !== 'undefined') {
-		console.warn(new Error(`<${tag}> is already defined`));
-		// Returns true/false if element being registered matches given class
-		return customElements.get(tag) === cls;
-	} else {
-		customElements.define(tag, cls, ...rest);
-		return true;
-	}
-}
-
-export async function getCustomElement(tag) {
-	if (! (window.customElements instanceof Object)) {
-		throw(new Error('`customElements` not supported'));
-	} else {
-		await customElements.whenDefined(tag);
-		return await customElements.get(tag);
-	}
-}
-
-export async function createCustomElement(tag, ...args) {
-	const Pro = await getCustomElement(tag);
-	return new Pro(...args);
-}
-
-export function parseHTML(text, { type = 'text/html', asFrag = true, head = true } = {}) {
-	const parser = new DOMParser();
-	const doc = parser.parseFromString(text, type);
-
-	if (asFrag === false) {
-		return doc;
-	} else if (head === false) {
-		const frag = document.createDocumentFragment();
-		[...doc.body.childNodes].forEach(el => frag.append(el));
-		return frag;
-	} else {
-		const frag = document.createDocumentFragment();
-		[...doc.head.childNodes, ...doc.body.childNodes].forEach(el => frag.append(el));
-		return frag;
 	}
 }
 
@@ -500,14 +225,6 @@ export function debounce(func, wait = 17, immediate = false) {
 	};
 }
 
-export async function when(target, event, {
-	once = true,
-	capture = true,
-	passive = true,
-} = {}) {
-	await new Promise(resolve => on(target, event, resolve, { once, capture, passive }));
-}
-
 export async function whenOnline() {
 	if (navigator.onLine === false) {
 		await when(window, 'online');
@@ -536,29 +253,12 @@ export async function sleep(ms, ...args) {
 	await new Promise(resolve => setTimeout(() => resolve(...args), ms));
 }
 
-export async function defined(...els) {
-	await Promise.all(els.map(el => customElements.whenDefined(el)));
-}
-
 /**
  * @deprecated [will be removed in v3.0.0]
  */
 export async function wait(ms) {
 	console.warn('`wait()` is deprecated. Please use `sleep()` instead.');
 	await sleep(ms);
-}
-
-export async function ready() {
-	if (document.readyState === 'loading') {
-		await new Promise(r => document.addEventListener('DOMContentLoaded', r, { once: true }));
-	}
-
-}
-
-export async function loaded() {
-	if (document.readyState !== 'complete') {
-		await new Promise(r => window.addEventListener('load', r, { once: true }));
-	}
 }
 
 /**
@@ -584,13 +284,6 @@ export async function pageHidden() {
 export function isModule() {
 	// Cannot check `import.meta` due to syntax errors, so check `currentScript`
 	return ! (document.currentScript instanceof HTMLScriptElement);
-}
-
-/**
- * Do not export immediately as it still needs static methods assigned
- */
-function $(selector, parent = document) {
-	return new esQuery(selector, parent);
 }
 
 export function* toGenerator(...items) {
@@ -713,17 +406,8 @@ export async function getLocation({ maximumAge, timeout, enableHighAccuracy = fa
 	});
 }
 
-$.mediaQuery = esQuery.mediaQuery;
-$.getLocation = esQuery.getLocation;
-$.loaded = esQuery.loaded;
-$.ready = esQuery.ready;
-$.get = esQuery.get;
-$.post = esQuery.post;
-$.delete = esQuery.delete;
-$.getHTML = esQuery.getHTML;
-$.getJSON = esQuery.getJSON;
-$.getText = esQuery.getText;
-$.postHTML = esQuery.postHTML;
-$.postJSON = esQuery.postJSON;
-$.postText = esQuery.postText;
-export { $ };
+export { $, attr, css, data, toggleClass, on, off, when, ready, loaded, parseHTML,
+	getCustomElement, createCustomElement, registerCustomElement, defined };
+
+export { mediaQuery, prefersReducedMotion, prefersColorScheme, displayMode } from './media-queries.js';
+export { createSVG, useSVG } from './svg.js';
