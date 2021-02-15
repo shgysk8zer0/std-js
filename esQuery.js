@@ -1,6 +1,6 @@
-import { attr, css, data, toggleClass, on, off, read, debounce,
-	prefersReducedMotion, isInViewport, mediaQuery, getLocation, ready, loaded }
-	from './functions.js';
+import { read, debounce, getLocation, isInViewport } from './functions.js';
+import { attr, css, data, toggleClass, on, off, ready, loaded } from './dom.js';
+import { prefersReducedMotion, mediaQuery } from './media-queries.js';
 
 import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText } from './http.js';
 
@@ -1304,3 +1304,23 @@ export default class esQuery extends Set {
 		return ready();
 	}
 }
+
+function $(selector, parent = document) {
+	return new esQuery(selector, parent);
+}
+
+$.mediaQuery = esQuery.mediaQuery;
+$.getLocation = esQuery.getLocation;
+$.loaded = esQuery.loaded;
+$.ready = esQuery.ready;
+$.get = esQuery.get;
+$.post = esQuery.post;
+$.delete = esQuery.delete;
+$.getHTML = esQuery.getHTML;
+$.getJSON = esQuery.getJSON;
+$.getText = esQuery.getText;
+$.postHTML = esQuery.postHTML;
+$.postJSON = esQuery.postJSON;
+$.postText = esQuery.postText;
+
+export { $ };
