@@ -2,7 +2,7 @@ export function create(tag, {
 	text = null,
 	id,
 	classList,
-	attrs,
+	attrs = {},
 	dataset,
 	hidden,
 	title,
@@ -19,8 +19,13 @@ export function create(tag, {
 	itemref,
 	children,
 	events,
+	styles,
 } = {}) {
 	const el = document.createElement(tag, { is });
+
+	if (typeof is === 'string') {
+		attrs.is = is;
+	}
 
 	if (typeof id === 'string') {
 		el.id = id;
@@ -92,6 +97,10 @@ export function create(tag, {
 		el.setAttribute('itemref', itemref);
 	} else if (Array.isArray(itemref)) {
 		el.setAttribute('itemref', itemref.join(' '));
+	}
+
+	if (typeof styles === 'object') {
+		css(el, styles);
 	}
 
 	return el;

@@ -1,7 +1,7 @@
 import { SVG, XLINK } from './namespaces.js';
 
 export function createSVG({ fill = null, height = null, width = null, label = null,
-	role = 'img', hidden = false, classes = [] } = {}) {
+	role = 'img', hidden = false, classList = [] } = {}) {
 	const svg = document.createElementNS(SVG, 'svg');
 
 	svg.setAttribute('role', role);
@@ -26,16 +26,16 @@ export function createSVG({ fill = null, height = null, width = null, label = nu
 		svg.setAttribute('fill', fill);
 	}
 
-	if (Array.isArray(classes) && classes.length !== 0) {
-		svg.classList.add(...classes);
+	if (Array.isArray(classList) && classList.length !== 0) {
+		svg.classList.add(...classList);
 	}
 
 	return svg;
 }
 
 export function useSVG(sprite, { src = '/img/icons.svg', fill = null, height = null,
-	width = null, classes = [], label = null } = {}) {
-	const svg = createSVG({ fill, height, width, classes, label });
+	width = null, classList = [], label = null } = {}) {
+	const svg = createSVG({ fill, height, width, classList, label, hidden: true });
 	const use = document.createElementNS(SVG, 'use');
 
 	if (typeof src === 'string') {
