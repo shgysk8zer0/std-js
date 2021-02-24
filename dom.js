@@ -354,7 +354,7 @@ export function intersect(what, callback, options) {
 	if ('IntersectionObserver' in window) {
 		const items = query(what);
 		const observer = new IntersectionObserver((entries, observer) => {
-			entries.forEach(entry => callback.apply(null, [entry, observer]));
+			entries.forEach((entry, index) => callback.apply(null, [entry, observer, index]));
 		}, options);
 		items.forEach(item => observer.observe(item));
 		return observer;
@@ -366,7 +366,7 @@ export function intersect(what, callback, options) {
 export function mutate(what, callback, opts = {}) {
 	if ('MutationObserver' in window) {
 		const observer = new MutationObserver((records, observer) => {
-			records.forEach(record => callback.apply(null, [record, observer]));
+			records.forEach((record, index) => callback.apply(null, [record, observer, index]));
 		});
 		const items = query(what);
 		items.forEach(item => observer.observe(item, opts));
