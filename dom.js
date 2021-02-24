@@ -1,3 +1,17 @@
+export function query(what, base = document) {
+	if (what instanceof Node) {
+		return [what];
+	} else if (Array.isArray(what)) {
+		return what;
+	} else if (typeof what === 'string') {
+		return Array.from(base.querySelectorAll(what));
+	} else if (typeof what === 'object' && what[Symbol.iterator] instanceof Function) {
+		return Array.from(what);
+	} else {
+		throw new TypeError('Invalid "what" given to query()');
+	}
+}
+
 export function create(tag, {
 	text = null,
 	id,
@@ -122,27 +136,28 @@ export function meta({ name, itemprop, property, charset, content }) {
 	} else {
 		throw new Error('Meta must have either name, itemprop, property, or charset given');
 	}
+
 	return meta;
 }
 
 export function css(what, props = {}, { base = document, priority = undefined } = {}) {
-	if (what instanceof Element) {
+	const items = query(what, base);
+	items.forEach(item => {
 		Object.entries(props).forEach(([p, v]) => {
 			if (typeof v === 'string' || typeof v === 'number') {
-				what.style.setProperty(p, v, priority);
+				item.style.setProperty(p, v, priority);
 			} else {
-				what.style.removeProperty(p);
+				item.style.removeProperty(p);
 			}
 		});
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => css(el, props, { base, priority }));
-	} else if (typeof what === 'string') {
-		css(base.querySelectorAll(what), props, { base, priority });
-	}
+	});
+
+	return items;
 }
 
 export function data(what, props = {}, { base = document } = {}) {
-	if (what instanceof Element) {
+	const items = query(what, base);
+	items.forEach(item => {
 		Object.entries(props).forEach(([p, v]) => {
 			if (v instanceof Date) {
 				v = v.toISOString();
@@ -153,134 +168,130 @@ export function data(what, props = {}, { base = document } = {}) {
 			switch (typeof v) {
 				case 'string':
 				case 'number':
-					what.dataset[p] = v;
+					item.dataset[p] = v;
 					break;
 
 				case 'boolean':
 					if (v) {
-						what.dataset[p] = '';
+						item.dataset[p] = '';
 					} else {
-						delete what.dataset[p];
+						delete item.dataset[p];
 					}
 					break;
 
 				case 'undefined':
-					delete what.dataset[p];
+					delete item.dataset[p];
 					break;
 
 				default:
 					if (v === null) {
-						delete what.dataset[p];
+						delete item.dataset[p];
 					} else {
-						what.dataset[p] = JSON.stringify(v);
+						item.dataset[p] = JSON.stringify(v);
 					}
 			}
 		});
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => data(el, props, { base }));
-	} else if (typeof what === 'string') {
-		data(base.querySelectorAll(what), props);
-	}
+	});
+
+	return items;
 }
 
 export function attr(what, props = {}, { base = document, namespace = null } = {}) {
-	if (what instanceof Element) {
+	const items = query(what, base);
+	items.forEach(item => {
 		Object.entries(props).forEach(([p, v]) => {
 			if (typeof v === 'string' || typeof v === 'number') {
 				if (typeof namespace === 'string') {
-					when.setAttributeNS(namespace, p, v);
+					item.setAttributeNS(namespace, p, v);
 				} else {
-					what.setAttribute(p, v);
+					item.setAttribute(p, v);
 				}
 			} else if (typeof v === 'boolean') {
 				if (typeof namespace === 'string') {
-					v ? what.setAttributeNS(namespace, p, '') : what.removeAttributeNS(namespace, p);
+					v ? item.setAttributeNS(namespace, p, '') : item.removeAttributeNS(namespace, p);
 				} else {
-					what.toggleAttribute(p, v);
+					item.toggleAttribute(p, v);
 				}
 			} else if (v instanceof Date) {
 				if (typeof namespace === 'string') {
-					what.setAttributeNS(namespace, p, v.toISOString());
+					item.setAttributeNS(namespace, p, v.toISOString());
 				} else {
-					what.setAttribute(p, v.toISOString());
+					item.setAttribute(p, v.toISOString());
 				}
 			} else if (v instanceof URL) {
 				if (typeof namespace === 'string') {
-					what.setAttributeNS(namespace, p, v.href);
+					item.setAttributeNS(namespace, p, v.href);
 				} else {
-					what.setAttribute(p, v.href);
+					item.setAttribute(p, v.href);
 				}
 			} else if (typeof v === 'undefined' || v === null) {
 				if (typeof namespace === 'string') {
-					what.removeAttributeNS(namespace, p);
+					item.removeAttributeNS(namespace, p);
 				} else {
-					what.removeAttribute(p);
+					item.removeAttribute(p);
 				}
 			} else if (typeof namespace === 'string') {
-				what.setAttributeNS(namespace, p, JSON.stringify(v));
+				item.setAttributeNS(namespace, p, JSON.stringify(v));
 			} else {
-				what.setAttribute(p, JSON.stringify(v));
+				item.setAttribute(p, JSON.stringify(v));
 			}
 		});
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => attr(el, props, { base, namespace }));
-	} else if (typeof what === 'string') {
-		attr(base.querySelectorAll(what), props, { namespace });
-	}
+	});
+
+	return items;
 }
 
 export function toggleClass(what, classes, { base = document, force = undefined } = {}) {
-	if (what instanceof Element) {
+	const items = query(what, base);
+	items.forEach(item => {
 		if (typeof classes === 'string') {
-			what.classList.toggle(classes, force);
+			return item.classList.toggle(classes, force);
 		} else if (Array.isArray(classes)) {
-			classes.forEach(cn => toggleClass(what, cn, { force }));
+			classes.forEach(cn => {
+				item.classList.toggle(cn, force);
+			});
 		} else {
 			Object.entries(classes).forEach(([cl, cond]) => {
 				if (cond instanceof Function) {
-					what.classList.toggle(cl, cond.apply(what, [cl]));
+					item.classList.toggle(cl, cond.apply(what, [cl]));
 				} else {
-					what.classList.toggle(cl, cond);
+					item.classList.toggle(cl, cond);
 				}
 			});
 		}
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => toggleClass(el, classes, { force }));
-	} else if (typeof what === 'string') {
-		toggleClass(base.querySelectorAll(what), classes, { force });
-	}
+	});
+
+	return items;
 }
 
 export function on(what, when, ...args) {
-	if (what instanceof Element) {
+	const items = query(what);
+	items.forEach(item => {
 		if (typeof when === 'string') {
-			what.addEventListener(when, ...args);
+			item.addEventListener(when, ...args);
 		} else if (Array.isArray(when)) {
-			when.forEach(e => on(what, e, ...args));
+			when.forEach(e =>  item.addEventListener(e, ...args));
 		} else {
-			Object.entries(when).forEach(([ev, cb]) => on(what, ev, cb, ...args));
+			Object.entries(when).forEach(([ev, cb]) => item.addEventListener(ev, cb, ...args));
 		}
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => on(el, when, ...args));
-	} else if (typeof what === 'string') {
-		on(document.querySelectorAll(what), when, ...args);
-	}
+	});
+
+	return items;
 }
 
 export function off(what, when, ...args) {
-	if (what instanceof Element) {
+	const items = query(what);
+	items.forEach(item => {
 		if (typeof when === 'string') {
-			what.removeEventListener(when, ...args);
+			item.removeEventListener(when, ...args);
 		} else if (Array.isArray(when)) {
-			when.forEach(e => off(what, e, ...args));
+			when.forEach(e =>  item.removeEventListener(e, ...args));
 		} else {
-			Object.entries(when).forEach(([ev, cb]) => off(what, ev, cb, ...args));
+			Object.entries(when).forEach(([ev, cb]) => item.removeEventListener(ev, cb, ...args));
 		}
-	} else if (what instanceof NodeList || what instanceof Set || Array.isArray(what)) {
-		what.forEach(el => off(el, when, ...args));
-	} else if (typeof what === 'string') {
-		off(document.querySelectorAll(what), when, ...args);
-	}
+	});
+
+	return items;
 }
 
 export async function when(target, event, {
