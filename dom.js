@@ -336,7 +336,7 @@ export function parseHTML(text, { type = 'text/html', asFrag = true, head = true
 	}
 }
 
-export function observe(what, ...args) {
+export function itersect(what, ...args) {
 	if ('IntersectionObserver' in window) {
 		const items = query(what);
 		const observer = new IntersectionObserver(...args);
@@ -344,5 +344,16 @@ export function observe(what, ...args) {
 		return observer;
 	} else {
 		throw new Error('IntersectionObserver not supported');
+	}
+}
+
+export function mutate(what, callback, ...args) {
+	if ('MutationObserver' in window) {
+		const observer = new MutationObserver(callback);
+		const items = query(what);
+		items.forEach(item => observer.observe(item, ...args));
+		return observer;
+	} else {
+		throw new Error('MutationObserver not supported');
 	}
 }
