@@ -1,5 +1,5 @@
 import { read, debounce, getLocation, isInViewport } from './functions.js';
-import { attr, css, data, toggleClass, on, off, ready, loaded } from './dom.js';
+import { query, attr, css, data, toggleClass, on, off, ready, loaded } from './dom.js';
 import { prefersReducedMotion, mediaQuery } from './media-queries.js';
 
 import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText } from './http.js';
@@ -13,23 +13,8 @@ const PREFIXES = [
 
 /*============================ esQuery Functions =======================*/
 export default class esQuery extends Set {
-	constructor(selector, parent = document) {
-		if (typeof selector === 'string') {
-			super(parent.querySelectorAll(selector));
-
-			if (parent instanceof Element && parent.matches(selector)) {
-				this.add(parent);
-			}
-		} else if (selector instanceof Element) {
-			super([selector]);
-		} else if (selector[Symbol.iterator] instanceof Function) {
-			super(selector);
-		} else if (typeof selector === 'object') {
-			super([selector]);
-		} else {
-			super();
-			throw new TypeError(`Expected a string, Element, or NodeList but got a ${typeof selector}`);
-		}
+	constructor(selector, base = document) {
+		super(query(selector, base));
 	}
 
 	get parents() {
