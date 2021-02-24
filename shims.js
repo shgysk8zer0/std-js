@@ -33,7 +33,7 @@ if (! (window.requestIdleCallback instanceof Function)) {
 				}
 			};
 
-			idle.didTimeout = idle.timeRemaining() > 0;
+			idle.didTimeout = idle.timeRemaining() === 0;
 
 			callback(idle);
 		});
@@ -44,6 +44,11 @@ if (! ( window.cancelIdleCallback instanceof Function)) {
 	window.cancelIdleCallback = function(id) {
 		cancelAnimationFrame(id);
 	};
+}
+
+if (! (window.queueMicrotask instanceof Function)) {
+	window.queueMicrotask = cb => Promise.resolve().then(cb)
+		.catch(e => setTimeout(() => { throw e; }));
 }
 
 if (! (navigator.setAppBadge instanceof Function)) {
