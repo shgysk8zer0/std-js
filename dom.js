@@ -336,6 +336,20 @@ export function parseHTML(text, { type = 'text/html', asFrag = true, head = true
 	}
 }
 
+export function animate(what, keyframes, opts = { duration: 400 }) {
+	if (Element.prototype.animate instanceof Function) {
+		const items = query(what);
+
+		if (Number.isInteger(opts)) {
+			opts = { duration: opts };
+		}
+
+		return items.map(item => item.animate(keyframes, opts));
+	} else {
+		throw new Error('Animations not supported');
+	}
+}
+
 export function intersect(what, ...args) {
 	if ('IntersectionObserver' in window) {
 		const items = query(what);
@@ -347,11 +361,11 @@ export function intersect(what, ...args) {
 	}
 }
 
-export function mutate(what, callback, ...args) {
+export function mutate(what, callback, opts = {}) {
 	if ('MutationObserver' in window) {
 		const observer = new MutationObserver(callback);
 		const items = query(what);
-		items.forEach(item => observer.observe(item, ...args));
+		items.forEach(item => observer.observe(item, opts));
 		return observer;
 	} else {
 		throw new Error('MutationObserver not supported');
