@@ -19,7 +19,7 @@ $(document.documentElement).toggleClass({
 	'no-details': document.createElement('details') instanceof HTMLUnknownElement,
 	'js': true,
 	'no-js': false,
-	'no-custom-elements': 'customElements' in window,
+	'no-custom-elements': !('customElements' in window),
 });
 
 window.$ = $;

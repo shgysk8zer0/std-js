@@ -871,7 +871,7 @@ export default class esQuery extends Set {
 	}
 
 	async toggleClass(...args) {
-		toggleClass(this, args);
+		toggleClass(this, ...args);
 		return this;
 	}
 
