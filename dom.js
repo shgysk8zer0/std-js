@@ -336,10 +336,26 @@ export function parseHTML(text, { type = 'text/html', asFrag = true, head = true
 	}
 }
 
-export function itersect(what, ...args) {
+export function animate(what, keyframes, opts = { duration: 400 }) {
+	if (Element.prototype.animate instanceof Function) {
+		const items = query(what);
+
+		if (Number.isInteger(opts)) {
+			opts = { duration: opts };
+		}
+
+		return Promise.all(items.map(item => item.animate(keyframes, opts).finished));
+	} else {
+		throw new Error('Animations not supported');
+	}
+}
+
+export function intersect(what, callback, options) {
 	if ('IntersectionObserver' in window) {
 		const items = query(what);
-		const observer = new IntersectionObserver(...args);
+		const observer = new IntersectionObserver((entries, observer) => {
+			entries.forEach(entry => callback.apply(null, [entry, observer]));
+		}, options);
 		items.forEach(item => observer.observe(item));
 		return observer;
 	} else {
@@ -347,11 +363,13 @@ export function itersect(what, ...args) {
 	}
 }
 
-export function mutate(what, callback, ...args) {
+export function mutate(what, callback, opts = {}) {
 	if ('MutationObserver' in window) {
-		const observer = new MutationObserver(callback);
+		const observer = new MutationObserver((records, observer) => {
+			records.forEach(record => callback.apply(null, [record, observer]));
+		});
 		const items = query(what);
-		items.forEach(item => observer.observe(item, ...args));
+		items.forEach(item => observer.observe(item, opts));
 		return observer;
 	} else {
 		throw new Error('MutationObserver not supported');

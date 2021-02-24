@@ -1,6 +1,7 @@
 import { read, debounce, getLocation, isInViewport } from './functions.js';
-import { query, attr, css, data, toggleClass, on, off, ready, loaded } from './dom.js';
-import { prefersReducedMotion, mediaQuery } from './media-queries.js';
+import { query, attr, css, data, toggleClass, on, off, animate, ready, loaded,
+	intersect } from './dom.js';
+import { mediaQuery } from './media-queries.js';
 
 import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText } from './http.js';
 
@@ -162,13 +163,11 @@ export default class esQuery extends Set {
 	}
 
 	async animate(keyframes, opts = 400) {
-		if (typeof keyframes === 'string') {
-			return this.css({ 'animation-name': keyframes });
-		} else if (('animate' in Element.prototype) && ! prefersReducedMotion()) {
-			await this.map(node => node.animate(keyframes, opts).finished);
+		if (Element.prototype.animate instanceof Function) {
+			await animate(this, keyframes, opts);
 			return this;
 		} else {
-			return Promise.resolve(this);
+			return this;
 		}
 	}
 
@@ -1211,11 +1210,7 @@ export default class esQuery extends Set {
 	 */
 	async intersect(callback, options = {}) {
 		try {
-			const observer = new IntersectionObserver((entries, observer) => {
-				entries.forEach(entry => callback(entry, observer));
-			}, options);
-
-			this.forEach(node => observer.observe(node));
+			intersect(this, callback, options);
 		} catch (err) {
 			console.error(err);
 		}
