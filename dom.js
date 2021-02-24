@@ -336,7 +336,7 @@ export function parseHTML(text, { type = 'text/html', asFrag = true, head = true
 	}
 }
 
-export function itersect(what, ...args) {
+export function intersect(what, ...args) {
 	if ('IntersectionObserver' in window) {
 		const items = query(what);
 		const observer = new IntersectionObserver(...args);
