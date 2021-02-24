@@ -4,7 +4,11 @@ export function query(what, base = document) {
 	} else if (Array.isArray(what)) {
 		return what;
 	} else if (typeof what === 'string') {
-		return Array.from(base.querySelectorAll(what));
+		const matches = Array.from(base.querySelectorAll(what));
+		if (base.matches(what)) {
+			matches.push(base);
+		}
+		return matches;
 	} else if (typeof what === 'object' && what[Symbol.iterator] instanceof Function) {
 		return Array.from(what);
 	} else {
