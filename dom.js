@@ -1,11 +1,11 @@
 export function query(what, base = document) {
-	if (what instanceof Node) {
+	if (what instanceof Node || what instanceof Window || what instanceof Navigator) {
 		return [what];
 	} else if (Array.isArray(what)) {
 		return what;
 	} else if (typeof what === 'string') {
 		const matches = Array.from(base.querySelectorAll(what));
-		if (base.matches(what)) {
+		if (base.matches instanceof Function && base.matches(what)) {
 			matches.push(base);
 		}
 		return matches;
@@ -333,5 +333,16 @@ export function parseHTML(text, { type = 'text/html', asFrag = true, head = true
 		const frag = document.createDocumentFragment();
 		[...doc.head.childNodes, ...doc.body.childNodes].forEach(el => frag.append(el));
 		return frag;
+	}
+}
+
+export function observe(what, ...args) {
+	if ('IntersectionObserver' in window) {
+		const items = query(what);
+		const observer = new IntersectionObserver(...args);
+		items.forEach(item => observer.observe(item));
+		return observer;
+	} else {
+		throw new Error('IntersectionObserver not supported');
 	}
 }
