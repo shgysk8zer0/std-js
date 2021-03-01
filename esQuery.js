@@ -1,6 +1,6 @@
 import { read, debounce, getLocation, isInViewport } from './functions.js';
-import { query, attr, css, data, toggleClass, on, off, animate, ready, loaded,
-	intersect } from './dom.js';
+import { query, attr, css, data, toggleClass, text, html, on, off, animate, ready,
+	loaded, intersect } from './dom.js';
 import { mediaQuery } from './media-queries.js';
 
 import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText } from './http.js';
@@ -57,12 +57,12 @@ export default class esQuery extends Set {
 	}
 
 	async text(str) {
-		this.forEach(node => node.textContent = str);
+		await text(this, str);
 		return this;
 	}
 
-	async html(html) {
-		this.forEach(node => node.innerHTML = html);
+	async html(HTML) {
+		await html(this, HTML);
 		return this;
 	}
 
@@ -1218,17 +1218,17 @@ export default class esQuery extends Set {
 	}
 
 	async attr(...args) {
-		attr(this, ...args);
-		return this;
-	}
-
-	async css(...args) {
-		css(this, ...args);
+		await attr(this, ...args);
 		return this;
 	}
 
 	async data(...args) {
-		data(this, ...args);
+		await data(this, ...args);
+		return this;
+	}
+
+	async css(...args) {
+		await css(this, ...args);
 		return this;
 	}
 
