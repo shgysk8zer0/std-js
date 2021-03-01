@@ -1,3 +1,39 @@
+export async function onAnimationFrame(callback) {
+	return await new Promise((resolve, reject) => {
+		requestAnimationFrame(hrts => {
+			if (callback instanceof Promise) {
+				callback(hrts).then(resolve).catch(reject);
+			} else if (callback instanceof Function) {
+				try {
+					resolve(callback(hrts));
+				} catch (err) {
+					reject(err);
+				}
+			} else {
+				reject(new TypeError('callback must be an instance of Function or Promise'));
+			}
+		});
+	});
+}
+
+export async function onIdle(callback, { timeout } = {}) {
+	return await new Promise((resolve, reject) => {
+		requestIdleCallback(hrts => {
+			if (callback instanceof Promise) {
+				callback(hrts).then(resolve).catch(reject);
+			} else if (callback instanceof Function) {
+				try {
+					resolve(callback(hrts));
+				} catch (err) {
+					reject(err);
+				}
+			} else {
+				reject(new TypeError('callback must be an instance of Function or Promise'));
+			}
+		}, { timeout });
+	});
+}
+
 export function query(what, base = document) {
 	if (what instanceof Node || what instanceof Window || what instanceof Navigator) {
 		return [what];
@@ -145,127 +181,157 @@ export function meta({ name, itemprop, property, charset, content }) {
 }
 
 export function css(what, props = {}, { base = document, priority = undefined } = {}) {
-	const items = query(what, base);
-	items.forEach(item => {
-		Object.entries(props).forEach(([p, v]) => {
-			if (typeof v === 'string' || typeof v === 'number') {
-				item.style.setProperty(p, v, priority);
-			} else {
-				item.style.removeProperty(p);
-			}
-		});
-	});
+	return onAnimationFrame(() => {
+		const items = query(what, base);
 
-	return items;
+		items.forEach(item => {
+			Object.entries(props).forEach(([p, v]) => {
+				if (typeof v === 'string' || typeof v === 'number') {
+					item.style.setProperty(p, v, priority);
+				} else {
+					item.style.removeProperty(p);
+				}
+			});
+		});
+
+		return items;
+	});
 }
 
 export function data(what, props = {}, { base = document } = {}) {
-	const items = query(what, base);
-	items.forEach(item => {
-		Object.entries(props).forEach(([p, v]) => {
-			if (v instanceof Date) {
-				v = v.toISOString();
-			} else if (v instanceof URL) {
-				v = v.href;
-			}
+	return onAnimationFrame(() => {
+		const items = query(what, base);
 
-			switch (typeof v) {
-				case 'string':
-				case 'number':
-					item.dataset[p] = v;
-					break;
+		items.forEach(item => {
+			Object.entries(props).forEach(([p, v]) => {
+				if (v instanceof Date) {
+					v = v.toISOString();
+				} else if (v instanceof URL) {
+					v = v.href;
+				}
 
-				case 'boolean':
-					if (v) {
-						item.dataset[p] = '';
-					} else {
+				switch (typeof v) {
+					case 'string':
+					case 'number':
+						item.dataset[p] = v;
+						break;
+
+					case 'boolean':
+						if (v) {
+							item.dataset[p] = '';
+						} else {
+							delete item.dataset[p];
+						}
+						break;
+
+					case 'undefined':
 						delete item.dataset[p];
-					}
-					break;
+						break;
 
-				case 'undefined':
-					delete item.dataset[p];
-					break;
-
-				default:
-					if (v === null) {
-						delete item.dataset[p];
-					} else {
-						item.dataset[p] = JSON.stringify(v);
-					}
-			}
+					default:
+						if (v === null) {
+							delete item.dataset[p];
+						} else {
+							item.dataset[p] = JSON.stringify(v);
+						}
+				}
+			});
 		});
-	});
 
-	return items;
+		return items;
+	});
 }
 
 export function attr(what, props = {}, { base = document, namespace = null } = {}) {
-	const items = query(what, base);
-	items.forEach(item => {
-		Object.entries(props).forEach(([p, v]) => {
-			if (typeof v === 'string' || typeof v === 'number') {
-				if (typeof namespace === 'string') {
-					item.setAttributeNS(namespace, p, v);
-				} else {
-					item.setAttribute(p, v);
-				}
-			} else if (typeof v === 'boolean') {
-				if (typeof namespace === 'string') {
-					v ? item.setAttributeNS(namespace, p, '') : item.removeAttributeNS(namespace, p);
-				} else {
-					item.toggleAttribute(p, v);
-				}
-			} else if (v instanceof Date) {
-				if (typeof namespace === 'string') {
-					item.setAttributeNS(namespace, p, v.toISOString());
-				} else {
-					item.setAttribute(p, v.toISOString());
-				}
-			} else if (v instanceof URL) {
-				if (typeof namespace === 'string') {
-					item.setAttributeNS(namespace, p, v.href);
-				} else {
-					item.setAttribute(p, v.href);
-				}
-			} else if (typeof v === 'undefined' || v === null) {
-				if (typeof namespace === 'string') {
-					item.removeAttributeNS(namespace, p);
-				} else {
-					item.removeAttribute(p);
-				}
-			} else if (typeof namespace === 'string') {
-				item.setAttributeNS(namespace, p, JSON.stringify(v));
-			} else {
-				item.setAttribute(p, JSON.stringify(v));
-			}
-		});
-	});
+	return onAnimationFrame(() => {
+		const items = query(what, base);
 
-	return items;
+		items.forEach(item => {
+			Object.entries(props).forEach(([p, v]) => {
+				if (typeof v === 'string' || typeof v === 'number') {
+					if (typeof namespace === 'string') {
+						item.setAttributeNS(namespace, p, v);
+					} else {
+						item.setAttribute(p, v);
+					}
+				} else if (typeof v === 'boolean') {
+					if (typeof namespace === 'string') {
+						v ? item.setAttributeNS(namespace, p, '') : item.removeAttributeNS(namespace, p);
+					} else {
+						item.toggleAttribute(p, v);
+					}
+				} else if (v instanceof Date) {
+					if (typeof namespace === 'string') {
+						item.setAttributeNS(namespace, p, v.toISOString());
+					} else {
+						item.setAttribute(p, v.toISOString());
+					}
+				} else if (v instanceof URL) {
+					if (typeof namespace === 'string') {
+						item.setAttributeNS(namespace, p, v.href);
+					} else {
+						item.setAttribute(p, v.href);
+					}
+				} else if (typeof v === 'undefined' || v === null) {
+					if (typeof namespace === 'string') {
+						item.removeAttributeNS(namespace, p);
+					} else {
+						item.removeAttribute(p);
+					}
+				} else if (typeof namespace === 'string') {
+					item.setAttributeNS(namespace, p, JSON.stringify(v));
+				} else {
+					item.setAttribute(p, JSON.stringify(v));
+				}
+			});
+		});
+
+		return items;
+	});
 }
 
 export function toggleClass(what, classes, { base = document, force = undefined } = {}) {
-	const items = query(what, base);
-	items.forEach(item => {
-		if (typeof classes === 'string') {
-			return item.classList.toggle(classes, force);
-		} else if (Array.isArray(classes)) {
-			classes.forEach(cn => {
-				item.classList.toggle(cn, force);
-			});
-		} else {
-			Object.entries(classes).forEach(([cl, cond]) => {
-				if (cond instanceof Function) {
-					item.classList.toggle(cl, cond.apply(what, [cl]));
-				} else {
-					item.classList.toggle(cl, cond);
-				}
-			});
-		}
-	});
+	return onAnimationFrame(() => {
+		const items = query(what, base);
 
-	return items;
+		items.forEach(item => {
+			if (typeof classes === 'string') {
+				return item.classList.toggle(classes, force);
+			} else if (Array.isArray(classes)) {
+				classes.forEach(cn => item.classList.toggle(cn, force));
+			} else {
+				Object.entries(classes).forEach(([cl, cond]) => {
+					if (cond instanceof Function) {
+						item.classList.toggle(cl, cond.apply(what, [cl]));
+					} else {
+						item.classList.toggle(cl, cond);
+					}
+				});
+			}
+		});
+
+		return items;
+	});
+}
+
+export function text(what, text, { base = document } = {}) {
+	return onAnimationFrame(() => {
+		const items = query(what, base);
+
+		items.forEach(el => el.textContent = text);
+
+		return items;
+	});
+}
+
+export function html(what, text, { base = document } = {}) {
+	return onAnimationFrame(() => {
+		const items = query(what, base);
+
+		items.forEach(el => el.innerHTML = text);
+
+		return items;
+	});
 }
 
 export function on(what, when, ...args) {
