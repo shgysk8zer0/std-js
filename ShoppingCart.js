@@ -118,12 +118,13 @@ export class ShoppingCart extends EventTarget {
 	}
 
 	get total() {
-		return this.items.then(items => {
+		return this.displayItems.then(items => {
 			return {
-				label: 'Total Cost',
+				label: 'Order Total',
 				amount: {
 					currency,
-					value: items.reduce((sum, { price }) => sum + price, 0).toFixed(2)
+					value: items.reduce((sum, { amount: { value }}) => sum + value, 0)
+						.toFixed(2)
 				},
 			};
 		});
@@ -169,6 +170,27 @@ export class ShoppingCart extends EventTarget {
 				return true;
 			}
 		} catch(err) {
+			return false;
+		}
+	}
+
+	async updateItem(uuid, data) {
+		const store = await getObjectStore(this, { mode: 'readwrite' });
+		const item = await doAsyncAction(store.get(uuid)).then(({ target: { result }}) => result);
+
+		if (typeof item !== 'undefined') {
+			try {
+				if (! Number.isInteger(data.quantity) || data.quantity > 1) {
+					await doAsyncAction(store.put({ ...item, ...data }));
+				} else {
+					await doAsyncAction(store.delete(uuid));
+				}
+				return true;
+			} catch(err) {
+				console.error(err);
+				return false;
+			}
+		} else {
 			return false;
 		}
 	}
