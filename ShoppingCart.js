@@ -180,7 +180,7 @@ export class ShoppingCart extends EventTarget {
 
 		if (typeof item !== 'undefined') {
 			try {
-				if (! Number.isInteger(data.quantity) || data.quantity > 1) {
+				if (! Number.isInteger(data.quantity) || data.quantity > 0) {
 					await doAsyncAction(store.put({ ...item, ...data }));
 				} else {
 					await doAsyncAction(store.delete(uuid));
