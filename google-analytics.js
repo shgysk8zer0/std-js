@@ -127,7 +127,7 @@ export async function importGa(id, params = {}) {
 	}).catch(console.error);
 
 	return { gtag, ga, send, get, set, ready, create, remove, require,
-		location, pageView, getTracker, getUTMParams };
+		location, pageView, getTracker, getUTMParams, hasGa };
 }
 
 export function externalHandler() {
