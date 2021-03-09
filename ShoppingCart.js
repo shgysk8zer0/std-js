@@ -1,3 +1,6 @@
+import { postJSON } from './http.js';
+import { EventObserver } from './EventObserver.js';
+
 export const keyPath = 'uuid';
 
 export const currency = 'USD';
@@ -105,6 +108,30 @@ export class ShoppingCart extends EventTarget {
 		});
 	}
 
+	async json() {
+		const items = await this.items;
+		return JSON.stringify(items);
+	}
+
+	async sync(url, {
+		credentials = 'include',
+		referrerPolicy = 'no-referrer',
+		headers = new Headers({ 'Content-Type': 'application/json' }),
+	} = {}) {
+		const items = await postJSON(url, {
+			body: await this.json,
+			headers,
+			credentials,
+			referrerPolicy,
+		});
+
+		if (Array.isArray(items) && items.length !== 0) {
+			console.table(items);
+			await Promise.all(items.map(({ uuid, name, quantity, price, updated }) =>
+				this.addItem({ uuid, name, quantity, price, updated })));
+		}
+	}
+
 	get ready() {
 		if (! protectedData.has(this)) {
 			return new Promise(r => this.addEventListener('ready', () => r(), { once: true }));
@@ -155,10 +182,9 @@ export class ShoppingCart extends EventTarget {
 			.then(([total, displayItems]) => ({ total, displayItems }));
 	}
 
-	async addItem({ uuid, name, quantity = 1, price, allowUpdate = true }) {
+	async addItem({ uuid, name, quantity = 1, price, updated = Date.now(), allowUpdate = true }) {
 		try {
 			const store = await getObjectStore(this, { mode: 'readwrite' });
-			const updated = Date.now();
 
 			if (quantity < 1) {
 				return await this.deleteItem(uuid);
@@ -245,6 +271,43 @@ export class ShoppingCart extends EventTarget {
 	async getTotal() {
 		const items = await this.getAllItems();
 		return items.reduce((sum, { price }) => sum + price, 0).toFixed(2);
+	}
+
+	/**
+	 * Uses an `IDBCursor` as an async generator
+	 * Note: Impelmenting code must call `result.value.continue()` itself
+	 */
+	async *cursor({ mode = 'readonly' } = {}) {
+		const store = await getObjectStore(this, { mode });
+		const obs = new EventObserver(store.openCursor(), 'success');
+		const generator = obs.generator();
+
+		while (true) {
+			const { value: { target: { result }}} = await generator.next();
+
+			if (result instanceof IDBCursorWithValue && typeof result.key === 'string') {
+				yield ({
+					key: result.key,
+					value: result.value,
+					continue: key => result.continue(key),
+					advance: count => result.advance(count),
+					update: async data => await new Promise((resolve, reject) => {
+						const req = result.update({...result.value, ...data });
+						req.addEventListener('success', resolve);
+						req.addEventListener('error', reject);
+					}),
+					delete: async () => await new Promise((resolve, reject) => {
+						const req = result.delete();
+						req.addEventListener('success', resolve);
+						req.addEventListener('error', reject);
+					}),
+				});
+			} else {
+				obs.close();
+				break;
+			}
+		}
+
 	}
 
 	static get supported() {
