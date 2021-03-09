@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Create `ShoppingCart` class utilizing `IndexedDB`
+- Add `EventObserver` class, which is a generator `yield`ing dispatched events
+- Misc. `dom.js` enhancements
 
 ## [v2.6.2] - 2021-02-15
 

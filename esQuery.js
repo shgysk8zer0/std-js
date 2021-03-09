@@ -1021,7 +1021,9 @@ export default class esQuery extends Set {
 	}
 
 	async networkChange(callback, ...args) {
-		return this.online(callback, ...args).offline(callback, ...args);
+		this.online(callback, ...args);
+		this.offline(callback, ...args);
+		return this;
 	}
 
 	async playing(callback) {

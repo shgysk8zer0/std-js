@@ -41,6 +41,7 @@ export function query(what, base = document) {
 		return what;
 	} else if (typeof what === 'string') {
 		const matches = Array.from(base.querySelectorAll(what));
+
 		if (base.matches instanceof Function && base.matches(what)) {
 			matches.push(base);
 		}
@@ -74,6 +75,7 @@ export function create(tag, {
 	children,
 	events,
 	styles,
+	...rest
 } = {}) {
 	const el = document.createElement(tag, { is });
 
@@ -113,9 +115,7 @@ export function create(tag, {
 		el.textContent = text;
 	}
 
-	if (typeof attrs === 'object') {
-		attr(el, attrs);
-	}
+	attr(el, { ...attrs, ...rest });
 
 	if (typeof dataset === 'object') {
 		data(el, dataset);
@@ -180,7 +180,7 @@ export function meta({ name, itemprop, property, charset, content }) {
 	return meta;
 }
 
-export function css(what, props = {}, { base = document, priority = undefined } = {}) {
+export async function css(what, props = {}, { base = document, priority = undefined } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -198,7 +198,7 @@ export function css(what, props = {}, { base = document, priority = undefined } 
 	});
 }
 
-export function data(what, props = {}, { base = document } = {}) {
+export async function data(what, props = {}, { base = document } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -242,7 +242,7 @@ export function data(what, props = {}, { base = document } = {}) {
 	});
 }
 
-export function attr(what, props = {}, { base = document, namespace = null } = {}) {
+export async function attr(what, props = {}, { base = document, namespace = null } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -290,7 +290,7 @@ export function attr(what, props = {}, { base = document, namespace = null } = {
 	});
 }
 
-export function toggleClass(what, classes, { base = document, force = undefined } = {}) {
+export async function toggleClass(what, classes, { base = document, force = undefined } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -314,7 +314,7 @@ export function toggleClass(what, classes, { base = document, force = undefined 
 	});
 }
 
-export function text(what, text, { base = document } = {}) {
+export async function text(what, text, { base = document } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -324,7 +324,7 @@ export function text(what, text, { base = document } = {}) {
 	});
 }
 
-export function html(what, text, { base = document } = {}) {
+export async function html(what, text, { base = document } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -402,7 +402,7 @@ export function parseHTML(text, { type = 'text/html', asFrag = true, head = true
 	}
 }
 
-export function animate(what, keyframes, opts = { duration: 400 }) {
+export async function animate(what, keyframes, opts = { duration: 400 }) {
 	if (Element.prototype.animate instanceof Function) {
 		const items = query(what);
 
@@ -422,6 +422,7 @@ export function intersect(what, callback, options) {
 		const observer = new IntersectionObserver((entries, observer) => {
 			entries.forEach((entry, index) => callback.apply(null, [entry, observer, index]));
 		}, options);
+
 		items.forEach(item => observer.observe(item));
 		return observer;
 	} else {
