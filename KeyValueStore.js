@@ -29,7 +29,6 @@ async function getObjectStore(obj, { mode = 'readonly' } = {}) {
 
 async function doAsyncAction(obj, { successEvent = 'success', errorEvent = 'error' } = {}) {
 	if (! (obj instanceof EventTarget)) {
-		console.info({ obj });
 		throw new TypeError('doAsyncAction() required obj to be an instance of EventTarget');
 	} else {
 		return new Promise((resolve, reject) => {
@@ -52,7 +51,6 @@ export class KeyValueStore extends EventTarget {
 				// @TODO handle migrating between versions
 				try {
 					const oStore = db.createObjectStore(store, { keyPath: 'key' });
-					console.log({ db, oStore });
 					oStore.createIndex('value', 'value', { unique: false });
 					oStore.createIndex('updated', 'updated', { unique: false });
 				} catch(err) {
@@ -77,8 +75,28 @@ export class KeyValueStore extends EventTarget {
 		}
 	}
 
+	get length() {
+		return this.count();
+	}
+
+	async close() {
+		if (protectedData.has(this)) {
+			const db = getData(this, 'db');
+			db.close();
+			protectedData.delete(this);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	async count(query) {
+		const store = await getObjectStore(this, { mode: 'readonly' });
+		return await doAsyncAction(store.count(query))
+			.then(({ target: { result }}) => result);
+	}
+
 	async get(key) {
-		await this.connected;
 		const store = await getObjectStore(this, { mode: 'readonly' });
 
 		return await doAsyncAction(store.get(key))
@@ -86,21 +104,34 @@ export class KeyValueStore extends EventTarget {
 	}
 
 	async getAll(...keys) {
-		await this.connected;
 		const store = await getObjectStore(this, { mode: 'readonly' });
 
-		return Promise.all(keys.map(async key => {
-			const { target: { result }} = await doAsyncAction(store.get(key));
-			if (typeof result === 'undefined') {
-				return { key, value: undefined, updated: 0 };
-			} else {
-				return result;
-			}
-		}));
+		if (keys.length === 0) {
+			const results = await doAsyncAction(store.getAll())
+				.then(({ target: { result = [] }}) => result);
+
+			return results.reduce((val, { key, value, updated }) => {
+				val[key] = { value, updated };
+				return val;
+			}, {});
+		} else {
+			const results = await Promise.all(keys.map(async key => {
+				const { target: { result }} = await doAsyncAction(store.get(key));
+				if (typeof result === 'undefined') {
+					return { key, value: undefined, updated: 0 };
+				} else {
+					return result;
+				}
+			}));
+
+			return results.reduce((val, { key, value, updated }) => {
+				val[key] = { value, updated };
+				return val;
+			}, {});
+		}
 	}
 
 	async set(key, value) {
-		await this.connected;
 		const store = await getObjectStore(this, { mode: 'readwrite' });
 		await doAsyncAction(store.put({ key, value, updated: Date.now() }));
 		this.dispatchEvent(new CustomEvent('update', { detail: { key, value }}));
@@ -110,7 +141,6 @@ export class KeyValueStore extends EventTarget {
 		if (! (obj instanceof Object)) {
 			throw new TypeError('setAll() expects an Object');
 		} else {
-			await this.connected;
 			const store = await getObjectStore(this, { mode: 'readwrite' });
 			const entries = Object.entries(obj);
 
@@ -139,12 +169,13 @@ export class KeyValueStore extends EventTarget {
 
 	async delete(...keys) {
 		try {
-			await this.connected;
 			const store = await getObjectStore(this, { mode: 'readwrite' });
 			await Promise.all(keys.map(async key => await doAsyncAction(store.delete(key))));
+
 			this.dispatchEvent(new CustomEvent('update', {
 				detail: Object.fromEntries(keys.map(key => [key, undefined])),
 			}));
+
 			return true;
 		} catch(err) {
 			console.error(err);
@@ -153,10 +184,25 @@ export class KeyValueStore extends EventTarget {
 	}
 
 	async keys({ query, count } = {}) {
-		await this.connected;
 		const store = await getObjectStore(this, { mode: 'readonly' });
 		return await doAsyncAction(store.getAllKeys(query, count))
 			.then(({ target: { result = [] }}) => result);
+	}
+
+	/**
+	 * NOTE: `.json()` cannot handle `File`s, etc.
+	 */
+	async json() {
+		const store = await getObjectStore(this, { mode: 'readonly' });
+		const results = await doAsyncAction(store.getAll())
+			.then(({ target: { result = [] }}) => result);
+
+		const obj = results.reduce((retVal, { key, value }) => {
+			retVal[key] = value;
+			return retVal;
+		}, {});
+
+		return JSON.stringify(obj);
 	}
 
 	async reset() {

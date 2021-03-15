@@ -41,7 +41,6 @@ export const fields = [{
 
 async function doAsyncAction(obj, { successEvent = 'success', errorEvent = 'error' } = {}) {
 	if (! (obj instanceof EventTarget)) {
-		console.info({ obj });
 		throw new TypeError('doAsyncAction() required obj to be an instance of EventTarget');
 	} else {
 		return new Promise((resolve, reject) => {
