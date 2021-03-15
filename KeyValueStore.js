@@ -122,6 +122,11 @@ export class KeyValueStore extends EventTarget {
 		}
 	}
 
+	async has(...keys) {
+		const stored = await this.keys();
+		return keys.every(key => stored.has(key));
+	}
+
 	async delete(...keys) {
 		try {
 			await this.connected;
@@ -135,6 +140,13 @@ export class KeyValueStore extends EventTarget {
 			console.error(err);
 			return false;
 		}
+	}
+
+	async keys({ query, count } = {}) {
+		await this.connected;
+		const store = await getObjectStore(this, { mode: 'readonly' });
+		return await doAsyncAction(store.getAllKeys(query, count))
+			.then(({ target: { result = [] }}) => result);
 	}
 
 	async reset() {
