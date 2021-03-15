@@ -124,7 +124,17 @@ export class KeyValueStore extends EventTarget {
 
 	async has(...keys) {
 		const stored = await this.keys();
-		return keys.every(key => stored.has(key));
+
+		switch(keys.length) {
+			case 0:
+				return true;
+
+			case 1:
+				return stored.includes(keys[0]);
+
+			default:
+				return keys.every(key => stored.includes(key));
+		}
 	}
 
 	async delete(...keys) {
