@@ -1,5 +1,16 @@
 import CookieStore from  './CookieStore.js';
 
+if (typeof globalThis === 'undefined') {
+	if (typeof self !== 'undefined') {
+		self.globalThis = self;
+	} else if (typeof window !== 'undefined') {
+		window.globalThis = window;
+	} else if (typeof global !== 'undefined') {
+		/* global global: true */
+		global.globalThis = global;
+	}
+}
+
 if (! (Element.prototype.getAttributeNames instanceof Function)) {
 	Element.prototype.getAttributeNames = function() {
 		return Array.from(this.attributes).map(({ name }) => name);
