@@ -189,6 +189,24 @@ export class KeyValueStore extends EventTarget {
 			.then(({ target: { result = [] }}) => result);
 	}
 
+	async values() {
+		const store = await getObjectStore(this, { mode: 'readonly' });
+
+		return await doAsyncAction(store.getAll())
+			.then(({ target: { result = [] }}) => {
+				return result.map(({ value }) => value);
+			});
+	}
+
+	async entries() {
+		const store = await getObjectStore(this, { mode: 'readonly' });
+
+		return await doAsyncAction(store.getAll())
+			.then(({ target: { result = [] }}) => {
+				return result.map(({ key, value }) => [key, value]);
+			});
+	}
+
 	/**
 	 * NOTE: `.json()` cannot handle `File`s, etc.
 	 */
