@@ -1,33 +1,265 @@
+import { getJSON } from './http.js';
+import { KeyValueStore } from './KeyValueStore.js';
 /**
  * Class for getting weather data using OpenWeatherMap
- * @see http://openweathermap.org/current
+ * @see https://openweathermap.org/current
  */
 const ENDPOINT = 'http://api.openweathermap.org';
 
-export default class OpenWeatherMap {
+const GPS_PRECISION = 3;
+
+const API_VERSION = 2.5;
+
+const defaults = {
+	lang: 'en',
+	units: 'imperial',
+};
+
+export const units = {
+	imperial: {
+		temp: 'F',
+		speed: 'MPH'
+	},
+	metric: {
+		temp: 'C',
+		speed: 'M/S',
+	},
+};
+
+const ENDPOINTS = {
+	forecast: `${ENDPOINT}/data/${API_VERSION}/forecast`, ENDPOINT,
+	currentConditions: `${ENDPOINT}/data/${API_VERSION}/weather`,
+};
+
+export const config = {
+	name: 'OpenWeatherMap',
+	version: 1,
+	stores: [{
+		store: 'forecast',
+		options: {
+			keyPath: 'location',
+			autoIncrement: false,
+		},
+		indicies: [{
+			name: 'data',
+			unique: false,
+			multiEntry: false,
+		}, {
+			name: 'updated',
+			unique: false,
+			multiEntry: false,
+		}],
+		values: [],
+	}, {
+		store: 'current',
+		options: {
+			keyPath: 'location',
+			autoIncrement: false,
+		},
+		indicies: [{
+			name: 'data',
+			unique: false,
+			multiple: false,
+		}, {
+			name: 'updated',
+			unique: false,
+			multiple: false,
+		}],
+		values: [],
+	},  {
+		store: 'prefs',
+		options: {
+			keyPath: 'key',
+			autoIncrement: false,
+		},
+		indicies: [{
+			name: 'value',
+			unique: false,
+			multiple: false,
+		}],
+		values: [
+			{ key: 'temp', value: 'F' },
+			{ key: 'speed', value: 'MPH' },
+			{ key: 'units', value: 'imperial' },
+		]
+	}]
+};
+
+const protectedData = new WeakMap();
+
+function setData(obj, data) {
+	if (protectedData.has(obj)) {
+		const current = protectedData.get(obj);
+		protectedData.setr(obj, { ...current, ...data });
+	} else {
+		protectedData.set(obj, data);
+	}
+}
+
+function getData(obj, key) {
+	if (! protectedData.has(obj)) {
+		return null;
+	} else if (typeof key === 'string') {
+		const data = protectedData.get(obj);
+		return data[key];
+	} else {
+		return protectedData.get(obj);
+	}
+}
+
+async function fetchData(obj, type, location) {
+	if (! (location instanceof WeatherLocation)) {
+		throw new TypeError('location must be an instance of WeatherLocation a sub-class');
+	}
+
+	const { db, appId: appid } = getData(obj);
+	const { temp, speed } = await getPrefs(db);
+
+	if (typeof db === 'undefined') {
+		return await getJSON(ENDPOINTS[type], {
+			body: { appid, temp, speed, ...location },
+			headers: new Headers({ Accept: 'application/json' }),
+		});
+	} else {
+		//
+	}
+}
+
+async function getPrefs(timeout = 500) {
+	const store = new KeyValueStore('OpenWeatherMapPrefs');
+	const prefs = await Promise.race([
+		store.getAll().catch(err => console.error(err)),
+		new Promise(r => setTimeout(() => r({}), timeout)),
+	]);
+
+	return {...units[defaults.units], ...prefs };
+}
+
+class WeatherLocation {
+	// This is a parent class for Cities, Postal Codes, Lat/Lng
+}
+
+export class LatLng extends WeatherLocation {
+	constructor({ latitude, longitude }) {
+		super();
+		if (! (typeof latitude === 'number' && typeof longitude === 'number')) {
+			throw new TypeError('Latitude and longitude must be numerical');
+		} else {
+			this._latitude = latitude.toFixed(GPS_PRECISION);
+			this.longitude = longitude.toFixed(GPS_PRECISION);
+		}
+	}
+
+	toJSON() {
+		return { lat: this._latitude, lng: this._longitude };
+	}
+}
+
+export class PostalCode extends WeatherLocation {
+	constructor(zip) {
+		super();
+
+		if (Number.isInteget(zip)) {
+			this._zip = zip;
+		} else if (typeof zip === 'string') {
+			this._zip = parseInt(zip);
+		} else {
+			throw new TypeError('PostalCode must be an integer');
+		}
+	}
+
+	toJSON() {
+		return { zip: this._zip };
+	}
+}
+
+export class City extends WeatherLocation {
+	constructor(city, state, country) {
+		super();
+		const data = [city, state, country].filter(q => typeof q === 'string').join(',');
+		if (data.length === 0) {
+			throw new TypeError('City accepts city: string[, state: string[, country: string]]');
+		} else {
+			this._data = data;
+		}
+	}
+
+	toJSON() {
+		return { q: this._data };
+	}
+}
+
+export class OpenWeatherMap extends EventTarget {
 	/**
 	 * Creates new instance and sets class properties
 	 * @param  {string} appid              Your unique API key [http://home.openweathermap.org/users/sign_up]
-	 * @param  {String} [units='imperial'] imperial or metric
-	 * @param  {String} [lang='en']        language code
-	 * @param  {float} [version=2.5]       API version
 	 */
-	constructor(appid, {units = 'imperial', lang = 'en', version = 2.5} = {}) {
-		this.url = new URL(`/data/${version}/weather`, ENDPOINT);
-		this.headers = new Headers();
-		this.url.searchParams.set('units', units);
-		this.url.searchParams.set('lang', lang);
-		this.url.searchParams.set('appid', appid);
-		this.units = {};
-		this.headers.set('Accept', 'application/json');
+	constructor(appId) {
+		super();
 
-		if (units === 'imperial') {
-			this.units.temp = 'F';
-			this.units.speed = 'MPH';
-		} else if (units === 'metric') {
-			this.units.temp = 'C';
-			this.units.speed = 'M/S';
+		setData(this, { appId, db: null });
+
+		if ('indexedDB' in window) {
+			const req = indexedDB.open(config.name, config.version);
+
+			req.addEventListener('success', ({ target: { result: db }}) => {
+				setData(this, { db });
+				this.dispatchEvent('connected');
+			});
+
+			req.addEventListener('error', ev => this.dispatchEvent(ev));
+
+			req.addEventListener('upgradeneeded', ({ target: { result: db }}) => {
+				const objectStores = db.objectStoreNames;
+
+				config.stores.forEach(({ name, options, indicies, values }) => {
+					if (! objectStores.contains(name) && Array.isArray(indicies)) {
+						const store = db.createObjectStore(name, options);
+
+						indicies.forEach(({ name, keyPath, unique = false, multiEntry = false, locale = 'auto' }) => {
+							store.createIndex(name, name || keyPath, { unique, multiEntry, locale });
+						});
+
+						if (Array.isArray(values) && values.length !== 0) {
+							values.forEach(value => store.put(value));
+						}
+					}
+				});
+
+
+				/*if (! stores.contains('forecast')) {
+					const forecast = db.createObjectStore('forecast', { keyPath: 'location' });
+					forecast.createIndex('data', 'data', { unique: false });
+					forecast.createIndex('updated', 'updated', { unique: false });
+				}
+
+				if (! stores.contains('currentConditions')) {
+					const current = db.createObjectStore('currentConditions', { keyPath: 'location' });
+					current.createIndex('data', 'data', { unique: false });
+					current.createIndex('updated', 'updated', { unique: false });
+				}
+
+				if (! stores.contains('preferences')) {
+					const prefs = db.createObjectStore('preferences', { keyPath: 'key' });
+					prefs.createIndex('value', 'value', { unique: false });
+				}*/
+			});
 		}
+	}
+
+	get connected() {
+		if (typeof getData(this, 'db') === 'undefined') {
+			return Promise.race([
+				new Promise(r => this.addEventListener('connected', () => r(this), { once: true })),
+				new Promise((res, rej) => setTimeout(() => rej(new Error('Connection timeout'), 500))),
+			]);
+		} else {
+			return Promise.resolve(this);
+		}
+	}
+
+	async getConditionsFromPostalCode(postalCode) {
+		return await fetchData(this, 'currentConditions', new PostalCode(postalCode));
 	}
 
 	/**
@@ -172,5 +404,9 @@ export default class OpenWeatherMap {
 			}
 			navigator.geolocation.getCurrentPosition(success, fail, options);
 		});
+	}
+
+	static get apiVersion() {
+		return 2.5;
 	}
 }
