@@ -344,3 +344,28 @@ export function getAbortController(ms) {
 		return { signal: undefined, abort: function() {}};
 	}
 }
+
+export function postNav(url, data = {}, { target = '_self' , enctype = 'application/x-www-form-urlencoded' } = {}) {
+	const form = document.createElement('form');
+	const inputs = Object.entries(data).map(([name, value]) => {
+		const input = document.createElement('input');
+		input.name = name;
+		input.type = 'hidden';
+		input.readOnly = true;
+		input.value = value;
+		return input;
+	});
+
+	form.action = url;
+	form.method = 'POST';
+	form.target = target;
+	form.enctype = enctype;
+	form.hidden = true;
+	form.append(...inputs);
+	form.addEventListener('submit', ({ target }) => setTimeout(() => target.remove), 100);
+
+	requestAnimationFrame(() => {
+		document.body.append(form);
+		form.submit();
+	});
+}
