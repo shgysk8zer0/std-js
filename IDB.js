@@ -9,15 +9,22 @@ export class IDB extends EventTarget {
 				req.addEventListener('upgradeneeded', ({ target: { result: db }}) => {
 					const objectStores = db.objectStoreNames;
 
+					for (let n = 0; n < objectStores.length; n++) {
+						const store = objectStores.item(n);
+
+						if (! stores.some(({ name }) => name === store)) {
+							db.deleteObjectStore(store);
+						}
+					}
+
 					stores.forEach(({ name, options, indicies }) => {
-						if (! objectStores.contains(name) && Array.isArray(indicies)) {
+						if (! objectStores.contains(name)) {
 							const store = db.createObjectStore(name, options);
 
 							indicies.forEach(({ name, keyPath, unique = false, multiEntry = false, locale = 'auto' }) => {
 								store.createIndex(name, name || keyPath, { unique, multiEntry, locale });
 							});
 						}
-						// @TODO update indicies of existing stores?
 					});
 				});
 			}
@@ -96,7 +103,7 @@ export class IDB extends EventTarget {
 		return transaction.objectStore(name);
 	}
 
-	async get(store, key, { timeout }) {
+	async get(store, key, { timeout } = {}) {
 		const oStore = await this.store(store, { timeout });
 
 		return await new Promise((resolve, reject) => {
