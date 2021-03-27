@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Misc. `dom.js` enhancements
 - Implement `indexedDB` version of basic key/value store
 - Shim for `globalThis`
+- Shim for `addEventListener()` `signal` handling
+- Event feature detection (`signal`, `once`, etc.)
 
 ## [v2.6.2] - 2021-02-15
 
