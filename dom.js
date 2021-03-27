@@ -418,8 +418,9 @@ export async function when(target, event, {
 	once = true,
 	capture = true,
 	passive = true,
+	signal,
 } = {}) {
-	await new Promise(resolve => on(target, event, resolve, { once, capture, passive }));
+	await new Promise(resolve => on(target, event, resolve, { once, capture, passive, signal }));
 }
 
 export async function ready() {
