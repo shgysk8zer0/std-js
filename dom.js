@@ -1,3 +1,54 @@
+function getEventFeatures() {
+	const el = document.createElement('div');
+	const eventFeatures = {
+		signal: false,
+		passive: false,
+		capture: false,
+		once: false,
+	};
+
+	// Use of a getter will detect support when properties are read
+	const options = {
+		get passive() {
+			eventFeatures.passive = true;
+			return true;
+		},
+		get signal() {
+			eventFeatures.signal = true;
+			return new AbortController().signal;
+		},
+		get capture() {
+			eventFeatures.capture = true;
+			return true;
+		},
+		get once() {
+			eventFeatures.once = true;
+			return false;
+		},
+	};
+
+	el.addEventListener('click', null, options);
+	el.removeEventListener('click', null, options);
+
+	return Object.seal(eventFeatures);
+}
+
+export const eventFeatures = getEventFeatures();
+
+function addListener(targets, events, callback, { capture, once, passive, signal } = {}) {
+	targets.forEach(target => {
+		events.forEach(event => target.addEventListener(event, callback, { capture, once, passive, signal }));
+	});
+
+	if ('AbortSignal' in window && 'signal' instanceof AbortSignal && eventFeatures.signal === false) {
+		signal.addEventListener('abort', () => {
+			events.forEach(event => {
+				targets.forEach(target => target.removeEventListener(event, callback, { capture, once, passive, signal }));
+			});
+		}, { once: true });
+	}
+}
+
 export async function onAnimationFrame(callback) {
 	return await new Promise((resolve, reject) => {
 		requestAnimationFrame(hrts => {
@@ -336,15 +387,14 @@ export async function html(what, text, { base = document } = {}) {
 
 export function on(what, when, ...args) {
 	const items = query(what);
-	items.forEach(item => {
-		if (typeof when === 'string') {
-			item.addEventListener(when, ...args);
-		} else if (Array.isArray(when)) {
-			when.forEach(e =>  item.addEventListener(e, ...args));
-		} else {
-			Object.entries(when).forEach(([ev, cb]) => item.addEventListener(ev, cb, ...args));
-		}
-	});
+
+	if (typeof when === 'string') {
+		addListener(items, [when], ...args);
+	} else if (Array.isArray(when)) {
+		addListener(items, when, ...args);
+	} else {
+		Object.entries(when).forEach(([ev, cb]) => addListener(items, [ev], cb, ...args));
+	}
 
 	return items;
 }
@@ -412,21 +462,20 @@ export async function animate(what, keyframes, opts = { duration: 400 }) {
 
 		return Promise.all(items.map(item => item.animate(keyframes, opts).finished));
 	} else {
-		throw new Error('Animations not supported');
+		throw new DOMException('Animations not supported');
 	}
 }
 
 export function intersect(what, callback, options) {
 	if ('IntersectionObserver' in window) {
-		const items = query(what);
 		const observer = new IntersectionObserver((entries, observer) => {
 			entries.forEach((entry, index) => callback.apply(null, [entry, observer, index]));
 		}, options);
 
-		items.forEach(item => observer.observe(item));
+		query(what).forEach(item => observer.observe(item));
 		return observer;
 	} else {
-		throw new Error('IntersectionObserver not supported');
+		throw new DOMException('IntersectionObserver not supported');
 	}
 }
 
@@ -435,10 +484,14 @@ export function mutate(what, callback, opts = {}) {
 		const observer = new MutationObserver((records, observer) => {
 			records.forEach((record, index) => callback.apply(null, [record, observer, index]));
 		});
-		const items = query(what);
-		items.forEach(item => observer.observe(item, opts));
+
+		query(what).forEach(item => observer.observe(item, opts));
 		return observer;
 	} else {
 		throw new Error('MutationObserver not supported');
 	}
+}
+
+export function supportsElement(...tags) {
+	return ! tags.some(tag => document.createElement(tag) instanceof HTMLUnknownElement);
 }
