@@ -7,7 +7,9 @@ import { $ } from '../esQuery.js';
 // import kbdShortcuts from '../kbd_shortcuts.js';
 import { loadScript } from '../loader.js';
 import { init } from '../data-handlers.js';
+import { CreditCard } from '../CreditCard.js';
 import { description, keywords, robots, thumbnail } from '../meta.js';
+window.CreditCard = CreditCard;
 
 keywords(['javascript', 'ecmascript', 'es6', 'modules', 'library']);
 description('This is a JavaScript library testing page');
