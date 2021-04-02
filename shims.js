@@ -1,5 +1,42 @@
 import CookieStore from  './CookieStore.js';
 
+if (! ('EventTarget' in window)) {
+	window.EventTarget = class EventTarget extends HTMLUnknownElement {};
+}
+
+if (! ('AbortSignal' in window)) {
+	window.AbortError = class AbortError extends Error {};
+
+	window.AbortSignal = class AbortSignal extends EventTarget {
+		constructor() {
+			super();
+			this.onabort = null;
+			this._aborted = false;
+
+			this.addEventListener('abort', () => {
+				if (this.onabort instanceof Function) {
+					this.onabort();
+				}
+			});
+		}
+
+		get aborted() {
+			return this._aborted;
+		}
+	};
+
+	window.AbortController = class AbortController {
+		constructor() {
+			this.signal = new AbortSignal();
+		}
+
+		abort() {
+			this.signal._aborted = true;
+			this.signal.dispatchEvent(new Event('abort'));
+		}
+	};
+}
+
 if (typeof globalThis === 'undefined') {
 	if (typeof self !== 'undefined') {
 		self.globalThis = self;

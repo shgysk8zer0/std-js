@@ -898,7 +898,7 @@ export default class esQuery extends Set {
 				}
 			}));
 		} else {
-			this.forEach(node => [...node.children].forEach(child => child.remove()));
+			this.forEach(node => node.replaceChildren());
 		}
 		return this;
 	}
