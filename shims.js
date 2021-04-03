@@ -27,12 +27,16 @@ if (! ('AbortSignal' in window)) {
 
 	window.AbortController = class AbortController {
 		constructor() {
-			this.signal = new AbortSignal();
+			this._signal = new AbortSignal();
+		}
+
+		get signal() {
+			return this._signal;
 		}
 
 		abort() {
-			this.signal._aborted = true;
-			this.signal.dispatchEvent(new Event('abort'));
+			this._signal._aborted = true;
+			this._signal.dispatchEvent(new Event('abort'));
 		}
 	};
 }
