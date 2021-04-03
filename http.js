@@ -1,4 +1,4 @@
-import { parseHTML } from './dom.js';
+import { parseHTML, signalAborted, eventFeatures } from './dom.js';
 
 function filename(src) {
 	if (typeof src === 'string') {
@@ -46,8 +46,15 @@ export async function GET(url, {
 		signal = signal.signal;
 	}
 
-	return await fetch(url, { method: 'GET', mode, credentials, referrerPolicy, headers,
+	const resp = fetch(url, { method: 'GET', mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal });
+
+	if (typeof signal !== 'undefined' && eventFeatures.nativeSignal === false) {
+		return await Promise.race([resp, signalAborted(signal)]);
+	} else {
+		return await resp;
+	}
+
 }
 
 export async function POST(url, {
@@ -87,13 +94,13 @@ export async function POST(url, {
 		signal = signal.signal;
 	}
 
-	const resp = await fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy, headers,
+	const resp = fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal });
 
-	if (resp.ok) {
-		return resp;
+	if (typeof signal !== 'undefined' && eventFeatures.nativeSignal === false) {
+		return await Promise.race([resp, signalAborted(signal)]);
 	} else {
-		throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
+		return await resp;
 	}
 }
 
@@ -126,8 +133,14 @@ export async function DELETE(url, {
 		signal = signal.signal;
 	}
 
-	return await fetch(url, { method: 'DELETE', mode, credentials, referrerPolicy, headers,
+	const resp = fetch(url, { method: 'DELETE', mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal });
+
+	if (typeof signal !== 'undefined' && eventFeatures.nativeSignal === false) {
+		return await Promise.race([resp, signalAborted(signal)]);
+	} else {
+		return await resp;
+	}
 }
 
 export async function getHTML(url, {

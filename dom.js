@@ -45,7 +45,7 @@ function addListener(targets, events, callback, { capture, once, passive, signal
 		events.forEach(event => target.addEventListener(event, callback, { capture, once, passive, signal }));
 	});
 
-	if ('AbortSignal' in window && 'signal' instanceof AbortSignal &&( eventFeatures.signal === false || eventFeatures.nativeSignal === false)) {
+	if ('AbortSignal' in window && 'signal' instanceof AbortSignal && (eventFeatures.signal === false || eventFeatures.nativeSignal === false)) {
 		signal.addEventListener('abort', () => {
 			events.forEach(event => {
 				targets.forEach(target => target.removeEventListener(event, callback, { capture, once, passive, signal }));
@@ -502,17 +502,22 @@ export function supportsElement(...tags) {
 	return ! tags.some(tag => document.createElement(tag) instanceof HTMLUnknownElement);
 }
 
+export async function signalAborted(signal) {
+	if (! (signal instanceof AbortSignal)) {
+		throw new TypeError('signal must be an AbortSignal');
+	} else if (signal.aborted) {
+		throw new DOMException('The operation was aborted.');
+	} else {
+		await new Promise((_, reject) => {
+			const abortHandler = ({ target }) => {
+				reject(new DOMException('The operation was aborted.'));
+				target.removeEventListener('abort', abortHandler);
+			};
+			signal.addEventListener('abort', abortHandler);
+		});
+	}
+}
+
 export async function abortablePromise(promise, signal) {
-	return await new Promise((resolve, reject) => {
-		if (! (promise instanceof Promise)) {
-			reject(new TypeError('promise must be a Promise'));
-		} else if (! (signal instanceof AbortSignal)) {
-			reject(new TypeError('signal must be an AbortSignal'));
-		} else if (signal.aborted) {
-			reject(new DOMException('The operation was aborted.'));
-		} else {
-			promise.then(resolve).catch(reject);
-			signal.addEventListener('abort', () => reject(new DOMException('The operation was aborted.')), { once: true });
-		}
-	});
+	return await Promise.race([promise, signalAborted(signal)]);
 }
