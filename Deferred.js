@@ -67,18 +67,21 @@ export class Deferred extends EventTarget {
 	}
 
 	set signal(signal) {
-		if (signal instanceof AbortSignal) {
-			const abortCallback = () => this.reject(new DOMException('The operation was aborted.'));
-			setData(this, { signal });
-			signal.addEventListener('abort', abortCallback);
-			this.signal = null;
-		} else {
+		if (! (signal instanceof AbortSignal)) {
 			const { signal, abortCallback } = getData(this);
 			setData(this, { signal: undefined, abortCallback: undefined });
 
 			if (signal instanceof AbortSignal && abortCallback instanceof Function) {
 				signal.removeEventListener('abort', abortCallback);
 			}
+		} else if (signal.aborted) {
+			this.reject(new DOMException('The operation was aborted.'));
+			this.signal = null;
+		} else {
+			const abortCallback = () => this.reject(new DOMException('The operation was aborted.'));
+			setData(this, { signal });
+			signal.addEventListener('abort', abortCallback);
+			this.signal = null;
 		}
 	}
 
@@ -168,6 +171,7 @@ export class Deferred extends EventTarget {
 		if (target instanceof EventTarget && typeof event === 'string') {
 			const callback = event => {
 				target.removeEventListener(event, callback, opts);
+				this.rejectOn(null);
 				this.resolve(event);
 			};
 			target.addEventListener(event, callback, opts);
@@ -187,34 +191,15 @@ export class Deferred extends EventTarget {
 		if (target instanceof EventTarget && typeof event === 'string') {
 			const callback = event => {
 				target.removeEventListener(event, callback, opts);
+				this.resolveOn(null);
 				this.reject(event);
 			};
 			target.addEventListener(event, callback, opts);
 			setData(this, { rejectEvent: { target, event, callback, opts }});
 		}
 	}
-	async onEvent(targets, successEvent, { errorEvent = 'error', capture, passive, signal } = {}) {
-		const handlers = {};
-		const once = true;
-		if (! Array.isArray(targets)) {
-			targets = Array.of(targets);
-		}
 
-		handlers[successEvent] = event => {
-			this.resolve(event);
-			off(targets, handlers, { capture, passive, signal, once });
-		};
-
-		handlers[errorEvent] = event => {
-			this.reject(event);
-			off(targets, handlers, { capture, passive, signal, once });
-		};
-
-		on(targets, handlers, { capture, passive, signal, once });
-		return await this.promise;
-	}
-
-	async *yieldEvents(targets, successEvent, errorEvent = 'error', { capture, passive, signal } = {}) {
+	async *yieldEvents(targets, successEvent, { errorEvent = 'error', capture, passive, signal } = {}) {
 		const successQueue = [];
 		const errorQueue = [];
 
@@ -291,6 +276,19 @@ export class Deferred extends EventTarget {
 			promise.then(result => def.resolve(result));
 			promise.catch(err => def.reject(err));
 			return def;
+		}
+	}
+
+	static fromEvent(target, successEvent, { errorEvent = 'error', signal, capture, passive } = {}) {
+		const opts = { once: true, signal, capture, passive };
+
+		if (target instanceof EventTarget) {
+			const def = new Deferred();
+
+			def.resolveOn(target, successEvent, opts);
+			def.rejectOn(target, errorEvent, opts);
+			return def;
+
 		}
 	}
 
