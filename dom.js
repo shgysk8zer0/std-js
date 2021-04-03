@@ -1,6 +1,7 @@
 function getEventFeatures() {
 	const el = document.createElement('div');
 	const eventFeatures = {
+		nativeSignal: 'AbortController' in window && AbortController.prototype.hasOwnProperty('signal'),
 		signal: false,
 		passive: false,
 		capture: false,
@@ -27,20 +28,27 @@ function getEventFeatures() {
 		},
 	};
 
-	el.addEventListener('click', null, options);
-	el.removeEventListener('click', null, options);
+	try {
+		el.addEventListener('click', null, options);
+		el.removeEventListener('click', null, options);
+	} catch(err) {
+		console.error(err);
+	}
 
 	return Object.seal(eventFeatures);
 }
 
 export const eventFeatures = getEventFeatures();
 
-function addListener(targets, events, callback, { capture, once, passive, signal } = {}) {
+export function addListener(targets, events, callback, { capture, once, passive, signal } = {}) {
+	if (! Array.isArray(targets)) {
+		targets = Array.of(targets);
+	}
 	targets.forEach(target => {
 		events.forEach(event => target.addEventListener(event, callback, { capture, once, passive, signal }));
 	});
 
-	if ('AbortSignal' in window && 'signal' instanceof AbortSignal && eventFeatures.signal === false) {
+	if ('AbortSignal' in window && 'signal' instanceof AbortSignal && (eventFeatures.signal === false || eventFeatures.nativeSignal === false)) {
 		signal.addEventListener('abort', () => {
 			events.forEach(event => {
 				targets.forEach(target => target.removeEventListener(event, callback, { capture, once, passive, signal }));
@@ -495,4 +503,24 @@ export function mutate(what, callback, opts = {}) {
 
 export function supportsElement(...tags) {
 	return ! tags.some(tag => document.createElement(tag) instanceof HTMLUnknownElement);
+}
+
+export async function signalAborted(signal) {
+	if (! (signal instanceof AbortSignal)) {
+		throw new TypeError('signal must be an AbortSignal');
+	} else if (signal.aborted) {
+		throw new DOMException('The operation was aborted.');
+	} else {
+		await new Promise((_, reject) => {
+			const abortHandler = ({ target }) => {
+				reject(new DOMException('The operation was aborted.'));
+				target.removeEventListener('abort', abortHandler);
+			};
+			signal.addEventListener('abort', abortHandler);
+		});
+	}
+}
+
+export async function abortablePromise(promise, signal) {
+	return await Promise.race([promise, signalAborted(signal)]);
 }

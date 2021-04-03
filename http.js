@@ -1,4 +1,4 @@
-import { parseHTML } from './dom.js';
+import { parseHTML, signalAborted, eventFeatures } from './dom.js';
 
 function filename(src) {
 	if (typeof src === 'string') {
@@ -14,6 +14,14 @@ function getType({ headers }) {
 		return headers.get('Content-Type').split(';')[0];
 	} else {
 		return null;
+	}
+}
+
+export async function fetch(url, opts) {
+	if ('AbortSignal' in window && opts.signal instanceof AbortSignal && eventFeatures.nativeSignal === false) {
+		return await Promise.race([window.fetch(url), signalAborted(opts.signal)]);
+	} else {
+		return await window.fetch(url, opts);
 	}
 }
 
@@ -48,6 +56,7 @@ export async function GET(url, {
 
 	return await fetch(url, { method: 'GET', mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal });
+
 }
 
 export async function POST(url, {
@@ -87,14 +96,8 @@ export async function POST(url, {
 		signal = signal.signal;
 	}
 
-	const resp = await fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy, headers,
+	return await fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal });
-
-	if (resp.ok) {
-		return resp;
-	} else {
-		throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);
-	}
 }
 
 export async function DELETE(url, {
