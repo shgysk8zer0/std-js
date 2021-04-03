@@ -40,7 +40,10 @@ function getEventFeatures() {
 
 export const eventFeatures = getEventFeatures();
 
-function addListener(targets, events, callback, { capture, once, passive, signal } = {}) {
+export function addListener(targets, events, callback, { capture, once, passive, signal } = {}) {
+	if (! Array.isArray(targets)) {
+		targets = Array.of(targets);
+	}
 	targets.forEach(target => {
 		events.forEach(event => target.addEventListener(event, callback, { capture, once, passive, signal }));
 	});

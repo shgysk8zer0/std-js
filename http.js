@@ -1,4 +1,5 @@
 import { parseHTML, signalAborted, eventFeatures } from './dom.js';
+import { Deferred } from './Deferred.js';
 
 function filename(src) {
 	if (typeof src === 'string') {
@@ -14,6 +15,14 @@ function getType({ headers }) {
 		return headers.get('Content-Type').split(';')[0];
 	} else {
 		return null;
+	}
+}
+
+export async function fetch(url, opts) {
+	if ('AbortSignal' in window && opts.signal instanceof AbortSignal && eventFeatures.nativeSignal === false) {
+		return await Promise.race([window.fetch(url), signalAborted(opts.signal)]);
+	} else {
+		return await window.fetch(url, opts);
 	}
 }
 
@@ -46,14 +55,8 @@ export async function GET(url, {
 		signal = signal.signal;
 	}
 
-	const resp = fetch(url, { method: 'GET', mode, credentials, referrerPolicy, headers,
+	return await fetch(url, { method: 'GET', mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal });
-
-	if (typeof signal !== 'undefined' && eventFeatures.nativeSignal === false) {
-		return await Promise.race([resp, signalAborted(signal)]);
-	} else {
-		return await resp;
-	}
 
 }
 
@@ -94,14 +97,8 @@ export async function POST(url, {
 		signal = signal.signal;
 	}
 
-	const resp = fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy, headers,
+	return await fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal });
-
-	if (typeof signal !== 'undefined' && eventFeatures.nativeSignal === false) {
-		return await Promise.race([resp, signalAborted(signal)]);
-	} else {
-		return await resp;
-	}
 }
 
 export async function DELETE(url, {
@@ -133,14 +130,8 @@ export async function DELETE(url, {
 		signal = signal.signal;
 	}
 
-	const resp = fetch(url, { method: 'DELETE', mode, credentials, referrerPolicy, headers,
+	return await fetch(url, { method: 'DELETE', mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal });
-
-	if (typeof signal !== 'undefined' && eventFeatures.nativeSignal === false) {
-		return await Promise.race([resp, signalAborted(signal)]);
-	} else {
-		return await resp;
-	}
 }
 
 export async function getHTML(url, {
