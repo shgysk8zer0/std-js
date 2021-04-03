@@ -1,5 +1,4 @@
 import { parseHTML, signalAborted, eventFeatures } from './dom.js';
-import { Deferred } from './Deferred.js';
 
 function filename(src) {
 	if (typeof src === 'string') {
