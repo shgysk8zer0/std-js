@@ -1,4 +1,6 @@
+import './abort-shims.js';
 import { on, off } from './dom.js';
+
 const protectedData = new WeakMap();
 
 function getData(def, key) {
@@ -20,7 +22,7 @@ function setData(def, data) {
 }
 
 export class Deferred extends EventTarget {
-	constructor(success, fail) {
+	constructor({ success, fail, signal, timeout } = {}) {
 		super();
 		this.reset();
 
@@ -31,9 +33,17 @@ export class Deferred extends EventTarget {
 		if (fail instanceof Function) {
 			this.catch(fail);
 		}
+
+		if (signal instanceof AbortSignal) {
+			this.signal = signal;
+		}
+
+		if (Number.isInteger(timeout)) {
+			this.rejectIn(timeout);
+		}
 	}
 
-	get fullfilled() {
+	get fulfilled() {
 		return this.state !== 'pending';
 	}
 
@@ -86,9 +96,11 @@ export class Deferred extends EventTarget {
 	}
 
 	get state() {
-		const { result, error } = getData(this);
+		const { result, error, signal } = getData(this);
 
-		if (typeof result !== 'undefined') {
+		if (signal instanceof AbortSignal && signal.aborted === true) {
+			return 'aborted';
+		} else if (typeof result !== 'undefined') {
 			return 'done';
 		} else if (typeof error !== 'undefined') {
 			return 'error';
@@ -97,7 +109,7 @@ export class Deferred extends EventTarget {
 		}
 	}
 
-	get whenFullfilled() {
+	get whenfulfilled() {
 		if (this.pending) {
 			return this.whenStatusChanged;
 		} else {
@@ -107,6 +119,31 @@ export class Deferred extends EventTarget {
 
 	get whenStatusChanged() {
 		return this.when('statechange').then(() => this);
+	}
+
+	get aborted() {
+		const { aborted = false } = this.signal || {};
+		return aborted;
+	}
+
+	clearHandlers() {
+		if (protectedData.has(this)) {
+			const { timeout, resolveEvent, rejectEvent } = getData(this);
+
+			if (Number.isInteger(timeout)) {
+				clearTimeout(timeout);
+			}
+
+			if (typeof resolveEvent !== 'undefined' && resolveEvent.target instanceof EventTarget) {
+				const { target, event, callback, opts } = resolveEvent;
+				target.removeEventListener(event, callback, opts);
+			}
+
+			if (typeof rejectEvent !== 'undefined' && rejectEvent.target instanceof EventTarget) {
+				const { target, event, callback, opts } = rejectEvent;
+				target.removeEventListener(event, callback, opts);
+			}
+		}
 	}
 
 	reset() {
@@ -129,44 +166,46 @@ export class Deferred extends EventTarget {
 		return this;
 	}
 
-	resolve(result) {
+	resolve(value) {
 		if (this.state !== 'pending') {
-			throw new DOMException('Already resolved');
-		} else if (typeof result === 'undefined') {
+			throw new DOMException('Already fulfilled');
+		} else if (typeof value === 'undefined') {
 			throw new TypeError('Cannot resolve with undefined');
 		} else {
 			const resolve = getData(this, 'resolve');
-			setData(this, { result });
-			resolve(result);
+			setData(this, { value });
+			resolve(value);
 			this.dispatchEvent(new CustomEvent('statechange', { detail: 'done' }));
-			this.dispatchEvent(new CustomEvent('done', { detail: result }));
+			this.dispatchEvent(new CustomEvent('done', { detail: value }));
 			return this;
 		}
 	}
 
-	reject(error) {
+	reject(reason) {
 		if (this.state !== 'pending') {
-			throw new DOMException('Already resolved');
-		} else if (typeof error === 'undefined') {
+			throw new DOMException('Already fulfilled');
+		} else if (typeof reason === 'undefined') {
 			throw new TypeError('Cannot reject with undefined');
 		} else {
 			const reject = getData(this, 'reject');
-			setData(this, { error });
-			reject(error);
+			setData(this, { reason });
+			reject(reason);
 			this.dispatchEvent(new CustomEvent('statechange', { detail: 'error' }));
-			this.dispatchEvent(new CustomEvent('error', { detail: error }));
+			this.dispatchEvent(new CustomEvent('error', { detail: reason }));
 			return this;
 		}
 	}
 
 	resolveOn(target, event, { passive, capture, signal } = {}) {
-		const opts = { once: true, passive, capture, signal };
+		{
+			const { target, event, callback, opts } = getData(this, 'resolveEvent');
 
-		Promise.resolve(getData(this, 'resolveEvent')).then(({ target, event, callback, opts }) => {
 			if (target instanceof EventTarget) {
 				target.removeEventListener(event, callback, opts);
 			}
-		});
+		}
+
+		const opts = { once: true, passive, capture, signal };
 
 		if (target instanceof EventTarget && typeof event === 'string') {
 			const callback = event => {
@@ -174,19 +213,23 @@ export class Deferred extends EventTarget {
 				this.rejectOn(null);
 				this.resolve(event);
 			};
+
 			target.addEventListener(event, callback, opts);
 			setData(this, { resolveEvent: { target, event, callback, opts }});
 		}
+
+		return this;
 	}
 
 	rejectOn(target, event, { passive, capture, signal } = {}) {
-		const opts = { once: true, passive, capture, signal };
-
-		Promise.resolve(getData(this, 'rejectEvent')).then(({ target, event, callback, opts }) => {
+		{
+			const { target, event, callback, opts } = getData(this, 'rejectEvent');
 			if (target instanceof EventTarget) {
 				target.removeEventListener(event, callback, opts);
 			}
-		});
+		}
+
+		const opts = { once: true, passive, capture, signal };
 
 		if (target instanceof EventTarget && typeof event === 'string') {
 			const callback = event => {
@@ -194,8 +237,25 @@ export class Deferred extends EventTarget {
 				this.resolveOn(null);
 				this.reject(event);
 			};
+
 			target.addEventListener(event, callback, opts);
 			setData(this, { rejectEvent: { target, event, callback, opts }});
+		}
+
+		return this;
+	}
+
+	rejectIn(timeout) {
+		{
+			const timeout = getData(this, 'timeout');
+
+			if (Number.isInteger(timeout)) {
+				clearTimeout(timeout);
+			}
+		}
+
+		if (Number.isInteger(timeout) && timeout > -1) {
+			setData(this, { timeout: setTimeout(() => this.reject(new DOMException('Operation timed-out')), timeout) });
 		}
 	}
 
@@ -219,20 +279,39 @@ export class Deferred extends EventTarget {
 			}
 		}, { capture, passive, signal });
 
+		const abortPromise = new Promise((_, reject) => {
+			if (signal instanceof AbortSignal) {
+				signal.addEventListener('abort', () => reject(new DOMException('Operation aborted.')), { once: true });
+			}
+		});
+
 		while(! (signal instanceof AbortSignal) || ! signal.aborted) {
 			if (successQueue.length !== 0) {
 				yield successQueue.shift();
 			} else if (errorQueue.length !== 0) {
 				yield errorQueue.shift();
-			} else if (this.fullfilled) {
+			} else if (this.fulfilled) {
 				const { result, error } = getData(this);
 				this.reset();
-				yield error || result;
+
+				if (typeof error !== 'undefined') {
+					yield Promise.reject(error);
+				} else {
+					yield result;
+				}
 			} else {
-				await this.whenFullfilled;
-				const { result, error } = getData(this);
-				this.reset();
-				yield error || result;
+				try {
+					await Promise.race([this.whenfulfilled, abortPromise]);
+					const { result, error } = getData(this);
+					this.reset();
+					if (typeof error !== 'undefined') {
+						yield Promise.reject(error);
+					} else {
+						yield result;
+					}
+				} catch(err) {
+					yield Promise.reject(err);
+				}
 			}
 		}
 	}
@@ -286,9 +365,12 @@ export class Deferred extends EventTarget {
 			const def = new Deferred();
 
 			def.resolveOn(target, successEvent, opts);
-			def.rejectOn(target, errorEvent, opts);
-			return def;
 
+			if (typeof errorEvent === 'string') {
+				def.rejectOn(target, errorEvent, opts);
+			}
+
+			return def;
 		}
 	}
 
@@ -302,61 +384,5 @@ export class Deferred extends EventTarget {
 		const def = new Deferred();
 		def.reject(err);
 		return def;
-	}
-
-	static async race(defs) {
-		if (Array.isArray(defs)) {
-			return await Promise.race(defs.map(def => {
-				if (def instanceof Deferred) {
-					return def.whenFullfilled;
-				} else if (def instanceof Promise) {
-					return Deferred.fromPromise(def).whenFullfilled;
-				} else {
-					return Deferred.resolve(def);
-				}
-			}));
-		}
-	}
-
-	static async all(defs) {
-		if (Array.isArray(defs)) {
-			return await Promise.all(defs.map(def => {
-				if (def instanceof Deferred) {
-					return def.whenFullfilled;
-				} else if (def instanceof Promise) {
-					return Deferred.fromPromise(def).whenFullfilled;
-				} else {
-					return Deferred.resolve(def);
-				}
-			}));
-		}
-	}
-
-	static async allSettled(defs) {
-		if (Array.isArray(defs)) {
-			return await Promise.allSettled(defs.map(def => {
-				if (def instanceof Deferred) {
-					return def.whenFullfilled;
-				} else if (def instanceof Promise) {
-					return Deferred.fromPromise(def).whenFullfilled;
-				} else {
-					return Deferred.resolve(def);
-				}
-			}));
-		}
-	}
-
-	static async any(defs) {
-		if (Array.isArray(defs)) {
-			return await Promise.any(defs.map(def => {
-				if (def instanceof Deferred) {
-					return def.whenFullfilled;
-				} else if (def instanceof Promise) {
-					return Deferred.fromPromise(def).whenFullfilled;
-				} else {
-					return Deferred.resolve(def);
-				}
-			}));
-		}
 	}
 }

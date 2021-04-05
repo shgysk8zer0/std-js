@@ -1,4 +1,6 @@
-import { parseHTML, signalAborted, eventFeatures } from './dom.js';
+import { parseHTML } from './dom.js';
+import { signalAborted, abortTimeoutController } from './abort.js';
+import { features as eventFeatures } from './events.js';
 
 function filename(src) {
 	if (typeof src === 'string') {
@@ -49,7 +51,7 @@ export async function GET(url, {
 	}
 
 	if (typeof signal === 'undefined' && typeof timeout === 'number') {
-		signal = getAbortController(timeout).signal;
+		signal = abortTimeoutController(timeout).signal;
 	} else if ('AbortController' in window && signal instanceof AbortController) {
 		signal = signal.signal;
 	}
@@ -91,7 +93,7 @@ export async function POST(url, {
 	}
 
 	if (typeof signal === 'undefined' && typeof timeout === 'number') {
-		signal = getAbortController(timeout).signal;
+		signal = abortTimeoutController(timeout).signal;
 	} else if ('AbortController' in window && signal instanceof AbortController) {
 		signal = signal.signal;
 	}
@@ -124,7 +126,7 @@ export async function DELETE(url, {
 	}
 
 	if (typeof signal === 'undefined' && typeof timeout === 'number') {
-		signal = getAbortController(timeout).signal;
+		signal = abortTimeoutController(timeout).signal;
 	} else if ('AbortController' in window && signal instanceof AbortController) {
 		signal = signal.signal;
 	}
@@ -332,20 +334,6 @@ export async function postText(url, {
 		cache, redirect, integrity, keepalive, signal, timeout });
 
 	return await resp.text();
-}
-
-export function getAbortController(ms) {
-	if ('AbortController' in window) {
-		const controller = new AbortController();
-
-		if (Number.isInteger(ms)) {
-			setTimeout(() => controller.abort(), ms);
-		}
-
-		return controller;
-	} else {
-		return { signal: undefined, abort: function() {}};
-	}
 }
 
 export function postNav(url, data = {}, { target = '_self' , enctype = 'application/x-www-form-urlencoded' } = {}) {
