@@ -1,59 +1,21 @@
-function getEventFeatures() {
-	const el = document.createElement('div');
-	const eventFeatures = {
-		nativeSignal: 'AbortController' in window && AbortController.prototype.hasOwnProperty('signal'),
-		signal: false,
-		passive: false,
-		capture: false,
-		once: false,
-	};
-
-	// Use of a getter will detect support when properties are read
-	const options = {
-		get passive() {
-			eventFeatures.passive = true;
-			return true;
-		},
-		get signal() {
-			eventFeatures.signal = true;
-			return new AbortController().signal;
-		},
-		get capture() {
-			eventFeatures.capture = true;
-			return true;
-		},
-		get once() {
-			eventFeatures.once = true;
-			return false;
-		},
-	};
-
-	try {
-		el.addEventListener('click', null, options);
-		el.removeEventListener('click', null, options);
-	} catch(err) {
-		console.error(err);
-	}
-
-	return Object.seal(eventFeatures);
-}
-
-export const eventFeatures = getEventFeatures();
+import { signalAborted } from './abort.js';
+import { features as eventFeatures } from './events.js';
 
 export function addListener(targets, events, callback, { capture, once, passive, signal } = {}) {
 	if (! Array.isArray(targets)) {
-		targets = Array.of(targets);
+		targets = query(targets);
 	}
+
 	targets.forEach(target => {
 		events.forEach(event => target.addEventListener(event, callback, { capture, once, passive, signal }));
 	});
 
-	if ('AbortSignal' in window && 'signal' instanceof AbortSignal && (eventFeatures.signal === false || eventFeatures.nativeSignal === false)) {
-		signal.addEventListener('abort', () => {
+	if ('AbortSignal' in window && signal instanceof AbortSignal && eventFeatures.nativeSignal === false) {
+		signalAborted(signal).then(() => {
 			events.forEach(event => {
 				targets.forEach(target => target.removeEventListener(event, callback, { capture, once, passive, signal }));
 			});
-		}, { once: true });
+		});
 	}
 }
 
@@ -94,7 +56,7 @@ export async function onIdle(callback, { timeout } = {}) {
 }
 
 export function query(what, base = document) {
-	if (what instanceof Node || what instanceof Window || what instanceof Navigator) {
+	if (what instanceof EventTarget) {
 		return [what];
 	} else if (Array.isArray(what)) {
 		return what;
@@ -428,19 +390,45 @@ export async function when(target, event, {
 	passive = true,
 	signal,
 } = {}) {
-	return await new Promise(resolve => on(target, event, resolve, { once, capture, passive, signal }));
+	const controller = new AbortController();
+
+	if (signal instanceof AbortSignal) {
+		if (signal.aborted) {
+			return Promise.reject(new DOMException('Operation aborted'));
+		} else {
+			signal.addEventListener('abort', () => controller.abort(), { signal: controller.signal });
+		}
+	}
+
+	const promise = new Promise(resolve => {
+		on(target, event, resolve, { once, capture, passive, signal: controller.signal });
+	});
+
+	return promise.then(result => {
+		if (! controller.signal.aborted) {
+			controller.abort();
+		}
+
+		return Promise.resolve(result);
+	}).catch(reason => {
+		if (! controller.signal.aborted) {
+			controller.abort();
+		}
+
+		return Promise.reject(reason);
+	});
 }
 
 export async function ready() {
 	if (document.readyState === 'loading') {
-		await new Promise(r => document.addEventListener('DOMContentLoaded', r, { once: true }));
+		await when(document, 'DOMContentLoaded');
 	}
 
 }
 
 export async function loaded() {
 	if (document.readyState !== 'complete') {
-		await new Promise(r => window.addEventListener('load', r, { once: true }));
+		await when(window, 'load');
 	}
 }
 
@@ -503,24 +491,4 @@ export function mutate(what, callback, opts = {}) {
 
 export function supportsElement(...tags) {
 	return ! tags.some(tag => document.createElement(tag) instanceof HTMLUnknownElement);
-}
-
-export async function signalAborted(signal) {
-	if (! (signal instanceof AbortSignal)) {
-		throw new TypeError('signal must be an AbortSignal');
-	} else if (signal.aborted) {
-		throw new DOMException('The operation was aborted.');
-	} else {
-		await new Promise((_, reject) => {
-			const abortHandler = ({ target }) => {
-				reject(new DOMException('The operation was aborted.'));
-				target.removeEventListener('abort', abortHandler);
-			};
-			signal.addEventListener('abort', abortHandler);
-		});
-	}
-}
-
-export async function abortablePromise(promise, signal) {
-	return await Promise.race([promise, signalAborted(signal)]);
 }
