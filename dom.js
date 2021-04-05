@@ -1,5 +1,6 @@
 import { signalAborted } from './abort.js';
 import { features as eventFeatures } from './events.js';
+import { getDeferred } from './promises.js';
 
 export function addListener(targets, events, callback, { capture, once, passive, signal } = {}) {
 	if (! Array.isArray(targets)) {
@@ -392,17 +393,20 @@ export async function when(target, event, {
 } = {}) {
 	const controller = new AbortController();
 
+	const { promise, resolve, reject } = getDeferred();
+
 	if (signal instanceof AbortSignal) {
 		if (signal.aborted) {
-			return Promise.reject(new DOMException('Operation aborted'));
+			return reject(new DOMException('Operation aborted'));
 		} else {
-			signal.addEventListener('abort', () => controller.abort(), { signal: controller.signal });
+			signal.addEventListener('abort', () => {
+				controller.abort();
+				reject(new DOMException('Operation aborted'));
+			}, { signal: controller.signal });
 		}
 	}
 
-	const promise = new Promise(resolve => {
-		on(target, event, resolve, { once, capture, passive, signal: controller.signal });
-	});
+	on(target, event, resolve, { once, capture, passive, signal: controller.signal });
 
 	return promise.then(result => {
 		if (! controller.signal.aborted) {

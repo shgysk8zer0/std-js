@@ -1,6 +1,4 @@
-function css(el, rules) {
-	Object.entries(rules).forEach(([prop, value]) => el.style.setProperty(prop, value));
-}
+import { css } from './dom.js';
 
 function fadeIn(dialog) {
 	if (dialog.animate instanceof Function) {

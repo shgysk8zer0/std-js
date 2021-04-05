@@ -1,55 +1,20 @@
 import './abort-shims.js';
 import { when } from './dom.js';
 import { features as eventFeatures} from './events.js';
+import { rejectOn, infinitPromise } from './promises.js';
 
 export const nativeSupport = eventFeatures.nativeSignal;
-export const infinitPromise = new Promise(() => {});
 
-export async function signalAborted(signal) {
-	if (! (signal instanceof AbortSignal)) {
+export async function signalAborted(signal, { reason } = {}) {
+	if (signal instanceof AbortController) {
+		return await signalAborted(signal.signal, { reason });
+	} else if (! (signal instanceof AbortSignal)) {
 		return infinitPromise;
 	} else if (signal.aborted) {
-		return Promise.reject();
+		return Promise.reject(reason);
 	} else {
-		return rejectOn(signal, 'abort');
+		return rejectOn(signal, 'abort').catch(() => Promise.reject(reason));
 	}
-}
-
-export async function promisifyEvents(targets, { success, fail = 'error', passive = true, capture = true } = {}) {
-	const controller = new AbortController();
-	const opts = { passive, capture, signal: controller.signal, once: true };
-
-	try {
-		const events = [];
-
-		if (typeof success === 'string' || Array.isArray(success) && success.length !== 0) {
-			events.push(when(targets, success, opts));
-		}
-
-		if (typeof fail === 'string' || (Array.isArray(fail) && fail.length !== 0)) {
-			events.push(when(targets, fail, opts).then(event => Promise.reject(event)));
-		}
-
-		const result = await Promise.race(events);
-
-		controller.abort();
-		return result;
-	} catch(err) {
-		controller.abort();
-		throw err;
-	}
-}
-
-export async function resolveOn(targets, success, { passive = true, capture = true } = {}) {
-	return await promisifyEvents(targets, { success, fail: null,  passive, capture });
-}
-
-export async function rejectOn(targets, fail, { passive = true, capture = true } = {}) {
-	return await promisifyEvents(targets, { success: null, fail,  passive, capture });
-}
-
-export async function abortablePromise(promise, signal) {
-	return await Promise.race([promise, signalAborted(signal)]);
 }
 
 export function abortTimeoutController(timeout) {
