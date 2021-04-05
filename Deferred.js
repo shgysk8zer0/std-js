@@ -1,5 +1,6 @@
 import './abort-shims.js';
 import { on, off } from './dom.js';
+import { getDeferred } from './promises.js';
 
 const protectedData = new WeakMap();
 
@@ -147,21 +148,20 @@ export class Deferred extends EventTarget {
 	}
 
 	reset() {
-		const obj = {
+		const { promise, resolve, reject } = getDeferred();
+
+		setData(this, {
+			resolve,
+			reject,
+			promise,
 			result: undefined,
 			error: undefined,
 			signal: undefined,
 			abortCallback: undefined,
 			resolveEvent: { target: null, event: null, opts: {}},
 			rejectEvent: { target: null, event: null, opts: {}},
-		};
-
-		obj.promise = new Promise((resolve, reject) => {
-			obj.resolve = resolve;
-			obj.reject = reject;
 		});
 
-		setData(this, obj);
 		this.dispatchEvent(new CustomEvent('statuschange', { detail: 'pending' }));
 		return this;
 	}

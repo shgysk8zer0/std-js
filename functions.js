@@ -1,6 +1,7 @@
 import { $ } from './esQuery.js';
 import { attr, css, data, toggleClass, on, off, ready, loaded, when, parseHTML } from './dom.js';
 import { getCustomElement, createCustomElement, registerCustomElement, defined } from './custom-elements.js';
+import { getDeferred } from './promises.js';
 
 export function openWindow(url, {
 	name = '',
@@ -250,7 +251,9 @@ export async function whenHidden() {
 }
 
 export async function sleep(ms, ...args) {
-	await new Promise(resolve => setTimeout(() => resolve(...args), ms));
+	const { promise, resolve } = getDeferred();
+	setTimeout(() => resolve(...args), ms);
+	await promise;
 }
 
 /**
@@ -397,13 +400,15 @@ export async function notificationsAllowed() {
 }
 
 export async function getLocation({ maximumAge, timeout, enableHighAccuracy = false } = {}) {
-	/* https://developer.mozilla.org/en-US/docs/Web/API/Geolocation.getCurrentPosition */
-	return new Promise((resolve, reject) => {
-		if (! ('geolocation' in navigator)) {
-			reject('Your browser does not support GeoLocation');
-		}
+	const { resolve, reject, promise } = getDeferred();
+
+	if (! ('geolocation' in navigator) || ! (navigator.geolocation.getCurrentPosition instanceof Function)) {
+		reject(new DOMException('GeoLocation API not supported'));
+	} else {
 		navigator.geolocation.getCurrentPosition(resolve, reject, { maximumAge, timeout, enableHighAccuracy });
-	});
+	}
+
+	return promise;
 }
 
 export { $, attr, css, data, toggleClass, on, off, when, ready, loaded, parseHTML,
