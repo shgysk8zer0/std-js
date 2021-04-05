@@ -28,6 +28,26 @@ export async function promisifyEvents(targets, { success, fail = 'error', passiv
 	}
 }
 
+export async function *promiseQueue(...promises) {
+	const target = new EventTarget();
+	const queue = new Set(promises);
+	const results = [];
+
+	promises.forEach(prom => prom.then(result => {
+		results.push(result);
+		queue.delete(prom);
+		target.dispatchEvent(new Event('resolve'));
+	}));
+
+	while (queue.size !== 0 || results.length !== 0) {
+		if (results.length === 0) {
+			await resolveOn(target, 'resolve');
+		}
+
+		yield results.shift();
+	}
+}
+
 export async function resolveOn(targets, success, { passive = true, capture = true } = {}) {
 	return await promisifyEvents(targets, { success, fail: null,  passive, capture });
 }
