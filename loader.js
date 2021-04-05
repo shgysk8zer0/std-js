@@ -1,3 +1,5 @@
+import { getDeferred } from './promises.js';
+
 export async function load(target, parent, srcAttr, value) {
 	if (parent instanceof Node) {
 		const promise = loaded(target);
@@ -11,29 +13,31 @@ export async function load(target, parent, srcAttr, value) {
 }
 
 export async function loaded(target) {
-	await new Promise((resolve, reject) => {
-		function load() {
-			this.removeEventListener('load', load);
-			this.removeEventListener('error', error);
-			resolve(target);
-		}
+	const { resolve, reject, promise } = getDeferred();
 
-		function error(err) {
-			console.error(err);
-			this.removeEventListener('load', load);
-			this.removeEventListener('error', error);
-			reject(err);
-		}
+	function load() {
+		this.removeEventListener('load', load);
+		this.removeEventListener('error', error);
+		resolve(target);
+	}
 
-		if (target instanceof HTMLScriptElement && target.noModule === true) {
-			resolve(target);
-		} else if (target instanceof HTMLLinkElement && target.disabled === true) {
-			resolve(target);
-		} else {
-			target.addEventListener('load', load);
-			target.addEventListener('error', error);
-		}
-	});
+	function error(err) {
+		// console.error(err);
+		this.removeEventListener('load', load);
+		this.removeEventListener('error', error);
+		reject(err);
+	}
+
+	if (target instanceof HTMLScriptElement && target.noModule === true) {
+		resolve(target);
+	} else if (target instanceof HTMLLinkElement && target.disabled === true) {
+		resolve(target);
+	} else {
+		target.addEventListener('load', load);
+		target.addEventListener('error', error);
+	}
+
+	return await promise;
 }
 
 export async function loadLink(href = null, {
