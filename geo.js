@@ -15,7 +15,9 @@ export async function *watch({ maximumAge, timeout, signal, enableHighAccuracy }
 		let error;
 		promise.catch(err => error = err);
 
-		signalAborted(signal).finally(() => navigator.geolocation.clearWatch(id));
+		if (signal instanceof AbortSignal) {
+			signalAborted(signal).finally(() => navigator.geolocation.clearWatch(id));
+		}
 
 		for await (const result of generator({ signal })) {
 			if (typeof error === 'undefined') {
@@ -36,7 +38,9 @@ export async function get({ maximumAge, timeout, signal, enableHighAccuracy } = 
 		throw new DOMException('Operation aborted');
 	} else {
 		const { resolve, reject, promise } = getDeferred();
-		signalAborted(signal).finally(() => reject(new DOMException('Operation aborted')));
+		if (signal instanceof AbortSignal) {
+			signalAborted(signal).finally(() => reject(new DOMException('Operation aborted')));
+		}
 		navigator.geolocation.getCurrentPosition(resolve, reject, { maximumAge, timeout, enableHighAccuracy });
 		return promise;
 

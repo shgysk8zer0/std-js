@@ -20,7 +20,7 @@ function getType({ headers }) {
 }
 
 export async function fetch(url, opts) {
-	if ('AbortSignal' in window && opts.signal instanceof AbortSignal && eventFeatures.nativeSignal === false) {
+	if (opts.signal instanceof AbortSignal && eventFeatures.nativeSignal === false) {
 		return await Promise.race([window.fetch(url), signalAborted(opts.signal)]);
 	} else {
 		return await window.fetch(url, opts);
@@ -50,15 +50,14 @@ export async function GET(url, {
 			: new URLSearchParams(body);
 	}
 
-	if (typeof signal === 'undefined' && typeof timeout === 'number') {
+	if (typeof signal === 'undefined' && Number.isInteger(timeout)) {
 		signal = abortTimeoutController(timeout).signal;
-	} else if ('AbortController' in window && signal instanceof AbortController) {
+	} else if (signal instanceof AbortController) {
 		signal = signal.signal;
 	}
 
 	return await fetch(url, { method: 'GET', mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal });
-
 }
 
 export async function POST(url, {
@@ -92,9 +91,9 @@ export async function POST(url, {
 		}
 	}
 
-	if (typeof signal === 'undefined' && typeof timeout === 'number') {
+	if (typeof signal === 'undefined' && Number.isInteger(timeout)) {
 		signal = abortTimeoutController(timeout).signal;
-	} else if ('AbortController' in window && signal instanceof AbortController) {
+	} else if (signal instanceof AbortController) {
 		signal = signal.signal;
 	}
 
@@ -125,9 +124,9 @@ export async function DELETE(url, {
 			: new URLSearchParams(body);
 	}
 
-	if (typeof signal === 'undefined' && typeof timeout === 'number') {
+	if (typeof signal === 'undefined' && Number.isInteger(timeout)) {
 		signal = abortTimeoutController(timeout).signal;
-	} else if ('AbortController' in window && signal instanceof AbortController) {
+	} else if (signal instanceof AbortController) {
 		signal = signal.signal;
 	}
 
@@ -246,34 +245,34 @@ export async function submitForm(form) {
 	}
 }
 
-export async function getManifest(timeout = null) {
-	const resp = await getLink('link[rel="manifest"][href]', timeout);
+export async function getManifest({ timeout, signal } = {}) {
+	const resp = await getLink('link[rel="manifest"][href]', { timeout, signal });
 	return await resp.json();
 }
 
-export async function getLink(link, timeout = null) {
+export async function getLink(link, { timeout, signal } = {}) {
 	if (typeof link === 'string') {
-		return await getLink(document.querySelector(link));
+		return await getLink(document.querySelector(link, { timeout, signal }));
 	} else if (! (link instanceof HTMLLinkElement)) {
-		throw new Error('Expected a <link>');
+		throw new DOMException('Expected a <link>');
 	} else if (link.href.length === 0) {
-		throw new Error('Missing `href` on <link>');
+		throw new DOMException('Missing `href` on <link>');
 	} else {
-		const { href, integrity, type, referrerPolicy } = link;
+		const { href, integrity, type, referrerPolicy, crossOrigin } = link;
 
 		let credentials;
-		const mode = ('crossOrigin' in link) ? 'cors' : 'no-cors';
+		const mode = typeof crossOrigin === 'string' ? 'cors' : 'no-cors';
 		const headers = new Headers();
 
 		if (mode === 'cors') {
-			credentials = link.crossOrigin === 'use-credentials' ? 'include' : 'omit';
+			credentials = crossOrigin === 'use-credentials' ? 'include' : 'omit';
 		}
 
 		if (typeof type === 'string') {
 			headers.set('Accept', type);
 		}
 
-		return await GET(href, { mode, credentials, headers, integrity, referrerPolicy, timeout });
+		return await GET(href, { mode, credentials, headers, integrity, referrerPolicy, timeout, signal });
 	}
 }
 
