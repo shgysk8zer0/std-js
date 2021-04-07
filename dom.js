@@ -1,59 +1,45 @@
 import { signalAborted } from './abort.js';
-import { features as eventFeatures } from './events.js';
+import { addListener } from './events.js';
 import { getDeferred } from './promises.js';
 
-export function addListener(targets, events, callback, { capture, once, passive, signal } = {}) {
-	if (! Array.isArray(targets)) {
-		targets = query(targets);
-	}
-
-	targets.forEach(target => {
-		events.forEach(event => target.addEventListener(event, callback, { capture, once, passive, signal }));
-	});
-
-	if ('AbortSignal' in window && signal instanceof AbortSignal && eventFeatures.nativeSignal === false) {
-		signalAborted(signal).then(() => {
-			events.forEach(event => {
-				targets.forEach(target => target.removeEventListener(event, callback, { capture, once, passive, signal }));
-			});
-		});
-	}
-}
-
 export async function onAnimationFrame(callback) {
-	return await new Promise((resolve, reject) => {
-		requestAnimationFrame(hrts => {
-			if (callback instanceof Promise) {
-				callback(hrts).then(resolve).catch(reject);
-			} else if (callback instanceof Function) {
-				try {
-					resolve(callback(hrts));
-				} catch (err) {
-					reject(err);
-				}
-			} else {
-				reject(new TypeError('callback must be an instance of Function or Promise'));
+	const { promise, resolve, reject } = getDeferred();
+
+	requestAnimationFrame(hrts => {
+		if (callback instanceof Promise) {
+			callback(hrts).then(resolve).catch(reject);
+		} else if (callback instanceof Function) {
+			try {
+				resolve(callback(hrts));
+			} catch (err) {
+				reject(err);
 			}
-		});
+		} else {
+			reject(new TypeError('callback must be an instance of Function or Promise'));
+		}
 	});
+
+	return await promise;
 }
 
 export async function onIdle(callback, { timeout } = {}) {
-	return await new Promise((resolve, reject) => {
-		requestIdleCallback(hrts => {
-			if (callback instanceof Promise) {
-				callback(hrts).then(resolve).catch(reject);
-			} else if (callback instanceof Function) {
-				try {
-					resolve(callback(hrts));
-				} catch (err) {
-					reject(err);
-				}
-			} else {
-				reject(new TypeError('callback must be an instance of Function or Promise'));
+	const { promise, resolve, reject } = getDeferred();
+
+	requestIdleCallback(hrts => {
+		if (callback instanceof Promise) {
+			callback(hrts).then(resolve).catch(reject);
+		} else if (callback instanceof Function) {
+			try {
+				resolve(callback(hrts));
+			} catch (err) {
+				reject(err);
 			}
-		}, { timeout });
-	});
+		} else {
+			reject(new TypeError('callback must be an instance of Function or Promise'));
+		}
+	}, { timeout });
+
+	return await promise;
 }
 
 export function query(what, base = document) {
@@ -423,16 +409,16 @@ export async function when(target, event, {
 	});
 }
 
-export async function ready() {
+export async function ready({ signal } = {}) {
 	if (document.readyState === 'loading') {
-		await when(document, 'DOMContentLoaded');
+		await when(document, 'DOMContentLoaded', { signal });
 	}
 
 }
 
-export async function loaded() {
+export async function loaded({ signal } = {}) {
 	if (document.readyState !== 'complete') {
-		await when(window, 'load');
+		await when(window, 'load', { signal });
 	}
 }
 
@@ -453,7 +439,7 @@ export function parseHTML(text, { type = 'text/html', asFrag = true, head = true
 	}
 }
 
-export async function animate(what, keyframes, opts = { duration: 400 }) {
+export function animate(what, keyframes, opts = { duration: 400 }) {
 	if (Element.prototype.animate instanceof Function) {
 		const items = query(what);
 
@@ -461,32 +447,48 @@ export async function animate(what, keyframes, opts = { duration: 400 }) {
 			opts = { duration: opts };
 		}
 
-		return Promise.all(items.map(item => item.animate(keyframes, opts).finished));
+		const animations = items.map(item => item.animate(keyframes, opts));
+
+		if ('signal' in opts) {
+			signalAborted(opts.signal).finally(() => animations.forEach(anim => anim.finish()));
+		}
+
+		return animations;
 	} else {
 		throw new DOMException('Animations not supported');
 	}
 }
 
-export function intersect(what, callback, options) {
+export function intersect(what, callback, options = {}) {
 	if ('IntersectionObserver' in window) {
 		const observer = new IntersectionObserver((entries, observer) => {
 			entries.forEach((entry, index) => callback.apply(null, [entry, observer, index]));
 		}, options);
 
 		query(what).forEach(item => observer.observe(item));
+
+		if ('signal' in options) {
+			signalAborted(options.signal).finally(() => observer.disconnect());
+		}
+
 		return observer;
 	} else {
 		throw new DOMException('IntersectionObserver not supported');
 	}
 }
 
-export function mutate(what, callback, opts = {}) {
+export function mutate(what, callback, options = {}) {
 	if ('MutationObserver' in window) {
 		const observer = new MutationObserver((records, observer) => {
 			records.forEach((record, index) => callback.apply(null, [record, observer, index]));
 		});
 
-		query(what).forEach(item => observer.observe(item, opts));
+		query(what).forEach(item => observer.observe(item, options));
+
+		if ('signal' in options) {
+			signalAborted(options.signal).finally(() => observer.disconnect());
+		}
+
 		return observer;
 	} else {
 		throw new Error('MutationObserver not supported');
@@ -496,3 +498,5 @@ export function mutate(what, callback, opts = {}) {
 export function supportsElement(...tags) {
 	return ! tags.some(tag => document.createElement(tag) instanceof HTMLUnknownElement);
 }
+
+export { addListener };
