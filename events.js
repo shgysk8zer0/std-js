@@ -1,4 +1,5 @@
 import { query, off } from './dom.js';
+import { signalAborted } from './abort.js';
 
 function getEventFeatures() {
 	const el = document.createElement('div');
