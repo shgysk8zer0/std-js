@@ -1,7 +1,8 @@
 import { $ } from './esQuery.js';
 import { attr, css, data, toggleClass, on, off, ready, loaded, when, parseHTML } from './dom.js';
 import { getCustomElement, createCustomElement, registerCustomElement, defined } from './custom-elements.js';
-import { getDeferred } from './promises.js';
+import { sleep } from './promises.js';
+import { get as getLocation } from './geo.js';
 
 export function openWindow(url, {
 	name = '',
@@ -250,12 +251,6 @@ export async function whenHidden() {
 	}
 }
 
-export async function sleep(ms, ...args) {
-	const { promise, resolve } = getDeferred();
-	setTimeout(() => resolve(...args), ms);
-	await promise;
-}
-
 /**
  * @deprecated [will be removed in v3.0.0]
  */
@@ -399,20 +394,10 @@ export async function notificationsAllowed() {
 	return getNotificationPermission().then(perm => perm === 'granted');
 }
 
-export async function getLocation({ maximumAge, timeout, enableHighAccuracy = false } = {}) {
-	const { resolve, reject, promise } = getDeferred();
-
-	if (! ('geolocation' in navigator) || ! (navigator.geolocation.getCurrentPosition instanceof Function)) {
-		reject(new DOMException('GeoLocation API not supported'));
-	} else {
-		navigator.geolocation.getCurrentPosition(resolve, reject, { maximumAge, timeout, enableHighAccuracy });
-	}
-
-	return promise;
-}
-
 export { $, attr, css, data, toggleClass, on, off, when, ready, loaded, parseHTML,
-	getCustomElement, createCustomElement, registerCustomElement, defined };
+	getCustomElement, createCustomElement, registerCustomElement, defined, sleep,
+	getLocation,
+};
 
 export { mediaQuery, prefersReducedMotion, prefersColorScheme, displayMode } from './media-queries.js';
 export { createSVG, useSVG } from './svg.js';

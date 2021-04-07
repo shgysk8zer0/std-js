@@ -1,8 +1,7 @@
 import './abort-shims.js';
 import { when } from './dom.js';
 import { features as eventFeatures} from './events.js';
-import { rejectOn, infinitPromise } from './promises.js';
-
+import { resolveOn, infinitPromise } from './promises.js';
 export const nativeSupport = eventFeatures.nativeSignal;
 
 export async function signalAborted(signal, { reason } = {}) {
@@ -11,9 +10,11 @@ export async function signalAborted(signal, { reason } = {}) {
 	} else if (! (signal instanceof AbortSignal)) {
 		return infinitPromise;
 	} else if (signal.aborted) {
-		return Promise.reject(reason);
+		return typeof reason === 'undefined' ? Promise.resolve() : Promise.reject(reason);
 	} else {
-		return rejectOn(signal, 'abort').catch(() => Promise.reject(reason));
+		return resolveOn(signal, 'abort').finally(() => {
+			return typeof reason === 'undefined' ? Promise.resolve() : Promise.reject(reason);
+		});
 	}
 }
 
@@ -35,29 +36,26 @@ export function abortEventController(what, events, { passive, capture } = {}) {
 	return controller;
 }
 
-export function multiSignalController(...signals) {
+export function abortableTimeout(callback, ms, { signal } = {}) {
+	const id = setTimeout(() => callback(), ms);
+	signalAborted(signal).finally(() => clearTimeout(id));
+	return id;
+}
+
+export function abortableInterval(callback, ms, { signal } = {}) {
+	const id = setInterval(() => callback(), ms);
+	signalAborted(signal).finally(() => clearInterval(id));
+	return id;
+}
+
+export function signalRaceController(...signals) {
 	const controller = new AbortController();
+	signals.race(signal => signalAborted(signal)).then(() => controller.abort());
+	return controller;
+}
 
-	for (const signal of signals) {
-		if (signal instanceof AbortSignal) {
-			if (signal.aborted) {
-				controller.abort();
-				break;
-			} else {
-				signal.addEventListener('abort', () => controller.abort(), { signal: controller.signal });
-			}
-		} else if (signal instanceof AbortController) {
-			if (signal.signal.aborted) {
-				controller.abort();
-				break;
-			} else {
-				signal.signal.addEventListener('abort', () => controller.abort(), { signal: controller.signal });
-			}
-		} else {
-			controller.abort();
-			throw new TypeError('multiSignalController only accepts AbortSignals');
-		}
-	}
-
+export function signalAllController(...signals) {
+	const controller = new AbortController();
+	signals.all(signal => signalAborted(signal)).then(() => controller.abort());
 	return controller;
 }
