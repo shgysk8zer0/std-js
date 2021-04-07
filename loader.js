@@ -1,4 +1,5 @@
 import { getDeferred } from './promises.js';
+import { addListener } from './events.js';
 
 export async function load(target, parent, srcAttr, value) {
 	if (parent instanceof Node) {
@@ -14,18 +15,17 @@ export async function load(target, parent, srcAttr, value) {
 
 export async function loaded(target) {
 	const { resolve, reject, promise } = getDeferred();
+	const controller = new AbortController();
+	const opts = { once: true, signal: controller.signal };
 
 	function load() {
-		this.removeEventListener('load', load);
-		this.removeEventListener('error', error);
 		resolve(target);
+		controller.abort();
 	}
 
 	function error(err) {
-		// console.error(err);
-		this.removeEventListener('load', load);
-		this.removeEventListener('error', error);
 		reject(err);
+		controller.abort();
 	}
 
 	if (target instanceof HTMLScriptElement && target.noModule === true) {
@@ -33,8 +33,8 @@ export async function loaded(target) {
 	} else if (target instanceof HTMLLinkElement && target.disabled === true) {
 		resolve(target);
 	} else {
-		target.addEventListener('load', load);
-		target.addEventListener('error', error);
+		addListener([target], ['load'], load, opts);
+		addListener([target], ['error'], load, opts);
 	}
 
 	return await promise;
@@ -307,10 +307,8 @@ export async function loadImage(src, {
 			throw new DOMException(`Error loading image: ${img.src}`);
 		}
 	} else {
-		return new Promise((resolve, reject) => {
-			img.addEventListener('load', () => resolve(img), { once: true });
-			img.addEventListener('error', (err) => reject(err), { once: true });
-			img.src = src;
-		});
+		const prom = loaded(img);
+		img.src = src;
+		return prom;
 	}
 }

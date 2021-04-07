@@ -2,7 +2,7 @@ import './abort-shims.js';
 import { when } from './dom.js';
 import { features as eventFeatures} from './events.js';
 import { resolveOn, infinitPromise } from './promises.js';
-export const nativeSupport = eventFeatures.nativeSignal;
+export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
 
 export async function signalAborted(signal, { reason } = {}) {
 	if (signal instanceof AbortController) {

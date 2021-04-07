@@ -61,13 +61,17 @@ export async function abortablePromise(promise, signal, { reason } = {}) {
 }
 
 export async function sleep(ms, { signal } = {}) {
-	await Promise.race([
-		new Promise(resolve => setTimeout(() => resolve(), ms)),
-		signalAborted(signal).then(() => null)
-	]).finally(() => null);
+	if (signal instanceof AbortSignal) {
+		await Promise.race([
+			new Promise(resolve => setTimeout(() => resolve(), ms)),
+			signalAborted(signal).then(() => null)
+		]).finally(() => null);
+	} else {
+		await new Promise(resolve => setTimeout(() => resolve(), ms));
+	}
 }
 
-export function getDeferred({ signal } = {}) {
+export function getDeferred({ signal, reason = 'Operation aborted' } = {}) {
 	const deferred = {};
 
 	deferred.promise = new Promise((resolve, reject) => {
@@ -76,7 +80,7 @@ export function getDeferred({ signal } = {}) {
 	});
 
 	if (signal instanceof AbortSignal) {
-		signal.addEventListener('abort', () => deferred.reject('Operation aborted.'));
+		signal.addEventListener('abort', () => deferred.reject(reason));
 	}
 
 	return Object.seal(deferred);
@@ -103,14 +107,24 @@ export function callbackGenerator() {
 	const target = new EventTarget();
 	const queue = [];
 
-	async function *generator({ signal } = { aborted: false }) {
-		while (! signal.aborted) {
-			if (queue.length === 0) {
-				await Promise.race([
-					when(target, 'update', { signal }),
-					signalAborted(signal).catch(() => null).finally(() => null),
-				]).catch(() => null);
-			} else {
+	async function *generator({ signal } = {}) {
+		if (signal instanceof AbortSignal) {
+			while (! signal.aborted) {
+				if (queue.length === 0) {
+					await Promise.race([
+						when(target, 'update', { signal }),
+						signalAborted(signal).catch(() => null).finally(() => null),
+					]).catch(() => null);
+				}
+
+				yield queue.shift();
+			}
+		} else {
+			while (true) {
+				if (queue.length === 0) {
+					await when(target, 'update', { signal });
+				}
+
 				yield queue.shift();
 			}
 		}

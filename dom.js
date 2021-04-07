@@ -2,10 +2,10 @@ import { signalAborted } from './abort.js';
 import { addListener } from './events.js';
 import { getDeferred } from './promises.js';
 
-export async function onAnimationFrame(callback) {
+export async function onAnimationFrame(callback, { signal, reason = 'Operation aborted.' } = {}) {
 	const { promise, resolve, reject } = getDeferred();
 
-	requestAnimationFrame(hrts => {
+	const id = requestAnimationFrame(hrts => {
 		if (callback instanceof Promise) {
 			callback(hrts).then(resolve).catch(reject);
 		} else if (callback instanceof Function) {
@@ -19,13 +19,20 @@ export async function onAnimationFrame(callback) {
 		}
 	});
 
+	if (signal instanceof AbortSignal) {
+		singalAborted(singal).finally(() => {
+			cancelAnimationFrame(id);
+			reject(reason);
+		});
+	}
+
 	return await promise;
 }
 
-export async function onIdle(callback, { timeout } = {}) {
+export async function onIdle(callback, { timeout, signal, reason = 'Operation aborted.' } = {}) {
 	const { promise, resolve, reject } = getDeferred();
 
-	requestIdleCallback(hrts => {
+	const id = requestIdleCallback(hrts => {
 		if (callback instanceof Promise) {
 			callback(hrts).then(resolve).catch(reject);
 		} else if (callback instanceof Function) {
@@ -38,6 +45,13 @@ export async function onIdle(callback, { timeout } = {}) {
 			reject(new TypeError('callback must be an instance of Function or Promise'));
 		}
 	}, { timeout });
+
+	if (signal instanceof AbortSignal) {
+		singalAborted(singal).finally(() => {
+			cancelIdleCallback(id);
+			reject(reason);
+		});
+	}
 
 	return await promise;
 }
@@ -449,7 +463,7 @@ export function animate(what, keyframes, opts = { duration: 400 }) {
 
 		const animations = items.map(item => item.animate(keyframes, opts));
 
-		if ('signal' in opts) {
+		if (opts.signal instanceof AbortSignal) {
 			signalAborted(opts.signal).finally(() => animations.forEach(anim => anim.cancel()));
 		}
 
@@ -467,7 +481,7 @@ export function intersect(what, callback, options = {}) {
 
 		query(what).forEach(item => observer.observe(item));
 
-		if ('signal' in options) {
+		if (options.signal instanceof AbortSignal) {
 			signalAborted(options.signal).finally(() => observer.disconnect());
 		}
 
@@ -485,7 +499,7 @@ export function mutate(what, callback, options = {}) {
 
 		query(what).forEach(item => observer.observe(item, options));
 
-		if ('signal' in options) {
+		if (options.signal instanceof AbortSignal) {
 			signalAborted(options.signal).finally(() => observer.disconnect());
 		}
 
