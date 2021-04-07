@@ -162,9 +162,9 @@ export default class esQuery extends Set {
 		}, document.createDocumentFragment());
 	}
 
-	async animate(keyframes, opts = 400) {
+	async animate(keyframes, opts = { duration: 400 }) {
 		if (Element.prototype.animate instanceof Function) {
-			await animate(this, keyframes, opts);
+			await Promise.all(animate(this, keyframes, opts).map(anim => anim.finished));
 			return this;
 		} else {
 			return this;
@@ -1002,8 +1002,8 @@ export default class esQuery extends Set {
 		});
 	}
 
-	async once(event, callback) {
-		return this.on(event, callback, { once: true });
+	async once(event, callback, { capture, passive, signal }) {
+		return this.on(event, callback, { once: true, capture, passive, signal });
 	}
 
 	async debounce(event, callback, wait = 17, immediate = false, ...attrs) {
