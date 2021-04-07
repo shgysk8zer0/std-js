@@ -1,5 +1,5 @@
 import { parseHTML } from './dom.js';
-import { signalAborted, abortTimeoutController, supported } from './abort.js';
+import { signalAborted, abortTimeoutController } from './abort.js';
 import { features as eventFeatures } from './events.js';
 
 function filename(src) {
@@ -246,7 +246,7 @@ export async function submitForm(form) {
 }
 
 export async function getManifest({ timeout, signal } = {}) {
-	const resp = await getLink('link[rel="manifest"][href]', { timeout, signal } = {});
+	const resp = await getLink('link[rel="manifest"][href]', { timeout, signal });
 	return await resp.json();
 }
 

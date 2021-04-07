@@ -1,6 +1,5 @@
 import './abort-shims.js';
 import { when } from './dom.js';
-import { features as eventFeatures} from './events.js';
 import { resolveOn, infinitPromise } from './promises.js';
 export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
 

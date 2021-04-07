@@ -20,7 +20,7 @@ export async function onAnimationFrame(callback, { signal, reason = 'Operation a
 	});
 
 	if (signal instanceof AbortSignal) {
-		singalAborted(singal).finally(() => {
+		signalAborted(signal).finally(() => {
 			cancelAnimationFrame(id);
 			reject(reason);
 		});
@@ -47,7 +47,7 @@ export async function onIdle(callback, { timeout, signal, reason = 'Operation ab
 	}, { timeout });
 
 	if (signal instanceof AbortSignal) {
-		singalAborted(singal).finally(() => {
+		signalAborted(signal).finally(() => {
 			cancelIdleCallback(id);
 			reject(reason);
 		});

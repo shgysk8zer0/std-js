@@ -34,7 +34,7 @@ export async function loaded(target) {
 		resolve(target);
 	} else {
 		addListener([target], ['load'], load, opts);
-		addListener([target], ['error'], load, opts);
+		addListener([target], ['error'], error, opts);
 	}
 
 	return await promise;
