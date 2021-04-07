@@ -397,7 +397,7 @@ export async function notificationsAllowed() {
 export { $, attr, css, data, toggleClass, on, off, when, ready, loaded, parseHTML,
 	getCustomElement, createCustomElement, registerCustomElement, defined, sleep,
 	getLocation,
- };
+};
 
 export { mediaQuery, prefersReducedMotion, prefersColorScheme, displayMode } from './media-queries.js';
 export { createSVG, useSVG } from './svg.js';
