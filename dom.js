@@ -1,5 +1,5 @@
 import { signalAborted } from './abort.js';
-import { features as eventFeatures, addListener } from './events.js';
+import { addListener } from './events.js';
 import { getDeferred } from './promises.js';
 
 export async function onAnimationFrame(callback) {
