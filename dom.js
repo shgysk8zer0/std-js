@@ -450,7 +450,7 @@ export function animate(what, keyframes, opts = { duration: 400 }) {
 		const animations = items.map(item => item.animate(keyframes, opts));
 
 		if ('signal' in opts) {
-			signalAborted(opts.signal).finally(() => animations.forEach(anim => anim.finish()));
+			signalAborted(opts.signal).finally(() => animations.forEach(anim => anim.cancel()));
 		}
 
 		return animations;
