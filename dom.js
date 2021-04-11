@@ -312,6 +312,14 @@ export async function attr(what, props = {}, { base = document, namespace = null
 	});
 }
 
+export async function addClass(what, ...args) {
+	return onAnimationFrame(() => query(what).forEach(el => el.classList.add(...args)));
+}
+
+export async function removeClass(what, ...args) {
+	return onAnimationFrame(() => query(what).forEach(el => el.classList.remove(...args)));
+}
+
 export async function toggleClass(what, classes, { base = document, force = undefined } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
