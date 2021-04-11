@@ -8,12 +8,6 @@ const KEYS = ['data', 'title', 'url'];
 
 let instance;
 
-const initial = {
-	title: document.title,
-	url: location.href,
-	data: isValidState(history.state) ? history.state.data : history.state || {},
-};
-
 function isValidState(state = history.state) {
 	return state != null && KEYS.every(key => state.hasOwnProperty(key));
 }
@@ -168,10 +162,10 @@ export class StateManager extends EventTarget {
 		const url = new URL(location.href);
 		const event = new Event('hashchange');
 		event.oldURL = location.href;
-		const oldValue = url.hash;
+		event.oldValue = url.hash;
 
 		if (! newValue.startsWith('#')) {
-			newValue = `#${newValue}`
+			newValue = `#${newValue}`;
 		}
 
 		url.hash = newValue;
