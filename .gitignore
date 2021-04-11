@@ -1,4 +1,6 @@
 /patches/
+/local/*
+!/local/.gitkeep
 *.patch
 /node_modules/
 /npm-debug.log
