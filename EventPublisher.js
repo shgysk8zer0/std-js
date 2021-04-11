@@ -41,9 +41,9 @@ export class EventPublisher extends EventTarget {
 				events.forEach(event => subscriptions.delete(event));
 
 				if (subscriptions.size === 0) {
-					this.removeSubscription(target)
+					this.removeSubscription(target);
 				} else {
-					subscribers.set(target, subscriptions);
+					subscribers.set(target, { controller, subscriptions });
 				}
 			}
 		}
