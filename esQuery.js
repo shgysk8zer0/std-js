@@ -1,6 +1,6 @@
 import { read, debounce, getLocation, isInViewport } from './functions.js';
-import { query, attr, css, data, toggleClass, text, html, on, off, animate, ready,
-	loaded, intersect } from './dom.js';
+import { query, attr, css, data, addClass, removeClass, toggleClass, text, html, on, off,
+	animate, ready, loaded, intersect } from './dom.js';
 import { mediaQuery } from './media-queries.js';
 
 import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText } from './http.js';
@@ -19,7 +19,7 @@ export default class esQuery extends Set {
 	}
 
 	get parents() {
-		return new esQuery(this.toArray().map(item => item.parentElement));
+		return new esQuery(this.toArray().map(item => item.parentElement).flat());
 	}
 
 	get children() {
@@ -67,9 +67,13 @@ export default class esQuery extends Set {
 	}
 
 	async replaceText(replacements = {}) {
-		this.forEach(el => Object.keys(replacements).forEach(find => {
-			el.textContent = el.textContent.replace(find, replacements[find]);
-		}));
+		requestAnimationFrame(() => {
+			this.each(node => {
+				Object.entries(replacements).forEach(([from, to]) => {
+					node.textContent = node.textContent.replace(from, to);
+				});
+			});
+		});
 		return this;
 	}
 
@@ -122,8 +126,8 @@ export default class esQuery extends Set {
 		return new esQuery([...this].map(el => el.closest(selector)));
 	}
 
-	async matches(selector, any = false) {
-		if (any) {
+	async matches(selector, some = false) {
+		if (some) {
 			return this.some(el => el.matches(selector));
 		} else {
 			return this.every(el => el.matches(selector));
@@ -856,12 +860,12 @@ export default class esQuery extends Set {
 	}
 
 	async addClass(...classes) {
-		this.forEach(el => el.classList.add(...classes));
+		await addClass(this, ...classes);
 		return this;
 	}
 
 	async removeClass(...classes) {
-		this.forEach(el => el.classList.remove(...classes));
+		await removeClass(this, ...classes);
 		return this;
 	}
 
@@ -870,7 +874,7 @@ export default class esQuery extends Set {
 	}
 
 	async toggleClass(...args) {
-		toggleClass(this, ...args);
+		await toggleClass(this, ...args);
 		return this;
 	}
 
