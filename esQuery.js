@@ -1,6 +1,7 @@
 import { read, debounce, getLocation, isInViewport } from './functions.js';
-import { query, attr, css, data, addClass, removeClass, toggleClass, text, html, on, off,
-	animate, ready, loaded, intersect } from './dom.js';
+import { query, attr, toggleAttr, css, data, addClass, removeClass, toggleClass,
+	replaceClass, text, html, on, off, animate, ready, loaded, intersect, onAnimationFrame,
+} from './dom.js';
 import { mediaQuery } from './media-queries.js';
 
 import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText } from './http.js';
@@ -31,16 +32,16 @@ export default class esQuery extends Set {
 	}
 
 	get first() {
-		return this.toArray().shift();
+		return new esQuery(this.toArray().shift());
 	}
 
 	get last() {
-		return this.toArray().pop();
+		return new esQuery(this.toArray().pop());
 	}
 
 	item(num) {
 		if (this.size > num) {
-			return this.toArray()[num];
+			return new esQuery(this.toArray()[num]);
 		} else {
 			return undefined;
 		}
@@ -67,7 +68,7 @@ export default class esQuery extends Set {
 	}
 
 	async replaceText(replacements = {}) {
-		requestAnimationFrame(() => {
+		await onAnimationFrame(() => {
 			this.each(node => {
 				Object.entries(replacements).forEach(([from, to]) => {
 					node.textContent = node.textContent.replace(from, to);
@@ -123,7 +124,7 @@ export default class esQuery extends Set {
 	}
 
 	async closest(selector) {
-		return new esQuery([...this].map(el => el.closest(selector)));
+		return new esQuery(this.toArray().map(el => el.closest(selector)));
 	}
 
 	async matches(selector, some = false) {
@@ -522,19 +523,12 @@ export default class esQuery extends Set {
 		from = 1,
 		to = 0,
 		id = 'fade-in',
+		signal
 	} = {}) {
 		return this.animate([
 			{ opacity: from },
 			{ opacity: to }
-		], {
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-		});
+		], { delay, duration, fill, easing, direction, iterations, id, signal });
 	}
 
 	async fadeIn({
@@ -547,18 +541,10 @@ export default class esQuery extends Set {
 		from = 0,
 		to = 1,
 		id = 'fade-in',
+		signal,
 	} = {}) {
-		return this.fade({
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			from,
-			to,
-			id,
-		});
+		return this.fade({ delay, duration, fill, easing, direction, iterations,
+			from, to, id, signal });
 	}
 
 	async fadeOut(opts = {}) {
@@ -575,19 +561,12 @@ export default class esQuery extends Set {
 		id = 'scale',
 		initialScale = 0,
 		scale = 1.5,
+		signal,
 	} = {}) {
 		return this.animate([
 			{ transform: `scale(${initialScale})` },
 			{ transform: `scale(${scale})` }
-		], {
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-		});
+		], { delay, duration, fill, easing, direction, iterations, id, signal });
 	}
 
 	async grow({
@@ -600,18 +579,10 @@ export default class esQuery extends Set {
 		id = 'grow',
 		initialScale = 0,
 		scale = 1,
+		signal,
 	} = {}) {
-		return this.scale({
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-			scale,
-			initialScale,
-		});
+		return this.scale({ delay, duration, fill, easing, direction, iterations,
+			id, scale, initialScale, signal });
 	}
 
 	async shrink({
@@ -624,18 +595,10 @@ export default class esQuery extends Set {
 		id = 'shrink',
 		initialScale = 1,
 		scale = 0,
+		signal,
 	} = {}) {
-		return this.scale({
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-			scale,
-			initialScale,
-		});
+		return this.scale({ delay, duration, fill, easing, direction, iterations,
+			id, scale, initialScale, signal });
 	}
 
 	async rotate({
@@ -648,19 +611,12 @@ export default class esQuery extends Set {
 		id = 'rotate',
 		rotation = '1turn',
 		initialRotation = '0turn',
+		signal,
 	} = {}) {
 		return this.animate([
 			{ transform: `rotate(${initialRotation})` },
 			{ transform: `rotate(${rotation})` }
-		], {
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-		});
+		], { delay, duration, fill, easing, direction, iterations, id, signal });
 	}
 
 	async bounce({
@@ -672,19 +628,12 @@ export default class esQuery extends Set {
 		iterations = 1,
 		id = 'bounce',
 		height = '-50px',
+		signal,
 	} = {}) {
 		return this.animate([
 			{ transform: 'none' },
 			{ transform: `translateY(${height})` }
-		], {
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-		});
+		], { delay, duration, fill, easing, direction, iterations, id, signal });
 	}
 
 	async shake({
@@ -698,6 +647,7 @@ export default class esQuery extends Set {
 		offsetX = '60px',
 		offsetY = '20px',
 		scale = 0.9,
+		signal,
 	} = {}) {
 		return this.animate([
 			{ transform: 'none' },
@@ -705,15 +655,7 @@ export default class esQuery extends Set {
 			{ transform: 'none' },
 			{ transform: `translateY(-${offsetY}) translateX(${offsetX}) scale(${1 / scale})` },
 			{ transform: 'none' },
-		], {
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-		});
+		], { delay, duration, fill, easing, direction, iterations, id, signal });
 	}
 
 	async slideLeft({
@@ -726,19 +668,12 @@ export default class esQuery extends Set {
 		id = 'slide-left',
 		initial = 0,
 		distance = '50px',
+		signal,
 	} = {}) {
 		return this.animate([
 			{ transform: `translateX(${initial})` },
 			{ transform: `translateX(-${distance})` }
-		], {
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-		});
+		], { delay, duration, fill, easing, direction, iterations, id, signal });
 	}
 
 	async slideRight({
@@ -751,19 +686,12 @@ export default class esQuery extends Set {
 		id = 'slide-right',
 		initial = 0,
 		distance = '50px',
+		signal,
 	} = {}) {
 		return this.animate([
 			{ transform: `translateX(${initial})` },
 			{ transform: `translateX(${distance})` }
-		], {
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-		});
+		], { delay, duration, fill, easing, direction, iterations, id, signal });
 	}
 
 	async slideUp({
@@ -776,19 +704,12 @@ export default class esQuery extends Set {
 		id = 'slide-up',
 		initial = 0,
 		distance = '50px',
+		signal,
 	} = {}) {
 		return this.animate([
 			{ transform: `translateY(${initial})` },
 			{ transform: `translateY(-${distance})` }
-		], {
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-		});
+		], { delay, duration, fill, easing, direction, iterations, id, signal });
 	}
 
 	async slideDown({
@@ -801,19 +722,12 @@ export default class esQuery extends Set {
 		id = 'slide-down',
 		initial = 0,
 		distance = '50px',
+		signal,
 	} = {}) {
 		return this.animate([
 			{ transform: `translateY(${initial})` },
 			{ transform: `translateY(${distance})` }
-		], {
-			delay,
-			duration,
-			fill,
-			easing,
-			direction,
-			iterations,
-			id,
-		});
+		], { delay, duration, fill, easing, direction, iterations, id, signal });
 	}
 
 	/**
@@ -836,15 +750,15 @@ export default class esQuery extends Set {
 	}
 
 	async some(callback) {
-		return [...this].some(callback);
+		return this.toArray().some(callback);
 	}
 
 	async every(callback) {
-		return [...this].every(callback);
+		return this.toArray().every(callback);
 	}
 
 	async find(callback) {
-		return [...this].find(callback);
+		return this.toArray().find(callback);
 	}
 
 	async findAll(callback) {
@@ -852,11 +766,11 @@ export default class esQuery extends Set {
 	}
 
 	async map(callback) {
-		return Promise.all([...this].map(callback));
+		return Promise.all(this.toArray().map(callback));
 	}
 
 	async filter(callback) {
-		return new esQuery([...this].filter(callback));
+		return new esQuery(this.toArray().filter(callback));
 	}
 
 	async addClass(...classes) {
@@ -878,45 +792,62 @@ export default class esQuery extends Set {
 		return this;
 	}
 
-	async replaceClass(cname1, cname2) {
-		this.forEach(node => node.classList.replace(cname1, cname2));
+	async replaceClass(classes = {}) {
+		await replaceClass(this, classes);
 		return this;
 	}
 
 	async pickClass(cname1, cname2, condition) {
-		this.toggleClass(cname1, condition);
-		this.toggleClass(cname2, !condition);
+		await onAnimationFrame(() => {
+			if (condition) {
+				this.each(el => {
+					el.classList.add(cname1);
+					el.classList.remove(cname2);
+				});
+			} else {
+				this.each(el => {
+					el.classList.add(cname2);
+					el.classList.remove(cname1);
+				});
+			}
+		});
+
 		return this;
 	}
 
 	async remove() {
-		this.forEach(el => el.remove());
+		await onAnimationFrame(() =>  this.forEach(el => el.remove()));
 		return this;
 	}
 
 	async empty(query = null) {
-		if (typeof query === 'string') {
-			this.forEach(node => [...node.children].forEach(child => {
-				if (child.matches(query)) {
-					child.remove();
-				}
-			}));
-		} else {
-			this.forEach(node => node.replaceChildren());
-		}
+		await onAnimationFrame(() => {
+			if (typeof query === 'string') {
+				this.forEach(node => [...node.children].forEach(child => {
+					if (child.matches(query)) {
+						child.remove();
+					}
+				}));
+			} else {
+				this.forEach(node => node.replaceChildren());
+			}
+		});
+
 		return this;
 	}
 
 	async disable(disabled = true) {
-		this.forEach(el => el.disabled = disabled);
+		await onAnimationFrame(() =>  this.forEach(el => el.disabled = disabled));
+		return this;
 	}
 
 	async enable(enabled = true) {
-		this.disable(!enabled);
+		await this.disable(!enabled);
+		return this;
 	}
 
 	async hide(hidden = true) {
-		this.forEach(el => el.hidden = hidden);
+		await onAnimationFrame(() => this.forEach(el => el.hidden = hidden));
 		return this;
 	}
 
@@ -925,42 +856,42 @@ export default class esQuery extends Set {
 	}
 
 	async append(...nodes) {
-		this.forEach(el => el.append(...nodes));
+		await onAnimationFrame(() => this.forEach(el => el.append(...nodes)));
 		return this;
 	}
 
 	async prepend(...nodes) {
-		this.forEach(el => el.prepend(...nodes));
+		await onAnimationFrame(() => this.forEach(el => el.prepend(...nodes)));
 		return this;
 	}
 
 	async before(...nodes) {
-		this.forEach(el => el.before(...nodes));
+		await onAnimationFrame(this.forEach(el => el.before(...nodes)));
 		return this;
 	}
 
 	async after(...nodes) {
-		this.forEach(el => el.after(...nodes));
+		await onAnimationFrame(this.forEach(el => el.after(...nodes)));
 		return this;
 	}
 
 	async afterBegin(text) {
-		this.forEach(el => el.insertAdjacentHTML('afterbegin', text));
+		await onAnimationFrame(this.forEach(el => el.insertAdjacentHTML('afterbegin', text)));
 		return this;
 	}
 
 	async afterEnd(text) {
-		this.forEach(el => el.insertAdjacentHTML('afterend', text));
+		await onAnimationFrame(this.forEach(el => el.insertAdjacentHTML('afterend', text)));
 		return this;
 	}
 
 	async beforeBegin(text) {
-		this.forEach(el => el.insertAdjacentHTML('beforebegin', text));
+		await onAnimationFrame(this.forEach(el => el.insertAdjacentHTML('beforebegin', text)));
 		return this;
 	}
 
 	async beforeEnd(text) {
-		this.forEach(el => el.insertAdjacentHTML('beforeend', text));
+		await onAnimationFrame(this.forEach(el => el.insertAdjacentHTML('beforeend', text)));
 		return this;
 	}
 
@@ -969,7 +900,8 @@ export default class esQuery extends Set {
 	}
 
 	async toggleAttribute(...args) {
-		return this.each(el => el.toggleAttribute(...args));
+		await onAnimationFrame(this.each(el => el.toggleAttribute(...args)));
+		return this;
 	}
 
 	async value(value) {
@@ -1006,7 +938,7 @@ export default class esQuery extends Set {
 		});
 	}
 
-	async once(event, callback, { capture, passive, signal }) {
+	async once(event, callback, { capture, passive, signal } = {}) {
 		return this.on(event, callback, { once: true, capture, passive, signal });
 	}
 
@@ -1226,6 +1158,10 @@ export default class esQuery extends Set {
 	async attr(...args) {
 		await attr(this, ...args);
 		return this;
+	}
+
+	async toggleAttr(attrs, { base, force, signal } = {}) {
+		toggleAttr(this, attrs, { force, signal });
 	}
 
 	async data(...args) {
