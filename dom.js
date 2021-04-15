@@ -322,17 +322,17 @@ export async function attr(what, props = {}, { base, namespace = null } = {}) {
 
 export async function toggleAttr(what, attrs, { base, force, signal } = {}) {
 	if (! Array.isArray(attrs)) {
-		atrts = [attrs];
+		attrs = [attrs];
 	}
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
 		if (! (signal instanceof AbortSignal)) {
-			items.forEach(item => atrrs.forEach(attr => item.toggleAttribute(attr, force)));
+			items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, force)));
 		} else if (signal.aborted) {
 			items.forEach(item => attrs.forEach(attr => item.removeAttribute(attr)));
 		} else {
-			if (! typeof force === 'boolean') {
+			if (typeof force !== 'boolean') {
 				force = true;
 			}
 

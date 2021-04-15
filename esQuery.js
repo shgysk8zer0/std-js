@@ -1160,7 +1160,7 @@ export default class esQuery extends Set {
 		return this;
 	}
 
-	async toggleAttr(attrs, { base, force, signal } = {}) {
+	async toggleAttr(attrs, { force, signal } = {}) {
 		toggleAttr(this, attrs, { force, signal });
 	}
 
