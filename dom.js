@@ -182,6 +182,14 @@ export function create(tag, {
 	return el;
 }
 
+export async function append(parent, ...nodes) {
+	await onAnimationFrame(() => parent.append(...nodes));
+}
+
+export async function remove(what, { base } = {}) {
+	await onAnimationFrame(() => query(what, base).forEach(el => el.remove()));
+}
+
 export function meta({ name, itemprop, property, charset, content }) {
 	const meta = document.createElement('meta');
 	if (typeof name === 'string') {
@@ -202,7 +210,7 @@ export function meta({ name, itemprop, property, charset, content }) {
 	return meta;
 }
 
-export async function css(what, props = {}, { base = document, priority = undefined } = {}) {
+export async function css(what, props = {}, { base, priority } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -220,7 +228,7 @@ export async function css(what, props = {}, { base = document, priority = undefi
 	});
 }
 
-export async function data(what, props = {}, { base = document } = {}) {
+export async function data(what, props = {}, { base } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -264,7 +272,7 @@ export async function data(what, props = {}, { base = document } = {}) {
 	});
 }
 
-export async function attr(what, props = {}, { base = document, namespace = null } = {}) {
+export async function attr(what, props = {}, { base, namespace = null } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -312,6 +320,32 @@ export async function attr(what, props = {}, { base = document, namespace = null
 	});
 }
 
+export async function toggleAttr(what, attrs, { base, force, signal } = {}) {
+	if (! Array.isArray(attrs)) {
+		attrs = [attrs];
+	}
+	return onAnimationFrame(() => {
+		const items = query(what, base);
+
+		if (! (signal instanceof AbortSignal)) {
+			items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, force)));
+		} else if (signal.aborted) {
+			items.forEach(item => attrs.forEach(attr => item.removeAttribute(attr)));
+		} else {
+			if (typeof force !== 'boolean') {
+				force = true;
+			}
+
+			items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, force)));
+
+			signal.addEventListener('abort', () => {
+				items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, !force)));
+			}, { once:true });
+		}
+		return items;
+	});
+}
+
 export async function addClass(what, ...args) {
 	return onAnimationFrame(() => query(what).forEach(el => el.classList.add(...args)));
 }
@@ -320,7 +354,7 @@ export async function removeClass(what, ...args) {
 	return onAnimationFrame(() => query(what).forEach(el => el.classList.remove(...args)));
 }
 
-export async function toggleClass(what, classes, { base = document, force = undefined } = {}) {
+export async function toggleClass(what, classes = {}, { base, force } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -333,6 +367,15 @@ export async function toggleClass(what, classes, { base = document, force = unde
 				Object.entries(classes).forEach(([cl, cond]) => {
 					if (cond instanceof Function) {
 						item.classList.toggle(cl, cond.apply(what, [cl]));
+					} else if (cond instanceof AbortSignal) {
+						if (cond.aborted) {
+							item.classList.remove(cl);
+						} else {
+							item.classList.add(cl, true);
+							cond.addEventListener('abort', () => {
+								onAnimationFrame(() => item.classList.remove(cl));
+							}, { once: true });
+						}
 					} else {
 						item.classList.toggle(cl, cond);
 					}
@@ -344,7 +387,20 @@ export async function toggleClass(what, classes, { base = document, force = unde
 	});
 }
 
-export async function text(what, text, { base = document } = {}) {
+export async function replaceClass(what, classes = {}, { base } = {}) {
+	return onAnimationFrame(() => {
+		const items = query(what, base);
+		const entries = Object.entries(classes);
+
+		items.forEach(item => {
+			entries.forEach(([from, to]) => item.classList.replace(from, to));
+		});
+
+		return items;
+	});
+}
+
+export async function text(what, text, { base } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
@@ -354,7 +410,7 @@ export async function text(what, text, { base = document } = {}) {
 	});
 }
 
-export async function html(what, text, { base = document } = {}) {
+export async function html(what, text, { base } = {}) {
 	return onAnimationFrame(() => {
 		const items = query(what, base);
 
