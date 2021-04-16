@@ -21,7 +21,7 @@ export class ObserverableObject extends EventTarget {
 				},
 				enumerable: true,
 				configurable: true,
-			})
+			});
 		});
 	}
 
