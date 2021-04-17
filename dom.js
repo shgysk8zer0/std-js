@@ -500,19 +500,27 @@ export async function loaded({ signal } = {}) {
 	}
 }
 
+/**
+ * @deprecated [will be removed in v3.0.0]
+ */
 export function parseHTML(text, { type = 'text/html', asFrag = true, head = true } = {}) {
+	console.warn('`parseHTML` is deprecated. Please use `parse` instead');
+	return parse(text, { type, asFrag, head });
+}
+
+export function parse(text, { type = 'text/html', asFrag = true, head = true } = {}) {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(text, type);
 
 	if (asFrag === false) {
 		return doc;
 	} else if (head === false) {
-		const frag = document.createDocumentFragment();
-		[...doc.body.childNodes].forEach(el => frag.append(el));
+		const frag = new DocumentFragment();
+		frag.append(...doc.body.children);
 		return frag;
 	} else {
-		const frag = document.createDocumentFragment();
-		[...doc.head.childNodes, ...doc.body.childNodes].forEach(el => frag.append(el));
+		const frag = new DocumentFragment();
+		frag.append(...doc.head.children, ...doc.body.children);
 		return frag;
 	}
 }

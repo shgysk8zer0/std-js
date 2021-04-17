@@ -1,4 +1,4 @@
-import { parseHTML } from './dom.js';
+import { parse } from './dom.js';
 import { signalAborted, abortTimeoutController } from './abort.js';
 import { features as eventFeatures } from './events.js';
 
@@ -152,7 +152,7 @@ export async function getHTML(url, {
 	const html = await getText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout });
 
-	return parseHTML(html, { head, asFrag });
+	return parse(html, { head, asFrag });
 }
 
 export async function getText(url, {
@@ -294,7 +294,7 @@ export async function postHTML(url, {
 	const html = await postText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout });
 
-	return parseHTML(html, { head, asFrag });
+	return parse(html, { head, asFrag });
 }
 
 export async function postJSON(url, {
