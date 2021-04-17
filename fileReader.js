@@ -1,3 +1,5 @@
+import { getDeferred } from './promises.js';
+import { parse } from './dom.js';
 /**
  * @SEE: https://developer.mozilla.org/en-US/docs/Web/API/FileReader
  */
@@ -6,46 +8,47 @@ async function readFile(file, as = 'text', { signal, progress, encoding = 'UTF-8
 		throw new TypeError('Not a File');
 	}
 
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
+	const { resolve, reject, promise } = getDeferred();
+	const reader = new FileReader();
 
-		if (progress instanceof Function) {
-			reader.addEventListener('progress', progress, { signal });
+	if (progress instanceof Function) {
+		reader.addEventListener('progress', progress, { signal });
+	}
+
+	reader.addEventListener('load', ({ target: { result }}) => resolve(result));
+	reader.addEventListener('error', ({ target: { error }}) => reject(error));
+	reader.addEventListener('abort', ({ target: { error }}) => reject(error));
+
+	switch (as) {
+		case 'text':
+		reader.readAsText(file, encoding);
+		break;
+
+		case 'data':
+		reader.readAsDataURL(file);
+		break;
+
+		case 'binary':
+		reader.readAsBinaryString(file);
+		break;
+
+		case 'buffer':
+		reader.readAsArrayBuffer(file);
+		break;
+
+		default:
+		throw new TypeError(`Unsupported file read type: ${as}`);
+	}
+
+	if (signal instanceof AbortSignal) {
+		if (signal.aborted) {
+			reader.abort();
+		} else {
+			signal.addEventListener('abort', () => reader.abort(), { once: true });
 		}
+	}
 
-		reader.addEventListener('load', ({ target: { result }}) => resolve(result));
-		reader.addEventListener('error', ({ target: { error }}) => reject(error));
-		reader.addEventListener('abort', ({ target: { error }}) => reject(error));
-
-		switch (as) {
-			case 'text':
-				reader.readAsText(file, encoding);
-				break;
-
-			case 'data':
-				reader.readAsDataURL(file);
-				break;
-
-			case 'binary':
-				reader.readAsBinaryString(file);
-				break;
-
-			case 'buffer':
-				reader.readAsArrayBuffer(file);
-				break;
-
-			default:
-				throw new TypeError(`Unsupported read type: ${as}`);
-		}
-
-		if (signal instanceof AbortSignal) {
-			if (signal.aborted) {
-				reader.abort();
-			} else {
-				signal.addEventListener('abort', () => reader.abort(), { once: true });
-			}
-		}
-	});
+	return promise;
 }
 
 export async function text(file, { signal, progress, encoding = 'UTF-8' } = {}) {
@@ -57,22 +60,14 @@ export async function json(file, { signal, progress, encoding = 'UTF-8' } = {}) 
 	return JSON.parse(json);
 }
 
-export async function document(file, { signal, progress, encoding = 'UTF-8', mimeType = 'text/html' } = {}) {
+export async function document(file, { signal, progress, encoding = 'UTF-8', mimeType: type = 'text/html' } = {}) {
 	const body = await text(file, { signal, progress, encoding });
-	const parser = new DOMParser();
-	return parser.parseFromString(body, mimeType);
+	return parse(body, { type });
 }
 
-export async function html(file, { signal, progress, encoding = 'UTF-8', fragment = true } = {}) {
-	const doc = await document(file, { signal, progress, encoding });
-
-	if (fragment) {
-		const frag = new DocumentFragment();
-		frag.append(...doc.head.children, ...doc.body.children);
-		return frag;
-	} else {
-		return doc;
-	}
+export async function html(file, { signal, progress, encoding = 'UTF-8', fragment: asFrag = true } = {}) {
+	const html = await text(file, { signal, progress, encoding });
+	return parse(html, { asFrag,  type: 'text/html' });
 }
 
 export async function xml(file, { signal, progress, encoding = 'UTF-8' } = {}) {
