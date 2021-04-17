@@ -1,5 +1,5 @@
 import { $ } from './esQuery.js';
-import { attr, css, data, toggleClass, on, off, ready, loaded, when, parseHTML } from './dom.js';
+import { attr, css, data, toggleClass, on, off, ready, loaded, when, parse } from './dom.js';
 import { getCustomElement, createCustomElement, registerCustomElement, defined } from './custom-elements.js';
 import { sleep } from './promises.js';
 import { get as getLocation } from './geo.js';
@@ -394,7 +394,7 @@ export async function notificationsAllowed() {
 	return getNotificationPermission().then(perm => perm === 'granted');
 }
 
-export { $, attr, css, data, toggleClass, on, off, when, ready, loaded, parseHTML,
+export { $, attr, css, data, toggleClass, on, off, when, ready, loaded, parse as parseHTML,
 	getCustomElement, createCustomElement, registerCustomElement, defined, sleep,
 	getLocation,
 };

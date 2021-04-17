@@ -21,23 +21,23 @@ async function readFile(file, as = 'text', { signal, progress, encoding = 'UTF-8
 
 	switch (as) {
 		case 'text':
-		reader.readAsText(file, encoding);
-		break;
+			reader.readAsText(file, encoding);
+			break;
 
 		case 'data':
-		reader.readAsDataURL(file);
-		break;
+			reader.readAsDataURL(file);
+			break;
 
 		case 'binary':
-		reader.readAsBinaryString(file);
-		break;
+			reader.readAsBinaryString(file);
+			break;
 
 		case 'buffer':
-		reader.readAsArrayBuffer(file);
-		break;
+			reader.readAsArrayBuffer(file);
+			break;
 
 		default:
-		throw new TypeError(`Unsupported file read type: ${as}`);
+			throw new TypeError(`Unsupported file read type: ${as}`);
 	}
 
 	if (signal instanceof AbortSignal) {
