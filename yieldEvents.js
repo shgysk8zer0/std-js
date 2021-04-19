@@ -12,7 +12,7 @@ export async function *yieldEvents(what, events, { capture, passive, signal } = 
 
 	while (! isAborted(signal)) {
 		if (queue.length === 0) {
-			await when(target, 'enqueued', { signal }).catch(e => {});
+			await when(target, 'enqueued', { signal }).catch(() => {});
 		}
 
 		/**
