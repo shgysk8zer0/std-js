@@ -3,6 +3,16 @@ import { when } from './dom.js';
 import { resolveOn, infinitPromise } from './promises.js';
 export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
 
+export function isAborted(signal) {
+	if (signal instanceof AbortController) {
+		return signal.signal.aborted;
+	} else if (signal instanceof AbortSignal) {
+		return signal.aborted;
+	} else {
+		return false;
+	}
+}
+
 export async function signalAborted(signal, { reason } = {}) {
 	if (signal instanceof AbortController) {
 		return await signalAborted(signal.signal, { reason });
