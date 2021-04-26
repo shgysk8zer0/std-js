@@ -4,7 +4,7 @@ export function isDefined(...tags) {
 	return supported && tags.every(tag => typeof customElements.get(tag) !== 'undefined');
 }
 
-export function registerCustomElement(tag, cls, ..rest) {
+export function registerCustomElement(tag, cls, ...rest) {
 	if (! supported) {
 		console.error(new Error('`customElements` not supported'));
 		return false;
@@ -13,7 +13,7 @@ export function registerCustomElement(tag, cls, ..rest) {
 		// Returns true/false if element being registered matches given class
 		return customElements.get(tag) === cls;
 	} else {
-		customElements.define(tag, cls, ..rest);
+		customElements.define(tag, cls, ...rest);
 		return true;
 	}
 }
