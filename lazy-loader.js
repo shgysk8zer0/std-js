@@ -1,6 +1,6 @@
 import { query, css } from './dom.js';
 
-const rootMargin = `${Math.floor(Math.max(0.4 * screen.height, 200))}px`;
+export const rootMargin = `${Math.floor(Math.max(0.4 * screen.height, 200))}px`;
 
 export const lazyClass = 'lazy-load';
 
@@ -18,7 +18,11 @@ const intersectObserver = new IntersectionObserver((entries, observer) => {
 const mutateObserver = new MutationObserver(records => {
 	records.forEach(({ addedNodes, type }) => {
 		if (type === 'childList') {
-			addedNodes.forEach(node => lazyIntersect(document.body));
+			addedNodes.forEach(node => {
+				if (node instanceof Element) {
+					query(lazySelector, node).forEach(lazyLoad);
+				}
+			});
 		}
 	});
 });
