@@ -182,16 +182,21 @@ export function create(tag, {
 	return el;
 }
 
-export async function append(parent, ...nodes) {
-	await onAnimationFrame(() => parent.append(...nodes));
+export function append(parent, ...nodes) {
+	parent.append(...nodes);
 }
 
-export async function remove(what, { base } = {}) {
-	await onAnimationFrame(() => query(what, base).forEach(el => el.remove()));
+export function remove(what, { base } = {}) {
+	const items = query(what, base);
+
+	items.forEach(el => el.remove());
+
+	return items;
 }
 
 export function meta({ name, itemprop, property, charset, content }) {
 	const meta = document.createElement('meta');
+
 	if (typeof name === 'string') {
 		meta.name = name;
 		meta.content = content;
@@ -210,214 +215,204 @@ export function meta({ name, itemprop, property, charset, content }) {
 	return meta;
 }
 
-export async function css(what, props = {}, { base, priority } = {}) {
-	return onAnimationFrame(() => {
-		const items = query(what, base);
+export function css(what, props = {}, { base, priority } = {}) {
+	const items = query(what, base);
 
-		items.forEach(item => {
-			Object.entries(props).forEach(([p, v]) => {
-				if (typeof v === 'string' || typeof v === 'number') {
-					item.style.setProperty(p, v, priority);
-				} else {
-					item.style.removeProperty(p);
-				}
-			});
+	items.forEach(item => {
+		Object.entries(props).forEach(([p, v]) => {
+			if (typeof v === 'string' || typeof v === 'number') {
+				item.style.setProperty(p, v, priority);
+			} else {
+				item.style.removeProperty(p);
+			}
 		});
-
-		return items;
 	});
+
+	return items;
 }
 
-export async function data(what, props = {}, { base } = {}) {
-	return onAnimationFrame(() => {
-		const items = query(what, base);
+export function data(what, props = {}, { base } = {}) {
+	const items = query(what, base);
 
-		items.forEach(item => {
-			Object.entries(props).forEach(([p, v]) => {
-				if (v instanceof Date) {
-					v = v.toISOString();
-				} else if (v instanceof URL) {
-					v = v.href;
-				}
+	items.forEach(item => {
+		Object.entries(props).forEach(([p, v]) => {
+			if (v instanceof Date) {
+				v = v.toISOString();
+			} else if (v instanceof URL) {
+				v = v.href;
+			}
 
-				switch (typeof v) {
-					case 'string':
-					case 'number':
-						item.dataset[p] = v;
-						break;
+			switch (typeof v) {
+				case 'string':
+				case 'number':
+					item.dataset[p] = v;
+					break;
 
-					case 'boolean':
-						if (v) {
-							item.dataset[p] = '';
-						} else {
-							delete item.dataset[p];
-						}
-						break;
-
-					case 'undefined':
+				case 'boolean':
+					if (v) {
+						item.dataset[p] = '';
+					} else {
 						delete item.dataset[p];
-						break;
+					}
+					break;
 
-					default:
-						if (v === null) {
-							delete item.dataset[p];
-						} else {
-							item.dataset[p] = JSON.stringify(v);
-						}
-				}
-			});
+				case 'undefined':
+					delete item.dataset[p];
+					break;
+
+				default:
+					if (v === null) {
+						delete item.dataset[p];
+					} else {
+						item.dataset[p] = JSON.stringify(v);
+					}
+			}
 		});
-
-		return items;
 	});
+
+	return items;
 }
 
-export async function attr(what, props = {}, { base, namespace = null } = {}) {
-	return onAnimationFrame(() => {
-		const items = query(what, base);
+export function attr(what, props = {}, { base, namespace = null } = {}) {
+	const items = query(what, base);
 
-		items.forEach(item => {
-			Object.entries(props).forEach(([p, v]) => {
-				if (typeof v === 'string' || typeof v === 'number') {
-					if (typeof namespace === 'string') {
-						item.setAttributeNS(namespace, p, v);
-					} else {
-						item.setAttribute(p, v);
-					}
-				} else if (typeof v === 'boolean') {
-					if (typeof namespace === 'string') {
-						v ? item.setAttributeNS(namespace, p, '') : item.removeAttributeNS(namespace, p);
-					} else {
-						item.toggleAttribute(p, v);
-					}
-				} else if (v instanceof Date) {
-					if (typeof namespace === 'string') {
-						item.setAttributeNS(namespace, p, v.toISOString());
-					} else {
-						item.setAttribute(p, v.toISOString());
-					}
-				} else if (v instanceof URL) {
-					if (typeof namespace === 'string') {
-						item.setAttributeNS(namespace, p, v.href);
-					} else {
-						item.setAttribute(p, v.href);
-					}
-				} else if (typeof v === 'undefined' || v === null) {
-					if (typeof namespace === 'string') {
-						item.removeAttributeNS(namespace, p);
-					} else {
-						item.removeAttribute(p);
-					}
-				} else if (typeof namespace === 'string') {
-					item.setAttributeNS(namespace, p, JSON.stringify(v));
+	items.forEach(item => {
+		Object.entries(props).forEach(([p, v]) => {
+			if (typeof v === 'string' || typeof v === 'number') {
+				if (typeof namespace === 'string') {
+					item.setAttributeNS(namespace, p, v);
 				} else {
-					item.setAttribute(p, JSON.stringify(v));
+					item.setAttribute(p, v);
 				}
-			});
+			} else if (typeof v === 'boolean') {
+				if (typeof namespace === 'string') {
+					v ? item.setAttributeNS(namespace, p, '') : item.removeAttributeNS(namespace, p);
+				} else {
+					item.toggleAttribute(p, v);
+				}
+			} else if (v instanceof Date) {
+				if (typeof namespace === 'string') {
+					item.setAttributeNS(namespace, p, v.toISOString());
+				} else {
+					item.setAttribute(p, v.toISOString());
+				}
+			} else if (v instanceof URL) {
+				if (typeof namespace === 'string') {
+					item.setAttributeNS(namespace, p, v.href);
+				} else {
+					item.setAttribute(p, v.href);
+				}
+			} else if (typeof v === 'undefined' || v === null) {
+				if (typeof namespace === 'string') {
+					item.removeAttributeNS(namespace, p);
+				} else {
+					item.removeAttribute(p);
+				}
+			} else if (typeof namespace === 'string') {
+				item.setAttributeNS(namespace, p, JSON.stringify(v));
+			} else {
+				item.setAttribute(p, JSON.stringify(v));
+			}
 		});
-
-		return items;
 	});
+
+	return items;
 }
 
-export async function toggleAttr(what, attrs, { base, force, signal } = {}) {
+export function toggleAttr(what, attrs, { base, force, signal } = {}) {
 	if (! Array.isArray(attrs)) {
 		attrs = [attrs];
 	}
-	return onAnimationFrame(() => {
-		const items = query(what, base);
+	const items = query(what, base);
 
-		if (! (signal instanceof AbortSignal)) {
-			items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, force)));
-		} else if (signal.aborted) {
-			items.forEach(item => attrs.forEach(attr => item.removeAttribute(attr)));
-		} else {
-			if (typeof force !== 'boolean') {
-				force = true;
-			}
-
-			items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, force)));
-
-			signal.addEventListener('abort', () => {
-				items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, !force)));
-			}, { once:true });
+	if (! (signal instanceof AbortSignal)) {
+		items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, force)));
+	} else if (signal.aborted) {
+		items.forEach(item => attrs.forEach(attr => item.removeAttribute(attr)));
+	} else {
+		if (typeof force !== 'boolean') {
+			force = true;
 		}
-		return items;
-	});
+
+		items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, force)));
+
+		signal.addEventListener('abort', () => {
+			items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, !force)));
+		}, { once:true });
+	}
+	return items;
 }
 
-export async function addClass(what, ...args) {
-	return onAnimationFrame(() => query(what).forEach(el => el.classList.add(...args)));
+export function addClass(what, ...args) {
+	const items = query(items);
+	items.forEach(el => el.classList.add(...args));
+	return items;
 }
 
-export async function removeClass(what, ...args) {
-	return onAnimationFrame(() => query(what).forEach(el => el.classList.remove(...args)));
+export function removeClass(what, ...args) {
+	const items = query(items);
+
+	items.forEach(el => el.classList.remove(...args));
+
+	return items;
 }
 
-export async function toggleClass(what, classes = {}, { base, force } = {}) {
-	return onAnimationFrame(() => {
-		const items = query(what, base);
+export function toggleClass(what, classes = {}, { base, force } = {}) {
+	const items = query(what, base);
 
-		items.forEach(item => {
-			if (typeof classes === 'string') {
-				return item.classList.toggle(classes, force);
-			} else if (Array.isArray(classes)) {
-				classes.forEach(cn => item.classList.toggle(cn, force));
-			} else {
-				Object.entries(classes).forEach(([cl, cond]) => {
-					if (cond instanceof Function) {
-						item.classList.toggle(cl, cond.apply(what, [cl]));
-					} else if (cond instanceof AbortSignal) {
-						if (cond.aborted) {
-							item.classList.remove(cl);
-						} else {
-							item.classList.add(cl, true);
-							cond.addEventListener('abort', () => {
-								onAnimationFrame(() => item.classList.remove(cl));
-							}, { once: true });
-						}
+	items.forEach(item => {
+		if (typeof classes === 'string') {
+			return item.classList.toggle(classes, force);
+		} else if (Array.isArray(classes)) {
+			classes.forEach(cn => item.classList.toggle(cn, force));
+		} else {
+			Object.entries(classes).forEach(([cl, cond]) => {
+				if (cond instanceof Function) {
+					item.classList.toggle(cl, cond.apply(what, [cl]));
+				} else if (cond instanceof AbortSignal) {
+					if (cond.aborted) {
+						item.classList.remove(cl);
 					} else {
-						item.classList.toggle(cl, cond);
+						item.classList.add(cl, true);
+						cond.addEventListener('abort', () => {
+							onAnimationFrame(() => item.classList.remove(cl));
+						}, { once: true });
 					}
-				});
-			}
-		});
-
-		return items;
+				} else {
+					item.classList.toggle(cl, cond);
+				}
+			});
+		}
 	});
+
+	return items;
 }
 
-export async function replaceClass(what, classes = {}, { base } = {}) {
-	return onAnimationFrame(() => {
-		const items = query(what, base);
-		const entries = Object.entries(classes);
+export function replaceClass(what, classes = {}, { base } = {}) {
+	const items = query(what, base);
+	const entries = Object.entries(classes);
 
-		items.forEach(item => {
-			entries.forEach(([from, to]) => item.classList.replace(from, to));
-		});
-
-		return items;
+	items.forEach(item => {
+		entries.forEach(([from, to]) => item.classList.replace(from, to));
 	});
+
+	return items;
 }
 
-export async function text(what, text, { base } = {}) {
-	return onAnimationFrame(() => {
-		const items = query(what, base);
+export function text(what, text, { base } = {}) {
+	const items = query(what, base);
 
-		items.forEach(el => el.textContent = text);
+	items.forEach(el => el.textContent = text);
 
-		return items;
-	});
+	return items;
 }
 
-export async function html(what, text, { base } = {}) {
-	return onAnimationFrame(() => {
-		const items = query(what, base);
+export function html(what, text, { base } = {}) {
+	const items = query(what, base);
 
-		items.forEach(el => el.innerHTML = text);
+	items.forEach(el => el.innerHTML = text);
 
-		return items;
-	});
+	return items;
 }
 
 export function on(what, when, ...args) {
