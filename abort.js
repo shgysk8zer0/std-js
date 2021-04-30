@@ -29,14 +29,16 @@ export async function signalAborted(signal, { reason } = {}) {
 
 export function abortTimeoutController(timeout) {
 	const controller = new AbortController();
-	setTimeout(() => controller.abort(), timeout);
+
+	abortableTimeout(() => controller.abort(), timeout, { signal: controller.signal });
+
 	return controller;
 }
 
 export function abortEventController(what, events, { passive, capture } = {}) {
 	const controller = new AbortController();
 
-	when(what, events, { signal: controller.signal, capture, passive }).then(() => {
+	when(what, events, { signal: controller.signal, capture, passive, once: true }).then(() => {
 		if (! controller.signal.aborted) {
 			controller.abort();
 		}
@@ -47,24 +49,56 @@ export function abortEventController(what, events, { passive, capture } = {}) {
 
 export function abortableTimeout(callback, ms, { signal } = {}) {
 	const id = setTimeout(() => callback(), ms);
-	signalAborted(signal).finally(() => clearTimeout(id));
+
+	if (signal instanceof AbortSignal) {
+		signalAborted(signal).finally(() => clearTimeout(id));
+	}
+
 	return id;
 }
 
 export function abortableInterval(callback, ms, { signal } = {}) {
 	const id = setInterval(() => callback(), ms);
-	signalAborted(signal).finally(() => clearInterval(id));
+
+	if (signal instanceof AbortSignal) {
+		signalAborted(signal).finally(() => clearInterval(id));
+	}
+
+	return id;
+}
+
+export function abortableAnimationFrame(callback, { signal } = {}) {
+	const id = requestAnimationFrame(callback);
+
+	if (signal instanceof AbortSignal) {
+		signalAborted(signal).finally(() => cancelAnimationFrame(id));
+	}
+
+	return id;
+}
+
+export function abortableIdleCallback(callback, { signal, timeout } = {}) {
+	const id = requestIdleCallback(callback);
+
+	if (signal instanceof AbortSignal) {
+		signalAborted(signal).finally(() => cancelIdleCallback(id, { timeout }));
+	}
+
 	return id;
 }
 
 export function signalRaceController(...signals) {
 	const controller = new AbortController();
+
 	signals.race(signal => signalAborted(signal)).then(() => controller.abort());
+
 	return controller;
 }
 
 export function signalAllController(...signals) {
 	const controller = new AbortController();
+
 	signals.all(signal => signalAborted(signal)).then(() => controller.abort());
+
 	return controller;
 }

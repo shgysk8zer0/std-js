@@ -3,6 +3,60 @@ import { signalAborted } from './abort.js';
 
 export const infinitPromise = new Promise(() => {});
 
+export async function onAnimationFrame(callback, { signal, reason = 'Operation aborted.' } = {}) {
+	const { promise, resolve, reject } = getDeferred();
+
+	const id = requestAnimationFrame(hrts => {
+		if (! (callback instanceof Function)) {
+			reject(new TypeError('callback must be an instance of Function'));
+		} else if (callback.constructor.name === 'AsyncFunction') {
+			callback(hrts).then(resolve).catch(reject);
+		} else {
+			try {
+				resolve(callback(hrts));
+			} catch (err) {
+				reject(err);
+			}
+		}
+	});
+
+	if (signal instanceof AbortSignal) {
+		signalAborted(signal).finally(() => {
+			cancelAnimationFrame(id);
+			reject(reason);
+		});
+	}
+
+	return await promise;
+}
+
+export async function onIdle(callback, { timeout, signal, reason = 'Operation aborted.' } = {}) {
+	const { promise, resolve, reject } = getDeferred();
+
+	const id = requestIdleCallback(async hrts => {
+		if (! (callback instanceof Function)) {
+			reject(new TypeError('callback must be an instance of Function'));
+		} else if (callback.constructor.name === 'AsyncFunction') {
+			callback(hrts).then(resolve).catch(reject);
+		} else {
+			try {
+				resolve(callback(hrts));
+			} catch (err) {
+				reject(err);
+			}
+		}
+	}, { timeout });
+
+	if (signal instanceof AbortSignal) {
+		signalAborted(signal).finally(() => {
+			cancelIdleCallback(id);
+			reject(reason);
+		});
+	}
+
+	return await promise;
+}
+
 export async function promisifyEvents(targets, { success, fail = 'error', passive = true, capture = true } = {}) {
 	const controller = new AbortController();
 	const opts = { passive, capture, signal: controller.signal, once: true };

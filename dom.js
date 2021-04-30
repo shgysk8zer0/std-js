@@ -2,60 +2,6 @@ import { signalAborted } from './abort.js';
 import { addListener } from './events.js';
 import { getDeferred } from './promises.js';
 
-export async function onAnimationFrame(callback, { signal, reason = 'Operation aborted.' } = {}) {
-	const { promise, resolve, reject } = getDeferred();
-
-	const id = requestAnimationFrame(hrts => {
-		if (callback instanceof Promise) {
-			callback(hrts).then(resolve).catch(reject);
-		} else if (callback instanceof Function) {
-			try {
-				resolve(callback(hrts));
-			} catch (err) {
-				reject(err);
-			}
-		} else {
-			reject(new TypeError('callback must be an instance of Function or Promise'));
-		}
-	});
-
-	if (signal instanceof AbortSignal) {
-		signalAborted(signal).finally(() => {
-			cancelAnimationFrame(id);
-			reject(reason);
-		});
-	}
-
-	return await promise;
-}
-
-export async function onIdle(callback, { timeout, signal, reason = 'Operation aborted.' } = {}) {
-	const { promise, resolve, reject } = getDeferred();
-
-	const id = requestIdleCallback(hrts => {
-		if (callback instanceof Promise) {
-			callback(hrts).then(resolve).catch(reject);
-		} else if (callback instanceof Function) {
-			try {
-				resolve(callback(hrts));
-			} catch (err) {
-				reject(err);
-			}
-		} else {
-			reject(new TypeError('callback must be an instance of Function or Promise'));
-		}
-	}, { timeout });
-
-	if (signal instanceof AbortSignal) {
-		signalAborted(signal).finally(() => {
-			cancelIdleCallback(id);
-			reject(reason);
-		});
-	}
-
-	return await promise;
-}
-
 export function query(what, base = document) {
 	if (what instanceof EventTarget) {
 		return [what];
@@ -381,7 +327,7 @@ export function toggleClass(what, classes = {}, { base, force } = {}) {
 					} else {
 						item.classList.add(cl, true);
 						cond.addEventListener('abort', () => {
-							onAnimationFrame(() => item.classList.remove(cl));
+							item.classList.remove(cl);
 						}, { once: true });
 					}
 				} else {
