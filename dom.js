@@ -75,6 +75,32 @@ export function query(what, base = document) {
 	}
 }
 
+export function each(what, callback, { base } = {}) {
+	const items = query(what, base);
+	items.forEach(callback);
+	return items;
+}
+
+export function map(what, callback, { base } = {}) {
+	return query(what, base).map(callback);
+}
+
+export function some(what, callback, { base } = {}) {
+	return query(what, base).some(callback);
+}
+
+export function every(what, callback, { base } = {}) {
+	return query(what, base).every(callback);
+}
+
+export function find(what, callback, { base } = {}) {
+	return query(what, base).find(callback);
+}
+
+export function filter(what, callback, { base } = {}) {
+	return query(what, base).filter(callback);
+}
+
 export function create(tag, {
 	text = null,
 	id,
@@ -187,11 +213,7 @@ export function append(parent, ...nodes) {
 }
 
 export function remove(what, { base } = {}) {
-	const items = query(what, base);
-
-	items.forEach(el => el.remove());
-
-	return items;
+	return each(what, item => item.remove(), { base });
 }
 
 export function meta({ name, itemprop, property, charset, content }) {
@@ -216,25 +238,21 @@ export function meta({ name, itemprop, property, charset, content }) {
 }
 
 export function css(what, props = {}, { base, priority } = {}) {
-	const items = query(what, base);
-
-	items.forEach(item => {
+	return each(what, item => {
 		Object.entries(props).forEach(([p, v]) => {
 			if (typeof v === 'string' || typeof v === 'number') {
 				item.style.setProperty(p, v, priority);
+			} else if (v instanceof URL) {
+				item.type.setProperty(p, v.href, priority);
 			} else {
 				item.style.removeProperty(p);
 			}
 		});
-	});
-
-	return items;
+	}, { base });
 }
 
 export function data(what, props = {}, { base } = {}) {
-	const items = query(what, base);
-
-	items.forEach(item => {
+	return each(what, item => {
 		Object.entries(props).forEach(([p, v]) => {
 			if (v instanceof Date) {
 				v = v.toISOString();
@@ -245,7 +263,7 @@ export function data(what, props = {}, { base } = {}) {
 			switch (typeof v) {
 				case 'string':
 				case 'number':
-					item.dataset[p] = v;
+					item.dataset[p] = v.toString();
 					break;
 
 				case 'boolean':
@@ -263,20 +281,18 @@ export function data(what, props = {}, { base } = {}) {
 				default:
 					if (v === null) {
 						delete item.dataset[p];
+					} else if (v instanceof Date) {
+						item.dataset[p] = v.toISOString();
 					} else {
 						item.dataset[p] = JSON.stringify(v);
 					}
 			}
 		});
-	});
-
-	return items;
+	}, { base });
 }
 
 export function attr(what, props = {}, { base, namespace = null } = {}) {
-	const items = query(what, base);
-
-	items.forEach(item => {
+	return each(what, item => {
 		Object.entries(props).forEach(([p, v]) => {
 			if (typeof v === 'string' || typeof v === 'number') {
 				if (typeof namespace === 'string') {
@@ -314,9 +330,7 @@ export function attr(what, props = {}, { base, namespace = null } = {}) {
 				item.setAttribute(p, JSON.stringify(v));
 			}
 		});
-	});
-
-	return items;
+	}, { base });
 }
 
 export function toggleAttr(what, attrs, { base, force, signal } = {}) {
@@ -338,29 +352,21 @@ export function toggleAttr(what, attrs, { base, force, signal } = {}) {
 
 		signal.addEventListener('abort', () => {
 			items.forEach(item => attrs.forEach(attr => item.toggleAttribute(attr, !force)));
-		}, { once:true });
+		}, { once: true });
 	}
 	return items;
 }
 
 export function addClass(what, ...args) {
-	const items = query(items);
-	items.forEach(el => el.classList.add(...args));
-	return items;
+	return each(what, el => el.classList.add(...args));
 }
 
 export function removeClass(what, ...args) {
-	const items = query(items);
-
-	items.forEach(el => el.classList.remove(...args));
-
-	return items;
+	return each(what, el => el.classList.remove(...args));
 }
 
 export function toggleClass(what, classes = {}, { base, force } = {}) {
-	const items = query(what, base);
-
-	items.forEach(item => {
+	return each(what, item => {
 		if (typeof classes === 'string') {
 			return item.classList.toggle(classes, force);
 		} else if (Array.isArray(classes)) {
@@ -383,36 +389,23 @@ export function toggleClass(what, classes = {}, { base, force } = {}) {
 				}
 			});
 		}
-	});
-
-	return items;
+	}, { base });
 }
 
 export function replaceClass(what, classes = {}, { base } = {}) {
-	const items = query(what, base);
 	const entries = Object.entries(classes);
 
-	items.forEach(item => {
+	return each(what, item => {
 		entries.forEach(([from, to]) => item.classList.replace(from, to));
-	});
-
-	return items;
+	}, { base });
 }
 
 export function text(what, text, { base } = {}) {
-	const items = query(what, base);
-
-	items.forEach(el => el.textContent = text);
-
-	return items;
+	return each(what, el => el.textContent = text, { base });
 }
 
 export function html(what, text, { base } = {}) {
-	const items = query(what, base);
-
-	items.forEach(el => el.innerHTML = text);
-
-	return items;
+	return each(what, el => el.innerHTML = text, { base });
 }
 
 export function on(what, when, ...args) {
@@ -430,8 +423,7 @@ export function on(what, when, ...args) {
 }
 
 export function off(what, when, ...args) {
-	const items = query(what);
-	items.forEach(item => {
+	return each(what, item => {
 		if (typeof when === 'string') {
 			item.removeEventListener(when, ...args);
 		} else if (Array.isArray(when)) {
@@ -440,8 +432,6 @@ export function off(what, when, ...args) {
 			Object.entries(when).forEach(([ev, cb]) => item.removeEventListener(ev, cb, ...args));
 		}
 	});
-
-	return items;
 }
 
 export async function when(target, event, {
@@ -522,13 +512,11 @@ export function parse(text, { type = 'text/html', asFrag = true, head = true } =
 
 export function animate(what, keyframes, opts = { duration: 400 }) {
 	if (Element.prototype.animate instanceof Function) {
-		const items = query(what);
-
 		if (Number.isInteger(opts)) {
 			opts = { duration: opts };
 		}
 
-		const animations = items.map(item => item.animate(keyframes, opts));
+		const animations = query(what).map(item => item.animate(keyframes, opts));
 
 		if (opts.signal instanceof AbortSignal) {
 			signalAborted(opts.signal).finally(() => animations.forEach(anim => anim.cancel()));
@@ -546,7 +534,7 @@ export function intersect(what, callback, options = {}) {
 			entries.forEach((entry, index) => callback.apply(null, [entry, observer, index]));
 		}, options);
 
-		query(what).forEach(item => observer.observe(item));
+		each(what, item => observer.observe(item));
 
 		if (options.signal instanceof AbortSignal) {
 			signalAborted(options.signal).finally(() => observer.disconnect());
@@ -564,7 +552,7 @@ export function mutate(what, callback, options = {}) {
 			records.forEach((record, index) => callback.apply(null, [record, observer, index]));
 		});
 
-		query(what).forEach(item => observer.observe(item, options));
+		each(what, item => observer.observe(item, options));
 
 		if (options.signal instanceof AbortSignal) {
 			signalAborted(options.signal).finally(() => observer.disconnect());
