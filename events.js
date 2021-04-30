@@ -1,4 +1,4 @@
-import { query, off } from './dom.js';
+import { query } from './dom.js';
 import { signalAborted } from './abort.js';
 
 function getEventFeatures() {
@@ -40,6 +40,7 @@ function getEventFeatures() {
 
 	return Object.seal(eventFeatures);
 }
+
 export const features = getEventFeatures();
 
 export function addListener(targets, events, callback, { capture, once, passive, signal } = {}) {
@@ -57,7 +58,21 @@ export function addListener(targets, events, callback, { capture, once, passive,
 
 	if (signal instanceof AbortSignal && (features.nativeSignal === false || features.signal === false)) {
 		signalAborted(signal).finally(() => {
-			off(targets, events, callback, { capture, once, passive, signal });
+			removeListener(targets, events, callback, { capture, once, passive, signal });
 		});
 	}
+}
+
+export function removeListener(targets, events, callback, { capture, once, passive, signal } = {}) {
+	if (! Array.isArray(targets)) {
+		targets = query(targets);
+	}
+
+	if (! Array.isArray(events)) {
+		events = Array.of(events);
+	}
+
+	targets.forEach(target => {
+		events.forEach(event => target.removeEventListener(event, callback, { capture, once, passive, signal }));
+	});
 }
