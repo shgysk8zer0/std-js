@@ -18,15 +18,3 @@ export function slotReplacementHandler(shadow) {
 		slot.addEventListener('slotchange', changeHandler);
 	});
 }
-
-
-customElements.define('test-el', class HTMLTestEl extends HTMLElement {
-	constructor() {
-		super();
-		const shadow = this.attachShadow({ mode: 'closed' });
-		const slot = document.createElement('slot');
-		slot.name = 'content';
-		shadow.append(slot);
-		slotReplacementHandler(shadow);
-	}
-});
