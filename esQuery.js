@@ -1,5 +1,5 @@
 import { read, debounce, getLocation, isInViewport } from './functions.js';
-import { query, attr, toggleAttr, css, data, addClass, removeClass, toggleClass,
+import { attr, toggleAttr, css, data, addClass, removeClass, toggleClass,
 	replaceClass, text, html, on, off, animate, ready, loaded, intersect, onAnimationFrame,
 } from './dom.js';
 import { mediaQuery } from './media-queries.js';
@@ -15,8 +15,22 @@ const PREFIXES = [
 
 /*============================ esQuery Functions =======================*/
 export default class esQuery extends Set {
-	constructor(selector, base = document) {
-		super(query(selector, base));
+	constructor(what, base = document) {
+		if (what instanceof EventTarget) {
+			super([what]);
+		} else if (Array.isArray(what)) {
+			super(what);
+		} else if (typeof what === 'string') {
+			const matches = super(base.querySelectorAll(what));
+
+			if (base.matches instanceof Function && base.matches(what)) {
+				matches.add(base);
+			}
+		} else if (typeof what === 'object' && what[Symbol.iterator] instanceof Function) {
+			super(what);
+		} else {
+			throw new TypeError('Invalid "what" given to esQuery() constructor');
+		}
 	}
 
 	get parents() {
@@ -68,13 +82,12 @@ export default class esQuery extends Set {
 	}
 
 	async replaceText(replacements = {}) {
-		await onAnimationFrame(() => {
-			this.each(node => {
-				Object.entries(replacements).forEach(([from, to]) => {
-					node.textContent = node.textContent.replace(from, to);
-				});
+		this.each(node => {
+			Object.entries(replacements).forEach(([from, to]) => {
+				node.textContent = node.textContent.replace(from, to);
 			});
 		});
+
 		return this;
 	}
 
