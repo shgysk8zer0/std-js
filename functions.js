@@ -198,60 +198,6 @@ export function isInViewport(el) {
 }
 
 /**
- * Control the execution rate of callbacks, i.e. for listeners
- * https://davidwalsh.name/function-debounce
- *
- * @param  Callable callback    The callback
- * @param  int      [ms]        Number of milliseconds, defaulting to 1/60th a second
- * @param  bool     [immediate] Trigger function immediately instead of after wait ms
- * @return function             Rate limited function
- */
-export function debounce(func, wait = 17, immediate = false) {
-	let timeout;
-
-	return function(...args) {
-		const later = () => {
-			timeout = null;
-
-			if (! immediate) {
-				func.apply(this, args);
-			}
-		};
-
-		clearTimeout(timeout);
-		timeout = setTimeout(later, wait);
-
-		if (immediate && ! timeout) {
-			func.apply(this, args);
-		}
-	};
-}
-
-export async function whenOnline() {
-	if (navigator.onLine === false) {
-		await when(window, 'online');
-	}
-}
-
-export async function whenOffline() {
-	if (navigator.onLine === true) {
-		await when(window, 'offline');
-	}
-}
-
-export async function whenVisible() {
-	if (document.visibilityState === 'hidden') {
-		await when(document, 'visibilitychange');
-	}
-}
-
-export async function whenHidden() {
-	if (document.visibilityState === 'visible') {
-		await when(document, 'visibilitychange');
-	}
-}
-
-/**
  * @deprecated [will be removed in v3.0.0]
  */
 export async function wait(ms) {
@@ -394,10 +340,12 @@ export async function notificationsAllowed() {
 	return getNotificationPermission().then(perm => perm === 'granted');
 }
 
-export { $, attr, css, data, toggleClass, on, off, when, ready, loaded, parse as parseHTML,
+export {
+	$, attr, css, data, toggleClass, on, off, when, ready, loaded, parse as parseHTML,
 	getCustomElement, createCustomElement, registerCustomElement, defined, sleep,
 	getLocation,
 };
 
 export { mediaQuery, prefersReducedMotion, prefersColorScheme, displayMode } from './media-queries.js';
 export { createSVG, useSVG } from './svg.js';
+export { debounce, whenOnline, whenOffline, whenVisble, whenHidden } from './events.js';
