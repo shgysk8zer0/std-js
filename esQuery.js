@@ -1,5 +1,6 @@
 import { read, isInViewport } from './functions.js';
-import { onAnimationFrame, debounce } from './promises.js';
+import { onAnimationFrame } from './promises.js';
+import { debounce } from './events.js';
 import { get as getLocation } from './geo.js';
 import {
 	attr, toggleAttr, css, data, addClass, removeClass, toggleClass,
