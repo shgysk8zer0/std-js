@@ -1,9 +1,11 @@
-import { read, debounce, getLocation, isInViewport } from './functions.js';
-import { attr, toggleAttr, css, data, addClass, removeClass, toggleClass,
-	replaceClass, text, html, on, off, animate, ready, loaded, intersect, onAnimationFrame,
+import { read, isInViewport } from './functions.js';
+import { onAnimationFrame, debounce } from './promises.js';
+import { get as getLocation } from './geo.js';
+import {
+	attr, toggleAttr, css, data, addClass, removeClass, toggleClass,
+	replaceClass, text, html, on, off, animate, ready, loaded, intersect,
 } from './dom.js';
 import { mediaQuery } from './media-queries.js';
-
 import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText } from './http.js';
 
 const PREFIXES = [
