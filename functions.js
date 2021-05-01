@@ -348,4 +348,4 @@ export {
 
 export { mediaQuery, prefersReducedMotion, prefersColorScheme, displayMode } from './media-queries.js';
 export { createSVG, useSVG } from './svg.js';
-export { debounce, whenOnline, whenOffline, whenVisble, whenHidden } from './events.js';
+export { debounce, whenOnline, whenOffline, whenVisible, whenHidden } from './events.js';
