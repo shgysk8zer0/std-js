@@ -380,12 +380,11 @@ export function off(what, when, ...args) {
 	});
 }
 
-export async function when(target, event, {
-	once = true,
-	capture = true,
-	passive = true,
-	signal,
-} = {}) {
+export function once(what, when, { capture, passive, signal } = {}) {
+	return on(what, when, { capture, once: true, passive, signal });
+}
+
+export async function when(target, event, { capture, passive, signal } = {}) {
 	const controller = new AbortController();
 
 	const { promise, resolve, reject } = getDeferred();
@@ -401,7 +400,7 @@ export async function when(target, event, {
 		}
 	}
 
-	on(target, event, resolve, { once, capture, passive, signal: controller.signal });
+	once(target, event, resolve, { once: true, capture, passive, signal: controller.signal });
 
 	return promise.then(result => {
 		if (! controller.signal.aborted) {

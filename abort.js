@@ -1,5 +1,5 @@
 import './abort-shims.js';
-import { when } from './dom.js';
+import { when, on } from './dom.js';
 import { resolveOn, infinitPromise } from './promises.js';
 export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
 
@@ -25,6 +25,20 @@ export async function signalAborted(signal, { reason } = {}) {
 			return typeof reason === 'undefined' ? Promise.resolve() : Promise.reject(reason);
 		});
 	}
+}
+
+export function abortButtonController(button) {
+	if (! (button instanceof HTMLButtonElement)) {
+		throw new TypeError('Not a <button>');
+	}
+
+	const controller = new AbortController();
+	button.disabled = false;
+
+	on(button, 'click', () => controller.abort(), { signal: controller.signal, once: true });
+	on(controller.signal, 'abort', () => button.disabled = true, { once: true });
+
+	return controller;
 }
 
 export function abortTimeoutController(timeout) {
@@ -90,7 +104,7 @@ export function abortableIdleCallback(callback, { signal, timeout } = {}) {
 export function signalRaceController(...signals) {
 	const controller = new AbortController();
 
-	signals.race(signal => signalAborted(signal)).then(() => controller.abort());
+	Promise.race(signals.map(signal => signalAborted(signal))).finally(() => controller.abort());
 
 	return controller;
 }
@@ -98,7 +112,7 @@ export function signalRaceController(...signals) {
 export function signalAllController(...signals) {
 	const controller = new AbortController();
 
-	signals.all(signal => signalAborted(signal)).then(() => controller.abort());
+	Promise.all(signals.map(signal => signalAborted(signal))).finally(() => controller.abort());
 
 	return controller;
 }

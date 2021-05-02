@@ -28,3 +28,15 @@ export async function pwned(pwd, { signal } = {}) {
 	const found = await pwnedCount(pwd, { signal });
 	return found !== 0;
 }
+
+export async function pwnedEventHandler() {
+	if (! (this.setCustomValidity instanceof Function)) {
+		return;
+	} else if (this.value.length === 0) {
+		this.setCustomValidity('');
+	} else if (await pwned(this.value)) {
+		this.setCustomValidity('Password was found in a database breach.');
+	} else {
+		this.setCustomValidity('');
+	}
+}
