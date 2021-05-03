@@ -369,7 +369,7 @@ export function on(what, when, ...args) {
 	return items;
 }
 
-export function off(what, when, { capture, passive, once, signal, base } = {}) {
+export function off(what, when,...args) {
 	return each(what, item => {
 		if (typeof when === 'string') {
 			item.removeEventListener(when, ...args);
@@ -378,7 +378,7 @@ export function off(what, when, { capture, passive, once, signal, base } = {}) {
 		} else {
 			Object.entries(when).forEach(([ev, cb]) => item.removeEventListener(ev, cb, ...args));
 		}
-	}, { base });
+	});
 }
 
 export async function when(what, events, { capture, passive, signal, base } = {}) {
@@ -391,8 +391,8 @@ export async function when(what, events, { capture, passive, signal, base } = {}
 			reject(new DOMException('Operation aborted'));
 		} else {
 			signal.addEventListener('abort', () => {
-				 controller.abort();
-				 reject(new DOMException('Operation aborted'));
+				controller.abort();
+				reject(new DOMException('Operation aborted'));
 			}, { once: true, signal: controller.signal });
 		}
 	}
