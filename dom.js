@@ -3,10 +3,10 @@ import { addListener } from './events.js';
 import { getDeferred } from './promises.js';
 
 export function query(what, base = document) {
-	if (what instanceof EventTarget) {
-		return [what];
-	} else if (Array.isArray(what)) {
+	if (Array.isArray(what)) {
 		return what;
+	} else if (what instanceof EventTarget) {
+		return [what];
 	} else if (typeof what === 'string') {
 		const matches = Array.from(base.querySelectorAll(what));
 
@@ -355,6 +355,7 @@ export function html(what, text, { base } = {}) {
 }
 
 export function on(what, when, ...args) {
+	// @TODO: Figure out a way of adding `base` to arguments
 	const items = query(what);
 
 	if (typeof when === 'string') {
@@ -368,7 +369,7 @@ export function on(what, when, ...args) {
 	return items;
 }
 
-export function off(what, when, ...args) {
+export function off(what, when, { capture, passive, once, signal, base } = {}) {
 	return each(what, item => {
 		if (typeof when === 'string') {
 			item.removeEventListener(when, ...args);
@@ -377,56 +378,43 @@ export function off(what, when, ...args) {
 		} else {
 			Object.entries(when).forEach(([ev, cb]) => item.removeEventListener(ev, cb, ...args));
 		}
-	});
+	}, { base });
 }
 
-export function once(what, when, { capture, passive, signal } = {}) {
-	return on(what, when, { capture, once: true, passive, signal });
-}
-
-export async function when(target, event, { capture, passive, signal } = {}) {
-	const controller = new AbortController();
-
+export async function when(what, events, { capture, passive, signal, base } = {}) {
 	const { promise, resolve, reject } = getDeferred();
+	const controller = new AbortController();
 
 	if (signal instanceof AbortSignal) {
 		if (signal.aborted) {
-			return reject(new DOMException('Operation aborted'));
+			controller.abort();
+			reject(new DOMException('Operation aborted'));
 		} else {
 			signal.addEventListener('abort', () => {
-				controller.abort();
-				reject(new DOMException('Operation aborted'));
-			}, { signal: controller.signal });
+				 controller.abort();
+				 reject(new DOMException('Operation aborted'));
+			}, { once: true, signal: controller.signal });
 		}
 	}
 
-	once(target, event, resolve, { once: true, capture, passive, signal: controller.signal });
+	on(query(what, base), events, event => {
+		resolve(event);
+		controller.abort();
+	}, { capture, passive, signal: controller.signal });
 
-	return promise.then(result => {
-		if (! controller.signal.aborted) {
-			controller.abort();
-		}
-
-		return Promise.resolve(result);
-	}).catch(reason => {
-		if (! controller.signal.aborted) {
-			controller.abort();
-		}
-
-		return Promise.reject(reason);
-	});
+	return promise;
 }
 
 export async function ready({ signal } = {}) {
 	if (document.readyState === 'loading') {
-		await when(document, 'DOMContentLoaded', { signal });
+		await when([document], ['DOMContentLoaded'], { signal });
 	}
 
 }
 
 export async function loaded({ signal } = {}) {
 	if (document.readyState !== 'complete') {
-		await when(window, 'load', { signal });
+		await when([window], ['load'], { signal });
 	}
 }
 
