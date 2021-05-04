@@ -2,6 +2,10 @@ import { signalAborted } from './abort.js';
 import { addListener } from './events.js';
 import { getDeferred } from './promises.js';
 
+export function isAsync(what) {
+	return what instanceof  Promise || what instanceof Function && what.constructor.name === 'AsyncFunction';
+}
+
 export function query(what, base = document) {
 	if (Array.isArray(what)) {
 		return what;
@@ -406,16 +410,53 @@ export async function when(what, events, { capture, passive, signal, base } = {}
 }
 
 export async function ready({ signal } = {}) {
-	if (document.readyState === 'loading') {
-		await when([document], ['DOMContentLoaded'], { signal });
+	const { resolve, reject, promise } = getDeferred();
+	const controller = new AbortController();
+
+	if (signal instanceof AbortSignal) {
+		if (signal.aborted) {
+			reject(new DOMException('Operation aborted'));
+		} else {
+			addListener([signal], ['abort'], reject(new DOMException('Operation aborted')), { signal: controller.signal });
+		}
 	}
 
+	if (document.readyState === 'loading') {
+		addListener([document], ['DOMContentLoaded'], () => {
+			controller.abort();
+			resolve(performance.now());
+		}, { signal, once: true });
+	} else {
+		controller.abort();
+		resolve(performance.now());
+	}
+
+	return promise;
 }
 
 export async function loaded({ signal } = {}) {
-	if (document.readyState !== 'complete') {
-		await when([window], ['load'], { signal });
+	const { resolve, reject, promise } = getDeferred();
+	const controller = new AbortController();
+
+	if (signal instanceof AbortSignal) {
+		if (signal.aborted) {
+			reject(new DOMException('Operation aborted'));
+		} else {
+			addListener([signal], ['abort'], reject(new DOMException('Operation aborted')), { signal: controller.signal });
+		}
 	}
+
+	if (document.readyState !== 'complete') {
+		addListener([window], ['load'], () => {
+			controller.abort();
+			resolve(performance.now());
+		}, { signal, once: true });
+	} else {
+		controller.abort();
+		resolve(performance.now());
+	}
+
+	return promise;
 }
 
 /**

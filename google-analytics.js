@@ -1,14 +1,26 @@
 import { loadScript } from './loader.js';
 
-window.dataLayer = window.dataLayer || [];
+if (! Array.isArray(window.dataLayer)) {
+	window.dataLayer = [];
+}
+
+export function ga(...args) {
+	if (window.ga instanceof Function) {
+		return window.ga(...args);
+	}
+}
 
 export async function ready(timeout = 2000) {
 	await new Promise((resolve, reject) => {
 		if (! hasGa()) {
-			reject(new Error('Google Analytics script not loaded'));
+			reject(new DOMException('Google Analytics script not loaded'));
 		} else {
-			setTimeout(() => reject(new Error('GA ready callback timed-out')), timeout);
-			window.ga(() => resolve());
+			const id = setTimeout(() => reject(new DOMException('GA ready callback timed-out')), timeout);
+
+			ga(() => {
+				clearTimeout(id);
+				resolve();
+			});
 		}
 	});
 }
@@ -16,18 +28,12 @@ export async function ready(timeout = 2000) {
 export function getUTMParams(search = window.location.search) {
 	const params = new URLSearchParams(search);
 	return  {
-		source: params.get('utm_source'),
-		medium: params.get('utm_medium'),
 		campaign: params.get('utm_campaign'),
-		term: params.get('utm_term'),
 		content: params.get('utm_content'),
+		medium: params.get('utm_medium'),
+		source: params.get('utm_source'),
+		term: params.get('utm_term'),
 	};
-}
-
-export function ga(...args) {
-	if (hasGa()) {
-		return window.ga(...args);
-	}
 }
 
 export async function create(...args) {
@@ -41,25 +47,25 @@ export async function remove() {
 }
 
 export async function get(prop, timeout = 150) {
-	return await getTracker(timeout).then(tracker => {
-		return tracker.get(prop);
-	});
+	return await getTracker(timeout).then(tracker => tracker.get(prop));
 }
 
 export async function getTracker(timeout = 150) {
 	if (hasGa()) {
 		return await new Promise(async (resolve, reject) => {
-			setTimeout(() => reject(new Error('Timeout obtaining tracker')), timeout);
-			window.ga(tracker => {
+			const id = setTimeout(() => reject(new DOMException('Timeout obtaining tracker')), timeout);
+
+			ga(tracker => {
 				if (typeof tracker !== 'undefined') {
+					clearTimeout(id);
 					resolve(tracker);
 				} else {
-					reject(new Error('Unable to obtain GA tracker'));
+					reject(new DOMException('Unable to obtain GA tracker'));
 				}
 			});
 		});
 	} else {
-		new Error('Google Analytics script not loaded');
+		new DOMException('Google Analytics script not loaded');
 	}
 }
 
@@ -177,11 +183,10 @@ export function geoHandler() {
 
 export function genericHandler() {
 	if (hasGa()) {
-		send({
-			hitType: this.dataset.hitType || 'event',
-			eventCategory: this.dataset.eventCategory || 'unknown',
-			eventLabel: this.dataset.eventLabel || 'unknown',
-			transport: this.dataset.transport || 'beacon',
-		});
+		const {
+			hitType = 'event', eventCategory = 'unknown', eventLabel = 'unknown',
+			transport = 'beacon',
+		} = this.dataset;
+		send({ hitType, eventCategory, eventLabel, transport });
 	}
 }
