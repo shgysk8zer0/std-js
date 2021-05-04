@@ -417,7 +417,7 @@ export async function ready({ signal } = {}) {
 		if (signal.aborted) {
 			reject(new DOMException('Operation aborted'));
 		} else {
-			addListener([signal], ['abort'], reject(new DOMException('Operation aborted')), { signal: controller.signal });
+			addListener([signal], ['abort'], () => reject(new DOMException('Operation aborted')), { signal: controller.signal });
 		}
 	}
 
@@ -442,7 +442,7 @@ export async function loaded({ signal } = {}) {
 		if (signal.aborted) {
 			reject(new DOMException('Operation aborted'));
 		} else {
-			addListener([signal], ['abort'], reject(new DOMException('Operation aborted')), { signal: controller.signal });
+			addListener([signal], ['abort'], () => reject(new DOMException('Operation aborted')), { signal: controller.signal });
 		}
 	}
 
