@@ -4,9 +4,14 @@ import { POST } from './http.js';
 
 const errorObj = Object.seal({
 	error: Object.seal({
-		status: 502,
+		status: 500,
 		message: 'Error submitting message',
 	})
+});
+
+const successObj = Object.seal({
+	message: null,
+	status: 204,
 });
 
 export async function signatureHeaders({ uuid }) {
@@ -41,17 +46,17 @@ export async function send(endpoint, { name, email, phone, subject, body, url },
 			signal,
 		});
 
-		return {
+		return Object.seal({
 			status: resp.status,
 			success: resp.ok,
-			body: resp.ok ? errorObj : await resp.json().catch(console.error),
-		};
+			body: resp.ok ? successObj : errorObj,
+		});
 	} catch(err) {
 		console.error(err);
-		return {
+		return Object.seal({
 			status: 502,
 			success: false,
 			body: errorObj,
-		};
+		});
 	}
 }
