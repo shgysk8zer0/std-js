@@ -13,6 +13,7 @@ function fadeIn(dialog) {
 			easing: 'ease-in-out',
 		});
 	}
+
 	document.body.append(dialog);
 	dialog.showModal();
 }
