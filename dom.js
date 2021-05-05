@@ -25,6 +25,18 @@ export function query(what, base = document) {
 	}
 }
 
+export function nth(what, n, { base } = {}) {
+	return query(what, base).at(n);
+}
+
+export function first(what, base) {
+	return nth(what, 0, { base });
+}
+
+export function last(what, base) {
+	return nth(what, -1, { base });
+}
+
 export function each(what, callback, { base } = {}) {
 	const items = query(what, base);
 	items.forEach(callback);
@@ -305,6 +317,30 @@ export function toggleAttr(what, attrs, { base, force, signal } = {}) {
 		}, { once: true });
 	}
 	return items;
+}
+
+export function disable(what, { base, value = true } = {}) {
+	return each(what, el => el.disabled = value, { base });
+}
+
+export function enable(what, { base, value = false } = {}) {
+	return disable(what, { base, value });
+}
+
+export function hide(what, { base, value = true } = {}) {
+	return each(what, el => el.hidden = value, { base });
+}
+
+export function unhide(what, { base, value = false } = {}) {
+	return hide(what, { base, value });
+}
+
+export function value(what, value, { base } = {}) {
+	if (value == null) {
+		return each(what, el => el.removeAttribute('value'), { base });
+	} else {
+		return each(what, el => el.value = value, { base });
+	}
 }
 
 export function addClass(what, ...args) {
