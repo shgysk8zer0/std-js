@@ -2,12 +2,14 @@ import { read, isInViewport } from './functions.js';
 import { onAnimationFrame } from './promises.js';
 import { debounce } from './events.js';
 import { get as getLocation } from './geo.js';
+import { mediaQuery } from './media-queries.js';
 import {
 	attr, toggleAttr, css, data, addClass, removeClass, toggleClass,
 	replaceClass, text, html, on, off, animate, ready, loaded, intersect,
 } from './dom.js';
-import { mediaQuery } from './media-queries.js';
-import { GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText } from './http.js';
+import {
+	GET, POST, DELETE, getHTML, getJSON, postHTML, postJSON, getText, postText,
+} from './http.js';
 
 const PREFIXES = [
 	'',
@@ -49,11 +51,11 @@ export default class esQuery extends Set {
 	}
 
 	get first() {
-		return new esQuery(this.toArray().shift());
+		return this.at(0);
 	}
 
 	get last() {
-		return new esQuery(this.toArray().pop());
+		return this.at(-1);
 	}
 
 	item(num) {
@@ -64,8 +66,16 @@ export default class esQuery extends Set {
 		}
 	}
 
+	at(num) {
+		if (this.size > num) {
+			return new esQuery(this.toArray().at(num));
+		} else {
+			return undefined;
+		}
+	}
+
 	toArray() {
-		return [...this];
+		return Array.from(this);
 	}
 
 	*toGenerator() {
@@ -958,8 +968,8 @@ export default class esQuery extends Set {
 		return this.on(event, callback, { once: true, capture, passive, signal });
 	}
 
-	async debounce(event, callback, wait = 17, immediate = false, ...attrs) {
-		return this.on(event, debounce(callback, wait, immediate), ...attrs);
+	async debounce(event, callback, wait = 17, immediate = false, capture, once, passive, signal) {
+		return this.on(event, debounce(callback, wait, immediate), { capture, once, passive, signal });
 	}
 
 	async ready(callback, ...args) {
