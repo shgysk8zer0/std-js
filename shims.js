@@ -246,7 +246,7 @@ if (! ('globalPrivacyControl' in Navigator.prototype)) {
 if (! (NodeList.prototype.forEach instanceof Function)) {
 	NodeList.prototype.forEach = function(callback, thisArg) {
 		Array.prototype.forEach.call(this, callback, thisArg);
-	}
+	};
 }
 
 if (! (NodeList.prototype.keys instanceof Function)) {
@@ -254,7 +254,7 @@ if (! (NodeList.prototype.keys instanceof Function)) {
 		for (let n = 0; n < this.length; n++) {
 			yield n;
 		}
-	}
+	};
 }
 
 if (! (NodeList.prototype.values instanceof Function)) {
@@ -262,7 +262,7 @@ if (! (NodeList.prototype.values instanceof Function)) {
 		for (let n = 0; n < this.length; n++) {
 			yield this.item(n);
 		}
-	}
+	};
 }
 
 if (! (NodeList.prototype.entries instanceof Function)) {
@@ -270,7 +270,7 @@ if (! (NodeList.prototype.entries instanceof Function)) {
 		for (let n = 0; n < this.length; n++) {
 			yield [n, this.item(n)];
 		}
-	}
+	};
 }
 
 if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
