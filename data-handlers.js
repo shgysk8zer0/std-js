@@ -1,4 +1,4 @@
-import { on, ready, each, addClass, removeClass } from './dom.js';
+import { on, query, each, addClass, removeClass } from './dom.js';
 
 export function remove() {
 	each(this.dataset.remove, el => el.remove());
