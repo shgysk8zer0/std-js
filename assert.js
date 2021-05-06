@@ -75,13 +75,22 @@ export function deepEquals(a, b, { exception, throws } = {}) {
 		if (b instanceof DOMTokenList) {
 			return assert(
 				b instanceof DOMTokenList && a.length === b.maxLength
-				&& Array.from(a).every(cl => b.has(cl)),
+				&& Array.from(a).every(cl => b.contains(cl)),
 				{ throws, exception }
 			);
 		} else if (Array.isArray(b)) {
-			return assert(a.length === b.length && b.every(cl => a.has(cl), { throws, exception }));
+			return assert(a.length === b.length && b.every(cl => a.contains(cl), { throws, exception }));
 		} else {
-			throw getError(`Cannot cmpare DOMTokenList to `)
+			throw getError(`Cannot compare DOMTokenList to ${getType(b)}`);
+		}
+	} else if (a instanceof DOMStringMap) {
+		if (b instanceof DOMStringMap || typeof b === 'object' && typeof b.prototype === 'undefined') {
+			return assert(Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(
+				([k, v]) => b[k] === v),
+				{ throws, exception }
+			);
+		} else {
+			throw getError(`Cannot compare a DOMStringMap to ${getType(b)}`);
 		}
 	} else if (a !== null) {
 		return deepEquals(Object.keys(a), Object.keys(b), { exception, throws })
