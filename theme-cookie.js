@@ -1,19 +1,19 @@
-import { $ } from './functions.js';
+import { data, attr, ready, query } from './dom.js';
 
 if ('cookieStore' in window && cookieStore.get instanceof Function) {
 	cookieStore.get({ name: 'theme' }).then(async cookie => {
-		await $.ready;
+		await ready();
 
-		const $data = $(':root, [data-theme="auto]');
-		const $attr = $('[theme="auto"]');
+		const $data = query(':root, [data-theme="auto]');
+		const $attr = query('[theme="auto"]');
 
 		const setTheme = async ({ name, value = 'auto' }) => {
 			if (name === 'theme') {
 				document.dispatchEvent(new CustomEvent('themechange', { detail: { theme: value }}));
 
 				await Promise.all([
-					$data.data({ theme: value }),
-					$attr.attr({ theme: value }),
+					data($data, { theme: value }),
+					attr($attr, { theme: value }),
 				]);
 			}
 		};
