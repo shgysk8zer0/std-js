@@ -1,44 +1,99 @@
 import CookieStore from  './CookieStore.js';
 
-if (! ('EventTarget' in window)) {
-	window.EventTarget = class EventTarget extends HTMLUnknownElement {};
-}
-
 if (typeof globalThis === 'undefined') {
+	/* global global: true */
 	if (typeof self !== 'undefined') {
 		self.globalThis = self;
 	} else if (typeof window !== 'undefined') {
 		window.globalThis = window;
 	} else if (typeof global !== 'undefined') {
-		/* global global: true */
 		global.globalThis = global;
 	}
 }
 
-if (! (Element.prototype.getAttributeNames instanceof Function)) {
-	Element.prototype.getAttributeNames = function() {
-		return Array.from(this.attributes).map(({ name }) => name);
+if (! ('EventTarget' in globalThis)) {
+	globalThis.EventTarget = class EventTarget extends HTMLUnknownElement {};
+}
+
+if (! globalThis.hasOwnProperty('CustomEvent')) {
+	globalThis.CustomEvent = class CustomEvent {
+		constructor(event, {
+			bubbles = false,
+			cancelable = false,
+			detail = null
+		} = {}) {
+			const evt = document.createEvent('CustomEvent');
+			evt.initCustomEvent(event, bubbles, cancelable, detail);
+			return evt;
+		}
 	};
 }
 
-if (! ('cookieStore' in window)) {
-	window.cookieStore = new CookieStore();
+if (! ('cookieStore' in globalThis)) {
+	globalThis.cookieStore = new CookieStore();
 }
 
-if (! ('doNotTrack' in Navigator.prototype)) {
-	Object.defineProperty(Navigator.prototype, 'doNotTrack', {
-		get: () => 'unspecified',
+if ('Promise' in globalThis && ! (Promise.prototype.finally instanceof Function)) {
+	Promise.prototype.finally = function(callback) {
+		return this.then(async val => {
+			await callback();
+			return val;
+		}, async val => {
+			await callback();
+			return val;
+		});
+	};
+}
+
+if ('Promise' in globalThis && ! (Promise.allSettled instanceof Function)) {
+	Promise.allSettled = function(promises) {
+		return Promise.all(Array.from(promises).map(function(call) {
+			return new Promise(function(resolve) {
+				if (! (call instanceof Promise)) {
+					call = Promise.resolve(call);
+				}
+				call.then(function(value) {
+					resolve({ status: 'fulfilled', value: value });
+				}).catch(function(reason) {
+					resolve({ status: 'rejected', reason: reason });
+				});
+			});
+		}));
+	};
+}
+
+if (globalThis.hasOwnProperty('Animation') && ! Animation.prototype.hasOwnProperty('finished')) {
+	Object.defineProperty(Animation.prototype, 'finished', {
+		get: function() {
+			return new Promise((resolve, reject) => {
+				if (this.playState === 'finished') {
+					resolve(this);
+				} else {
+					this.addEventListener('finish', () => resolve(this), { once: true });
+					this.addEventListener('error', event => reject(event), { once: true });
+				}
+			});
+		}
 	});
 }
 
-if (! ('globalPrivacyControl' in Navigator.prototype)) {
-	Object.defineProperty(Navigator.prototype, 'globalPrivacyControl', {
-		get: () => false,
+if (globalThis.hasOwnProperty('Animation') && ! Animation.prototype.hasOwnProperty('ready')) {
+	Object.defineProperty(Animation.prototype, 'ready', {
+		get: function() {
+			return new Promise((resolve, reject) => {
+				if (! this.pending) {
+					resolve(this);
+				} else {
+					this.addEventListener('ready', () => resolve(this), { once: true });
+					this.addEventListener('error', event => reject(event), { once: true });
+				}
+			});
+		}
 	});
 }
 
-if (! (window.requestIdleCallback instanceof Function)) {
-	window.requestIdleCallback = function(callback, { timeout = 50 } = {}) {
+if (! (globalThis.requestIdleCallback instanceof Function)) {
+	globalThis.requestIdleCallback = function(callback, { timeout = 50 } = {}) {
 		const now = Date.now();
 
 		return requestAnimationFrame(function() {
@@ -55,66 +110,42 @@ if (! (window.requestIdleCallback instanceof Function)) {
 	};
 }
 
-if (! ( window.cancelIdleCallback instanceof Function)) {
-	window.cancelIdleCallback = function(id) {
+if (! ( globalThis.cancelIdleCallback instanceof Function)) {
+	globalThis.cancelIdleCallback = function(id) {
 		cancelAnimationFrame(id);
 	};
 }
 
-if (! (window.queueMicrotask instanceof Function)) {
-	window.queueMicrotask = cb => Promise.resolve().then(cb)
+if (! (globalThis.queueMicrotask instanceof Function)) {
+	globalThis.queueMicrotask = cb => Promise.resolve().then(cb)
 		.catch(e => setTimeout(() => { throw e; }));
 }
 
-if (! (navigator.setAppBadge instanceof Function)) {
-	navigator.setAppBadge = async (n) => {
-		if (! Number.isInteger(n)) {
-			throw new TypeError('Failed to execute \'setAppBadge\' on \'Navigator\': Value is not of type \'unsigned long long\'');
-		} else if (n < 0) {
-			throw new TypeError('Failed to execute \'setAppBadge\' on \'Navigator\': Value is outside the \'unsigned long long\' value range.');
-		} else if (n === 0) {
-			if (document.title.startsWith('(')) {
-				document.title = document.title.replace(/^\((\d{1,2}\+?)\)\s/, '');
-			}
-		} else if (n < 100) {
-			await navigator.clearAppBadge();
-			document.title = `(${n}) ${document.title}`;
-		} else {
-			await navigator.clearAppBadge();
-			document.title = `(99+) ${document.title}`;
+/**
+ * @SEE https://github.com/tc39/proposal-relative-indexing-method#polyfill
+ * @SEE https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray
+ */
+if (! (Array.prototype.at instanceof Function)) {
+	const at = function at(n) {
+		n = Math.trunc(n) || 0;
+		if (n < 0) n += this.length;
+		if (n < 0 || n >= this.length) return undefined;
+		return this[n];
+	};
+
+	for (const C of [Array, String, globalThis.Int8Array, globalThis.Uint8Array,
+		globalThis.Uint8ClampedArray, globalThis.Int16Array, globalThis.Uint16Array,
+		globalThis.Int32Array, globalThis.Uint32Array, globalThis.Float32Array,
+		globalThis.Float64Array, globalThis.BigInt64Array, globalThis.BigUint64Array,
+	]) {
+		if (typeof C !== 'undefined') {
+			Object.defineProperty(C.prototype, 'at', {
+				value: at,
+				writable: true,
+				enumerable: false,
+				configurable: true
+			});
 		}
-	};
-}
-
-if (! (navigator.clearAppBadge instanceof Function)) {
-	navigator.clearAppBadge = () => navigator.setAppBadge(0);
-}
-
-if (! (navigator.getInstalledRelatedApps instanceof Function)) {
-	navigator.getInstalledRelatedApps = async () => [];
-}
-
-if (! (Element.prototype.replaceChildren instanceof Function)) {
-	Element.prototype.replaceChildren = function(...items) {
-		[...this.children].forEach(el => el.remove());
-		this.append(...items);
-	};
-
-	Document.prototype.replaceChildren = function(...items) {
-		[...this.children].forEach(el => el.remove());
-		this.append(...items);
-	};
-
-	DocumentFragment.prototype.replaceChildren = function(...items) {
-		[...this.children].forEach(el => el.remove());
-		this.append(...items);
-	};
-
-	if ('ShadowRoot' in window) {
-		ShadowRoot.prototype.replaceChildren = function(...items) {
-			[...this.children].forEach(el => el.remove());
-			this.append(...items);
-		};
 	}
 }
 
@@ -155,86 +186,91 @@ if (! (Object.fromEntries instanceof Function)) {
 	};
 }
 
-if (! HTMLImageElement.prototype.hasOwnProperty('complete')) {
-	/**
-	 * Note: This shim cannot detect if an image has an error while loading
-	 * and will return false on an invalid URL, for example. It also does not
-	 * work for 0-sized images, if such a thing is possible.
-	 */
-	Object.defineProperty(HTMLImageElement.prototype, 'complete', {
-		get: function() {
-			return this.src === '' || this.naturalHeight > 0;
-		}
-	});
-}
-
-if(! (HTMLImageElement.prototype.decode instanceof Function)) {
-	HTMLImageElement.prototype.decode = function () {
-		if (this.complete) {
-			return Promise.resolve();
+if (! (navigator.setAppBadge instanceof Function)) {
+	navigator.setAppBadge = async (n) => {
+		if (! Number.isInteger(n)) {
+			throw new TypeError('Failed to execute \'setAppBadge\' on \'Navigator\': Value is not of type \'unsigned long long\'');
+		} else if (n < 0) {
+			throw new TypeError('Failed to execute \'setAppBadge\' on \'Navigator\': Value is outside the \'unsigned long long\' value range.');
+		} else if (n === 0) {
+			if (document.title.startsWith('(')) {
+				document.title = document.title.replace(/^\((\d{1,2}\+?)\)\s/, '');
+			}
+		} else if (n < 100) {
+			await navigator.clearAppBadge();
+			document.title = `(${n}) ${document.title}`;
 		} else {
-			return new Promise((resolve, reject) => {
-				const load = () => {
-					this.removeEventListener('error', error);
-					this.removeEventListener('load', load);
-					resolve();
-				};
-
-				const error = (err) => {
-					this.removeEventListener('error', error);
-					this.removeEventListener('load', load);
-					reject(err);
-				};
-
-				this.addEventListener('load', load);
-				this.addEventListener('error', error);
-			});
+			await navigator.clearAppBadge();
+			document.title = `(99+) ${document.title}`;
 		}
 	};
 }
 
-if (! window.hasOwnProperty('CustomEvent')) {
-	window.CustomEvent = class CustomEvent {
-		constructor(event, {
-			bubbles = false,
-			cancelable = false,
-			detail = null
-		} = {}) {
-			const evt = document.createEvent('CustomEvent');
-			evt.initCustomEvent(event, bubbles, cancelable, detail);
-			return evt;
+if (! (navigator.clearAppBadge instanceof Function)) {
+	navigator.clearAppBadge = () => navigator.setAppBadge(0);
+}
+
+if (! (navigator.getInstalledRelatedApps instanceof Function)) {
+	navigator.getInstalledRelatedApps = async () => [];
+}
+
+if (! ('connection' in navigator)) {
+	navigator.connection = Object.freeze({
+		type: 'unknown',
+		effectiveType: '4g',
+		rtt: NaN,
+		downlink: NaN,
+		downlinkMax: Infinity,
+		saveData: false,
+		onchange: null,
+		ontypechange: null,
+		addEventListener: () => null,
+	});
+} else if (! ('type' in navigator.connection)) {
+	navigator.connection.type = 'unknown';
+}
+
+if (! ('doNotTrack' in Navigator.prototype)) {
+	Object.defineProperty(Navigator.prototype, 'doNotTrack', {
+		get: () => 'unspecified',
+	});
+}
+
+if (! ('globalPrivacyControl' in Navigator.prototype)) {
+	Object.defineProperty(Navigator.prototype, 'globalPrivacyControl', {
+		get: () => false,
+	});
+}
+
+
+if (! (NodeList.prototype.forEach instanceof Function)) {
+	NodeList.prototype.forEach = function(callback, thisArg) {
+		Array.prototype.forEach.call(this, callback, thisArg);
+	};
+}
+
+if (! (NodeList.prototype.keys instanceof Function)) {
+	NodeList.prototype.keys = function* keys() {
+		for (let n = 0; n < this.length; n++) {
+			yield n;
 		}
 	};
 }
 
-if (window.hasOwnProperty('Animation') && ! Animation.prototype.hasOwnProperty('finished')) {
-	Object.defineProperty(Animation.prototype, 'finished', {
-		get: function() {
-			return new Promise((resolve, reject) => {
-				if (this.playState === 'finished') {
-					resolve(this);
-				} else {
-					this.addEventListener('finish', () => resolve(this), { once: true });
-					this.addEventListener('error', event => reject(event), { once: true });
-				}
-			});
+if (! (NodeList.prototype.values instanceof Function)) {
+	NodeList.prototype.values = function* values() {
+		for (let n = 0; n < this.length; n++) {
+			yield this.item(n);
 		}
-	});
+	};
 }
 
-if (window.hasOwnProperty('Animation') && ! Animation.prototype.hasOwnProperty('ready')) {
-	Object.defineProperty(Animation.prototype, 'ready', {
-		get: function() {
-			return new Promise((resolve, reject) => {
-				if (! this.pending) {
-					resolve(this);
-				} else {
-					this.addEventListener('ready', () => resolve(this), { once: true });
-					this.addEventListener('error', event => reject(event), { once: true });
-				}
-			});
+if (! (NodeList.prototype.entries instanceof Function)) {
+	NodeList.prototype.entries = function* entries() {
+		for (let n = 0; n < this.length; n++) {
+			yield [n, this.item(n)];
 		}
-	});
+	};
 }
 
 if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
@@ -261,7 +297,75 @@ if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
 	};
 }
 
-if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLUnknownElement.prototype.hasOwnProperty('open')) {
+if (! (Element.prototype.replaceChildren instanceof Function)) {
+	Element.prototype.replaceChildren = function(...items) {
+		[...this.children].forEach(el => el.remove());
+		this.append(...items);
+	};
+
+	Document.prototype.replaceChildren = function(...items) {
+		[...this.children].forEach(el => el.remove());
+		this.append(...items);
+	};
+
+	DocumentFragment.prototype.replaceChildren = function(...items) {
+		[...this.children].forEach(el => el.remove());
+		this.append(...items);
+	};
+
+	if ('ShadowRoot' in globalThis) {
+		ShadowRoot.prototype.replaceChildren = function(...items) {
+			[...this.children].forEach(el => el.remove());
+			this.append(...items);
+		};
+	}
+}
+
+if (! (Element.prototype.getAttributeNames instanceof Function)) {
+	Element.prototype.getAttributeNames = function() {
+		return Array.from(this.attributes).map(({ name }) => name);
+	};
+}
+
+if (! HTMLImageElement.prototype.hasOwnProperty('complete')) {
+	/**
+	 * Note: This shim cannot detect if an image has an error while loading
+	 * and will return false on an invalid URL, for example. It also does not
+	 * work for 0-sized images, if such a thing is possible.
+	 */
+	Object.defineProperty(HTMLImageElement.prototype, 'complete', {
+		get: function() {
+			return this.src === '' || this.naturalHeight > 0;
+		}
+	});
+}
+
+if (! (HTMLImageElement.prototype.decode instanceof Function)) {
+	HTMLImageElement.prototype.decode = function () {
+		if (this.complete) {
+			return Promise.resolve();
+		} else {
+			return new Promise((resolve, reject) => {
+				const load = () => {
+					this.removeEventListener('error', error);
+					this.removeEventListener('load', load);
+					resolve();
+				};
+
+				const error = (err) => {
+					this.removeEventListener('error', error);
+					this.removeEventListener('load', load);
+					reject(err);
+				};
+
+				this.addEventListener('load', load);
+				this.addEventListener('error', error);
+			});
+		}
+	};
+}
+
+if (document.createElement('dialog') instanceof HTMLUnknownElement && ! HTMLUnknownElement.prototype.hasOwnProperty('open')) {
 	HTMLUnknownElement.prototype.show = function() {
 		this.open = true;
 	};
@@ -302,7 +406,7 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && !HTMLUnkno
 	});
 }
 
-if (! document.createElement('dialog').hasOwnProperty('showModal')) {
+if (! (document.createElement('dialog').showModal instanceof Function)) {
 	HTMLUnknownElement.prototype.showModal = function() {
 		this.open = true;
 		this.classList.add('modal');
@@ -354,49 +458,4 @@ if (! HTMLLinkElement.prototype.hasOwnProperty('import')) {
 			link.dispatchEvent(new Event('error'));
 		}
 	});
-}
-
-if (! ('connection' in navigator)) {
-	navigator.connection = Object.freeze({
-		type: 'unknown',
-		effectiveType: '4g',
-		rtt: NaN,
-		downlink: NaN,
-		downlinkMax: Infinity,
-		saveData: false,
-		onchange: null,
-		ontypechange: null,
-		addEventListener: () => null,
-	});
-} else if (! ('type' in navigator.connection)) {
-	navigator.connection.type = 'unknown';
-}
-
-if ('Promise' in window && ! (Promise.prototype.finally instanceof Function)) {
-	Promise.prototype.finally = function(callback) {
-		return this.then(async val => {
-			await callback();
-			return val;
-		}, async val => {
-			await callback();
-			return val;
-		});
-	};
-}
-
-if ('Promise' in window && ! (Promise.allSettled instanceof Function)) {
-	Promise.allSettled = function(promises) {
-		return Promise.all(Array.from(promises).map(function(call) {
-			return new Promise(function(resolve) {
-				if (! (call instanceof Promise)) {
-					call = Promise.resolve(call);
-				}
-				call.then(function(value) {
-					resolve({ status: 'fulfilled', value: value });
-				}).catch(function(reason) {
-					resolve({ status: 'rejected', reason: reason });
-				});
-			});
-		}));
-	};
 }
