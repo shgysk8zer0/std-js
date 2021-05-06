@@ -1,23 +1,23 @@
-import { $ } from './esQuery.js';
+import { on, query, each, addClass, removeClass } from './dom.js';
 
 export function remove() {
-	$(this.dataset.remove).remove();
+	each(this.dataset.remove, el => el.remove());
 }
 
 export function hide() {
-	$(this.dataset.hide).hide();
+	each(this.dataset.hide, el => el.hidden = true);
 }
 
 export function unhide() {
-	$(this.dataset.unhide).unhide();
+	each(this.dataset.unhide, el => el.hidden = false);
 }
 
 export function disable() {
-	$(this.dataset.disable).disable();
+	each(this.dataset.disable, el => el.disabled = true);
 }
 
 export function enable() {
-	$(this.dataset.enable).enable();
+	each(this.dataset.enable, el => el.disabled = false);
 }
 
 export function fullScreen() {
@@ -36,6 +36,7 @@ export function fullScreen() {
 
 export async function cookie() {
 	const { cookie: name, value = null, domain = null, maxAge, expires, sameSite = 'Strict', path = '/' } = this.dataset;
+
 	if (typeof value === 'string') {
 		await cookieStore.set({ name, value, domain, path,
 			maxAge: typeof maxAge === 'string' ? parseInt(maxAge) : null, sameSite,
@@ -67,32 +68,30 @@ export function show() {
 }
 
 export function open() {
-	const els = document.querySelectorAll(this.dataset.open);
-	els.forEach(el => el.open = true);
+	each(this.dataset.open, el => el.open = true);
 }
 
 export function showModal() {
 	const target = document.querySelector(this.dataset.showModal);
+
 	if (target.showModal instanceof Function) {
 		target.showModal();
 	}
 }
 
 export function close() {
-	const target = document.querySelector(this.dataset.close);
-	if (target instanceof HTMLElement) {
-		target.tagName === 'DIALOG' ? target.close() : target.open = false;
-	}
+	const { close, returnValue } = this.dataset;
+	each(close, el => el.tagName === 'DIALOG' ? el.close(returnValue) : el.open = false);
 }
 
 export function toggleAttribute() {
 	const { selector = ':root', toggleAttribute } = this.dataset;
-	const els = document.querySelectorAll(selector);
 
 	if ('checked' in this) {
-		els.forEach(el => el.toggleAttribute(toggleAttribute, this.checked));
+		const checked = this.checked;
+		each(selector, el => el.toggleAttribute(toggleAttribute, checked));
 	} else {
-		els.forEach(el => el.toggleAttribute(toggleAttribute));
+		each(selector, el => el.toggleAttribute(toggleAttribute));
 	}
 }
 
@@ -123,37 +122,37 @@ export function navigate() {
 
 export function toggleClass() {
 	const { selector = ':root', toggleClass = '' } = this.dataset;
-	const els = document.querySelectorAll(selector);
 
 	if ('checked' in this) {
 		if (this.checked) {
-			els.forEach(el => el.classList.add(...toggleClass.split(' ')));
+			addClass(selector, ...toggleClass.split(' '));
 		} else {
-			els.forEach(el => el.classList.remove(...toggleClass.split(' ')));
+			removeClass(selector, ...toggleClass.split(' '));
 		}
 	} else {
-		els.forEach(el => toggleClass.split(' ').forEach(cn => el.classList.toggle(cn)));
+		each(selector, el => toggleClass.split(' ').forEach(cn => el.classList.toggle(cn)));
 	}
 }
 
-export async function init(base = document, { passive = true, capture = true, once = false } = {}) {
-	await $.ready;
-	await Promise.allSettled([
-		$('[data-remove]', base).click(remove, { passive, capture, once }),
-		$('[data-hide]', base).click(hide, { passive, capture, once }),
-		$('[data-unhide]', base).click(unhide, { passive, capture, once }),
-		$('[data-disable]', base).click(disable, { passive, capture, once }),
-		$('[data-enable]', base).click(enable, { passive, capture, once }),
-		$('[data-scroll-to]', base).click(scrollTo, { passive, capture, once }),
-		$('[data-show]', base).click(show, { passive, capture, once }),
-		$('[data-open]', base).click(open, { passive, capture, once }),
-		$('[data-show-modal]', base).click(showModal, { passive, capture, once }),
-		$('[data-close]', base).click(close, { passive, capture, once }),
-		$('[data-toggle-attribute]', base).click(toggleAttribute, { passive, capture, once }),
-		$('[data-toggle-class]', base).click(toggleClass, { passive, capture, once }),
-		$('[data-cookie]', base).click(cookie),
-		$('[data-navigate]', base).click(navigate),
-		$('[data-full-screen]', base).click(fullScreen),
-		$('[data-copy]', base).click(copy),
-	]);
+export function init({ base = document, capture, once, passive, signal } = {}) {
+	// NOTE: Need to set keyboard handlers for non-button elements
+	const events = ['click'];
+	const opts = { capture, passive, once, signal };
+
+	on(query('[data-remove]', base),           events, remove,          opts);
+	on(query('[data-hide]', base),             events, hide,            opts);
+	on(query('[data-unhide]', base),           events, unhide,          opts);
+	on(query('[data-disable]', base),          events, disable,         opts);
+	on(query('[data-enable]', base),           events, enable,          opts);
+	on(query('[data-scroll-to]', base),        events, scrollTo,        opts);
+	on(query('[data-show]', base),             events, show,            opts);
+	on(query('[data-open]', base),             events, open,            opts);
+	on(query('[data-show-modal]', base),       events, showModal,       opts);
+	on(query('[data-close]', base),            events, close,           opts);
+	on(query('[data-toggle-attribute]', base), events, toggleAttribute, opts);
+	on(query('[data-toggle-class]', base),     events, toggleClass,     opts);
+	on(query('[data-cookie]', base),           events, cookie,          opts);
+	on(query('[data-navigate]', base),         events, navigate,        opts);
+	on(query('[data-full-screen]', base),      events, fullScreen,      opts);
+	on(query('[data-copy]', base),             events, copy,            opts);
 }

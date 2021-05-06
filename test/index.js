@@ -2,7 +2,7 @@ import '../shims.js';
 import '../deprefixer.js';
 import '../theme-cookie.js';
 import { loadHandler } from './funcs.js';
-import { sleep } from '../functions.js';
+import { sleep } from '../promises.js';
 import { $ } from '../esQuery.js';
 // import kbdShortcuts from '../kbd_shortcuts.js';
 import { loadScript } from '../loader.js';
