@@ -6,6 +6,26 @@ export function isAsync(what) {
 	return what instanceof Function && what.constructor.name === 'AsyncFunction';
 }
 
+export function getType(obj) {
+	const type = typeof obj;
+
+	if (LITERALS.includes(type)) {
+		return type;
+	} else if (obj === null) {
+		return 'null';
+	} else if (Array.isArray(obj)) {
+		return 'Array';
+	} else if (obj.hasOwnProperty('constructor') && typeof obj.constructor.name === 'string') {
+		return obj.constructor.name;
+	} else if (obj instanceof Element) {
+		return `<${obj.tagName.toLowerCase()}>`;
+	} else if (obj.toString instanceof Function) {
+		return obj.toString();
+	} else {
+		return type;
+	}
+}
+
 const DEFAULT_EXCEPTION = 'Assertion failed';
 
 const LITERALS = ['string', 'number', 'boolean', 'undefined', 'symbol'];
@@ -49,13 +69,25 @@ export function deepEquals(a, b, { exception, throws } = {}) {
 		return assert(a.length === b.length && (a.every(val => b.includes(val)
 			|| b.some(valb => deepEquals(val, valb, { throws: false }))
 		)), { exception, throws });
-	} else if (a instanceof ELement) {
+	} else if (a instanceof Element) {
 		return domEquals(a, b, { exception, throws });
+	} else if (a instanceof DOMTokenList) {
+		if (b instanceof DOMTokenList) {
+			return assert(
+				b instanceof DOMTokenList && a.length === b.maxLength
+				&& Array.from(a).every(cl => b.has(cl)),
+				{ throws, exception }
+			);
+		} else if (Array.isArray(b)) {
+			return assert(a.length === b.length && b.every(cl => a.has(cl), { throws, exception });
+		} else {
+			throw getError(`Cannot cmpare DOMTokenList to `)
+		}
 	} else if (a !== null) {
 		return deepEquals(Object.keys(a), Object.keys(b), { exception, throws })
 			&& Object.entries(a).every(([key, value]) => deepEquals(value, b[key], { exception, throws }));
 	} else {
-		return equals(b, null, { exception, throws })
+		return equals(b, null, { exception, throws });
 	}
 }
 
