@@ -3,62 +3,7 @@ import { attr, css, data, toggleClass, on, off, ready, loaded, when, parse } fro
 import { getCustomElement, createCustomElement, registerCustomElement, defined } from './custom-elements.js';
 import { sleep } from './promises.js';
 import { get as getLocation } from './geo.js';
-
-export function openWindow(url, {
-	name = '',
-	referrer = false,
-	opener = false,
-	height = null,
-	width = null,
-	x = null,
-	y = null,
-	resizable = true,
-	location = false,
-	scrollbars = true,
-} = {}) {
-	let flags = [];
-
-	if (opener === false) {
-		flags.push('noopener');
-	}
-
-	if (referrer === false) {
-		flags.push('noreferrer');
-	}
-
-	// Some properties only apply to sized windows
-	if (Number.isInteger(width) || Number.isInteger(height)) {
-		if (Number.isInteger(height)) {
-			flags.push(`height=${height}`);
-		}
-
-		if (Number.isInteger(width)) {
-			flags.push(`width=${width}`);
-		}
-
-		if (Number.isInteger(x)) {
-			flags.push(`left=${x}`);
-		}
-
-		if (Number.isInteger(y)) {
-			flags.push(`top=${y}`);
-		}
-
-		if (resizable) {
-			flags.push('resiabled');
-		}
-
-		if (location) {
-			flags.push('location');
-		}
-
-		if (scrollbars) {
-			flags.push('scrollbars');
-		}
-	}
-
-	return window.open(url, name, flags.join(','));
-}
+import { between } from './math.js';
 
 export async function statusDialog(what, { duration = 5000, type = 'info', heading = null } = {}) {
 	const dialog = document.createElement('dialog');
@@ -134,10 +79,6 @@ export async function statusDialog(what, { duration = 5000, type = 'info', headi
 			setTimeout(() => dialog.close(), duration);
 		}
 	});
-}
-
-export function between(min, val, max) {
-	return val >= min && val <= max;
 }
 
 export function clone(thing) {
@@ -343,9 +284,10 @@ export async function notificationsAllowed() {
 export {
 	$, attr, css, data, toggleClass, on, off, when, ready, loaded, parse as parseHTML,
 	getCustomElement, createCustomElement, registerCustomElement, defined, sleep,
-	getLocation,
+	getLocation, between,
 };
 
 export { mediaQuery, prefersReducedMotion, prefersColorScheme, displayMode } from './media-queries.js';
 export { createSVG, useSVG } from './svg.js';
 export { debounce, whenOnline, whenOffline, whenVisible, whenHidden } from './events.js';
+export { popup as openWindow } from './popup.js';

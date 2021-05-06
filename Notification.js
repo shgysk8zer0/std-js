@@ -1,4 +1,4 @@
-import { css } from './functions.js';
+import { css } from './dom.js';
 
 export default class Notification {
 	constructor(title, {
