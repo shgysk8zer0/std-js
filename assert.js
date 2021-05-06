@@ -1,3 +1,5 @@
+import { parse } from './dom.js';
+
 export class AssertionError extends Error {}
 
 export function isAsync(what) {
@@ -47,6 +49,8 @@ export function deepEquals(a, b, { exception, throws } = {}) {
 		return assert(a.length === b.length && (a.every(val => b.includes(val)
 			|| b.some(valb => deepEquals(val, valb, { throws: false }))
 		)), { exception, throws });
+	} else if (a instanceof ELement) {
+		return domEquals(a, b, { exception, throws });
 	} else if (a !== null) {
 		return deepEquals(Object.keys(a), Object.keys(b), { exception, throws })
 			&& Object.entries(a).every(([key, value]) => deepEquals(value, b[key], { exception, throws }));
@@ -95,23 +99,55 @@ export function isArray(test, { minLength: min, maxLength: max, exception, throw
 	}
 }
 
+export function domEquals(given, expected, { exception, throws } = {}) {
+	if (typeof expected === 'string') {
+		expected = parse(expected).firstElementChild;
+	}
+
+	if (given instanceof Element) {
+		return assert((expected instanceof Element) && (
+			given.isSameNode(expected) || (
+				given.tagName === expected.tagName
+				&& given.attributes.length === expected.attributes.length
+				&& given.childNodes.length === expected.childNodes.length
+				&& Array.from(given.attributes).every(
+					({ localName, value }) => expected.getAttribute(localName) === value
+				)
+				&& Array.from(given.childNodes).every(
+					(el, i) => domEquals(el, expected.childNodes.item(i), { throws: false })
+				)
+			)
+		), { exception, throws });
+	} else if (given instanceof Node && given.nodeType === Node.TEXT_NODE) {
+		return assert(expected instanceof Node && given.nodeType === Node.TEXT_NODE
+			&& expected.wholeText === expected.wholeText, { throws, exception });
+	} else {
+		throw new AssertionError('Cannot run test on non-element or string');
+	}
+}
+
 export function instanceOf(test, expected, { exception, throws } = {}) {
 	return assert(test instanceof expected, { exception, throws });
 }
 
-export function throws(callback, { exception, thisArg = null, args = [], throws } = {}) {
+export function throws(callback, { exception, thisArg = null, args = [], throws, type } = {}) {
 	if (isAsync(callback)) {
-		return rejects(callback(...args), { exception, throws });
+		return rejects(callback(...args), { exception, throws, type });
 	} else {
-		let thrown = false;
+		let thrown;
 
 		try {
 			callback.apply(thisArg, args);
 		} catch(err) {
-			thrown = true;
+			thrown = err;
 		}
 
-		return assert(thrown, { exception, throws });
+		if (typeof type !== 'undefined') {
+			return instanceOf(thrown, type, { exception, throws });
+		} else {
+			return assert(thrown instanceof type, { exception, throws });
+		}
+
 	}
 }
 
@@ -137,8 +173,13 @@ export async function resolves(promise, { exception, throws } = {}) {
 	return assert(! thrown, { exception, throws });
 }
 
-export async function rejects(promise, { exception, throws } = {}) {
-	let thrown = false;
-	await promise.catch(() => thrown = true);
-	return assert(thrown, { exception, throws });
+export async function rejects(promise, { exception, throws, type } = {}) {
+	let thrown;
+
+	await promise.catch(err => thrown = err);
+	if (typeof type !== 'undefined') {
+		return instanceOf(thrown, type, { exception, throws });
+	} else {
+		return equals(typeof thrown, 'undefined', { exception, throws });
+	}
 }
