@@ -86,9 +86,8 @@ export function deepEquals(a, b, { exception, throws } = {}) {
 	} else if (a instanceof DOMStringMap) {
 		if (b instanceof DOMStringMap || typeof b === 'object' && typeof b.prototype === 'undefined') {
 			return assert(Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(
-				([k, v]) => b[k] === v),
-				{ throws, exception }
-			);
+				([k, v]) => b[k] === v
+			), { throws, exception });
 		} else {
 			throw getError(`Cannot compare a DOMStringMap to ${getType(b)}`);
 		}
