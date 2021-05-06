@@ -79,7 +79,7 @@ export function deepEquals(a, b, { exception, throws } = {}) {
 				{ throws, exception }
 			);
 		} else if (Array.isArray(b)) {
-			return assert(a.length === b.length && b.every(cl => a.has(cl), { throws, exception });
+			return assert(a.length === b.length && b.every(cl => a.has(cl), { throws, exception }));
 		} else {
 			throw getError(`Cannot cmpare DOMTokenList to `)
 		}
