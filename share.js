@@ -1,4 +1,4 @@
-import { css } from './functions.js';
+import { css } from './dom.js';
 import { getShareURL, ALL_TARGETS } from './share-targets.js';
 import { loadImage } from './loader.js';
 

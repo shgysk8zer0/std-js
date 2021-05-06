@@ -1,5 +1,9 @@
 import './math-shims.js';
 
+export function between(min, val, max) {
+	return val >= min && val <= max;
+}
+
 export function* range(start, end, step = 1) {
 	[start, end] = [Math.min(start, end), Math.max(start, end)];
 
