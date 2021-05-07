@@ -29,6 +29,20 @@ if (! globalThis.hasOwnProperty('CustomEvent')) {
 	};
 }
 
+if (! globalThis.hasOwnProperty('AggregateError')) {
+	window.AggregateError = class AggregateError extends Error {
+		constructor(errors, message) {
+			if (typeof message === 'undefined') {
+				super(errors);
+				this.errors = [];
+			} else {
+				super(message);
+				this.errors = errors;
+			}
+		}
+	};
+}
+
 if (! ('cookieStore' in globalThis)) {
 	globalThis.cookieStore = new CookieStore();
 }
@@ -60,6 +74,27 @@ if ('Promise' in globalThis && ! (Promise.allSettled instanceof Function)) {
 			});
 		}));
 	};
+}
+
+if ('Promise' in globalThis && ! (Promise.any instanceof Function)) {
+	Promise.any = (promises) => new Promise((resolve, reject) => {
+		let errors = [];
+
+		promises.forEach(promise => {
+			promise.then(resolve).catch(e => {
+				errors.push(e);
+				if (errors.length === promises.length) {
+					reject(new globalThis.AggregateError(errors, 'No Promise in Promise.any was resolved'));
+				}
+			});
+		});
+	});
+}
+
+if ('Promise' in globalThis && ! (Promise.race instanceof Function)) {
+	Promise.race = (promises) => new Promise((resolve, reject) => {
+		promises.forEach(promise => promise.then(resolve, reject));
+	});
 }
 
 if (globalThis.hasOwnProperty('Animation') && ! Animation.prototype.hasOwnProperty('finished')) {
