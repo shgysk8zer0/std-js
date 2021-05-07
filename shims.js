@@ -32,8 +32,13 @@ if (! globalThis.hasOwnProperty('CustomEvent')) {
 if (! globalThis.hasOwnProperty('AggregateError')) {
 	window.AggregateError = class AggregateError extends Error {
 		constructor(errors, message) {
-			super(message);
-			this.errors = errors;
+			if (typeof message === 'undefined') {
+				super(errors);
+				this.errors = [];
+			} else {
+				super(message);
+				this.errors = errors;
+			}
 		}
 	};
 }
@@ -79,7 +84,7 @@ if ('Promise' in globalThis && ! (Promise.any instanceof Function)) {
 			promise.then(resolve).catch(e => {
 				errors.push(e);
 				if (errors.length === promises.length) {
-					reject(new AggregateError(errors, 'No Promise in Promise.any was resolved'));
+					reject(new globalThis.AggregateError(errors, 'No Promise in Promise.any was resolved'));
 				}
 			});
 		});
