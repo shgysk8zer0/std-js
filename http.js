@@ -4,8 +4,7 @@ import { features as eventFeatures } from './events.js';
 
 function filename(src) {
 	if (typeof src === 'string') {
-		const path = src.split('/');
-		return path[path.length - 1];
+		return new URL(src, location.origin).pathname.split('/').at(-1);
 	} else {
 		return '';
 	}
