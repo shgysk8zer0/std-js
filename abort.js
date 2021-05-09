@@ -1,6 +1,6 @@
 import './abort-shims.js';
 import { when, on } from './dom.js';
-import { resolveOn, infinitPromise, getDeferred } from './promises.js';
+import { infinitPromise, getDeferred } from './promises.js';
 import { features } from './events.js';
 export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
 
@@ -29,7 +29,7 @@ export async function signalAborted(signal, { reason } = {}) {
 			const callback = () => {
 				reject(reason),
 				signal.removeEventListener('abort', callback);
-			}
+			};
 
 			signal.addEventListener('abort', callback);
 		}
@@ -42,7 +42,7 @@ export async function signalAborted(signal, { reason } = {}) {
 			const callback = () => {
 				resolve();
 				signal.removeEventListener('abort', callback);
-			}
+			};
 
 			signal.addEventListener('abort', callback);
 		}
