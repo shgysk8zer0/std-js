@@ -1,6 +1,7 @@
 import './abort-shims.js';
 import { when, on } from './dom.js';
-import { resolveOn, infinitPromise } from './promises.js';
+import { resolveOn, infinitPromise, getDeferred } from './promises.js';
+import { features } from './events.js';
 export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
 
 export function isAborted(signal) {
@@ -20,10 +21,33 @@ export async function signalAborted(signal, { reason } = {}) {
 		return infinitPromise;
 	} else if (signal.aborted) {
 		return typeof reason === 'undefined' ? Promise.resolve() : Promise.reject(reason);
+	} else if (typeof reason === 'string') {
+		const { reject, promise } = getDeferred();
+		if (features.once) {
+			signal.addEventListener('abort', () => reject(reason), { once: true });
+		} else {
+			const callback = () => {
+				reject(reason),
+				signal.removeEventListener('abort', callback);
+			}
+
+			signal.addEventListener('abort', callback);
+		}
+		return promise;
 	} else {
-		return resolveOn(signal, 'abort').finally(() => {
-			return typeof reason === 'undefined' ? Promise.resolve() : Promise.reject(reason);
-		});
+		const { resolve, promise } = getDeferred();
+		if (features.once) {
+			signal.addEventListener('abort', () => resolve(), { once: true });
+		} else {
+			const callback = () => {
+				resolve();
+				signal.removeEventListener('abort', callback);
+			}
+
+			signal.addEventListener('abort', callback);
+		}
+
+		return promise;
 	}
 }
 

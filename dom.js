@@ -422,77 +422,42 @@ export function off(what, when,...args) {
 }
 
 export async function when(what, events, { capture, passive, signal, base } = {}) {
-	const { promise, resolve, reject } = getDeferred();
 	const controller = new AbortController();
+	const { promise, resolve, reject } = getDeferred();
 
 	if (signal instanceof AbortSignal) {
 		if (signal.aborted) {
 			controller.abort();
-			reject(new DOMException('Operation aborted'));
 		} else {
-			signal.addEventListener('abort', () => {
+			addEventListener([signal], ['abort'], () => {
 				controller.abort();
 				reject(new DOMException('Operation aborted'));
 			}, { once: true, signal: controller.signal });
 		}
 	}
 
-	on(query(what, base), events, event => {
-		resolve(event);
-		controller.abort();
-	}, { capture, passive, signal: controller.signal });
+	if (controller.signal.aborted) {
+		reject(new DOMException('Operation aborted'));
+	} else {
+		on(query(what, base), events, event => {
+			resolve(event);
+			controller.abort();
+		}, { capture, passive, signal: controller.signal });
+	}
 
 	return promise;
 }
 
 export async function ready({ signal } = {}) {
-	const { resolve, reject, promise } = getDeferred();
-	const controller = new AbortController();
-
-	if (signal instanceof AbortSignal) {
-		if (signal.aborted) {
-			reject(new DOMException('Operation aborted'));
-		} else {
-			addListener([signal], ['abort'], () => reject(new DOMException('Operation aborted')), { signal: controller.signal });
-		}
-	}
-
 	if (document.readyState === 'loading') {
-		addListener([document], ['DOMContentLoaded'], () => {
-			controller.abort();
-			resolve(performance.now());
-		}, { signal, once: true });
-	} else {
-		controller.abort();
-		resolve(performance.now());
+		await when([document], ['DOMContentLoaded'], { signal });
 	}
-
-	return promise;
 }
 
 export async function loaded({ signal } = {}) {
-	const { resolve, reject, promise } = getDeferred();
-	const controller = new AbortController();
-
-	if (signal instanceof AbortSignal) {
-		if (signal.aborted) {
-			reject(new DOMException('Operation aborted'));
-		} else {
-			addListener([signal], ['abort'], () => reject(new DOMException('Operation aborted')), { signal: controller.signal });
-		}
-	}
-
 	if (document.readyState !== 'complete') {
-		addListener([window], ['load'], () => {
-			controller.abort();
-			resolve(performance.now());
-		}, { signal, once: true });
-	} else {
-		controller.abort();
-		resolve(performance.now());
+		await when([window], ['load'], { signal });
 	}
-
-	return promise;
 }
 
 /**

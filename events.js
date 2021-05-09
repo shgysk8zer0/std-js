@@ -15,19 +15,19 @@ function getEventFeatures() {
 	const options = {
 		get passive() {
 			eventFeatures.passive = true;
-			return true;
+			return undefined;
 		},
 		get signal() {
 			eventFeatures.signal = true;
-			return new AbortController().signal;
+			return undefined;
 		},
 		get capture() {
 			eventFeatures.capture = true;
-			return true;
+			return undefined;
 		},
 		get once() {
 			eventFeatures.once = true;
-			return false;
+			return undefined;
 		},
 	};
 
@@ -56,7 +56,7 @@ export function addListener(targets, events, callback, { capture, once, passive,
 		events.forEach(event => target.addEventListener(event, callback, { capture, once, passive, signal }));
 	});
 
-	if (signal instanceof AbortSignal && (features.nativeSignal === false || features.signal === false)) {
+	if (signal instanceof AbortSignal && features.signal === false) {
 		signalAborted(signal).finally(() => {
 			removeListener(targets, events, callback, { capture, once, passive, signal });
 		});
