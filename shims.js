@@ -11,24 +11,6 @@ if (typeof globalThis === 'undefined') {
 	}
 }
 
-if (! ('EventTarget' in globalThis)) {
-	globalThis.EventTarget = class EventTarget extends HTMLUnknownElement {};
-}
-
-if (! globalThis.hasOwnProperty('CustomEvent')) {
-	globalThis.CustomEvent = class CustomEvent {
-		constructor(event, {
-			bubbles = false,
-			cancelable = false,
-			detail = null
-		} = {}) {
-			const evt = document.createEvent('CustomEvent');
-			evt.initCustomEvent(event, bubbles, cancelable, detail);
-			return evt;
-		}
-	};
-}
-
 if (! globalThis.hasOwnProperty('AggregateError')) {
 	window.AggregateError = class AggregateError extends Error {
 		constructor(errors, message) {
@@ -184,30 +166,6 @@ if (! (Array.prototype.at instanceof Function)) {
 	}
 }
 
-if (! (Array.from instanceof Function)) {
-	Array.from = function(args, mapFn, thisArg) {
-		if (mapFn instanceof Function) {
-			return typeof thisArg === 'undefined'
-				? Array.prototype.slice.call(args).map(mapFn)
-				: Array.prototype.slice.call(args).map(mapFn.bind(thisArg));
-		} else {
-			return Array.prototype.slice.call(args);
-		}
-	};
-}
-
-if (! (Array.of instanceof Function)) {
-	Array.of = function() {
-		return Array.from(arguments);
-	};
-}
-
-if (! (Object.entries instanceof Function)) {
-	Object.entries = function(obj) {
-		return Object.keys(obj).map(key => [key, obj[key]]);
-	};
-}
-
 if (! (Object.fromEntries instanceof Function)) {
 	Object.fromEntries = function(arr) {
 		if (Array.isArray(arr)) {
@@ -275,37 +233,6 @@ if (! ('globalPrivacyControl' in Navigator.prototype)) {
 	Object.defineProperty(Navigator.prototype, 'globalPrivacyControl', {
 		get: () => false,
 	});
-}
-
-
-if (! (NodeList.prototype.forEach instanceof Function)) {
-	NodeList.prototype.forEach = function(callback, thisArg) {
-		Array.prototype.forEach.call(this, callback, thisArg);
-	};
-}
-
-if (! (NodeList.prototype.keys instanceof Function)) {
-	NodeList.prototype.keys = function* keys() {
-		for (let n = 0; n < this.length; n++) {
-			yield n;
-		}
-	};
-}
-
-if (! (NodeList.prototype.values instanceof Function)) {
-	NodeList.prototype.values = function* values() {
-		for (let n = 0; n < this.length; n++) {
-			yield this.item(n);
-		}
-	};
-}
-
-if (! (NodeList.prototype.entries instanceof Function)) {
-	NodeList.prototype.entries = function* entries() {
-		for (let n = 0; n < this.length; n++) {
-			yield [n, this.item(n)];
-		}
-	};
 }
 
 if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
