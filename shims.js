@@ -1,4 +1,5 @@
 import CookieStore from  './CookieStore.js';
+import { uuidv4 } from './uuid.js';
 
 if (typeof globalThis === 'undefined') {
 	/* global global: true */
@@ -240,6 +241,10 @@ if (! ('globalPrivacyControl' in Navigator.prototype)) {
 	Object.defineProperty(Navigator.prototype, 'globalPrivacyControl', {
 		get: () => false,
 	});
+}
+
+if (! (crypto.randomUUID instanceof Function)) {
+	crypto.randomUUID = uuidv4;
 }
 
 if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
