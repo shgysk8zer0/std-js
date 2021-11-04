@@ -198,7 +198,7 @@ if (! (navigator.canShare instanceof Function)) {
 		} else {
 			return [title, text, url].some(arg => typeof arg === 'string' && arg.length !== 0);
 		}
-	}
+	};
 }
 
 if (! (navigator.setAppBadge instanceof Function)) {
