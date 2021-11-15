@@ -1,3 +1,4 @@
+/* global SpeechSynthesis, SpeechSynthesisVoice, SpeechSynthesisUtterance */
 import { getDeferred } from './promises.js';
 
 export async function speak(text, { signal, pitch = 1, rate = 1, volume = 1, lang = navigator.language, voice } = {}) {
@@ -19,7 +20,7 @@ export async function speak(text, { signal, pitch = 1, rate = 1, volume = 1, lan
 			speech.voice = speechSynthesis.getVoices().find(({ name }) => name === voice);
 		}
 
-		speech.addEventListener('end', ev => {
+		speech.addEventListener('end', () => {
 			resolve();
 			controller.abort();
 		}, { signal: controller.signal });
