@@ -17,7 +17,7 @@ export async function speak(text, { signal, pitch = 1, rate = 1, volume = 1, lan
 		if (voice instanceof SpeechSynthesisVoice) {
 			speech.voice = voice;
 		} else if (typeof voice === 'string') {
-			speech.voice = speechSynthesis.getVoices().find(({ name }) => name === voice);
+			speech.voice = globalThis.speechSynthesis.getVoices().find(({ name }) => name === voice);
 		}
 
 		speech.addEventListener('end', () => {
