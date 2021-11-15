@@ -1,4 +1,4 @@
-/* global SpeechSynthesis, SpeechSynthesisVoice, SpeechSynthesisUtterance */
+/* global SpeechSynthesis, SpeechSynthesisVoice */
 import { getDeferred } from './promises.js';
 
 export async function speak(text, { signal, pitch = 1, rate = 1, volume = 1, lang = navigator.language, voice } = {}) {
