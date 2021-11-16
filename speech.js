@@ -1,51 +1,60 @@
-/* global SpeechSynthesis, SpeechSynthesisVoice */
+/* global SpeechSynthesisVoice */
 import { getDeferred } from './promises.js';
 
-export async function speak(text, { signal, pitch = 1, rate = 1, volume = 1, lang = navigator.language, voice } = {}) {
-	if (! (globalThis.speechSynthesis instanceof SpeechSynthesis)) {
-		return Promise.reject(new Error('Speech synthesis not supported'));
+export async function speak(text, { signal, rate = 1, pitch = 1, volume = 1, voice } = {}) {
+	const { resolve, reject, promise } = getDeferred();
+
+	if (! ('speechSynthesis' in globalThis)) {
+		reject(new DOMException('SpeechSynthesis not supported'));
 	} else {
-		const speech = new SpeechSynthesisUtterance(text);
+		const utterance = new SpeechSynthesisUtterance(text);
 		const controller = new AbortController();
-		const { resolve, reject, promise } = getDeferred();
 
-		speech.rate = Math.max(0, Math.min(rate, 1));
-		speech.pitch = Math.max(0, Math.min(pitch, 1));
-		speech.volume = Math.max(0, Math.min(volume, 1));
-		speech.lang = lang;
+		utterance.volume = Math.min(Math.max(0, volume), 1);
+		utterance.pitch = Math.min(Math.max(0, pitch), 1);
+		utterance.rate = Math.min(Math.max(0, rate), 1);
 
-		if (voice instanceof SpeechSynthesisVoice) {
-			speech.voice = voice;
-		} else if (typeof voice === 'string') {
-			speech.voice = globalThis.speechSynthesis.getVoices().find(({ name }) => name === voice);
+		if ('SpeechSynthesisVoice' in globalThis) {
+			if (voice instanceof SpeechSynthesisVoice) {
+				utterance.voice = voice;
+			} else if (typeof voice === 'string' && voice.length !== 0) {
+				const found = globalThis.speechSynthesis.getVoices().find(({ name }) => name === voice);
+				if (found instanceof SpeechSynthesisVoice) {
+					utterance.voice = found;
+				}
+			}
 		}
 
-		speech.addEventListener('end', () => {
+		utterance.addEventListener('end', () => {
 			resolve();
 			controller.abort();
 		}, { signal: controller.signal });
 
-		speech.addEventListener('error', ev => {
-			reject(ev);
+		utterance.addEventListener('error', () => {
+			reject(new DOMException('Speech cancelled'));
 			controller.abort();
 		}, { signal: controller.signal });
 
 		if (signal instanceof AbortSignal) {
 			if (signal.aborted) {
-				reject(new Error('Speech Aborted'));
 				controller.abort();
 			} else {
-				globalThis.speechSynthesis.speak(speech);
+				globalThis.speechSynthesis.speak(utterance);
+
 				signal.addEventListener('abort', () => {
-					reject(new Error('Signal aborted'));
+					reject(new DOMException('Signal aborted'));
 					controller.abort();
-					globalThis.speechSynthesis.cancel();
 				}, { signal: controller.signal });
 			}
-		} else {
-			globalThis.speechSynthesis.speak(speech);
-		}
 
-		return promise;
+			controller.signal.addEventListener('abort', () => {
+				globalThis.speechSynthesis.cancel();
+			}, { once: true });
+		}
+		else {
+			globalThis.speechSynthesis.speak(utterance);
+		}
 	}
+
+	return promise;
 }
