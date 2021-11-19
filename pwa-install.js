@@ -75,8 +75,9 @@ export async function registerButton(el) {
 				if (! resolved) {
 					reject(new DOMException('Installation aborted'));
 				}
+
 				installController.abort();
 			}, { once: true });
-		})
+		});
 	}
 }
