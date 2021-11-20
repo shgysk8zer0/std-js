@@ -1,8 +1,13 @@
-export const controller = new AbortController();
-
-export const signal = controller.signal;
-
 export const supported = 'serviceWorker' in navigator && navigator.serviceWorker.register instanceof Function;
+export const controller = new AbortController();
+export const signal = controller.signal;
+export const aborted = new Promise(resolve => {
+	if (signal.aborted) {
+		resolve();
+	} else {
+		signal.addEventListener('abort', () => resolve(), { once: true });
+	}
+});
 
 export const promise = new Promise((resolve, reject) => {
 	if (! supported) {
@@ -33,51 +38,35 @@ export async function registerButton(el) {
 
 		return await new Promise((resolve, reject) => {
 			let resolved = false;
-			const installController = new AbortController();
-			signal.addEventListener('abort', () => {
+			aborted.then(() => {
 				el.disabled = true;
-				installController.abort();
-			}, { once: true });
-
-			installController.signal.addEventListener('abort', () => {
-				el.disabled = true;
-				if (! controller.signal.aborted) {
-					controller.abort();
-				}
 				if (! resolved) {
-					reject(new DOMException('Installation aborted'));
 					resolved = true;
+					reject(new DOMException('Installation aborted'));
 				}
-			}, { signal, once: true });
+			});
 
 			el.addEventListener('click', async () => {
-				const [outcome] = await Promise.all([
+				const afterInstall =  new CustomEvent('afterinstallprompt');
+				afterInstall.platforms = platforms;
+				afterInstall.userResponse = await Promise.all([
 					event.userResponse,
 					event.prompt(),
-				]);
+				]).then(([resp]) => resp);
 
-
-				el.dispatchEvent(new CustomEvent('afterinstallprompt', { detail: outcome }));
+				el.dispatchEvent(afterInstall);
 				el.disabled = true;
 
-				if (outcome === 'accepted') {
-					resolve({ outcome, platforms });
-				} else {
-					reject(new DOMException('User aborted installation'));
+				if (afterInstall.userResponse === 'accepted') {
 					resolved = true;
+					resolve({ userResponse: afterInstall.userResponse, platforms });
+					controller.abort();
+				} else {
+					resolved = true;
+					reject(new DOMException('User aborted installation'));
+					controller.abort();
 				}
-
-				resolved = true;
-				requestIdleCallback(() => controller.abort());
 			}, { signal });
-
-			signal.addEventListener('abort', () => {
-				if (! resolved) {
-					reject(new DOMException('Installation aborted'));
-				}
-
-				installController.abort();
-			}, { once: true });
 		});
 	}
 }
