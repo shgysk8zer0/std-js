@@ -15,6 +15,7 @@ export const promise = new Promise((resolve, reject) => {
 		reject(new DOMException('Service Worker not supported'));
 	} else {
 		globalThis.addEventListener('beforeinstallprompt', event => {
+			event.preventDefault();
 			resolve(event);
 		}, { signal, once: true });
 
