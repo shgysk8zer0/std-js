@@ -37,7 +37,7 @@ if (! ('cookieStore' in globalThis)) {
 	globalThis.cookieStore = new CookieStore();
 }
 
-if (! (Math.clamp instanceof Function) {
+if (! (Math.clamp instanceof Function)) {
 	Math.clamp = function(value, min, max) {
 		return Math.min(Math.max(value, min), max);
 	};
@@ -46,7 +46,7 @@ if (! (Math.clamp instanceof Function) {
 /*
  * Question of if it will be `Math.clamp` or `Math.constrain`
  */
-if (! (Math.constrain instanceof Function) {
+if (! (Math.constrain instanceof Function)) {
 	Math.constrain = Math.clamp;
 }
 
