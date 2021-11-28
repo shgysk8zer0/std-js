@@ -37,6 +37,19 @@ if (! ('cookieStore' in globalThis)) {
 	globalThis.cookieStore = new CookieStore();
 }
 
+if (! (Math.clamp instanceof Function) {
+	Math.clamp = function(value, min, max) {
+		return Math.min(Math.max(value, min), max);
+	};
+}
+
+/*
+ * Question of if it will be `Math.clamp` or `Math.constrain`
+ */
+if (! (Math.constrain instanceof Function) {
+	Math.constrain = Math.clamp;
+}
+
 if ('Promise' in globalThis && ! (Promise.prototype.finally instanceof Function)) {
 	Promise.prototype.finally = function(callback) {
 		return this.then(async val => {
