@@ -12,6 +12,10 @@ export class Lock {
 			name = name.toString();
 		}
 
+		if (name.startsWith('-')) {
+			throw new DOMException('Names starting with `-` are reserved');
+		}
+
 		protectedData.set(this, { name, mode });
 	}
 
