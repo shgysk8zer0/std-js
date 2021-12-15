@@ -14,17 +14,23 @@ export function polyfill() {
 	}
 }
 
+function isAsync(callback) {
+	return callback instanceof Function && callback.constructor.name === 'AsyncFunction';
+}
+
 function shouldPend({ name, mode }) {
 	switch(mode) {
-		case 'exclusive': return [...locks.keys()].some(lock => lock.name === name);
-		case 'shared': return [...locks.keys()].some(lock => lock.name === name && lock.mode === 'exclusive');
+		case 'exclusive': return getLocks().some(lock => lock.name === name);
+		case 'shared': return getLocks().some(lock => lock.name === name && lock.mode === 'exclusive');
 	}
 }
 
 function stealLocks(name) {
 	[...locks.entries()].filter(([lock]) => lock.name === name).forEach(([lock, { reject, controller }]) => {
-		locks.delete(lock);
-		controller.abort();
+		requestIdleCallback(() => {
+			controller.abort();
+			locks.delete(lock);
+		});
 		reject(new DOMException('The lock request is aborted'));
 	});
 }
@@ -54,16 +60,33 @@ function isPending(lock) {
 	return lock instanceof Lock && locks.has(lock) && locks.get(lock).pending;
 }
 
-function getLocks() {
-	return [...locks.keys()];
+function getLocks(name) {
+	if (typeof name === 'string') {
+		return [...locks.keys()].filter(lock => lock.name === name);
+	} else {
+		return [...locks.keys()]
+	}
 }
 
-function getHeldLocks() {
-	return getLocks().filter(lock => ! isPending(lock));
+function getHeldLocks(name) {
+	return getLocks(name).filter(lock => ! isPending(lock));
 }
 
-function getPendingLocks() {
-	return getLocks().filter(lock => isPending(lock));
+function getPendingLocks(name) {
+	return getLocks(name).filter(lock => isPending(lock));
+}
+
+async function whenNotBlocked(lock) {
+	switch(lock.mode) {
+		case 'exclusive':
+			await Promise.allSettled(getLocks()
+				.filter(l => l.name === lock.name && l !== lock).map(whenReleased));
+			break;
+		case 'shared':
+			await Promise.allSettled(getLocks()
+				.filter(l => l.name === lock.name && l.mode === 'exclusive' && l !== lock).map(whenReleased));
+				break;
+	}
 }
 
 function getLockSignal(lock) {
@@ -79,14 +102,23 @@ async function executeLock(lock) {
 			if (pending) {
 				setPending(lock, false);
 			}
-			try {
-				const result = await callback(lock);
-				resolve(result);
-			} catch(err) {
-				reject(err);
-			} finally {
-				locks.delete(lock);
-				controller.abort();
+
+			if (isAsync(callback)) {
+				callback.call(globalThis, lock).then(resolve, reject).finally(() => {
+					locks.delete(lock);
+					requestIdleCallback(() => controller.abort());
+				});
+			} else {
+				try {
+					const result = callback.call(globalThis, lock);
+					resolve(result);
+				} catch(err) {
+					reject(err);
+				} finally {
+					locks.delete(lock);
+					controller.abort();
+				}
+
 			}
 		});
 
@@ -115,6 +147,10 @@ export class LockManager {
 			[opts, callback] = args;
 		}
 
+		if (! typeof name === 'string') {
+			name = name.toString();
+		}
+
 		const { mode = 'exclusive', ifAvailable = false, steal = false, signal } = opts;
 
 		if (! ['exclusive', 'shared'].includes(mode)) {
@@ -125,8 +161,8 @@ export class LockManager {
 			throw new DOMException('LockManager.request: `steal` is only supported for exclusive lock requests');
 		}
 
-		const held = getHeldLocks().filter(lock => lock.name === name);
-		const pending = getPendingLocks().filter(lock => lock.name === name);
+		const held = getHeldLocks(name);
+		const pending = getPendingLocks(name);
 		const alreadyLocked = [...held, ...pending].some(lock => lock.name === name);
 
 		if (steal && alreadyLocked) {
@@ -149,26 +185,28 @@ export class LockManager {
 
 		switch(mode) {
 			case 'exclusive': {
-				if (ifAvailable && held.length !== 0 || pending.length !== 0) {
+				if (ifAvailable && (held.length !== 0 || pending.length !== 0)) {
 					locks.delete(lock);
 					return new Promise((resolve, reject) => {
 						queueMicrotask(async () => {
 							try {
-								const result = await callback(null);
+								const result = await callback.call(globalThis, null);
 								resolve(result);
 							} catch(err) {
 								reject(err);
 							}
 						});
 					});
+				} if (ifAvailable) {
+					// I forget what to do here...
 				} else {
-					await Promise.allSettled([...held, ...pending].map(lock => whenReleased(lock)));
+					await whenNotBlocked(lock);
 					return await executeLock(lock);
 				}
 			}
 
 			case 'shared': {
-				await Promise.allSettled(held.map(lock => whenReleased(lock)));
+				await whenNotBlocked(lock);
 				return await executeLock(lock);
 			}
 
