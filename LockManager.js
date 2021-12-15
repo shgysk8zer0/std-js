@@ -203,13 +203,11 @@ export class LockManager {
 					await whenNotBlocked(lock);
 					return await executeLock(lock);
 				}
-				break;
 			}
 
 			case 'shared': {
 				await whenNotBlocked(lock);
 				return await executeLock(lock);
-				break;
 			}
 
 			default:
