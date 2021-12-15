@@ -46,7 +46,7 @@ export class AsyncLock extends EventTarget {
 
 	get whenUnlocked() {
 		return new Promise(resolve => {
-			if (! this.locked) {
+			if (this.locked) {
 				this.addEventListener('unlocked', () => resolve(), { once: true });
 			} else {
 				resolve();
