@@ -182,10 +182,12 @@ export class LockManager {
 		const lock = queueTask(name, mode, callback);
 		if (signal instanceof AbortSignal) {
 			signal.addEventListener('abort', () => {
-				const { reject, controller } = locks.get(lock);
-				locks.delete(lock);
-				reject(new DOMException('The lock request is aborted'));
-				controller.abort();
+				if (locks.has(lock)) {
+					const { reject, controller } = locks.get(lock);
+					locks.delete(lock);
+					reject(new DOMException('The lock request is aborted'));
+					controller.abort();
+				}
 			}, { once: true, signal: getLockSignal(lock) });
 		}
 
