@@ -199,8 +199,6 @@ export class LockManager {
 							}
 						});
 					});
-				} if (ifAvailable) {
-					// I forget what to do here...
 				} else {
 					await whenNotBlocked(lock);
 					return await executeLock(lock);
