@@ -128,7 +128,7 @@ export async function sleep(ms, { signal } = {}) {
 	}
 }
 
-export function getDeferred({ signal, reason = 'Operation aborted' } = {}) {
+export function getDeferred({ signal, reason = new DOMException('Operation aborted') } = {}) {
 	const deferred = {};
 
 	deferred.promise = new Promise((resolve, reject) => {
@@ -138,7 +138,7 @@ export function getDeferred({ signal, reason = 'Operation aborted' } = {}) {
 
 	if (signal instanceof EventTarget) {
 		if (signal.aborted) {
-			deferred.reject(reson);
+			deferred.reject(reason);
 		} else {
 			signal.addEventListener('abort', () => deferred.reject(reason), { once: true });
 		}
