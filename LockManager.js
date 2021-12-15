@@ -156,8 +156,8 @@ export class LockManager {
 		const { mode = 'exclusive', ifAvailable = false, steal = false, signal } = opts;
 
 		if (steal && ifAvailable) {
-		   throw new DOMException('LockManager.request: `steal` and `ifAvailable` cannot be used together');
-	   } else if (name.startsWith('-')) {
+			throw new DOMException('LockManager.request: `steal` and `ifAvailable` cannot be used together');
+		} else if (name.startsWith('-')) {
 			throw new DOMException('LockManager.request: Names starting with `-` are reserved');
 		} else if (! ['exclusive', 'shared'].includes(mode)) {
 			throw new TypeError(`LockManager.request: '${mode}' (value of 'mode' member of LockOptions) is not a valid value for enumeration LockMode.`);
