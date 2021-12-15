@@ -4,6 +4,18 @@ const protectedData = new WeakMap();
  */
 export class Lock {
 	constructor(name, mode = 'exclusive') {
+		if (! ['exclusive', 'shared'].includes(mode)) {
+			throw new TypeError(`'${mode}' (value of 'mode' member of LockOptions) is not a valid value for enumeration LockMode.`);
+		}
+
+		if (typeof name !== 'string') {
+			name = name.toString();
+		}
+
+		if (name.startsWith('-')) {
+			throw new DOMException('Names starting with `-` are reserved');
+		}
+
 		protectedData.set(this, { name, mode });
 	}
 
