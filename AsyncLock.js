@@ -31,7 +31,7 @@ export class AsyncLock extends EventTarget {
 	}
 
 	get supported() {
-		return 'locks' in navigator && navigator.locks.request instanceof Function
+		return 'locks' in navigator && navigator.locks.request instanceof Function;
 	}
 
 	get whenLocked() {
@@ -91,7 +91,7 @@ export class AsyncLock extends EventTarget {
 					}).catch(error => {
 						locks.delete(this);
 						reject(error);
-						this.dispatchEvent(new CustomEvent('error', { detail: error }))
+						this.dispatchEvent(new CustomEvent('error', { detail: error }));
 						this.dispatchEvent(new CustomEvent('unlocked', { detail: { error }}));
 					});
 				}
