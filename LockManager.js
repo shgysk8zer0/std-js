@@ -64,7 +64,7 @@ function getLocks(name) {
 	if (typeof name === 'string') {
 		return [...locks.keys()].filter(lock => lock.name === name);
 	} else {
-		return [...locks.keys()]
+		return [...locks.keys()];
 	}
 }
 
@@ -85,7 +85,7 @@ async function whenNotBlocked(lock) {
 		case 'shared':
 			await Promise.allSettled(getLocks()
 				.filter(l => l.name === lock.name && l.mode === 'exclusive' && l !== lock).map(whenReleased));
-				break;
+			break;
 	}
 }
 
@@ -147,7 +147,7 @@ export class LockManager {
 			[opts, callback] = args;
 		}
 
-		if (! typeof name === 'string') {
+		if (typeof name !== 'string') {
 			name = name.toString();
 		}
 
@@ -205,11 +205,13 @@ export class LockManager {
 					await whenNotBlocked(lock);
 					return await executeLock(lock);
 				}
+				break;
 			}
 
 			case 'shared': {
 				await whenNotBlocked(lock);
 				return await executeLock(lock);
+				break;
 			}
 
 			default:
