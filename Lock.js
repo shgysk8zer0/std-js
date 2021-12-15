@@ -8,7 +8,7 @@ export class Lock {
 			throw new TypeError(`'${mode}' (value of 'mode' member of LockOptions) is not a valid value for enumeration LockMode.`);
 		}
 
-		if (! typeof name === 'string') {
+		if (typeof name !== 'string') {
 			name = name.toString();
 		}
 
