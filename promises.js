@@ -115,13 +115,16 @@ export async function abortablePromise(promise, signal, { reason } = {}) {
 }
 
 export async function sleep(ms, { signal } = {}) {
-	if (signal instanceof AbortSignal) {
-		await Promise.race([
-			new Promise(resolve => setTimeout(() => resolve(), ms)),
-			signalAborted(signal).then(() => null)
-		]).finally(() => null);
+	if (! Number.isSafeInteger(ms) || ms < 0) {
+		throw new TypeError('`sleep()` only accepts positive integers (ms)');
 	} else {
-		await new Promise(resolve => setTimeout(() => resolve(), ms));
+		const { resolve, promise } = getDeferred({ signal });
+		const timeout = setTimeout(() => resolve(), ms);
+
+		return await promise.catch(err => {
+			clearTimeout(timeout);
+			throw err;
+		});
 	}
 }
 
@@ -133,8 +136,12 @@ export function getDeferred({ signal, reason = 'Operation aborted' } = {}) {
 		deferred.reject = reject;
 	});
 
-	if (signal instanceof AbortSignal) {
-		signal.addEventListener('abort', () => deferred.reject(reason));
+	if (signal instanceof EventTarget) {
+		if (signal.aborted) {
+			deferred.reject(reson);
+		} else {
+			signal.addEventListener('abort', () => deferred.reject(reason), { once: true });
+		}
 	}
 
 	return Object.seal(deferred);
