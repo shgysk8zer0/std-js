@@ -18,6 +18,23 @@ function isAsync(callback) {
 	return callback instanceof Function && callback.constructor.name === 'AsyncFunction';
 }
 
+async function callFunction(callback, arg = null) {
+	return new Promise((resolve, reject) => {
+		if (isAsync(callback)) {
+			callback.call(globalThis, arg).then(resolve, reject);
+		} else {
+			queueMicrotask(() => {
+				try {
+					const result = callback.call(globalThis, arg);
+					resolve(result);
+				} catch(err) {
+					reject(err);
+				}
+			});
+		}
+	});
+}
+
 function shouldPend({ name, mode }) {
 	switch(mode) {
 		case 'exclusive': return getLocks().some(lock => lock.name === name);
@@ -98,28 +115,13 @@ function getLockSignal(lock) {
 async function executeLock(lock) {
 	if (locks.has(lock)) {
 		const { resolve, reject, promise, callback, pending, controller } = locks.get(lock);
-		queueMicrotask(async () => {
-			if (pending) {
-				setPending(lock, false);
-			}
+		if (pending) {
+			setPending(lock, false);
+		}
 
-			if (isAsync(callback)) {
-				callback.call(globalThis, lock).then(resolve, reject).finally(() => {
-					locks.delete(lock);
-					requestIdleCallback(() => controller.abort());
-				});
-			} else {
-				try {
-					const result = callback.call(globalThis, lock);
-					resolve(result);
-				} catch(err) {
-					reject(err);
-				} finally {
-					locks.delete(lock);
-					controller.abort();
-				}
-
-			}
+		callFunction(callback, lock).then(resolve, reject).finally(() => {
+			locks.delete(lock);
+			requestIdleCallback(() => controller.abort());
 		});
 
 		return promise;
@@ -153,7 +155,9 @@ export class LockManager {
 
 		const { mode = 'exclusive', ifAvailable = false, steal = false, signal } = opts;
 
-		if (name.startsWith('-')) {
+		if (steal && ifAvailable) {
+			throw new DOMException('LockManager.request: `steal` and `ifAvailable` cannot be used together');
+		} else if (name.startsWith('-')) {
 			throw new DOMException('LockManager.request: Names starting with `-` are reserved');
 		} else if (! ['exclusive', 'shared'].includes(mode)) {
 			throw new TypeError(`LockManager.request: '${mode}' (value of 'mode' member of LockOptions) is not a valid value for enumeration LockMode.`);
@@ -188,16 +192,11 @@ export class LockManager {
 		switch(mode) {
 			case 'exclusive': {
 				if (ifAvailable && (held.length !== 0 || pending.length !== 0)) {
+					const controller = locks.get(lock).controller;
 					locks.delete(lock);
-					return new Promise((resolve, reject) => {
-						queueMicrotask(async () => {
-							try {
-								const result = await callback.call(globalThis, null);
-								resolve(result);
-							} catch(err) {
-								reject(err);
-							}
-						});
+					return await callFunction(callback, null).then(result => {
+						requestIdleCallback(() => controller.abort());
+						return result;
 					});
 				} else {
 					await whenNotBlocked(lock);
@@ -206,8 +205,20 @@ export class LockManager {
 			}
 
 			case 'shared': {
-				await whenNotBlocked(lock);
-				return await executeLock(lock);
+				if (! ifAvailable) {
+					await whenNotBlocked(lock);
+					return await executeLock(lock);
+				} else if ([...held, ...pending].some(lock => lock.mode === 'exclusive')) {
+					const controller = locks.get(lock).controller;
+					locks.delete(lock);
+					return await callFunction(callback, null).then(result => {
+						requestIdleCallback(() => controller.abort());
+						return result;
+					});
+				} else {
+					await whenNotBlocked(lock);
+					return await executeLock(lock);
+				}
 			}
 
 			default:
