@@ -1,36 +1,38 @@
-if (! ('AbortSignal' in window)) {
-	window.AbortError = class AbortError extends Error {};
+if (! ('AbortSignal' in globalThis)) {
+	const protectedData = new WeakMap();
+	globalThis.AbortError = class AbortError extends Error {};
 
-	window.AbortSignal = class AbortSignal extends EventTarget {
+	globalThis.AbortSignal = class AbortSignal extends EventTarget {
 		constructor() {
 			super();
 			this.onabort = null;
-			this._aborted = false;
+			protectedData.set(this, { aborted: false });
 
-			this.addEventListener('abort', () => {
+			this.addEventListener('abort', event => {
 				if (this.onabort instanceof Function) {
-					this.onabort();
+					this.onabort.call(this, event);
 				}
 			});
 		}
 
 		get aborted() {
-			return this._aborted;
+			return protectedData.get(this).aborted;
 		}
 	};
 
-	window.AbortController = class AbortController {
+	globalThis.AbortController = class AbortController {
 		constructor() {
-			this._signal = new AbortSignal();
+			protectedData.set(this, { signal: new AbortSignal() });
 		}
 
 		get signal() {
-			return this._signal;
+			return protectedData.get(this).signal;
 		}
 
 		abort() {
-			this._signal._aborted = true;
-			this._signal.dispatchEvent(new Event('abort'));
+			const signal = this.signal;
+			protectedData.set(signal, { aborted: true });
+			signal.dispatchEvent(new Event('abort'));
 		}
 	};
 }
