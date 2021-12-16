@@ -4,6 +4,10 @@ export function between(min, val, max) {
 	return val >= min && val <= max;
 }
 
+export function clamp(value, min, max) {
+	return Math.min(Math.max(value, min), max);
+}
+
 export function* range(start, end, step = 1) {
 	[start, end] = [Math.min(start, end), Math.max(start, end)];
 
@@ -14,9 +18,10 @@ export function* range(start, end, step = 1) {
 }
 
 export function* fibonacci(terms = Number.MAX_SAFE_INTEGER) {
-	if (! (Number.isInteger(terms) && Number.isSafeInteger(terms) && terms > 0)) {
-		throw new Error('Invalid terms given');
+	if (! (Number.isSafeInteger(terms) && terms > 0)) {
+		throw new TypeError('Invalid terms given');
 	}
+
 	let current = 1, prev = 1;
 	yield 1;
 

@@ -1,6 +1,10 @@
 import { when, on } from './dom.js';
 import { signalAborted } from './abort.js';
 
+export function isAsync(what) {
+	return what instanceof  Promise || what instanceof Function && what.constructor.name === 'AsyncFunction';
+}
+
 export const infinitPromise = new Promise(() => {});
 
 export async function onAnimationFrame(callback, { signal, reason = 'Operation aborted.' } = {}) {

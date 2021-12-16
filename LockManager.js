@@ -1,4 +1,4 @@
-import { getDeferred } from './promises.js';
+import { getDeferred, isAsync } from './promises.js';
 import { Lock } from './Lock.js';
 const locks = new Map();
 export const nativeSupport = 'locks' in navigator && navigator.locks.request instanceof Function;
@@ -12,10 +12,6 @@ export function polyfill() {
 	} else {
 		return false;
 	}
-}
-
-function isAsync(callback) {
-	return callback instanceof Function && callback.constructor.name === 'AsyncFunction';
 }
 
 async function callFunction(callback, arg = null) {
