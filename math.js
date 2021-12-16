@@ -6,7 +6,7 @@ export function between(min, val, max) {
 
 export function clamp(value, min, max) {
 	return Math.min(Math.max(value, min), max);
-};
+}
 
 export function* range(start, end, step = 1) {
 	[start, end] = [Math.min(start, end), Math.max(start, end)];
