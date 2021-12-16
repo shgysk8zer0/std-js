@@ -1,5 +1,7 @@
-import CookieStore from  './CookieStore.js';
-import { uuidv4 } from './uuid.js';
+/**
+ * @TODO Remove this module import and have implementing scripts handle it themselves
+ */
+import { polyfill as cookieStorePolyfill } from  './CookieStore.js';
 
 if (typeof globalThis === 'undefined') {
 	/* global global: true */
@@ -12,8 +14,10 @@ if (typeof globalThis === 'undefined') {
 	}
 }
 
+cookieStorePolyfill();
+
 if (! globalThis.hasOwnProperty('AggregateError')) {
-	window.AggregateError = class AggregateError extends Error {
+	globalThis.AggregateError = class AggregateError extends Error {
 		constructor(errors, message) {
 			if (typeof message === 'undefined') {
 				super(errors);
@@ -31,10 +35,6 @@ if (! (globalThis.reportError instanceof Function)) {
 		const { message, name, fileName: filename, lineNumber: lineno, columnNumber: colno } = error;
 		globalThis.dispatchEvent(new ErrorEvent('error', { error, message: `${name}: ${message}`, filename, lineno, colno }));
 	};
-}
-
-if (! ('cookieStore' in globalThis)) {
-	globalThis.cookieStore = new CookieStore();
 }
 
 if (! (Math.clamp instanceof Function)) {
@@ -271,7 +271,11 @@ if (! ('globalPrivacyControl' in Navigator.prototype)) {
 }
 
 if (! (crypto.randomUUID instanceof Function)) {
-	crypto.randomUUID = uuidv4;
+	crypto.randomUUID = function randomUUID() {
+		return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+			(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+		);
+	};
 }
 
 if (! Element.prototype.hasOwnProperty('toggleAttribute')) {

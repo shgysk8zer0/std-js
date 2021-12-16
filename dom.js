@@ -1,10 +1,6 @@
 import { signalAborted } from './abort.js';
 import { addListener } from './events.js';
-import { getDeferred } from './promises.js';
-
-export function isAsync(what) {
-	return what instanceof  Promise || what instanceof Function && what.constructor.name === 'AsyncFunction';
-}
+import { getDeferred, isAsync } from './promises.js';
 
 export function query(what, base = document) {
 	if (Array.isArray(what)) {
@@ -543,4 +539,43 @@ export function supportsElement(...tags) {
 	return ! tags.some(tag => document.createElement(tag) instanceof HTMLUnknownElement);
 }
 
-export { addListener };
+export function createTable(data, { caption, header, footer } = {}) {
+	const table = document.createElement('table');
+	if (Array.isArray(data)) {
+		data.forEach(row => {
+			if (Array.isArray(row)) {
+				const tr = table.insertRow();
+				row.forEach(cell => tr.insertCell().textContent = cell);
+			}
+		});
+	}
+
+	if (Array.isArray(header)) {
+		const tHead = table.createTHead();
+		const row = tHead.insertRow();
+		row.append(...header.map(cell => {
+			const th = document.createElement('th');
+			th.scope = 'col';
+			th.textContent = cell;
+			return th;
+		}));
+	}
+
+	if (Array.isArray(footer)) {
+		const tFoot = table.createTFoot();
+		const row = tFoot.insertRow();
+		row.append(...footer.map(cell => {
+			const th = document.createElement('th');
+			th.textContent = cell;
+			return th;
+		}));
+	}
+
+	if (typeof caption === 'string') {
+		table.createCaption().textContent = caption;
+	}
+
+	return table;
+}
+
+export { addListener, isAsync };

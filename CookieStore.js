@@ -7,6 +7,8 @@
  * @TODO verify spec compliance as best as is possible
  */
 
+export const nativeSupport = 'cookieStore' in globalThis;
+
 let onchange = null;
 
 function getAllCookies() {
@@ -119,7 +121,7 @@ function setter({
 	}
 }
 
-export default class CookieStore extends EventTarget {
+export class CookieStore extends EventTarget {
 	get onchange() {
 		return onchange;
 	}
@@ -196,5 +198,14 @@ export default class CookieStore extends EventTarget {
 		} else {
 			throw new TypeError('Failed to execute \'delete\' on \'CookieStore\': required member name is undefined.');
 		}
+	}
+}
+
+export function polyfill() {
+	if (! nativeSupport) {
+		globalThis.cookieStore = new CookieStore();
+		return true;
+	} else {
+		return false;
 	}
 }
