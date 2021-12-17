@@ -20,10 +20,10 @@ export class Sanitizer {
 		// allowCustomElements = false,
 		// allowComments = false,
 		// allowAttributes, */
-		blockElements,
+		blockElements = ['iframe', 'frame'],
 		/* <template> might not be accessible without using `template.content`
 		// which would double proccessing */
-		dropElements = ['script', 'template', 'object', 'iframe', 'frame'],
+		dropElements = ['script', 'object', 'param', 'embed', 'applet'],
 		dropAttributes = [
 			'onclick', 'onload', 'onerror', 'onmouseenter', 'onmouseleave', 'onmousedown', 'onmouseup',
 			'onsubmit', 'onreset', 'onwheel', 'onscroll', 'oncontextmenu', 'onblur', 'onauxclick',
@@ -54,12 +54,8 @@ export class Sanitizer {
 			}
 
 			if (Array.isArray(dropAttributes)) {
-				dropAttributes.forEach(attr => {
-					frag.querySelectorAll(`[${attr}]`).forEach(el => el.removeAttribute(attr));
-				});
+				dropAttributes.forEach(attr => frag.querySelectorAll(`[${attr}]`).forEach(el => el.removeAttribute(attr)));
 			}
-
-			frag.querySelectorAll('form[action]').forEach(form => form.removeAttribute('action'));
 
 			return frag;
 		}
