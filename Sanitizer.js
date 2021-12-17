@@ -28,7 +28,7 @@ export class Sanitizer {
 			'onclick', 'onload', 'onerror', 'onmouseenter', 'onmouseleave', 'onmousedown', 'onmouseup',
 			'onsubmit', 'onreset', 'onwheel', 'onscroll', 'oncontextmenu', 'onblur', 'onauxclick',
 			'oninput', 'onchange', 'onkeydown', 'onkeyup', 'onkeypress', 'onformdata', 'onbeforeinput',
-			'ondblclick', 'oncut', 'onpaste', 'oninvalid', 'ondrag', 'ondragstart'
+			'ondblclick', 'oncut', 'onpaste', 'oninvalid', 'ondrag', 'ondragstart',
 			'ondragend', 'ondrop', 'onfocus', 'onmousein', 'onmouseout', 'onmousemove',
 		],
 	} = {}) {
@@ -69,7 +69,7 @@ export class Sanitizer {
 		const el = document.createElement(tag);
 		const frag = new DocumentFragment();
 		const doc = new DOMParser().parseFromString(content, 'text/html');
-		frag.append(...[...doc.head.childNodes, ...doc.body.childNodes].map(node => node.cloneNode(true)))
+		frag.append(...[...doc.head.childNodes, ...doc.body.childNodes].map(node => node.cloneNode(true)));
 		el.append(this.sanitize(frag));
 		return el;
 	}
@@ -84,7 +84,7 @@ export function polyfill() {
 		if (! (Element.prototype.setHTML instanceof Function)) {
 			Element.prototype.setHTML = function setHTML(content, sanitizer = new Sanitizer()) {
 				this.innerHTML = sanitizer.sanitizeFor(this.tagName.toLowerCase(), content).innerHTML;
-			}
+			};
 		}
 
 		return true;
