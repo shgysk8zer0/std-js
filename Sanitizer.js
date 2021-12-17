@@ -85,7 +85,6 @@ export class Sanitizer {
 
 export function setHTML(el, content, sanitizer = new Sanitizer()) {
 	const frag = sanitizer.sanitizeFor(el.tagName.toLowerCase(), content);
-	console.log({ frag });
 	el.replaceChildren(...frag.childNodes);
 }
 
@@ -97,7 +96,7 @@ export function polyfill() {
 
 		if (! (Element.prototype.setHTML instanceof Function)) {
 			Element.prototype.setHTML = function setHTML(content, sanitizer = new Sanitizer()) {
-				setHTML(el, content, sanitizer);
+				setHTML(this, content, sanitizer);
 			};
 		}
 
