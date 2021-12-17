@@ -15,35 +15,27 @@ export const nativeSupport = 'Sanitizer' in globalThis;
  *        as it may involve a lot of querying & modifying.
  */
 export class Sanitizer {
-	constructor({
-		/* allowElements,
-		// allowCustomElements = false,
-		// allowComments = false,
-		// allowAttributes, */
-		blockElements = ['iframe', 'frame'],
-		/* <template> might not be accessible without using `template.content`
-		// which would double proccessing */
-		dropElements = ['script', 'object', 'param', 'embed', 'applet'],
-		dropAttributes = [
-			'onclick', 'onload', 'onerror', 'onmouseenter', 'onmouseleave', 'onmousedown', 'onmouseup',
-			'onsubmit', 'onreset', 'onwheel', 'onscroll', 'oncontextmenu', 'onblur', 'onauxclick',
-			'oninput', 'onchange', 'onkeydown', 'onkeyup', 'onkeypress', 'onformdata', 'onbeforeinput',
-			'ondblclick', 'oncut', 'onpaste', 'oninvalid', 'ondrag', 'ondragstart',
-			'ondragend', 'ondrop', 'onfocus', 'onmousein', 'onmouseout', 'onmousemove',
-		],
-	} = {}) {
-		protectedData.set(this, { dropElements, dropAttributes, blockElements });
+	constructor(...args) {
+		if (args.length !== 0) {
+			throw new Error('Sanitizer API is not yet stable, so contructor arguments are not yet supported');
+		}
+
+		protectedData.set(this, Sanitizer.getDefaultConfiguration());
 	}
 
-	sanitize(doc) {
-		if (doc instanceof Document) {
+	getConfiguration() {
+		return protectedData.get(this);
+	}
+
+	sanitize(input) {
+		if (input instanceof Document) {
 			const frag = new DocumentFragment();
-			frag.append(...[...doc.head.childNodes, ...doc.body.childNodes].map(node => node.cloneNode(true)));
+			frag.append(...[...input.head.childNodes, ...input.body.childNodes].map(node => node.cloneNode(true)));
 			return this.sanitize(frag);
-		} else if (doc instanceof DocumentFragment) {
+		} else if (input instanceof DocumentFragment) {
 			/* It'd be great if this could be moved to a worker script... */
-			const frag = doc.cloneNode(true);
-			const { blockElements, dropElements, dropAttributes } = protectedData.get(this);
+			const frag = input.cloneNode(true);
+			const { blockElements, dropElements, dropAttributes } = this.getConfiguration();
 
 			if (Array.isArray(blockElements)) {
 				blockElements.forEach(tag => frag.querySelectorAll(tag).forEach(el => el.replaceWith(...el.childNodes)));
@@ -57,18 +49,43 @@ export class Sanitizer {
 				dropAttributes.forEach(attr => frag.querySelectorAll(`[${attr}]`).forEach(el => el.removeAttribute(attr)));
 			}
 
+			frag.querySelectorAll('[href^="javascript:"]').forEach(el => el.removeAttribute('href'));
+
+
 			return frag;
 		}
 	}
 
 	sanitizeFor(tag, content) {
 		const el = document.createElement(tag);
-		const frag = new DocumentFragment();
-		const doc = new DOMParser().parseFromString(content, 'text/html');
-		frag.append(...[...doc.head.childNodes, ...doc.body.childNodes].map(node => node.cloneNode(true)));
-		el.append(this.sanitize(frag));
+		el.append(this.sanitize(new DOMParser().parseFromString(content, 'text/html')));
 		return el;
 	}
+
+	static getDefaultConfiguration() {
+		return {
+			/* allowElements,
+			// allowCustomElements: false,
+			// allowComments: false,
+			// allowAttributes, */
+			blockElements: ['iframe', 'frame'],
+			/* <template> might not be accessible without using `template.content`
+			// which would double proccessing */
+			dropElements: ['script', 'object', 'param', 'embed', 'applet'],
+			dropAttributes: [
+				'onclick', 'onload', 'onerror', 'onmouseenter', 'onmouseleave', 'onmousedown', 'onmouseup',
+				'onsubmit', 'onreset', 'onwheel', 'onscroll', 'oncontextmenu', 'onblur', 'onauxclick',
+				'oninput', 'onchange', 'onkeydown', 'onkeyup', 'onkeypress', 'onformdata', 'onbeforeinput',
+				'ondblclick', 'oncut', 'onpaste', 'oninvalid', 'ondrag', 'ondragstart',
+				'ondragend', 'ondrop', 'onfocus', 'onmousein', 'onmouseout', 'onmousemove',
+			],
+		};
+	}
+}
+
+export function setHTML(el, content, sanitizer = new Sanitizer()) {
+	const frag = sanitizer.sanitizeFor(el.tagName.toLowerCase(), content);
+	el.replaceChildren(...frag.childNodes);
 }
 
 export function polyfill() {
@@ -79,7 +96,7 @@ export function polyfill() {
 
 		if (! (Element.prototype.setHTML instanceof Function)) {
 			Element.prototype.setHTML = function setHTML(content, sanitizer = new Sanitizer()) {
-				this.innerHTML = sanitizer.sanitizeFor(this.tagName.toLowerCase(), content).innerHTML;
+				setHTML(this, content, sanitizer);
 			};
 		}
 

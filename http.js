@@ -147,11 +147,12 @@ export async function getHTML(url, {
 	timeout = null,
 	head = true,
 	asFrag = true,
+	sanitizer = undefined,
 } = {}) {
 	const html = await getText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout });
 
-	return parse(html, { head, asFrag });
+	return parse(html, { head, asFrag, sanitizer });
 }
 
 export async function getText(url, {
