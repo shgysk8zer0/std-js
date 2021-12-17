@@ -386,8 +386,12 @@ export function text(what, text, { base } = {}) {
 	return each(what, el => el.textContent = text, { base });
 }
 
-export function html(what, text, { base } = {}) {
-	return each(what, el => el.innerHTML = text, { base });
+export function html(what, text, { base, sanitizer } = {}) {
+	if (typeof sanitizer !== 'undefined' && sanitizer.setHTML instanceof Function) {
+		return each(what, el => el.setHTML(text, sanitizer), base);
+	} else {
+		return each(what, el => el.innerHTML = text, { base });
+	}
 }
 
 export function on(what, when, ...args) {
@@ -459,24 +463,26 @@ export async function loaded({ signal } = {}) {
 /**
  * @deprecated [will be removed in v3.0.0]
  */
-export function parseHTML(text, { type = 'text/html', asFrag = true, head = true } = {}) {
+export function parseHTML(text, { type = 'text/html', asFrag = true, head = true, sanitizer } = {}) {
 	console.warn('`parseHTML` is deprecated. Please use `parse` instead');
-	return parse(text, { type, asFrag, head });
+	return parse(text, { type, asFrag, head, sanitizer });
 }
 
-export function parse(text, { type = 'text/html', asFrag = true, head = true } = {}) {
+export function parse(text, { type = 'text/html', asFrag = true, head = true, sanitizer } = {}) {
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(text, type);
 
-	if (asFrag === false) {
+	if (typeof sanitizer !== 'undefined' && sanitizer.sanitize instanceof Function) {
+		return sanitizer.sanitize(doc);
+	} else if (asFrag === false) {
 		return doc;
 	} else if (head === false) {
 		const frag = new DocumentFragment();
-		frag.append(...doc.body.children);
+		frag.append(...doc.body.childNodes);
 		return frag;
 	} else {
 		const frag = new DocumentFragment();
-		frag.append(...doc.head.children, ...doc.body.children);
+		frag.append(...doc.head.childNodes, ...doc.body.childNodes);
 		return frag;
 	}
 }
