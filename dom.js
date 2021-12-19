@@ -468,23 +468,28 @@ export function parseHTML(text, { type = 'text/html', asFrag = true, head = true
 	return parse(text, { type, asFrag, head, sanitizer });
 }
 
-export function parse(text, { type = 'text/html', asFrag = true, head = true, sanitizer } = {}) {
-	const parser = new DOMParser();
-	const doc = parser.parseFromString(text, type);
-
-	if (typeof sanitizer !== 'undefined' && sanitizer.sanitize instanceof Function) {
-		return sanitizer.sanitize(doc);
-	} else if (asFrag === false) {
-		return doc;
-	} else if (head === false) {
-		const frag = new DocumentFragment();
-		frag.append(...doc.body.childNodes);
-		return frag;
+export function parse(text, { type = 'text/html', asFrag = true, sanitizer } = {}) {
+	if (asFrag === false) {
+		return new DOMParser().parseFromString(text, type);
 	} else {
-		const frag = new DocumentFragment();
-		frag.append(...doc.head.childNodes, ...doc.body.childNodes);
-		return frag;
+		return parseAsFragment(text, { sanitizer });
 	}
+}
+
+export function documentToFragment(doc, { sanitizer } = {}) {
+	const clone = document.cloneNode(true);
+	const frag = document.createDocumentFragment();
+	frag.append(...clone.head.childNodes, ...clone.body.childNodes);
+	return typeof sanitizer !== 'undefined' && sanitizer.sanitize instanceof Function
+		? sanitizer.sanitize(frag) : frag;
+}
+
+export function parseAsFragment(text, { sanitizer } = {}) {
+	const tmp = document.createElement('template');
+	tmp.innerHTML = text;
+	return typeof sanitizer !== 'undefined' && sanitizer.sanitize instanceof Function
+		? sanitizer.sanitize(tmp.content)
+		: tmp.content;
 }
 
 export function animate(what, keyframes, opts = { duration: 400 }) {

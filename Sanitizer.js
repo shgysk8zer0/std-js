@@ -1,6 +1,7 @@
 const protectedData = new WeakMap();
 export const nativeSupport = 'Sanitizer' in globalThis;
 import { SanitizerConfig as defaultConfig } from './SanitizerConfig.js';
+import { parseAsFragment, documentToFragment } from './dom.js';
 
 /**
  * @SEE https://developer.mozilla.org/en-US/docs/Web/API/Sanitizer/Sanitizer
@@ -36,17 +37,14 @@ export class Sanitizer {
 
 	sanitize(input) {
 		if (input instanceof Document) {
-			const frag = new DocumentFragment();
-			const clone = input.cloneNode(true);
-			frag.append(...clone.head.childNodes, ...clone.body.childNodes);
-			return this.sanitize(frag);
+			return this.sanitize(documentToFragment(input));
 		} else if (input instanceof DocumentFragment) {
 			/* It'd be great if this could be moved to a worker script... */
 			const frag = input.cloneNode(true);
 			const {
 				allowElements, allowAttributes, allowComments, allowCustomElements,
 				blockElements,
-			 } = this.getConfiguration();
+			} = this.getConfiguration();
 
 			/* eslint no-inner-declarations: 0 */
 			const sanitizeNode = function sanitizeNode(node) {
@@ -56,6 +54,7 @@ export class Sanitizer {
 
 					case Node.ELEMENT_NODE: {
 						const tag = node.tagName.toLowerCase();
+
 						if (Array.isArray(blockElements) && blockElements.includes(tag)) {
 							node.childNodes.forEach(sanitizeNode);
 							node.replaceWith(...node.childNodes);
@@ -103,7 +102,7 @@ export class Sanitizer {
 
 	sanitizeFor(tag, content) {
 		const el = document.createElement(tag);
-		el.append(this.sanitize(new DOMParser().parseFromString(content, 'text/html')));
+		el.append(this.sanitize(parseAsFragment(content)));
 		return el;
 	}
 
@@ -121,9 +120,7 @@ export function polyfill() {
 	if (!('Sanitizer' in globalThis)) {
 		globalThis.Sanitizer = Sanitizer;
 	} else if (! (globalThis.Sanitizer.getDefaultConfiguration instanceof Function)) {
-		globalThis.Sanitizer.getDefaultConfiguration = function getDefaultConfiguration() {
-			return defaultConfig;
-		};
+		globalThis.Sanitizer.getDefaultConfiguration = () => defaultConfig;
 	}
 
 	if (! (Element.prototype.setHTML instanceof Function)) {
