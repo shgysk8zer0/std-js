@@ -121,6 +121,10 @@ export function polyfill() {
 
 	if (!('Sanitizer' in globalThis)) {
 		globalThis.Sanitizer = Sanitizer;
+	} else if (! (globalThis.Sanitizer.getDefaultConfiguration instanceof Function)) {
+		globalThis.Sanitizer.getDefaultConfiguration = function getDefaultConfiguration() {
+			return defaultConfig;
+		};
 	}
 
 	if (! (Element.prototype.setHTML instanceof Function)) {
