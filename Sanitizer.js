@@ -118,7 +118,6 @@ export function setHTML(el, content, sanitizer = new Sanitizer()) {
 }
 
 export function polyfill() {
-
 	if (!('Sanitizer' in globalThis)) {
 		globalThis.Sanitizer = Sanitizer;
 	} else if (! (globalThis.Sanitizer.getDefaultConfiguration instanceof Function)) {
