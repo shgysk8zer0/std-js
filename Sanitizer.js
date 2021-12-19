@@ -1,13 +1,14 @@
 const protectedData = new WeakMap();
 export const nativeSupport = 'Sanitizer' in globalThis;
+import { SanitizerConfig as defaultConfig } from './SanitizerConfig.js';
+import { parseAsFragment, documentToFragment } from './dom.js';
 
 /**
  * @SEE https://developer.mozilla.org/en-US/docs/Web/API/Sanitizer/Sanitizer
  * @SEE https://wicg.github.io/sanitizer-api/
- *
  * @TODO: Figure out handdling of `allowCustomElements` & `allowComments`
  * @TODO: Expand list of `blockAttributes`, especially all `on*`
- * @TODO: Figure out how to handle `allowElements`, `alloeAttributes`, and how each
+ * @TODO: Figure out how to handle `allowElements`, `allowAttributes`, and how each
  *        works with their `block*` and `drop*` counterparts.
  *
  * @NOTE: The spec is still under development and is likely to change.
@@ -15,12 +16,19 @@ export const nativeSupport = 'Sanitizer' in globalThis;
  *        as it may involve a lot of querying & modifying.
  */
 export class Sanitizer {
-	constructor(...args) {
-		if (args.length !== 0) {
-			throw new Error('Sanitizer API is not yet stable, so contructor arguments are not yet supported');
-		}
-
-		protectedData.set(this, Sanitizer.getDefaultConfiguration());
+	constructor({
+		allowElements       = defaultConfig.allowElements,
+		allowComments       = defaultConfig.allowComments,
+		allowAttributes     = defaultConfig.allowAttributes,
+		allowCustomElements = defaultConfig.allowCustomElements,
+		blockAttributes     = defaultConfig.blockAttributes,
+		blockElements       = defaultConfig.blockElements,
+		dropAttributes      = defaultConfig.dropAttributes,
+	} = {}) {
+		protectedData.set(this,{
+			allowElements, allowComments, allowAttributes, allowCustomElements,
+			blockAttributes, blockElements, dropAttributes,
+		});
 	}
 
 	getConfiguration() {
@@ -29,57 +37,77 @@ export class Sanitizer {
 
 	sanitize(input) {
 		if (input instanceof Document) {
-			const frag = new DocumentFragment();
-			frag.append(...[...input.head.childNodes, ...input.body.childNodes].map(node => node.cloneNode(true)));
-			return this.sanitize(frag);
+			return this.sanitize(documentToFragment(input));
 		} else if (input instanceof DocumentFragment) {
 			/* It'd be great if this could be moved to a worker script... */
 			const frag = input.cloneNode(true);
-			const { blockElements, dropElements, dropAttributes } = this.getConfiguration();
+			const {
+				allowElements, allowAttributes, allowComments, allowCustomElements,
+				blockElements,
+			} = this.getConfiguration();
 
-			if (Array.isArray(blockElements)) {
-				blockElements.forEach(tag => frag.querySelectorAll(tag).forEach(el => el.replaceWith(...el.childNodes)));
-			}
+			/* eslint no-inner-declarations: 0 */
+			const sanitizeNode = function sanitizeNode(node) {
+				switch(node.nodeType) {
+					case Node.TEXT_NODE:
+						break;
 
-			if (Array.isArray(dropElements)) {
-				dropElements.forEach(tag => frag.querySelectorAll(tag).forEach(el => el.remove()));
-			}
+					case Node.ELEMENT_NODE: {
+						const tag = node.tagName.toLowerCase();
 
-			if (Array.isArray(dropAttributes)) {
-				dropAttributes.forEach(attr => frag.querySelectorAll(`[${attr}]`).forEach(el => el.removeAttribute(attr)));
-			}
+						if (Array.isArray(blockElements) && blockElements.includes(tag)) {
+							node.childNodes.forEach(sanitizeNode);
+							node.replaceWith(...node.childNodes);
+						} else if (tag.includes('-') && !allowCustomElements) {
+							node.remove();
+						} else if (Array.isArray(allowElements) && ! allowElements.includes(tag)) {
+							node.remove();
+						} else if (tag === 'template') {
+							node.content.childNodes.forEach(sanitizeNode);
+						} else {
+							node.getAttributeNames().forEach(attr => {
+								const value = node.getAttribute(attr);
+								if (! (attr in allowAttributes)) {
+									node.removeAttribute(attr);
+								} else if (! ['*', tag].some(tag => allowAttributes[attr].includes(tag))) {
+									node.removeAttribute(attr);
+								} else if (['href', 'action'].includes(attr) && value.startsWith('javascript:')) {
+									node.removeAttribute(attr);
+								}
+							});
 
-			frag.querySelectorAll('[href^="javascript:"]').forEach(el => el.removeAttribute('href'));
+							if (node.hasChildNodes()) {
+								node.childNodes.forEach(sanitizeNode);
+							}
+						}
+						break;
+					}
 
+					case Node.COMMENT_NODE: {
+						if (! allowComments) {
+							node.remove();
+						}
+						break;
+					}
 
+					default:
+						node.remove();
+				}
+			};
+
+			Array.from(frag.childNodes).forEach(sanitizeNode);
 			return frag;
 		}
 	}
 
 	sanitizeFor(tag, content) {
 		const el = document.createElement(tag);
-		el.append(this.sanitize(new DOMParser().parseFromString(content, 'text/html')));
+		el.append(this.sanitize(parseAsFragment(content)));
 		return el;
 	}
 
 	static getDefaultConfiguration() {
-		return {
-			/* allowElements,
-			// allowCustomElements: false,
-			// allowComments: false,
-			// allowAttributes, */
-			blockElements: ['iframe', 'frame'],
-			/* <template> might not be accessible without using `template.content`
-			// which would double proccessing */
-			dropElements: ['script', 'object', 'param', 'embed', 'applet'],
-			dropAttributes: [
-				'onclick', 'onload', 'onerror', 'onmouseenter', 'onmouseleave', 'onmousedown', 'onmouseup',
-				'onsubmit', 'onreset', 'onwheel', 'onscroll', 'oncontextmenu', 'onblur', 'onauxclick',
-				'oninput', 'onchange', 'onkeydown', 'onkeyup', 'onkeypress', 'onformdata', 'onbeforeinput',
-				'ondblclick', 'oncut', 'onpaste', 'oninvalid', 'ondrag', 'ondragstart',
-				'ondragend', 'ondrop', 'onfocus', 'onmousein', 'onmouseout', 'onmousemove',
-			],
-		};
+		return defaultConfig;
 	}
 }
 
@@ -89,17 +117,15 @@ export function setHTML(el, content, sanitizer = new Sanitizer()) {
 }
 
 export function polyfill() {
-	if (nativeSupport) {
-		return false;
-	} else {
+	if (!('Sanitizer' in globalThis)) {
 		globalThis.Sanitizer = Sanitizer;
+	} else if (! (globalThis.Sanitizer.getDefaultConfiguration instanceof Function)) {
+		globalThis.Sanitizer.getDefaultConfiguration = () => defaultConfig;
+	}
 
-		if (! (Element.prototype.setHTML instanceof Function)) {
-			Element.prototype.setHTML = function setHTML(content, sanitizer = new Sanitizer()) {
-				setHTML(this, content, sanitizer);
-			};
-		}
-
-		return true;
+	if (! (Element.prototype.setHTML instanceof Function)) {
+		Element.prototype.setHTML = function setHTML(content, sanitizer = new globalThis.Sanitizer()) {
+			setHTML(this, content, sanitizer);
+		};
 	}
 }
