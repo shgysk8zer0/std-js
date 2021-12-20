@@ -259,6 +259,6 @@ export async function polyfill() {
 		navigator.locks = LockManager;
 	} else if (! await actuallySupported) {
 		navigator.locks.request = (...args) => LockManager.request(...args);
-		navigator.locks.query => () => LockManager.query();
+		navigator.locks.query = () => LockManager.query();
 	}
 }
