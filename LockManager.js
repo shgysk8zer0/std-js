@@ -10,7 +10,7 @@ export const actuallySupported = new Promise(resolve => {
 	if (! nativeSupport) {
 		resolve(false);
 	} else {
-		navigator.locks.request('test-lock', lock => resolve(typeof lock !== 'undefined')).catch(() => resolve(false));
+		navigator.locks.query().then(() => resolve(true)).catch(() => resolve(false));
 	}
 });
 
