@@ -3,16 +3,16 @@ import { Lock } from './Lock.js';
 const locks = new Map();
 export const nativeSupport = 'locks' in navigator && navigator.locks.request instanceof Function;
 
-export function polyfill() {
+/**
+ * Some browsing contexts (iframes) have `navigator.locks` but methods only throw
+ */
+export const actuallySupported = new Promise(resolve => {
 	if (! nativeSupport) {
-		globalThis.Lock = Lock;
-		globalThis.LockManager = LockManager;
-		navigator.locks = LockManager;
-		return true;
+		resolve(false);
 	} else {
-		return false;
+		navigator.locks.request('test-lock', lock => resolve(typeof lock !== 'undefined')).catch(() => resolve(false));
 	}
-}
+});
 
 async function callFunction(callback, arg = null) {
 	return new Promise((resolve, reject) => {
@@ -233,5 +233,32 @@ export class LockManager {
 			held: getHeldLocks().map(({ name, mode }) => ({ name, mode, clientId: null })),
 			pending: getPendingLocks().map(({ name, mode }) => ({ name, mode, clientId: null })),
 		};
+	}
+}
+
+export async function request(...args) {
+	if (await actuallySupported) {
+		return navigator.locks.request(...args);
+	} else {
+		return LockManager.request(...args);
+	}
+}
+
+export async function query() {
+	if (await actuallySupported) {
+		return navigator.locks.query();
+	} else {
+		return LockManager.query();
+	}
+}
+
+export async function polyfill() {
+	if (! nativeSupport) {
+		globalThis.Lock = Lock;
+		globalThis.LockManager = LockManager;
+		navigator.locks = LockManager;
+	} else if (! await actuallySupported) {
+		navigator.locks.request = (...args) => LockManager.request(...args);
+		navigator.locks.query = () => LockManager.query();
 	}
 }
