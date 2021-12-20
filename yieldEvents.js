@@ -4,7 +4,7 @@ import { getDeferred } from './promises.js';
 export async function *yieldEvents(target, event, { signal, passive, capture } = {}) {
 	if (! (target instanceof EventTarget)) {
 		throw new TypeError('Target is not a valid `EventTarget`');
-	} else if (typeof event === 'string') {
+	} else if (typeof event !== 'string') {
 		throw new TypeError('Not a valid event');
 	} else if (signal instanceof AbortSignal && signal.aborted) {
 		throw new DOMException('Operation aborted');
@@ -30,7 +30,7 @@ export async function *yieldEvents(target, event, { signal, passive, capture } =
 			}, { signal: controller.signal, once: true });
 		}
 
-		addListener([target], [event], callback , { signal, passive, capture });
+		addListener([target], [event], callback , { signal: controller.signal, passive, capture });
 
 		while (! controller.signal.aborted) {
 			if (typeof target[key] !== 'undefined') {
