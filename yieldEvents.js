@@ -1,27 +1,44 @@
-import { on, when } from './dom.js';
-import { isAborted } from './abort.js';
+import { addListener } from './events.js';
+import { getDeferred } from './promises.js';
 
-export async function *yieldEvents(what, events, { capture, passive, signal } = {}) {
-	const queue = [];
-	const target = new EventTarget();
+export async function *yieldEvents(target, event, { signal, passive, capture } = {}) {
+	if (! (target instanceof EventTarget)) {
+		throw new TypeError('Target is not a valid `EventTarget`');
+	} else if (typeof event !== 'string') {
+		throw new TypeError('Not a valid event');
+	} else if (signal instanceof AbortSignal && signal.aborted) {
+		throw new DOMException('Operation aborted');
+	} else {
+		const key = Symbol(`${event}-promise`);
+		const controller = new AbortController();
+		const callback = function(event) {
+			if (typeof this[key] !== 'undefined') {
+				const { resolve } = this[key];
+				delete this[key];
+				resolve(event);
+			}
+		};
 
-	on(what, events, event => {
-		queue.push(event);
-		target.dispatchEvent(new Event('enqueued'));
-	}, { capture, passive, signal });
-
-	while (! isAborted(signal)) {
-		if (queue.length === 0) {
-			await when(target, 'enqueued', { signal }).catch(() => {});
+		if (signal instanceof AbortSignal && ! signal.aborted) {
+			signal.addEventListener('abort', () => {
+				controller.abort();
+				if (typeof target[key] !== 'undefined') {
+					const { resolve } = target[key];
+					delete target[key];
+					resolve();
+				}
+			}, { signal: controller.signal, once: true });
 		}
 
-		/**
-		 * May have aborted between beginning of loop and now
-		 */
-		if (isAborted(signal)) {
-			break;
-		} else {
-			yield queue.shift();
+		addListener([target], [event], callback , { signal: controller.signal, passive, capture });
+
+		while (! controller.signal.aborted) {
+			if (typeof target[key] !== 'undefined') {
+				await target[key].promise;
+			}
+
+			target[key] = getDeferred();
+			yield await target[key].promise;
 		}
 	}
 }
