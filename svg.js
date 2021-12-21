@@ -1,10 +1,22 @@
 import { SVG, XLINK } from './namespaces.js';
 
-export function createSVG({ fill = null, height = null, width = null, label = null,
-	role = 'img', hidden = false, classList = [] } = {}) {
+export function createSVG({
+	fill = null,
+	viewBox = null,
+	height = null,
+	width = null,
+	label = null,
+	role = 'img',
+	hidden = false,
+	classList = [],
+} = {}) {
 	const svg = document.createElementNS(SVG, 'svg');
 
 	svg.setAttribute('role', role);
+
+	if (typeof viewBox === 'string') {
+		svg.setAttributeNS(null, 'viewBox', viewBox);
+	}
 
 	if (typeof label === 'string') {
 		svg.setAttribute('aria-label', label);
