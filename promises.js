@@ -1,64 +1,152 @@
 import { when, on } from './dom.js';
 import { signalAborted } from './abort.js';
-
-export function isAsync(what) {
-	return what instanceof  Promise || what instanceof Function && what.constructor.name === 'AsyncFunction';
-}
+import { checkSupport as locksSupported } from './LockManager.js';
 
 export const infinitPromise = new Promise(() => {});
 
-export async function onAnimationFrame(callback, { signal, reason = 'Operation aborted.' } = {}) {
-	const { promise, resolve, reject } = getDeferred();
+export function isAsyncFunction(what) {
+	return what instanceof Function && what.constructor.name === 'AsyncFunction';
+}
 
-	const id = requestAnimationFrame(hrts => {
-		if (! (callback instanceof Function)) {
-			reject(new TypeError('callback must be an instance of Function'));
-		} else if (callback.constructor.name === 'AsyncFunction') {
-			callback(hrts).then(resolve).catch(reject);
-		} else {
-			try {
-				resolve(callback(hrts));
-			} catch (err) {
-				reject(err);
-			}
-		}
+export function isAsync(what) {
+	return isAsyncFunction(what) || what instanceof  Promise;
+}
+
+export function getDeferred({ signal, reason = new DOMException('Operation aborted') } = {}) {
+	const deferred = {};
+
+	deferred.promise = new Promise((resolve, reject) => {
+		deferred.resolve = resolve;
+		deferred.reject = reject;
 	});
 
-	if (signal instanceof AbortSignal) {
-		signalAborted(signal).finally(() => {
-			cancelAnimationFrame(id);
-			reject(reason);
+	if (signal instanceof EventTarget) {
+		const callback = function() {
+			this.removeEventListener('abort', callback, { once: true });
+			deferred.reject(reason instanceof Error ? reason : new DOMException(console.error()));
+		};
+
+		if (signal.aborted) {
+			deferred.reject(callback());
+		} else {
+			signal.addEventListener('abort', callback, { once: true });
+			deferred.promise.finally(callback);
+		}
+	}
+
+	return Object.seal(deferred);
+}
+
+export async function callAsAsync(callback, args = [], {
+	thisArg = globalThis,
+	reason = new DOMException('Operation aborted'),
+	signal,
+} = {}) {
+	const { promise, resolve, reject } = getDeferred({ signal, reason });
+
+	if (! (callback instanceof Function)) {
+		reject(new TypeError('`callAsAsync` expects callback to be a function'));
+	} else if (! Array.isArray(args)) {
+		reject(new TypeError('`args` must be an array'));
+	} else if (signal instanceof AbortSignal && signal.aborted) {
+		reject(reason instanceof Error ? reason : new DOMException(reason));
+	} else if (isAsyncFunction(callback)) {
+		callback.call(thisArg, args).then(resolve).catch(reject);
+	} else {
+		queueMicrotask(() => {
+			try {
+				resolve(callback.call(thisArg, args));
+			} catch(err) {
+				reject(err);
+			}
 		});
 	}
 
 	return await promise;
 }
 
-export async function onIdle(callback, { timeout, signal, reason = 'Operation aborted.' } = {}) {
-	const { promise, resolve, reject } = getDeferred();
-
-	const id = requestIdleCallback(async hrts => {
-		if (! (callback instanceof Function)) {
-			reject(new TypeError('callback must be an instance of Function'));
-		} else if (callback.constructor.name === 'AsyncFunction') {
-			callback(hrts).then(resolve).catch(reject);
-		} else {
-			try {
-				resolve(callback(hrts));
-			} catch (err) {
-				reject(err);
+export async function lock(name, callback, {
+	thisArg = globalThis,
+	args = [],
+	mode = 'exclusive',
+	ifAvailable = false,
+	steal = false,
+	allowFallback = true,
+	reason = new DOMException('Operation aborted'),
+	signal,
+} = {}) {
+	if (await locksSupported()) {
+		return await navigator.locks.request(name, { mode, ifAvailable, steal, signal }, async lock => {
+			if (lock) {
+				return await callAsAsync(callback, [lock, ...args], { thisArg, signal, reason });
 			}
-		}
-	}, { timeout });
+		});
+	} else if (allowFallback) {
+		return await callAsAsync(callback, [null, ...args], { signal, thisArg, reason });
+	} else {
+		throw new DOMException('WebLocks API not supported');
+	}
+}
+
+export async function onAnimationFrame(callback, {
+	thisArg = globalThis,
+	args = [],
+	reason = new DOMException('Operation aborted.'),
+	signal,
+} = {}) {
+	const { promise, resolve, reject } = getDeferred({ signal, reason });
+	const id = requestAnimationFrame(hrts => callAsAsync(callback, [hrts, ...args], { signal, thisArg, reason }).then(resolve, reject));
 
 	if (signal instanceof AbortSignal) {
-		signalAborted(signal).finally(() => {
-			cancelIdleCallback(id);
-			reject(reason);
-		});
+		signalAborted(signal).finally(() => cancelAnimationFrame(id));
 	}
 
 	return await promise;
+}
+
+export async function onIdle(callback, {
+	timeout,
+	thisArg = globalThis,
+	args = [],
+	signal,
+	reason = new DOMException('Operation aborted.'),
+} = {}) {
+	const { promise, resolve, reject } = getDeferred({ signal, reason });
+	const id = requestIdleCallback(hrts => callAsAsync(callback, [hrts, ...args], { thisArg, signal, reason }).then(resolve, reject), { timeout });
+
+	if (signal instanceof AbortSignal) {
+		signalAborted(signal).finally(() => cancelIdleCallback(id));
+	}
+
+	return await promise;
+}
+
+export async function onTimeout(callback, {
+	timeout = 0,
+	thisArg = globalThis,
+	args = [],
+	signal,
+	reason = new DOMException('Operation aborted'),
+} = {}) {
+	const { resolve, reject, promise } = getDeferred({ signal, reason });
+
+	if (Number.isSafeInteger(timeout) && (! timeout < 0)) {
+		const id = setTimeout(() => callAsAsync(callback, args, { signal, thisArg }).then(resolve).catch(reject), timeout);
+
+		if (signal instanceof AbortSignal) {
+			signalAborted(signal).finally(() => clearTimeout(id));
+		}
+	} else {
+		reject(new TypeError('`timeout` must be a positive intege'));
+	}
+
+	return await promise;
+}
+
+export async function sleep(timeout, { signal, reason = new DOMException('Operation aborted') } = {}) {
+	const { resolve, promise } = getDeferred();
+	onTimeout(() => resolve(), { signal, reason, timeout }).catch(() => resolve());
+	await promise;
 }
 
 export async function promisifyEvents(targets, { success, fail = 'error', passive = true, capture = true } = {}) {
@@ -116,39 +204,6 @@ export async function rejectOn(targets, fail, { passive = true, capture = true }
 
 export async function abortablePromise(promise, signal, { reason } = {}) {
 	return await Promise.race([promise, signalAborted(signal, { reason })]);
-}
-
-export async function sleep(ms, { signal } = {}) {
-	if (! Number.isSafeInteger(ms) || ms < 0) {
-		throw new TypeError('`sleep()` only accepts positive integers (ms)');
-	} else {
-		const { resolve, promise } = getDeferred({ signal });
-		const timeout = setTimeout(() => resolve(), ms);
-
-		return await promise.catch(err => {
-			clearTimeout(timeout);
-			throw err;
-		});
-	}
-}
-
-export function getDeferred({ signal, reason = new DOMException('Operation aborted') } = {}) {
-	const deferred = {};
-
-	deferred.promise = new Promise((resolve, reject) => {
-		deferred.resolve = resolve;
-		deferred.reject = reject;
-	});
-
-	if (signal instanceof EventTarget) {
-		if (signal.aborted) {
-			deferred.reject(reason);
-		} else {
-			signal.addEventListener('abort', () => deferred.reject(reason), { once: true });
-		}
-	}
-
-	return Object.seal(deferred);
 }
 
 export async function *eventGenerator(target, event, { signal, capture, passive } = {}) {
