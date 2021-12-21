@@ -77,16 +77,14 @@ export async function lock(name, callback, {
 	reason = new DOMException('Operation aborted'),
 	signal,
 } = {}) {
-	if (await locksSupported()) {
+	if ((! allowFallback) || await locksSupported()) {
 		return await navigator.locks.request(name, { mode, ifAvailable, steal, signal }, async lock => {
 			if (lock) {
 				return await callAsAsync(callback, [lock, ...args], { thisArg, signal, reason });
 			}
 		});
-	} else if (allowFallback) {
-		return await callAsAsync(callback, [null, ...args], { signal, thisArg, reason });
 	} else {
-		throw new DOMException('WebLocks API not supported');
+		return await callAsAsync(callback, [null, ...args], { signal, thisArg, reason });
 	}
 }
 
