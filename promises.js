@@ -21,9 +21,11 @@ export function getDeferred({ signal, reason = new DOMException('Operation abort
 	});
 
 	if (signal instanceof EventTarget) {
-		const callback = function() {
-			this.removeEventListener('abort', callback, { once: true });
+		const callback = function({ target } = {}) {
 			deferred.reject(reason instanceof Error ? reason : new DOMException(console.error()));
+			if (target instanceof EventTarget) {
+				target.removeEventListener('abort', callback, { once: true });
+			}
 		};
 
 		if (signal.aborted) {
