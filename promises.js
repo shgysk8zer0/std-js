@@ -4,8 +4,12 @@ import { checkSupport as locksSupported } from './LockManager.js';
 
 export const infinitPromise = new Promise(() => {});
 
+export function isAsyncFunction(what) {
+	return what instanceof Function && what.constructor.name === 'AsyncFunction';
+}
+
 export function isAsync(what) {
-	return what instanceof  Promise || what instanceof Function && what.constructor.name === 'AsyncFunction';
+	return isAsyncFunction(what) || what instanceof  Promise;
 }
 
 export function getDeferred({ signal, reason = new DOMException('Operation aborted') } = {}) {
@@ -46,7 +50,7 @@ export async function callAsAsync(callback, args = [], {
 		reject(new TypeError('`args` must be an array'));
 	} else if (signal instanceof AbortSignal && signal.aborted) {
 		reject(reason instanceof Error ? reason : new DOMException(reason));
-	} else if (isAsync(callback)) {
+	} else if (isAsyncFunction(callback)) {
 		callback.call(thisArg, args).then(resolve).catch(reject);
 	} else {
 		queueMicrotask(() => {
