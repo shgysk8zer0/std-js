@@ -1,6 +1,6 @@
 import { when, on } from './dom.js';
 import { signalAborted } from './abort.js';
-import { actuallySupported as locksSupported } from './LockManager.js';
+import { checkSupport as locksSupported } from './LockManager.js';
 
 export const infinitPromise = new Promise(() => {});
 
@@ -71,7 +71,7 @@ export async function lock(name, callback, {
 	reason = new DOMException('Operation aborted'),
 	signal,
 } = {}) {
-	if (await locksSupported) {
+	if (await locksSupported()) {
 		return await navigator.locks.request(name, { mode, ifAvailable, steal, signal }, async lock => {
 			if (lock) {
 				return await callAsAsync(callback, [lock, ...args], { thisArg, signal, reason });

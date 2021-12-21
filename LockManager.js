@@ -2,17 +2,19 @@ import { getDeferred, isAsync } from './promises.js';
 import { Lock } from './Lock.js';
 const locks = new Map();
 export const nativeSupport = 'locks' in navigator && navigator.locks.request instanceof Function;
-
+export async function checkSupport() {
+	return await new Promise(resolve => {
+		if ('locks' in navigator && navigator.locks.request instanceof Function) {
+			navigator.locks.query().then(() => resolve(true)).catch(() => resolve(false));
+		} else {
+			resolve(false);
+		}
+	});
+}
 /**
  * Some browsing contexts (iframes) have `navigator.locks` but methods only throw
  */
-export const actuallySupported = new Promise(resolve => {
-	if (! nativeSupport) {
-		resolve(false);
-	} else {
-		navigator.locks.query().then(() => resolve(true)).catch(() => resolve(false));
-	}
-});
+export const actuallySupported = checkSupport();
 
 async function callFunction(callback, arg = null) {
 	return new Promise((resolve, reject) => {
