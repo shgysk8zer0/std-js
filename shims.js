@@ -14,6 +14,27 @@ if (typeof globalThis === 'undefined') {
 	}
 }
 
+if (! (HTMLScriptElement.supports instanceof Function)) {
+	HTMLScriptElement.supports = function supports(type) {
+		switch(type.toLowerCase()) {
+			case 'classic':
+				return true;
+
+			case 'module':
+				return 'noModule' in HTMLScriptElement.prototype;
+
+			case 'importmap':
+				return false;
+
+			case 'speculationrules':
+				return false;
+
+			default:
+				return false;
+		}
+	};
+}
+
 cookieStorePolyfill();
 
 if (! globalThis.hasOwnProperty('AggregateError')) {
