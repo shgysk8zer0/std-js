@@ -4,7 +4,7 @@ import { signalAborted } from './abort.js';
 function getEventFeatures() {
 	const el = document.createElement('div');
 	const eventFeatures = {
-		nativeSignal: 'AbortController' in window && AbortController.prototype.hasOwnProperty('signal'),
+		nativeSignal: 'AbortController' in globalThis && AbortController.prototype.hasOwnProperty('signal'),
 		signal: false,
 		passive: false,
 		capture: false,
@@ -53,14 +53,24 @@ export function addListener(targets, events, callback, { capture, once, passive,
 	}
 
 	targets.forEach(target => {
-		events.forEach(event => target.addEventListener(event, callback, { capture, once, passive, signal }));
+		events.forEach(event => listen(target, event, callback, { capture, once, passive, signal }));
 	});
+}
 
-	if (signal instanceof AbortSignal && features.signal === false) {
-		signalAborted(signal).finally(() => {
-			removeListener(targets, events, callback, { capture, once, passive, signal });
-		});
+export function listen(target, event, callback, { capture, once, passive, signal } = {}) {
+	if (! (signal instanceof EventTarget && signal.aborted)) {
+		target.addEventListener(event, callback, { capture, once, passive, signal });
+
+		if (features.signal === false && signal instanceof EventTarget) {
+			signalAborted(signal).finally(() => target.removeEventListener(event, callback, { capture, once, passive, signal }));
+		}
 	}
+}
+
+export async function once(target, event, { capture, passive, signal } = {}) {
+	const { resolve, promise } = getDeferred({ signal, reason: new DOMException('Operation aborted') });
+	listen(target, event, resolve, { capture, once: true, passive, signal });
+	return await promise;
 }
 
 export function removeListener(targets, events, callback, { capture, once, passive, signal } = {}) {

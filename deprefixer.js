@@ -1,17 +1,17 @@
 if (! ('crypto' in window) && 'msCrypto' in window) {
-	window.crypto = window.msCrypto;
+	globalThis.crypto = globalThis.msCrypto;
 }
 
 if (!('Notification' in window)) {
-	window.Notification = window.notifications || window.webkitNotifications || window.oNotifications || window.msNotifications || false;
+	globalThis.Notification = globalThis.notifications || globalThis.webkitNotifications || globalThis.oNotifications || globalThis.msNotifications || false;
 }
 
 if (!('doNotTrack' in navigator)) {
-	navigator.doNotTrack = window.doNotTrack || navigator.msDoNotTrack || 'unspecified';
+	navigator.doNotTrack = globalThis.doNotTrack || navigator.msDoNotTrack || 'unspecified';
 }
 
 if (!('indexedDB' in window)) {
-	window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || false;
+	globalThis.indexedDB = globalThis.indexedDB || globalThis.mozIndexedDB || globalThis.webkitIndexedDB || globalThis.msIndexedDB || false;
 }
 
 if (!('hidden' in document)) {
@@ -27,7 +27,7 @@ if (!('fullscreenElement' in document)) {
 }
 
 if (!('requestAnimationFrame' in window)) {
-	window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || false;
+	globalThis.requestAnimationFrame = globalThis.mozRequestAnimationFrame || globalThis.webkitRequestAnimationFrame || globalThis.msRequestAnimationFrame || false;
 }
 
 if (!('exitFullscreen' in Document.prototype)) {

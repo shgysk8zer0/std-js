@@ -1,16 +1,14 @@
 import './abort-shims.js';
-import { when, on } from './dom.js';
+import { when } from './dom.js';
 import { infinitPromise, getDeferred } from './promises.js';
-import { features } from './events.js';
+import { features, listen } from './events.js';
 export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
 
 export function isAborted(signal) {
 	if (signal instanceof AbortController) {
 		return signal.signal.aborted;
-	} else if (signal instanceof AbortSignal) {
-		return signal.aborted;
 	} else {
-		return false;
+		return signal instanceof AbortSignal && signal.aborted;
 	}
 }
 
@@ -33,6 +31,7 @@ export async function signalAborted(signal, { reason } = {}) {
 
 			signal.addEventListener('abort', callback);
 		}
+
 		return promise;
 	} else {
 		const { resolve, promise } = getDeferred();
@@ -59,8 +58,8 @@ export function abortButtonController(button) {
 	const controller = new AbortController();
 	button.disabled = false;
 
-	on(button, 'click', () => controller.abort(), { signal: controller.signal, once: true });
-	on(controller.signal, 'abort', () => button.disabled = true, { once: true });
+	listen(button, 'click', () => controller.abort(), { signal: controller.signal, once: true });
+	listen(controller.signal, 'abort', () => button.disabled = true, { once: true });
 
 	return controller;
 }
