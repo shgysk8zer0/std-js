@@ -1,8 +1,24 @@
-import { when, on } from './dom.js';
+import { when, ready, loaded } from './dom.js';
 import { signalAborted } from './abort.js';
+import { getManifest } from './http.js';
+import { listen } from './events.js';
 import { checkSupport as locksSupported } from './LockManager.js';
 
 export const infinitPromise = new Promise(() => {});
+
+export const readyPromise = ready();
+
+export const loadedPromise = loaded();
+
+export const manifestPromise = new Promise((resolve, reject) => {
+	readyPromise.then(() => getManifest()).then(resolve).catch(reject);
+});
+
+export const beforeInstallPromptPromise = new Promise(resolve => {
+	if ('onbeforeinstallprompt' in globalThis) {
+		globalThis.addEventListener('beforeinstallprompt', resolve, { once: true });
+	}
+});
 
 export function isAsyncFunction(what) {
 	return what instanceof Function && what.constructor.name === 'AsyncFunction';
@@ -208,7 +224,7 @@ export async function abortablePromise(promise, signal, { reason } = {}) {
 
 export async function *eventGenerator(target, event, { signal, capture, passive } = {}) {
 	const{ callback, generator } = callbackGenerator();
-	on(target, event, callback, { signal, capture, passive });
+	listen(target, event, callback, { signal, capture, passive });
 
 	if (! (signal instanceof AbortSignal)) {
 		for await (const result of generator()) {
