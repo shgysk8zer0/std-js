@@ -1,5 +1,5 @@
 import { signalAborted } from './abort.js';
-import { addListener } from './events.js';
+import { addListener, listen } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
 
 export function query(what, base = document) {
@@ -449,15 +449,39 @@ export async function when(what, events, { capture, passive, signal, base } = {}
 }
 
 export async function ready({ signal } = {}) {
+	const { promise, resolve } = getDeferred();
+
 	if (document.readyState === 'loading') {
-		await when([document], ['DOMContentLoaded'], { signal });
+		listen(document, 'DOMContentLoaded', resolve, { signal, once: true, capture: true });
+	} else {
+		resolve();
 	}
+
+	return promise;
 }
 
 export async function loaded({ signal } = {}) {
+	const { promise, resolve } = getDeferred();
+
 	if (document.readyState !== 'complete') {
-		await when([window], ['load'], { signal });
+		listen(globalThis, 'load', resolve, { signal, once: true, capture: true });
+	} else {
+		resolve();
 	}
+
+	return promise;
+}
+
+export async function unloaded({ signal } = {}) {
+	const { promise, resolve } = getDeferred();
+	listen(globalThis, 'unload', resolve, { signal, once: true, capture: true });
+	return promise;
+}
+
+export async function beforeUnload({ signal } = {}) {
+	const { promise, resolve } = getDeferred();
+	listen(globalThis, 'beforeunload', resolve, { signal, once: true, capture: true });
+	return promise;
 }
 
 /**

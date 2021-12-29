@@ -1,4 +1,4 @@
-import { when, ready, loaded } from './dom.js';
+import { when, ready, loaded, beforeUnload, unloaded } from './dom.js';
 import { signalAborted } from './abort.js';
 import { getManifest } from './http.js';
 import { listen } from './events.js';
@@ -10,13 +10,17 @@ export const readyPromise = ready();
 
 export const loadedPromise = loaded();
 
+export const unloadPromise = unloaded();
+
+export const beforeUnloadPromise = beforeUnload();
+
 export const manifestPromise = new Promise((resolve, reject) => {
 	readyPromise.then(() => getManifest()).then(resolve).catch(reject);
 });
 
 export const beforeInstallPromptPromise = new Promise(resolve => {
 	if ('onbeforeinstallprompt' in globalThis) {
-		globalThis.addEventListener('beforeinstallprompt', resolve, { once: true });
+		globalThis.addEventListener('beforeinstallprompt', resolve, { once: true, capture: true });
 	}
 });
 

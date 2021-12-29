@@ -1,8 +1,24 @@
 import './abort-shims.js';
-import { when } from './dom.js';
+import { when, beforeUnload, unloaded } from './dom.js';
 import { infinitPromise, getDeferred } from './promises.js';
 import { features, listen } from './events.js';
 export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
+
+export const unloadSignal = getUnloadSignal();
+
+export const beforeUnloadSignal = getBeforeUnloadSignal();
+
+export function getBeforeUnloadSignal() {
+	const controller = new AbortController();
+	beforeUnload().then(() => controller.abort());
+	return controller.signal;
+}
+
+export function getUnloadSignal() {
+	const controller = new AbortController();
+	unloaded().then(() => controller.abort());
+	return controller.signal;
+}
 
 export function isAborted(signal) {
 	if (signal instanceof AbortController) {
