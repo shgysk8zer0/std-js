@@ -1,6 +1,6 @@
 import { getCustomElement } from './custom-elements.js';
 import { preload, loadScript } from './loader.js';
-import { resolveOn, beforeInstallPromptPromise } from './promises.js';
+import { beforeInstallPromptPromise } from './promises.js';
 
 export const beforeInstallPrompt = beforeInstallPromptPromise;
 

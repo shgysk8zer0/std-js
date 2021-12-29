@@ -43,7 +43,7 @@ if (! ('AbortSignal' in globalThis)) {
 			const signal = this.signal;
 
 			if (! signal.aborted) {
-				signal[symbols.aborted] = true
+				signal[symbols.aborted] = true;
 				signal.dispatchEvent(new Event('abort'));
 			}
 		}

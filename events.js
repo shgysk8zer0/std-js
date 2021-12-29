@@ -1,5 +1,6 @@
 import { query, when } from './dom.js';
 import { signalAborted } from './abort.js';
+import { getDeferred } from './promises.js';
 
 function getEventFeatures() {
 	const el = document.createElement('div');
