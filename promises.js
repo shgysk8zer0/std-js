@@ -87,6 +87,16 @@ export async function callAsAsync(callback, args = [], {
 	return await promise;
 }
 
+export function createDeferredCallback(callback, { signal, thisArg } = {}) {
+	const { promise, resolve } = getDeferred({ signal });
+	const retPromise = promise.then(() => callAsAsync(callback, [], { signal, thisArg }));
+
+	return async () => {
+		resolve();
+		return await retPromise;
+	};
+}
+
 export async function lock(name, callback, {
 	thisArg = globalThis,
 	args = [],
