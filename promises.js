@@ -1,7 +1,7 @@
 import { when, ready, loaded, beforeUnload, unloaded } from './dom.js';
 import { signalAborted } from './abort.js';
 import { getManifest } from './http.js';
-import { listen } from './events.js';
+import { listen, onKeypress } from './events.js';
 import { checkSupport as locksSupported } from './LockManager.js';
 
 export const infinitPromise = new Promise(() => {});
@@ -84,6 +84,22 @@ export async function callAsAsync(callback, args = [], {
 		});
 	}
 
+	return await promise;
+}
+
+export async function whenKeypress(key, {
+	target = globalThis,
+	type = 'keypress',
+	capture,
+	passive,
+	signal,
+	altKey,
+	ctrlKey,
+	metaKey,
+	shiftKey,
+} = {}) {
+	const { resolve, promise } = getDeferred({ signal });
+	onKeypress(key, resolve, { target, type, capture, once: true, passive, signal, altKey, ctrlKey, metaKey, shiftKey });
 	return await promise;
 }
 

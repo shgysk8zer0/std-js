@@ -68,6 +68,33 @@ export function listen(target, event, callback, { capture, once, passive, signal
 	}
 }
 
+export function onKeypress(key, callback, {
+	target = globalThis,
+	type = 'keypress',
+	capture,
+	once,
+	passive,
+	signal,
+	altKey,
+	ctrlKey,
+	metaKey,
+	shiftKey,
+} = {}) {
+	listen(target, type, function handler(event) {
+		if (
+			event.isTrusted && event.key.toLowerCase() === key.toLowerCase()
+			&& Object.entries({ ctrlKey, altKey, shiftKey, metaKey }).every(([name, value]) => {
+				return typeof value !== 'boolean' || event[name] === value;
+		})) {
+			if (once) {
+				target.removeEventListener(type, handler, { passive, capture, signal });
+			}
+
+			callback.call(this, event);
+		}
+	}, { passive, capture, signal });
+}
+
 export async function once(target, event, { capture, passive, signal } = {}) {
 	const { resolve, promise } = getDeferred({ signal, reason: new DOMException('Operation aborted') });
 	listen(target, event, resolve, { capture, once: true, passive, signal });
