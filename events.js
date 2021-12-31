@@ -85,7 +85,7 @@ export function onKeypress(key, callback, {
 			event.isTrusted && event.key.toLowerCase() === key.toLowerCase()
 			&& Object.entries({ ctrlKey, altKey, shiftKey, metaKey }).every(([name, value]) => {
 				return typeof value !== 'boolean' || event[name] === value;
-		})) {
+			})) {
 			if (once) {
 				target.removeEventListener(type, handler, { passive, capture, signal });
 			}
