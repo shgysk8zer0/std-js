@@ -63,7 +63,7 @@ export class AsyncTaskQueue {
 		}
 	}
 
-	async executeOnTimeout({ timeout = 0 signal, thisArg = globalThis } = {}) {
+	async executeOnTimeout({ timeout = 0, signal, thisArg = globalThis } = {}) {
 		for await (const callback of this.getQueue({ signal })) {
 			if (callback instanceof Function) {
 				await onTimeout(callback, { timeout, signal, thisArg });
