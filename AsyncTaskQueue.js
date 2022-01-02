@@ -1,4 +1,4 @@
-import { getDeferred, onIdle, onAnimationFrame, callAsAsync } from './promises.js';
+import { getDeferred, onIdle, onAnimationFrame, onTimeout, callAsAsync } from './promises.js';
 
 const symbols = {
 	resolve: Symbol('resolve'),
@@ -59,6 +59,14 @@ export class AsyncTaskQueue {
 		for await (const callback of this.getQueue({ signal })) {
 			if (callback instanceof Function) {
 				await onAnimationFrame(callback, { signal, thisArg });
+			}
+		}
+	}
+
+	async executeOnTimeout({ timeout = 0 signal, thisArg = globalThis } = {}) {
+		for await (const callback of this.getQueue({ signal })) {
+			if (callback instanceof Function) {
+				await onTimeout(callback, { timeout, signal, thisArg });
 			}
 		}
 	}
