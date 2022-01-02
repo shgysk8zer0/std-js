@@ -1,4 +1,4 @@
-import { getDeferred } from './promises.js';
+import { getDeferred, onIdle } from './promises.js';
 
 const symbols = {
 	resolve: Symbol('resolve'),
@@ -36,6 +36,14 @@ export class AsyncTaskQueue {
 			resolve(callback);
 		} else {
 			this[symbols.set].add(callback);
+		}
+	}
+
+	async execute({ signal, thisArg = globalThis, timeout } = {}) {
+		for (await callback of this.getQueue({ signal })) {
+			if (callback instanceof Function) {
+				await onIdle(callback, { signal, thisArg, timeout });
+			}
 		}
 	}
 
