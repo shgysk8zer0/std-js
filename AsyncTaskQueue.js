@@ -42,7 +42,7 @@ export class AsyncTaskQueue {
 	async execute({ signal, thisArg = globalThis } = {}) {
 		for await (const callback of this.getQueue({ signal })) {
 			if (callback instanceof Function) {
-				await callAsAsync(callback, { signal, thisArg });
+				await callAsAsync(callback, [], { signal, thisArg });
 			}
 		}
 	}
