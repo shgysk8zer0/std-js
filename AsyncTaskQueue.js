@@ -31,8 +31,9 @@ export class AsyncTaskQueue {
 		if (! (callback instanceof Function)) {
 			throw new TypeError('Callback must be a function');
 		} else if (this.waiting) {
-			this[symbols.resolve](callback);
+			const resolve = this[symbols.resolve];
 			delete this[symbols.resolve];
+			resolve(callback);
 		} else {
 			this[symbols.set].add(callback);
 		}
