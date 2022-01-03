@@ -77,7 +77,7 @@ export class AsyncTaskQueue {
 	}
 
 	has(...callbacks) {
-		return callbacks.every(callback => this[symbols.set].has(calback));
+		return callbacks.every(callback => this[symbols.set].has(callback));
 	}
 
 	delete(callback) {
