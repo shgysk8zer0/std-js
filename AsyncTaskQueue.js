@@ -1,18 +1,22 @@
 import { getDeferred, onIdle, onAnimationFrame, onTimeout, callAsAsync } from './promises.js';
+import { isAborted } from './abort.js';
 
 const symbols = {
 	resolve: Symbol('resolve'),
-	set: Symbol('set')
+	set: Symbol('set'),
+	reject: Symbol('reject'),
 };
 
 export class AsyncTaskQueue {
-	constructor() {
+	constructor(...callbacks) {
 		Object.defineProperty(this, symbols.set, {
 			configurable: false,
 			enumerable: false,
 			writable: false,
 			value: new Set(),
-		 });
+		});
+
+		callbacks.filter(callback => callback instanceof Function).forEach(this.add);
 	}
 
 	get size() {
@@ -27,59 +31,111 @@ export class AsyncTaskQueue {
 		return this.hasOwnProperty(symbols.resolve);
 	}
 
-	add(callback) {
-		if (! (callback instanceof Function)) {
-			throw new TypeError('Callback must be a function');
-		} else if (this.waiting) {
-			const resolve = this[symbols.resolve];
+	clear() {
+		if (this.waiting) {
+			this[symbols.reject]('Task queue cleared');
 			delete this[symbols.resolve];
-			resolve(callback);
-		} else {
-			this[symbols.set].add(callback);
+			delete this[symbols.reject];
 		}
+
+		return this[symbols.set].clear();
+	}
+
+	forEach(callback, thisArg) {
+		return this[symbols.set].forEach(callback, thisArg);
+	}
+
+	values() {
+		return this[symbols.set].values();
+	}
+
+	keys() {
+		return this[symbols.set].keys();
+	}
+
+	entries() {
+		return this[symbols.set].entries();
+	}
+
+	[Symbol.iterator]() {
+		return this.values();
+	}
+
+	add(...callbacks) {
+		callbacks.forEach(callback => {
+			if (! (callback instanceof Function)) {
+				throw new TypeError('Callback must be a function');
+			} else if (this.waiting) {
+				const resolve = this[symbols.resolve];
+				delete this[symbols.resolve];
+				delete this[symbols.reject];
+				resolve(callback);
+			} else {
+				this[symbols.set].add(callback);
+			}
+		});
+	}
+
+	has(...callbacks) {
+		return callbacks.every(callback => this[symbols.set].has(calback));
+	}
+
+	delete(callback) {
+		return this[symbols.set].delete(callback);
 	}
 
 	async execute({ signal, thisArg = globalThis } = {}) {
-		for await (const callback of this.getQueue({ signal })) {
-			if (callback instanceof Function) {
+		for (const callback of this) {
+			if (! isAborted(signal) &&callback instanceof Function) {
+				this.delete(callback);
 				await callAsAsync(callback, [], { signal, thisArg });
 			}
 		}
 	}
 
 	async executeOnIdle({ signal, thisArg = globalThis, timeout } = {}) {
-		for await (const callback of this.getQueue({ signal })) {
-			if (callback instanceof Function) {
+		for (const callback of this) {
+			if (! isAborted(signal) &&callback instanceof Function) {
+				this.delete(callback);
 				await onIdle(callback, { signal, thisArg, timeout });
 			}
 		}
 	}
 
 	async executeOnAnimationFrame({ signal, thisArg = globalThis } = {}) {
-		for await (const callback of this.getQueue({ signal })) {
-			if (callback instanceof Function) {
+		for (const callback of this) {
+			if (! isAborted(signal) &&callback instanceof Function) {
+				this.delete(callback);
 				await onAnimationFrame(callback, { signal, thisArg });
 			}
 		}
 	}
 
 	async executeOnTimeout({ timeout = 0, signal, thisArg = globalThis } = {}) {
-		for await (const callback of this.getQueue({ signal })) {
-			if (callback instanceof Function) {
+		for (const callback of this) {
+			if (! isAborted(signal) &&callback instanceof Function) {
+				this.delete(callback);
 				await onTimeout(callback, { timeout, signal, thisArg });
 			}
 		}
 	}
 
 	async *getQueue({ signal } = {}) {
-		while(! (signal instanceof AbortSignal && signal.aborted)) {
+		while(! isAborted(signal)) {
 			if (this.empty) {
-				const { promise, resolve } = getDeferred({ signal });
+				const { promise, resolve, reject } = getDeferred({ signal });
 				Object.defineProperty(this, symbols.resolve, {
 					configurable: true,
 					writable: false,
 					enumerable: false,
 					value: resolve,
+				});
+
+				Object.defineProperty(this, symbols.reject, {
+					configurable: true,
+					writable: false,
+					enumerable: false,
+					value: reject,
 				});
 
 				try {
@@ -90,11 +146,11 @@ export class AsyncTaskQueue {
 					return;
 				}
 			} else {
-				for (const callback of this[symbols.set]) {
-					if (signal instanceof AbortSignal && signal.aborted) {
+				for (const callback of this) {
+					if (isAborted(signal)) {
 						return;
 					} else {
-						this[symbols.set].delete(callback);
+						this.delete(callback);
 						yield callback;
 					}
 				}
