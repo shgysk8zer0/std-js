@@ -16,7 +16,9 @@ export class AsyncTaskQueue {
 			value: new Set(),
 		});
 
-		callbacks.filter(callback => callback instanceof Function).forEach(this.add);
+		if (callbacks.length !== 0) {
+			this.add(...callbacks);
+		}
 	}
 
 	get size() {
