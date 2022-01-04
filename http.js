@@ -2,6 +2,26 @@ import { parse } from './dom.js';
 import { signalAborted, abortTimeoutController } from './abort.js';
 import { features as eventFeatures } from './events.js';
 
+export function setURLParams(url, params) {
+	if (! (url instanceof URL)) {
+		url = new URL(url, document.baseURI);
+	}
+
+	if (params instanceof HTMLFormElement) {
+		return setURLParams(url, new FormData(params));
+	} else if (params instanceof FormData) {
+		return setURLParams(url, Object.fromEntries(params));
+	} else if (params instanceof URLSearchParams) {
+		return setURLParams(url, Object.fromEntries(params));
+	} else if (Array.isArray(params) || typeof params === 'string') {
+		return setURLParams(url, new URLSearchParams(params));
+	} else if (typeof params === 'object') {
+		url.search = new URLSearchParams({ ...Object.fromEntries(url.searchParams), ...params});
+	}
+
+	return url;
+}
+
 function filename(src) {
 	if (typeof src === 'string') {
 		return new URL(src, location.origin).pathname.split('/').at(-1);
@@ -20,9 +40,9 @@ function getType({ headers }) {
 
 export async function fetch(url, opts) {
 	if (opts.signal instanceof AbortSignal && eventFeatures.nativeSignal === false) {
-		return await Promise.race([window.fetch(url), signalAborted(opts.signal)]);
+		return await Promise.race([globalThis.fetch(url), signalAborted(opts.signal)]);
 	} else {
-		return await window.fetch(url, opts);
+		return await globalThis.fetch(url, opts);
 	}
 }
 
@@ -39,14 +59,10 @@ export async function GET(url, {
 	signal = undefined,
 	timeout = null,
 } = {}) {
-	if (typeof url === 'string') {
-		url = new URL(url, document.baseURI);
-	}
-
 	if (typeof body !== 'undefined') {
-		url.search = body instanceof HTMLFormElement
-			? new URLSearchParams(new FormData(body))
-			: new URLSearchParams(body);
+		url = setURLParams(url, body);
+	} else if (typeof url === 'string') {
+		url = new URL(url, document.baseURI);
 	}
 
 	if (typeof signal === 'undefined' && Number.isInteger(timeout)) {
@@ -55,8 +71,8 @@ export async function GET(url, {
 		signal = signal.signal;
 	}
 
-	return await fetch(url, { method: 'GET', mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal });
+	return await fetch(url, { method: 'GET', mode, credentials, referrerPolicy,
+		headers, cache, redirect, integrity, keepalive, signal });
 }
 
 export async function POST(url, {
@@ -96,8 +112,8 @@ export async function POST(url, {
 		signal = signal.signal;
 	}
 
-	return await fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal });
+	return await fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy,
+		headers, cache, redirect, integrity, keepalive, signal });
 }
 
 export async function DELETE(url, {
@@ -113,14 +129,10 @@ export async function DELETE(url, {
 	signal = undefined,
 	timeout = null,
 } = {}) {
-	if (typeof url === 'string') {
-		url = new URL(url, document.baseURI);
-	}
-
 	if (typeof body !== 'undefined') {
-		url.search = body instanceof HTMLFormElement
-			? new URLSearchParams(new FormData(body))
-			: new URLSearchParams(body);
+		url = setURLParams(url, body);
+	} else if (typeof url === 'string') {
+		url = new URL(url, document.baseURI);
 	}
 
 	if (typeof signal === 'undefined' && Number.isInteger(timeout)) {
@@ -129,8 +141,8 @@ export async function DELETE(url, {
 		signal = signal.signal;
 	}
 
-	return await fetch(url, { method: 'DELETE', mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal });
+	return await fetch(url, { method: 'DELETE', mode, credentials, referrerPolicy,
+		headers, cache, redirect, integrity, keepalive, signal });
 }
 
 export async function getHTML(url, {
@@ -290,11 +302,12 @@ export async function postHTML(url, {
 	timeout = null,
 	head = true,
 	asFrag = true,
+	sanitizer = undefined,
 } = {}) {
 	const html = await postText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout });
 
-	return parse(html, { head, asFrag });
+	return parse(html, { head, asFrag, sanitizer });
 }
 
 export async function postJSON(url, {
