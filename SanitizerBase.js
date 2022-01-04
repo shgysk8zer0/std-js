@@ -75,8 +75,9 @@ export class Sanitizer {
 									[...node.childNodes].forEach(sanitizeNode);
 								}
 							}
+
+							break;
 						}
-						break;
 
 						case Node.ATTRIBUTE_NODE: {
 							const { name, value, ownerElement } = node;
@@ -93,23 +94,26 @@ export class Sanitizer {
 									ownerElement.removeAttribute(name);
 								}
 							}
+
+							break;
 						}
-						break;
 
 						case Node.COMMENT_NODE: {
 							if (! allowComments) {
 								node.remove();
 							}
+
+							break;
 						}
-						break;
 
 						case Node.DOCUMENT_NODE:
 						case Node.DOCUMENT_FRAGMENT_NODE: {
 							if (node.hasChildNodes()) {
 								[...node.childNodes].forEach(node => sanitizeNode(node));
 							}
+
+							break;
 						}
-						break;
 
 						case Node.CDATA_SECTION_NODE:
 						case Node.PROCESSING_INSTRUCTION_NODE:
