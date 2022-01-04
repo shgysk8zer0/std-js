@@ -327,6 +327,4 @@ export const SanitizerConfig = {
 		'wbr'
 	],
 	blockElements: ['iframe', 'frame', 'object', 'embed', 'param'],
-	dropElements: ['script'],
-	dropAttributes: [],
 };
