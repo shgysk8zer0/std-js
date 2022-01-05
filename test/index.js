@@ -15,16 +15,13 @@ Promise.allSettled([
 	locksPolyfill(),
 ]);
 
-enforce();
 
 const sanitizerConfig = {...Sanitizer.getDefaultConfiguration(), allowCustomElements: true };
 
 trustedTypes.addEventListener('beforecreatepolicy', console.info);
-trustedTypes.createPolicy('default', {
+
+const policy = trustedTypes.createPolicy('default', {
 	createHTML: input => new Sanitizer(sanitizerConfig).sanitizeFor('div', input).innerHTML,
-	createScript: () => {
-		throw new DOMException('Untrusted script');
-	},
 	createScriptURL: input => {
 		if ([location.origin, 'https://cdn.kernvalley.us'].includes(new URL(input, location.origin).origin)) {
 			return input;
@@ -33,6 +30,7 @@ trustedTypes.createPolicy('default', {
 		}
 	},
 });
+enforce({ allowedPolicies: [policy.name], force: true });
 
 keywords(['javascript', 'ecmascript', 'es6', 'modules', 'library']);
 description('This is a JavaScript library testing page');

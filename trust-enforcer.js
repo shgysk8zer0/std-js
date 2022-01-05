@@ -29,13 +29,13 @@ const aliases = {
 /**
  * Replaces potentially dangerous DOM methods with ones requiring TrustedTypes
  * @param  {Array}   [allowedPolicies=[]]               List of allowed TrustedTypePolicy names
- * @param  {Boolean} [force=false]                      Set to true to enable custom enforcement event when natively supported
+ * @param  {Boolean} [force=false]                      Set to true to enable custom enforcement even when natively supported
  * @return {void}
  * @Todo: Handle Element.prototype.innerHTML & ELement.prototype.outerHTML
  * @Todo: HAndle HTMLScriptElement.prototype.text & HTMLScriptElement.prototype.textContent
  * @Todo: Handle new Function()
  */
-export function enforce(allowedPolicies = [], force = false) {
+export function enforce({ allowedPolicies = [], force = false } = {}) {
 	if (force || ! nativeSupport) {
 		function allowedType(trustedType) {
 			return nativeSupport || allowedPolicies.length === 0 || allowedPolicies.includes(trustedType[policySymbol]);
