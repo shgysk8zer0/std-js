@@ -67,7 +67,17 @@ export function createScriptURL(input, { policy = getDefaultPolicy() } = {}) {
 	}
 }
 
-export function createPolicy(name, { createHTML, createScript, createScriptURL }) {
+export function createPolicy(name, {
+	createHTML = () => {
+		throw new DOMException('This policy does not provide `createHTML()`');
+	},
+	createScript = () => {
+		throw new DOMException('This policy does not provide `createScript()`');
+	},
+	createScriptURL = () => {
+		throw new DOMException('This policy does not provide `createScriptURL()`');
+	},
+ }) {
 	if (supported()) {
 		return globalThis.trustedTypes.createPolicy(name, { createHTML, createScript, createScriptURL });
 	} else {
