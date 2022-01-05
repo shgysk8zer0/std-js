@@ -407,6 +407,9 @@ export class TrustedTypeFactory extends EventTarget {
 	}
 }
 
+/**
+ * .WIP to enforce TrustedTypePolicy.
+ */
 function harden() {
 	Object.entries(aliases.element).forEach(([name, symbol]) => {
 		Element.prototype[symbol] = Element.prototype[name];
@@ -679,89 +682,5 @@ export function polyfill(enableHarden = false) {
 
 	if (enableHarden) {
 		harden();
-	}
-}
-
-/**
- * [getInsecurePolicy description]
- * @param  {String} [name='no-op']               [description]
- * @return {TrustedTypePolicy}                [description]
- */
-export function getInsecurePolicy(name = 'no-op') {
-	if (isSupported()) {
-		return globalThis.trustedTypes.createPolicy(name, {
-			createHTML: val => val,
-			createScript: val => val,
-			createScriptURL: val => val,
-		});
-	} else {
-		return trustedTypes.createPolicy(name, {
-			createHTML: val => val,
-			createScript: val => val,
-			createScriptURL: val => val,
-		});
-	}
-}
-
-/**
- * [getStrictPolicy description]
- * @param  {String} [name='lock-down']               [description]
- * @return {TrustedTypePolicy}                    [description]
- */
-export function getStrictPolicy(name = 'lock-down') {
-	if (isSupported()) {
-		return globalThis.trustedTypes.createPolicy(name, {
-			createHTML: () => globalThis.trustedTypes.emptyHTML,
-			createScript: () => globalThis.trustedTypes.emptyScript,
-			createScriptURL: () => '',
-		});
-	} else {
-		return trustedTypes.createPolicy(name, {
-			createHTML: () => trustedTypes.emptyHTML,
-			createScript: () => trustedTypes.emptyScript,
-			createScriptURL: () => '',
-		});
-	}
-}
-
-/**
- * [getDefaultPolicy description]
- * @param  {String} [name='default']                                [description]
- * @param  {Array}  [allowedOrigins=[location.origin, 'https:}      =             {}]  [description]
- * @return {TrustedTypePolicy}                                   [description]
- */
-export function getDefaultPolicy(name = 'default', {
-	allowedOrigins = [location.origin, 'https://cdn.kernvalley.us', 'https://unpkg.com'],
-} = {}) {
-	const config = {
-		createHTML: input => {
-			const sanitized = new Sanitizer().sanitizeFor('div', input);
-
-			sanitized.querySelectorAll('a[href]:not([rel])').forEach(a => {
-				if (new URL(a.href).origin !== location.origin) {
-					a.relList.add('external', 'noopener', 'noreferrer');
-				}
-			});
-
-			sanitized.querySelectorAll('img:not([loading])').forEach(img => img.loading = 'lazy');
-
-			return sanitized.innerHTML;
-		},
-		createScript: () => {
-			throw new DOMException('Untrusted script');
-		},
-		createScriptURL: url => {
-			if (! allowedOrigins.includes(new URL(url, location.origin).origin)) {
-				throw new DOMException('Untrusted script origin');
-			} else {
-				return url;
-			}
-		},
-	};
-
-	if (isSupported()) {
-		return globalThis.trustedTypes.createPolicy(name, config);
-	} else {
-		return trustedTypes.createPolicy(name, config);
 	}
 }
