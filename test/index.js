@@ -20,7 +20,7 @@ const sanitizerConfig = {...Sanitizer.getDefaultConfiguration(), allowCustomElem
 
 trustedTypes.addEventListener('beforecreatepolicy', console.info);
 
-const policy = trustedTypes.createPolicy('default', {
+trustedTypes.createPolicy('default', {
 	createHTML: input => new Sanitizer(sanitizerConfig).sanitizeFor('div', input).innerHTML,
 	createScriptURL: input => {
 		if ([location.origin, 'https://cdn.kernvalley.us'].includes(new URL(input, location.origin).origin)) {
@@ -30,7 +30,8 @@ const policy = trustedTypes.createPolicy('default', {
 		}
 	},
 });
-enforce({ allowedPolicies: [policy.name], force: true });
+
+enforce({ allowedPolicies: ['loader#html'], force: true });
 
 keywords(['javascript', 'ecmascript', 'es6', 'modules', 'library']);
 description('This is a JavaScript library testing page');
