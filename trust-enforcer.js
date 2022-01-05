@@ -28,6 +28,8 @@ const aliases = {
 
 /**
  * Replaces potentially dangerous DOM methods with ones requiring TrustedTypes
+ * If any allowed policies are set, `'empty#html`' & `'empty#script`' are automatically
+ * added if missing, as they are neccesary for `trustedTypes.emptyHTML()` and `trustedTypes.emptyScript()`.
  * @param  {Array}   [allowedPolicies=[]]               List of allowed TrustedTypePolicy names
  * @param  {Boolean} [force=false]                      Set to true to enable custom enforcement even when natively supported
  * @return {void}
@@ -37,6 +39,16 @@ const aliases = {
  */
 export function enforce({ allowedPolicies = [], force = false } = {}) {
 	if (force || ! nativeSupport) {
+		if (allowedPolicies.length !== 0) {
+			if (! allowedPolicies.includes('empty#html')) {
+				allowedPolicies.push('empty#html');
+			}
+
+			if (! allowedPolicies.includes('empty#script')) {
+				allowedPolicies.push('empty#script');
+			}
+		}
+
 		function allowedType(trustedType) {
 			return nativeSupport || allowedPolicies.length === 0 || allowedPolicies.includes(trustedType[policySymbol]);
 		}
