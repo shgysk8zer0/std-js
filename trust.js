@@ -1,10 +1,15 @@
+import { getDeferred } from './promises.js';
+import { listen } from './events.js';
+
 export function supported() {
-	return 'trustedTypes' in globalThis && globalThis.trustedTypes.createPolicy instanceof Function;
+	return 'trustedTypes' in globalThis
+		&& globalThis.trustedTypes instanceof EventTarget
+		&& globalThis.trustedTypes.createPolicy instanceof Function;
 }
 
 export function isTrustPolicy(policy) {
-	if ('TrustedTypePolicy' in globalThis) {
-		return policy instanceof globalThis.TrustedTypePolicy;
+	if ('TrustedTypePolicy' in globalThis && policy instanceof globalThis.TrustedTypePolicy) {
+		return true;
 	} else {
 		return policy != null && policy.createHTML instanceof Function;
 	}
@@ -38,25 +43,25 @@ export function isScriptURL(input) {
 	}
 }
 
-export function createHTML(input) {
-	if (hasDefaultPolicy()) {
-		return globalThis.trustedTypes.defaultPolicy.createHTML(input);
+export function createHTML(input, { policy = getDefaultPolicy() } = {}) {
+	if (isTrustPolicy(policy)) {
+		return policy.createHTML(input);
 	} else {
 		return input;
 	}
 }
 
-export function createScript(input) {
-	if (hasDefaultPolicy()) {
-		return globalThis.trustedTypes.defaultPolicy.createScript(input);
+export function createScript(input, { policy = getDefaultPolicy() } = {}) {
+	if (isTrustPolicy(policy)) {
+		return policy.createScript(input);
 	} else {
 		return input;
 	}
 }
 
-export function createScriptURL(input) {
-	if (hasDefaultPolicy()) {
-		return globalThis.trustedTypes.defaultPolicy.createScriptURL(input);
+export function createScriptURL(input, { policy = getDefaultPolicy() } = {}) {
+	if (isTrustPolicy(policy)) {
+		return policy.createScriptURL(input);
 	} else {
 		return input;
 	}
@@ -66,7 +71,7 @@ export function createPolicy(name, { createHTML, createScript, createScriptURL }
 	if (supported()) {
 		return globalThis.trustedTypes.createPolicy(name, { createHTML, createScript, createScriptURL });
 	} else {
-		Object.freeze({ name, createHTML, createScript, createScriptURL });
+		return Object.freeze({ name, createHTML, createScript, createScriptURL });
 	}
 }
 
@@ -78,10 +83,18 @@ export function getDefaultPolicy() {
 	}
 }
 
-export function createNullPolicy(name = 'insecure-policy') {
-	return createPolicy(name, {
-		createHTML: input => input,
-		createScript: input => input,
-		createScriptURL: input => input,
-	});
+export async function whenPolicyCreated(name = 'default', { signal } = {}) {
+	const { resolve, reject, promise } = getDeferred();
+	if (! supported()) {
+		reject(new DOMException('TrustedTypes not supported'));
+	} else if (name === 'default' && isTrustPolicy(globalThis.trustedTypes.defaultPolicy)) {
+		resolve({ policyName: globalThis.trustedTypes.defaultPolicy.name });
+	} else {
+		listen(globalThis.trustedTypes, 'beforecreatepolicy', function callback(event) {
+			if (event.policyName === name) {
+				requestIdleCallback(() => resolve(event));
+				globalThis.trustedTypes.removeEventListener('beforecreatepolicy', callback, { signal });
+			}
+		}, { signal });
+	}
 }

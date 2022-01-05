@@ -1,7 +1,7 @@
 import { signalAborted } from './abort.js';
 import { addListener, listen } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
-import { isHTML, createHTML, isTrustPolicy, getDefaultPolicy } from './trust.js';
+import { isHTML, isScriptURL, isTrustPolicy, getDefaultPolicy } from './trust.js';
 
 export function query(what, base = document) {
 	if (Array.isArray(what)) {
@@ -253,7 +253,7 @@ export function data(what, props = {}, { base } = {}) {
 export function attr(what, props = {}, { base, namespace = null } = {}) {
 	return each(what, item => {
 		Object.entries(props).forEach(([p, v]) => {
-			if (typeof v === 'string' || typeof v === 'number') {
+			if (typeof v === 'string' || typeof v === 'number' || isScriptURL(v)) {
 				if (typeof namespace === 'string') {
 					item.setAttributeNS(namespace, p, v);
 				} else {
@@ -501,7 +501,7 @@ export function parse(text, { type = 'text/html', asFrag = true, sanitizer, poli
 
 	if (asFrag) {
 		return parseAsFragment(text, { sanitizer, policy });
-	} else if (TrustedTypePolicy(policy) && ! isHTML(text)) {
+	} else if (isTrustPolicy(policy) && ! isHTML(text)) {
 		return parser.parseFromString(policy.createHTML(text), type);
 	} else {
 		return parser.parseFromString(text, type);
@@ -517,7 +517,7 @@ export function documentToFragment(doc, { sanitizer } = {}) {
 		? sanitizer.sanitize(frag) : frag;
 }
 
-export function parseAsFragment(text, { sanitizer, policy = getDefaultPolicy } = {}) {
+export function parseAsFragment(text, { sanitizer, policy = getDefaultPolicy() } = {}) {
 	const tmp = document.createElement('template');
 
 	if (isTrustPolicy(policy) && ! isHTML(text)) {
@@ -568,7 +568,7 @@ export function intersect(what, callback, options = {}) {
 }
 
 export function mutate(what, callback, options = {}) {
-	if ('MutationObserver' in window) {
+	if ('MutationObserver' in globalThis) {
 		const observer = new MutationObserver((records, observer) => {
 			records.forEach((record, index) => callback.apply(null, [record, observer, index]));
 		});

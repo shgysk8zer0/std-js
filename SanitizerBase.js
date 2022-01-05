@@ -2,7 +2,14 @@ const protectedData = new WeakMap();
 import { SanitizerConfig as defaultConfig } from './SanitizerConfigBase.js';
 import { nativeSupport, getSantizerUtils } from './sanitizerUtils.js';
 import { parseAsFragment, documentToFragment } from './dom.js';
+import { polyfill as trustPolyfill } from './TrustedTypes.js';
 import { createPolicy } from './trust.js';
+
+try {
+	trustPolyfill();
+} catch(err) {
+	console.error(error);
+}
 
 /**
  * Need to create a policy for the Sanitizer API since
@@ -10,7 +17,7 @@ import { createPolicy } from './trust.js';
  * which would create infinite recursion.
  * @type {TrustedTypePolicy}
  */
-const sanitzerPolicy = createPolicy('sanitizer-policy', {
+const sanitizerPolicy = createPolicy('sanitizer-policy', {
 	createHTML: input => input,
 	createScript: () => new DOMException('This policy is only valid for Sanitizer HTML'),
 	createScriptURL: () => new DOMException('This policy is only valid for Sanitizer HTML'),
@@ -41,7 +48,7 @@ export class Sanitizer {
 
 	sanitize(input) {
 		if (input instanceof Document) {
-			return this.sanitize(documentToFragment(sanitzerPolicy.createHTML(input)));
+			return this.sanitize(documentToFragment(input));
 		} else if (input instanceof DocumentFragment) {
 			/* It'd be great if this could be moved to a worker script... */
 			const frag = input.cloneNode(true);
@@ -148,7 +155,7 @@ export class Sanitizer {
 
 	sanitizeFor(tag, content) {
 		const el = document.createElement(tag);
-		el.append(this.sanitize(parseAsFragment(sanitzerPolicy.createHTML(content))));
+		el.append(this.sanitize(parseAsFragment(sanitizerPolicy.createHTML(content))));
 		return el;
 	}
 

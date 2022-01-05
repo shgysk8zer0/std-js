@@ -434,6 +434,15 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && ! HTMLUnkn
 
 if (! (document.createElement('dialog').showModal instanceof Function)) {
 	HTMLUnknownElement.prototype.showModal = function() {
+		const controller = new AbortController();
+		const signal = controller.signal;
+		document.addEventListener('keydown', function escapeHandle({ key }) {
+			if (key === 'Escape') {
+				this.close();
+			}
+		}, { passive: true, signal });
+
+		this.addEventListener('close', () => controller.abort(), { once: true, signal });
 		this.open = true;
 		this.classList.add('modal');
 		const backdrop = document.createElement('div');

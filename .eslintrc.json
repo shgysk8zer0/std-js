@@ -31,6 +31,8 @@
     },
     "globals": {
       "cookieStore": "readonly",
-      "globalThis": "readonly"
+      "globalThis": "readonly",
+      "trustedTypes": "readonly",
+      "Sanitizer": "readonly"
     }
 }
