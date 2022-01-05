@@ -1,6 +1,7 @@
 import { signalAborted } from './abort.js';
 import { addListener, listen } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
+import { isHTML, createHTML, isTrustPolicy } from './trust.js';
 
 export function query(what, base = document) {
 	if (Array.isArray(what)) {
@@ -492,13 +493,14 @@ export async function beforeUnload({ signal } = {}) {
  */
 export function parseHTML(text, { type = 'text/html', asFrag = true, head = true, sanitizer, policy } = {}) {
 	console.warn('`parseHTML` is deprecated. Please use `parse` instead');
-	return parse(text, { type, asFrag, head, sanitizer });
+	return parse(text, { type, asFrag, head, sanitizer, policy });
 }
 
 export function parse(text, { type = 'text/html', asFrag = true, sanitizer, policy } = {}) {
 	if (asFrag === false) {
 		const parser = new DOMParser();
-		if (typeof policy !== 'undefined' && policy.createHTML instanceof Function) {
+
+		if (TrustedTypePolicy(policy) && ! isHTML(text)) {
 			return parser.parseFromString(policy.createHTML(text), type);
 		} else {
 			return new DOMParser().parseFromString(text, type);
@@ -512,13 +514,14 @@ export function documentToFragment(doc, { sanitizer } = {}) {
 	const clone = document.cloneNode(true);
 	const frag = document.createDocumentFragment();
 	frag.append(...clone.head.childNodes, ...clone.body.childNodes);
+
 	return typeof sanitizer !== 'undefined' && sanitizer.sanitize instanceof Function
 		? sanitizer.sanitize(frag) : frag;
 }
 
 export function parseAsFragment(text, { sanitizer, policy } = {}) {
 	const tmp = document.createElement('template');
-	if (typeof policy !== 'undefined' && policy.createHTML instanceof Function) {
+	if (isTrustPolicy(policy) && ! isHTML(text)) {
 		tmp.innerHTML = policy.createHTML(text);
 	} else {
 		tmp.innerHTML = text;

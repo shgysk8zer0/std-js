@@ -1,6 +1,5 @@
 import { getDeferred } from './promises.js';
 import { addListener } from './events.js';
-import { createScriptURL } from './trust.js';
 
 export async function load(target, parent, srcAttr, value) {
 	if (parent instanceof Node) {
@@ -187,7 +186,7 @@ export async function loadScript(src, {
 	if (typeof nonce === 'string') {
 		script.nonce = nonce;
 	}
-	if (typeof policy !== 'undefined' && policy.createScriptURL instanceof Function) {
+	if (policy != null && policy.createScriptURL instanceof Function) {
 		await load(script, parent, 'src', policy.createScriptURL(src));
 	} else {
 		await load(script, parent, 'src', src);
