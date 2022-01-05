@@ -40,7 +40,7 @@ export function isScriptURL(input) {
 
 export function createHTML(input) {
 	if (hasDefaultPolicy()) {
-		return globalThis.trustedTypes.createHTML(input);
+		return globalThis.trustedTypes.defaultPolicy.createHTML(input);
 	} else {
 		return input;
 	}
@@ -48,7 +48,7 @@ export function createHTML(input) {
 
 export function createScript(input) {
 	if (hasDefaultPolicy()) {
-		return globalThis.trustedTypes.createScript(input);
+		return globalThis.trustedTypes.defaultPolicy.createScript(input);
 	} else {
 		return input;
 	}
@@ -56,7 +56,7 @@ export function createScript(input) {
 
 export function createScriptURL(input) {
 	if (hasDefaultPolicy()) {
-		return globalThis.trustedTypes.createScriptURL(input);
+		return globalThis.trustedTypes.defaultPolicy.createScriptURL(input);
 	} else {
 		return input;
 	}

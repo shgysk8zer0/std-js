@@ -1,7 +1,7 @@
 import { signalAborted } from './abort.js';
 import { addListener, listen } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
-import { isHTML, createHTML, isTrustPolicy } from './trust.js';
+import { isHTML, createHTML, isTrustPolicy, getDefaultPolicy } from './trust.js';
 
 export function query(what, base = document) {
 	if (Array.isArray(what)) {
@@ -413,7 +413,7 @@ export function on(what, when, ...args) {
 	return items;
 }
 
-export function off(what, when,...args) {
+export function off(what, when, ...args) {
 	return each(what, item => {
 		if (typeof when === 'string') {
 			item.removeEventListener(when, ...args);
@@ -496,17 +496,15 @@ export function parseHTML(text, { type = 'text/html', asFrag = true, head = true
 	return parse(text, { type, asFrag, head, sanitizer, policy });
 }
 
-export function parse(text, { type = 'text/html', asFrag = true, sanitizer, policy } = {}) {
-	if (asFrag === false) {
-		const parser = new DOMParser();
+export function parse(text, { type = 'text/html', asFrag = true, sanitizer, policy = getDefaultPolicy() } = {}) {
+	const parser = new DOMParser();
 
-		if (TrustedTypePolicy(policy) && ! isHTML(text)) {
-			return parser.parseFromString(policy.createHTML(text), type);
-		} else {
-			return new DOMParser().parseFromString(text, type);
-		}
-	} else {
+	if (asFrag) {
 		return parseAsFragment(text, { sanitizer, policy });
+	} else if (TrustedTypePolicy(policy) && ! isHTML(text)) {
+		return parser.parseFromString(policy.createHTML(text), type);
+	} else {
+		return parser.parseFromString(text, type);
 	}
 }
 
@@ -519,8 +517,9 @@ export function documentToFragment(doc, { sanitizer } = {}) {
 		? sanitizer.sanitize(frag) : frag;
 }
 
-export function parseAsFragment(text, { sanitizer, policy } = {}) {
+export function parseAsFragment(text, { sanitizer, policy = getDefaultPolicy } = {}) {
 	const tmp = document.createElement('template');
+
 	if (isTrustPolicy(policy) && ! isHTML(text)) {
 		tmp.innerHTML = policy.createHTML(text);
 	} else {
