@@ -1,6 +1,11 @@
+/**
+ * @Todo: Handle Element.prototype.innerHTML & ELement.prototype.outerHTML
+ * @Todo: HAndle HTMLScriptElement.prototype.text & HTMLScriptElement.prototype.textContent
+ * @Todo: Handle new Function()
+ */
 import { isHTML, isScript, isScriptURL } from './trust.js';
 /**
- * [aliases description]
+ * Store `Symbol`s
  * @type {Object}
  */
 const aliases = {
@@ -29,18 +34,42 @@ const aliases = {
  */
 export function enforce() {
 	Object.entries(aliases.element).forEach(([name, symbol]) => {
-		Element.prototype[symbol] = Element.prototype[name];
-		delete Element.prototype[name];
+		if (Element.prototype[name] instanceof Function) {
+			Object.defineProperty(Element.prototype, symbol, {
+				enumerable: false,
+				configurable: false,
+				writable: false,
+				value: Element.prototype[name],
+			});
+
+			delete Element.prototype[name];
+		}
 	});
 
 	Object.entries(aliases.document).forEach(([name, symbol]) => {
-		Document.prototype[symbol] = Document.prototype[name];
-		delete Document.prototype[name];
+		if (Document.prototype[name] instanceof Function) {
+			Object.defineProperty(Document.prototype, symbol, {
+				enumerable: false,
+				configurable: false,
+				writable: false,
+				value: Document.prototype[name],
+			});
+
+			delete Document.prototype[name];
+		}
 	});
 
 	Object.entries(aliases.global).forEach(([name, symbol]) => {
-		globalThis[symbol] = globalThis[name];
-		delete globalThis[name];
+		if (globalThis[name] instanceof Function) {
+			Object.defineProperty(globalThis, symbol, {
+				enumerable: false,
+				configurable: false,
+				writable: false,
+				value: globalThis[name],
+			});
+
+			delete globalThis[name];
+		}
 	});
 
 	Object.defineProperty(HTMLScriptElement.prototype, 'src', {

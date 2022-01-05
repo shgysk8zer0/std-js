@@ -1,9 +1,6 @@
 /**
  * @See https://github.com/w3c/webappsec-trusted-types/blob/main/src/trustedtypes.js
  * @See https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
- * @Todo: Handle Element.prototype.innerHTML & ELement.prototype.outerHTML
- * @Todo: HAndle HTMLScriptElement.prototype.text & HTMLScriptElement.prototype.textContent
- * @Todo: Handle new Function()
  */
 import { supported as isSupported } from './trust.js';
 
