@@ -40,13 +40,15 @@ const aliases = {
 export function enforce({ allowedPolicies = [], force = false } = {}) {
 	if (force || ! nativeSupport) {
 		if (allowedPolicies.length !== 0) {
-			if (! allowedPolicies.includes('empty#html')) {
-				allowedPolicies.push('empty#html');
-			}
-
-			if (! allowedPolicies.includes('empty#script')) {
-				allowedPolicies.push('empty#script');
-			}
+			/**
+			 * Trust default policy, `trustedTypes.emptyHTML` & `trustedTypes.emptyScript`,
+			 * as well as `sanitizer:html` for `Sanitizer()`
+			 */
+			['default', 'empty#html', 'empty#script', 'sanitizer#html'].forEach(policy => {
+				if (! allowedPolicies.includes(policy)) {
+					allowedPolicies.push(policy);
+				}
+			});
 		}
 
 		function allowedType(trustedType) {

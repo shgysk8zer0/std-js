@@ -139,7 +139,7 @@ export class TrustedTypePolicy {
 	 * @param {Function} createScriptURL  [description]
 	 * @param {String} key              [description]
 	 */
-	constructor(name, { createHTML, createScript, createScriptURL }, key) {
+	constructor(name, { createHTML, createScript, createScriptURL }, { key }) {
 		if (key !== symbols.trustedKey) {
 			throw new TypeError('Invalid constructor');
 		} else if (! name.toString().match(/^[-#a-zA-Z0-9=_/@.%]+$/g)) {
@@ -215,7 +215,7 @@ export class TrustedTypeFactory extends EventTarget {
 			throw new TypeError('Invalid constructor');
 		}
 
-		Object.defineProperties(this,
+		Object.defineProperties(this, {
 			[symbols.defaultPolicy]: {
 				enumerable: false,
 				configurable: false,
@@ -279,8 +279,8 @@ export class TrustedTypeFactory extends EventTarget {
 	 */
 	createPolicy(name, { createHTML, createScript, createScriptURL }) {
 		if (! hasPolicy(name)) {
-			const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, symbols.trustedKey);
-			this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', policy, symbols.trustedKey));
+			const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, { key: symbols.trustedKey });
+			this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', { policy, key: symbols.trustedKey }));
 
 			if (policy.name === 'default') {
 				this[symbols.defaultPolicy] = policy;
@@ -429,5 +429,18 @@ export function polyfill() {
 
 	if (! ('trustedTypes' in globalThis)) {
 		globalThis.trustedTypes = trustedTypes;
+	} else {
+		try {
+			/**
+			 * Create these policies even if not needed to prevent
+			 * their use elsewhere. Not creating them but allowing them via CSP
+			 * would allow creating them as arbitrary policies.
+			 * @type {[type]}
+			 */
+			globalThis.createPolicy('empty#html', { createHTML: () => '' });
+			globalThis.createPolicy('empty#script', { createScript: () => '' });
+		} catch(err) {
+			console.error(err);
+		}
 	}
 }
