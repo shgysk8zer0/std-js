@@ -5,7 +5,7 @@ import { on, data } from '../dom.js';
 import * as mutations from '../mutations.js';
 import { DAYS } from '../date-consts.js';
 import { alert, prompt } from '../asyncDialog.js';
-import { createScriptURL, createHTML, whenPolicyCreated } from '../trust.js';
+import { createScriptURL, createPolicy } from '../trust.js';
 import { loadScript } from '../loader.js';
 import 'https://cdn.kernvalley.us/components/toast-message.js';
 
@@ -17,6 +17,10 @@ const modules = [
 export async function loadHandler() {
 	data('[data-cookie][data-expires]', {
 		expires: new Date(Date.now() + 2 * DAYS),
+	});
+
+	const policy = createPolicy('loader#html', {
+		createHTML: input => input,
 	});
 
 	Promise.allSettled(
@@ -37,21 +41,21 @@ export async function loadHandler() {
 		const name = await prompt('Enter cookie name');
 		if (name !== '') {
 			const value = await prompt('Enter cookie value');
-			cookieStore.set(name, value, {maxAge: 60});
+			await cookieStore.set(name, value, {maxAge: 60});
 		}
 	});
 
 	on('#get-cookie', 'click', async () => {
 		const name = await prompt('Enter cookie name');
 		if (name !== '') {
-			alert(`${name} = "${cookieStore.get(name)}"`);
+			alert(`${name} = "${await cookieStore.get(name)}"`);
 		}
 	});
 
 	on('#has-cookie', 'click', async () => {
 		const name = await prompt('Enter cookieStore name');
 		if (name !== '') {
-			alert(cookieStore.has(name) ? 'Found' : 'Not found');
+			alert(await cookieStore.has(name) ? 'Found' : 'Not found');
 		}
 	});
 
@@ -65,10 +69,8 @@ export async function loadHandler() {
 	try {
 		const json = await getJSON('/fetch.json');
 		await handleJSON(json);
-		on('main', 'click', () => $('article:first-of-type').read());
-		await Promise.all([customElements.whenDefined('github-user'), whenPolicyCreated('default')]);
-		document.getElementById('header').insertAdjacentHTML('beforeend', createHTML('<github-user user="shgysk8zer0"></github-user>'));
-		document.getElementById('header').insertAdjacentHTML('beforeend', createHTML('<github-user user="kernvalley"></github-user>'));
+		document.getElementById('header').insertAdjacentHTML('beforeend', policy.createHTML('<github-user user="shgysk8zer0"></github-user>'));
+		document.getElementById('header').insertAdjacentHTML('beforeend', policy.createHTML('<github-user user="kernvalley"></github-user>'));
 	} catch(err) {
 		console.error(err);
 	}
