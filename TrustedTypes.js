@@ -50,6 +50,9 @@ const aliases = {
 	global: {
 		eval: Symbol('window.eval'),
 	},
+	parser: {
+		parseFromString: Symbol('parser.parseFromString'),
+	}
 }
 
 if (! Symbol.hasOwnProperty('toStringTag')) {
@@ -58,7 +61,7 @@ if (! Symbol.hasOwnProperty('toStringTag')) {
 
 /**
  * [getUnsetPolicyException description]
- * @param {TrustedTypesPolicy} policy  [description]
+ * @param {TrustedTypePolicy} policy  [description]
  * @param {String} method  [description]
  */
 function getUnsetPolicyException(policy, method) {
@@ -141,9 +144,9 @@ export class TrustedScriptURL extends TrustedType {
 
 /**
  * [name description]
- * @type {TrustedTypesPolicy}
+ * @type {TrustedTypePolicy}
  */
-export class TrustedTypesPolicy {
+export class TrustedTypePolicy {
 	/**
 	 * [constructor description]
 	 * @param {String} name             [description]
@@ -277,7 +280,7 @@ export class TrustedTypeFactory extends EventTarget {
 	 * @param  {Function} createScriptURL               [description]
 	 */
 	createPolicy(name, { createHTML, createScript, createScriptURL }) {
-		const policy = new TrustedTypesPolicy(name, { createHTML, createScript, createScriptURL }, symbols.trustedKey);
+		const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, symbols.trustedKey);
 		this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', policy, symbols.trustedKey));
 
 		if (policy.name === 'default') {
@@ -391,7 +394,7 @@ export class TrustedTypeFactory extends EventTarget {
 
 	/**
 	 * [defaultPolicy description]
-	 * @return {TrustedTypesPolicy} [description]
+	 * @return {TrustedTypePolicy} [description]
 	 */
 	get defaultPolicy() {
 		return this[symbols.defaultPolicy];
@@ -422,6 +425,23 @@ function harden() {
 		delete globalThis[name];
 	});
 
+	Object.entries(aliases.parser).forEach(([name, symbol]) => {
+		DOMParser.prototype[symbol] = DOMParser.prototype[name];
+		delete DOMParser.prototype[name];
+	});
+
+	DOMParser.prototype.parseFromString = function(input, type) {
+		if (['text/html', 'application/html', 'text/xhtml+xml', 'application/xhtml+xml'].includes(type)) {
+			if (trustedTypes.isHTML(input)) {
+				return this[aliases.parser.parseFromString].call(this, input.toString(), type);
+			} else {
+				throw new TypeError('Untrusted HTML');
+			}
+		} else {
+			return this[aliases.parser.parseFromString].call(this, input, type);
+		}
+	}
+
 	Document.prototype.write = function(text) {
 		if (trustedTypes.isHTML(text)) {
 			this[aliases.document.write].call(this, text.toString());
@@ -432,7 +452,7 @@ function harden() {
 
 	Document.prototype.writeln = function(line) {
 		if (trustedTypes.isHTML(line)) {
-			this[aliases.document.writeln].call(this, line);
+			this[aliases.document.writeln].call(this, line.toString());
 		} else {
 			throw new TypeError('Untrusted HTML');
 		}
@@ -639,7 +659,7 @@ export function polyfill(enableHarden = false) {
 /**
  * [getInsecurePolicy description]
  * @param  {String} [name='no-op']               [description]
- * @return {TrustedTypesPolicy}                [description]
+ * @return {TrustedTypePolicy}                [description]
  */
 export function getInsecurePolicy(name = 'no-op') {
 	if (isSupported()) {
@@ -660,7 +680,7 @@ export function getInsecurePolicy(name = 'no-op') {
 /**
  * [getStrictPolicy description]
  * @param  {String} [name='lock-down']               [description]
- * @return {TrustedTypesPolicy}                    [description]
+ * @return {TrustedTypePolicy}                    [description]
  */
 export function getStrictPolicy(name = 'lock-down') {
 	if (isSupported()) {
@@ -682,7 +702,7 @@ export function getStrictPolicy(name = 'lock-down') {
  * [getDefaultPolicy description]
  * @param  {String} [name='default']                                [description]
  * @param  {Array}  [allowedOrigins=[location.origin, 'https:}      =             {}]  [description]
- * @return {TrustedTypesPolicy}                                   [description]
+ * @return {TrustedTypePolicy}                                   [description]
  */
 export function getDefaultPolicy(name = 'default', {
 	allowedOrigins = [location.origin, 'https://cdn.kernvalley.us', 'https://unpkg.com'],
