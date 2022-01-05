@@ -437,8 +437,8 @@ export function polyfill() {
 			 * would allow creating them as arbitrary policies.
 			 * @type {[type]}
 			 */
-			globalThis.createPolicy('empty#html', { createHTML: () => '' });
-			globalThis.createPolicy('empty#script', { createScript: () => '' });
+			globalThis.trustedTypes.createPolicy('empty#html', { createHTML: () => '' });
+			globalThis.trustedTypes.createPolicy('empty#script', { createScript: () => '' });
 		} catch(err) {
 			console.error(err);
 		}
