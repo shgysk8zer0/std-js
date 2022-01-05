@@ -51,9 +51,9 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 			});
 		}
 
-		function allowedType(trustedType) {
+		const allowedType = function allowedType(trustedType) {
 			return nativeSupport || allowedPolicies.length === 0 || allowedPolicies.includes(trustedType[policySymbol]);
-		}
+		};
 
 		Object.entries(aliases.element).forEach(([name, symbol]) => {
 			if (Element.prototype[name] instanceof Function) {
@@ -129,7 +129,7 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 
 		DOMParser.prototype.parseFromString = function(input, type) {
 			if (['text/html', 'application/xhtml+xml'].includes(type)) {
-				if (isHTML(input) && allowedType(value)) {
+				if (isHTML(input) && allowedType(input)) {
 					return this[aliases.parser.parseFromString].call(this, input.toString(), type);
 				} else {
 					throw new TypeError('Untrusted HTML');
@@ -172,8 +172,8 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 		};
 
 		Element.prototype.setAttribute = function(name, value) {
-			switch(trustedTypes.getAttributeType(this.tagName, name)) {
-				case TrustedHTML.name: {
+			switch(globalThis.trustedTypes.getAttributeType(this.tagName, name)) {
+				case globalThis.TrustedHTML.name: {
 					if (isHTML(value) && allowedType(value)) {
 						this[aliases.element.setAttribute].call(this, name, value.toString());
 					} else {
@@ -183,7 +183,7 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					break;
 				}
 
-				case TrustedScript.name: {
+				case globalThis.TrustedScript.name: {
 					if (isScript(value) && allowedType(value)) {
 						this[aliases.element.setAttribute].call(this, name, value.toString());
 					} else {
@@ -193,7 +193,7 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					break;
 				}
 
-				case TrustedScriptURL.name: {
+				case globalThis.TrustedScriptURL.name: {
 					if (isScriptURL(value) && allowedType(value)) {
 						this[aliases.element.setAttribute].call(this, name, value.toString());
 					} else {
@@ -203,14 +203,15 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					break;
 				}
 
-				default:
-				this[aliases.element.setAttribute].call(this, name, value.toString());
+				default: {
+					this[aliases.element.setAttribute].call(this, name, value.toString());
+				}
 			}
 		};
 
 		Element.prototype.setAttributeNode = function(attribute) {
-			switch(trustedTypes.getAttributeType(this.tagName, attribute.namename)) {
-				case TrustedHTML.name: {
+			switch(globalThis.trustedTypes.getAttributeType(this.tagName, attribute.namename)) {
+				case globalThis.TrustedHTML.name: {
 					if (isHTML(attribute.value) && allowedType(attribute.value)) {
 						return this[aliases.element.setAttributeNode].call(this, attribute);
 					} else {
@@ -218,7 +219,7 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					}
 				}
 
-				case TrustedScript.name: {
+				case globalThis.TrustedScript.name: {
 					if (isScript(attribute.value) && allowedType(attribute.value)) {
 						return this[aliases.element.setAttributeNode].call(this, attribute);
 					} else {
@@ -226,7 +227,7 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					}
 				}
 
-				case TrustedScriptURL.name: {
+				case globalThis.TrustedScriptURL.name: {
 					if (isScriptURL(attribute.value) && allowedType(attribute.value)) {
 						return this[aliases.element.setAttributeNode].call(this, attribute);
 					} else {
@@ -234,14 +235,15 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					}
 				}
 
-				default:
-				return this[aliases.element.setAttributeNode].call(this, attribute);
+				default: {
+					return this[aliases.element.setAttributeNode].call(this, attribute);
+				}
 			}
 		};
 
 		Element.prototype.setAttributeNS = function(namespace, name, value) {
-			switch(trustedTypes.getAttributeType(this.tagName, name, namespace)) {
-				case TrustedHTML.name: {
+			switch(globalThis.trustedTypes.getAttributeType(this.tagName, name, namespace)) {
+				case globalThis.TrustedHTML.name: {
 					if (isHTML(value) && allowedType(value)) {
 						return this[aliases.element.setAttributeNS].call(this, namespace, name, value.toString());
 					} else {
@@ -249,7 +251,7 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					}
 				}
 
-				case TrustedScript.name: {
+				case globalThis.TrustedScript.name: {
 					if (isScript(value) && allowedType(value)) {
 						return this[aliases.setAttributeNS].call(this, namespace, name, value.toString());
 					} else {
@@ -257,7 +259,7 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					}
 				}
 
-				case TrustedScriptURL.name: {
+				case globalThis.TrustedScriptURL.name: {
 					if (isScriptURL(value) && allowedType(value)) {
 						return this[aliases.element.setAttributeNS].call(this, namespace, name, value.toString());
 					} else {
@@ -265,14 +267,15 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					}
 				}
 
-				default:
-				return this[aliases.element.setAttributeNS].call(this, namespace, name, value.toString());
+				default: {
+					return this[aliases.element.setAttributeNS].call(this, namespace, name, value.toString());
+				}
 			}
 		};
 
 		Element.prototype.setAttributeNodeNS = function(attribute) {
-			switch(trustedTypes.getAttributeType(this.tagName, attribute.localName, attribute.prefix)) {
-				case TrustedHTML.name: {
+			switch(globalThis.trustedTypes.getAttributeType(this.tagName, attribute.localName, attribute.prefix)) {
+				case globalThis.TrustedHTML.name: {
 					if (isHTML(attribute.value) && allowedType(attribute.value)) {
 						return this[aliases.element.setAttributeNodeNS].call(this, attribute);
 					} else {
@@ -280,7 +283,7 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					}
 				}
 
-				case TrustedScript.name: {
+				case globalThis.TrustedScript.name: {
 					if (isScript(attribute.value) && allowedType(attribute.value)) {
 						return this[aliases.element.setAttributeNodeNS].call(this, attribute);
 					} else {
@@ -288,7 +291,7 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					}
 				}
 
-				case TrustedScriptURL.name: {
+				case globalThis.TrustedScriptURL.name: {
 					if (isScriptURL(attribute.value) && allowedType(attribute.value)) {
 						return this[aliases.element.setAttributeNodeNS].call(this, attribute);
 					} else {
@@ -296,8 +299,9 @@ export function enforce({ allowedPolicies = [], force = false } = {}) {
 					}
 				}
 
-				default:
+				default: {
 					return this[aliases.element.setAttributeNodeNS].call(this, attribute);
+				}
 			}
 		};
 	}

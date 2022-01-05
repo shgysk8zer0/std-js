@@ -77,7 +77,7 @@ export function createPolicy(name, {
 	createScriptURL = () => {
 		throw new DOMException('This policy does not provide `createScriptURL()`');
 	},
- }) {
+}) {
 	if (supported()) {
 		return globalThis.trustedTypes.createPolicy(name, { createHTML, createScript, createScriptURL });
 	} else {
@@ -95,6 +95,7 @@ export function getDefaultPolicy() {
 
 export async function whenPolicyCreated(name = 'default', { signal } = {}) {
 	const { resolve, reject, promise } = getDeferred();
+
 	if (! supported()) {
 		reject(new DOMException('TrustedTypes not supported'));
 	} else if (name === 'default' && isTrustPolicy(globalThis.trustedTypes.defaultPolicy)) {
@@ -107,4 +108,6 @@ export async function whenPolicyCreated(name = 'default', { signal } = {}) {
 			}
 		}, { signal });
 	}
+
+	return promise;
 }

@@ -3,7 +3,6 @@ import '../deprefixer.js';
 import '../theme-cookie.js';
 import { loadHandler } from './funcs.js';
 import { sleep } from '../promises.js';
-import { $ } from '../esQuery.js';
 import { toggleClass, on, replaceClass, data, attr, ready } from '../dom.js';
 import { init } from '../data-handlers.js';
 import { description, keywords, robots, thumbnail } from '../meta.js';
@@ -18,9 +17,9 @@ Promise.allSettled([
 
 const sanitizerConfig = {...Sanitizer.getDefaultConfiguration(), allowCustomElements: true };
 
-trustedTypes.addEventListener('beforecreatepolicy', console.info);
+globalThis.trustedTypes.addEventListener('beforecreatepolicy', console.info);
 
-trustedTypes.createPolicy('default', {
+globalThis.trustedTypes.createPolicy('default', {
 	createHTML: input => new Sanitizer(sanitizerConfig).sanitizeFor('div', input).innerHTML,
 	createScriptURL: input => {
 		if ([location.origin, 'https://cdn.kernvalley.us'].includes(new URL(input, location.origin).origin)) {
