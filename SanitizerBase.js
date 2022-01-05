@@ -8,7 +8,7 @@ import { createPolicy } from './trust.js';
 try {
 	trustPolyfill();
 } catch(err) {
-	console.error(error);
+	console.error(err);
 }
 
 /**
@@ -17,11 +17,7 @@ try {
  * which would create infinite recursion.
  * @type {TrustedTypePolicy}
  */
-const sanitizerPolicy = createPolicy('sanitizer-policy', {
-	createHTML: input => input,
-	createScript: () => new DOMException('This policy is only valid for Sanitizer HTML'),
-	createScriptURL: () => new DOMException('This policy is only valid for Sanitizer HTML'),
-});
+const sanitizerPolicy = createPolicy('sanitizer#html', { createHTML: input => input });
 /**
  * @SEE https://wicg.github.io/sanitizer-api/
  * @SEE https://developer.mozilla.org/en-US/docs/Web/API/Sanitizer/Sanitizer

@@ -16,11 +16,21 @@ export const supported = isSupported();
 const symbols = {
 	trustedValue: Symbol('trusted-value'),
 	trustedKey: Symbol('trusted-key'),
-	defaultPolicy: Symbol('defaultPolicy'),
+	policy: Symbol.for('trust-policy'),
 };
 
 if (! Symbol.hasOwnProperty('toStringTag')) {
 	Symbol.toStringTag = Symbol('Symbol.toStringTag');
+}
+
+const policies = [];
+
+function getPolicy(name) {
+	return policies.find(policy => policy.name === name) || null;
+}
+
+function hasPolicy(name) {
+	return policies.some(policy => policy.name === name);
 }
 
 /**
@@ -44,15 +54,23 @@ class TrustedType {
 	 * @param {String} value  [description]
 	 * @param {Symbol} key    [description]
 	 */
-	constructor (value, key) {
+	constructor(value, key, policy) {
 		if (key !== symbols.trustedKey) {
 			throw new TypeError('Invalid constructor');
 		} else {
-			Object.defineProperty(this, symbols.trustedValue, {
-				enumerable: false,
-				configurable: false,
-				writable: false,
-				value: value.toString(),
+			Object.defineProperties(this, {
+				[symbols.trustedValue]: {
+					enumerable: false,
+					configurable: false,
+					writable: false,
+					value: value.toString(),
+				},
+				[symbols.policy]: {
+					enumerable: false,
+					configurable: false,
+					writable: false,
+					value: policy.name,
+				}
 			});
 
 			Object.freeze(this);
@@ -138,7 +156,7 @@ export class TrustedTypePolicy {
 				configurable: false,
 				writable: false,
 				value: createHTML instanceof Function
-					? (...args) => new TrustedHTML(createHTML(...args), symbols.trustedKey)
+					? (...args) => new TrustedHTML(createHTML(...args), symbols.trustedKey, this)
 					: getUnsetPolicyException(this, 'createHTML'),
 			},
 			createScript: {
@@ -146,7 +164,7 @@ export class TrustedTypePolicy {
 				configurable: false,
 				writable: false,
 				value: createScript instanceof Function
-					? (...args) => new TrustedScript(createScript(...args), symbols.trustedKey)
+					? (...args) => new TrustedScript(createScript(...args), symbols.trustedKey, this)
 					: getUnsetPolicyException(this, 'createScript'),
 			},
 			createScriptURL: {
@@ -154,12 +172,12 @@ export class TrustedTypePolicy {
 				configurable: false,
 				writable: false,
 				value: createScriptURL instanceof Function
-					? (...args) => new TrustedScriptURL(createScriptURL(...args), symbols.trustedKey)
+					? (...args) => new TrustedScriptURL(createScriptURL(...args), symbols.trustedKey, this)
 					: getUnsetPolicyException(this, 'createScriptURL'),
 			},
 		});
 
-		Object.freeze(this);
+		policies.push(Object.freeze(this));
 	}
 }
 
@@ -244,14 +262,18 @@ export class TrustedTypeFactory extends EventTarget {
 	 * @param  {Function} createScriptURL               [description]
 	 */
 	createPolicy(name, { createHTML, createScript, createScriptURL }) {
-		const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, symbols.trustedKey);
-		this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', policy, symbols.trustedKey));
+		if (! hasPolicy(name)) {
+			const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, symbols.trustedKey);
+			this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', policy, symbols.trustedKey));
 
-		if (policy.name === 'default') {
-			this[symbols.defaultPolicy] = policy;
+			if (policy.name === 'default') {
+				this[symbols.defaultPolicy] = policy;
+			}
+
+			return policy;
+		} else {
+			throw new DOMException(`TrustedTypePolicy ${name} already set`);
 		}
-
-		return policy;
 	}
 
 	/**
@@ -353,7 +375,7 @@ export class TrustedTypeFactory extends EventTarget {
 	 * @return {TrustedTypePolicy} [description]
 	 */
 	get defaultPolicy() {
-		return this[symbols.defaultPolicy];
+		return getPolicy('default');
 	}
 
 	/**
