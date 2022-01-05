@@ -3,8 +3,6 @@
  * @See https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
  * @Todo: Handle Element.prototype.innerHTML & ELement.prototype.outerHTML
  * @Todo: HAndle HTMLScriptElement.prototype.text & HTMLScriptElement.prototype.textContent
- * @Todo: Handle HTMLScriptElement.prototype.src
- * @Todo: Handle HTMLIframeElement.prototype.srcdoc
  * @Todo: Handle new Function()
  */
 
@@ -423,6 +421,34 @@ function harden() {
 	Object.entries(aliases.global).forEach(([name, symbol]) => {
 		globalThis[symbol] = globalThis[name];
 		delete globalThis[name];
+	});
+
+	Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+		enumerable: true,
+		configurable: false,
+		get: function() {
+			return new URL(this.getAttribute('src'), document.baseURI).href;
+		},
+		set: function(value) {
+			if (trustedTypes.isScriptURL(value)) {
+				this.setAttribute('src', value);
+			} else {
+				throw new TypeError('Untrusted script src');
+			}
+		}
+	});
+
+	Object.defineProperty(HTMLIFrameElement.prototype, 'srcdoc', {
+		get: function() {
+			return this.getAttribute('srcdoc');
+		},
+		set: function(value) {
+			if (trustedTypes.isHTML(value)) {
+				this.setAttribute('srcdoc', value);
+			} else {
+				throw new TypeError('Untrusted HTML');
+			}
+		}
 	});
 
 	Object.entries(aliases.parser).forEach(([name, symbol]) => {
