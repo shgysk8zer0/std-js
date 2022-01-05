@@ -69,6 +69,7 @@ function getUnsetPolicyException(policy, method) {
 
 /**
  * [TrustedType description]
+ * @type {TrustedType}
  */
 class TrustedType {
 	/**
@@ -110,7 +111,7 @@ class TrustedType {
 
 /**
  * [description]
- * @Type {TrustedHTML}
+ * @type {TrustedHTML}
  */
 export class TrustedHTML extends TrustedType {
 	[Symbol.toStringTag]() {
@@ -120,7 +121,7 @@ export class TrustedHTML extends TrustedType {
 
 /**
  * [description]
- * @Type {TrustedScript}
+ * @type {TrustedScript}
  */
 export class TrustedScript extends TrustedType {
 	[Symbol.toStringTag]() {
