@@ -5,14 +5,7 @@
  * @Todo: HAndle HTMLScriptElement.prototype.text & HTMLScriptElement.prototype.textContent
  * @Todo: Handle new Function()
  */
-
-/**
- * [isSupported description]
- * @return {Boolean} [description]
- */
-export function isSupported() {
-	return 'trustedTypes' in globalThis;
-}
+import { supported as isSupported } from './trust.js';
 
 /**
  * [supported description]
@@ -51,7 +44,7 @@ const aliases = {
 	parser: {
 		parseFromString: Symbol('parser.parseFromString'),
 	}
-}
+};
 
 if (! Symbol.hasOwnProperty('toStringTag')) {
 	Symbol.toStringTag = Symbol('Symbol.toStringTag');
@@ -65,7 +58,7 @@ if (! Symbol.hasOwnProperty('toStringTag')) {
 function getUnsetPolicyException(policy, method) {
 	return function() {
 		throw new TypeError(`Failed to execute '${method}' on 'TrustedTypePolicy': Policy ${policy.name}'s TrustedTypePolicyOptions did not specify a '${method}' member.`);
-	}
+	};
 }
 
 /**
@@ -299,7 +292,7 @@ export class TrustedTypeFactory extends EventTarget {
 		tagName = tagName.toLowerCase();
 		attribute = attribute.toLowerCase();
 
-		if (typeof elementNS === 'string' && elementNS.length !== 0) {
+		if (typeof elementNS === 'string' && elementNs.length !== 0) {
 			return null;
 		}
 
@@ -310,8 +303,6 @@ export class TrustedTypeFactory extends EventTarget {
 				} else {
 					return null;
 				}
-
-				break;
 			}
 
 			case 'iframe': {
@@ -320,8 +311,6 @@ export class TrustedTypeFactory extends EventTarget {
 				} else {
 					return null;
 				}
-
-				break;
 			}
 
 			default:
@@ -346,8 +335,6 @@ export class TrustedTypeFactory extends EventTarget {
 				} else {
 					return null;
 				}
-
-				break;
 			}
 
 			case 'script': {
@@ -355,13 +342,11 @@ export class TrustedTypeFactory extends EventTarget {
 					return TrustedScriptURL.name;
 				} else if (['text', 'innerText', 'textContent'].includes(property)) {
 					return TrustedScript.name;
-				} else if (['outerHTML', 'innerHTML']) {
+				} else if (['outerHTML', 'innerHTML'].includes(property)) {
 					return TrustedHTML.name;
 				} else {
 					return null;
 				}
-
-				break;
 			}
 
 			default: {
@@ -469,7 +454,7 @@ function harden() {
 		} else {
 			return this[aliases.parser.parseFromString].call(this, input, type);
 		}
-	}
+	};
 
 	Document.prototype.write = function(text) {
 		if (trustedTypes.isHTML(text)) {
@@ -485,7 +470,7 @@ function harden() {
 		} else {
 			throw new TypeError('Untrusted HTML');
 		}
-	}
+	};
 
 	globalThis.eval = function(code) {
 		if (trustedTypes.isScript(code)) {
@@ -493,7 +478,7 @@ function harden() {
 		} else {
 			throw new TypeError('Untrusted script');
 		}
-	}
+	};
 
 	Element.prototype.insertAdjacentHTML = function(position, text) {
 		if (trustedTypes.isHTML(text)) {
@@ -543,111 +528,93 @@ function harden() {
 	Element.prototype.setAttributeNode = function(attribute) {
 		switch(trustedTypes.getAttributeType(this.tagName, attribute.namename)) {
 			case TrustedHTML.name: {
-				if (trustedTypes.isHTML(value)) {
+				if (trustedTypes.isHTML(attribute.value)) {
 					return this[aliases.element.setAttributeNode].call(this, attribute);
 				} else {
 					throw new DOMException('Untrusted HTML');
 				}
-
-				break;
 			}
 
 			case TrustedScript.name: {
-				if (trustedTypes.isScript(value)) {
+				if (trustedTypes.isScript(attribute.value)) {
 					return this[aliases.element.setAttributeNode].call(this, attribute);
 				} else {
 					throw new DOMException('Untrusted script');
 				}
-
-				break;
 			}
 
 			case TrustedScriptURL.name: {
-				if (trustedTypes.isScriptURL(value)) {
+				if (trustedTypes.isScriptURL(attribute.value)) {
 					return this[aliases.element.setAttributeNode].call(this, attribute);
 				} else {
 					throw new DOMException('Untrusted script url');
 				}
-
-				break;
 			}
 
 			default:
 				return this[aliases.element.setAttributeNode].call(this, attribute);
 		}
-	}
+	};
 
 	Element.prototype.setAttributeNS = function(namespace, name, value) {
 		switch(trustedTypes.getAttributeType(this.tagName, name, namespace)) {
 			case TrustedHTML.name: {
 				if (trustedTypes.isHTML(value)) {
-					this[aliases.element.setAttributeNS].call(this, namespace, name, value.toString());
+					return this[aliases.element.setAttributeNS].call(this, namespace, name, value.toString());
 				} else {
 					throw new DOMException('Untrusted HTML');
 				}
-
-				break;
 			}
 
 			case TrustedScript.name: {
 				if (trustedTypes.isScript(value)) {
-					this[aliases.setAttributeNS].call(this, namespace, name, value.toString());
+					return this[aliases.setAttributeNS].call(this, namespace, name, value.toString());
 				} else {
 					throw new DOMException('Untrusted script');
 				}
-
-				break;
 			}
 
 			case TrustedScriptURL.name: {
 				if (trustedTypes.isScriptURL(value)) {
-					this[aliases.element.setAttributeNS].call(this, namespace, name, value.toString());
+					return this[aliases.element.setAttributeNS].call(this, namespace, name, value.toString());
 				} else {
 					throw new DOMException('Untrusted script url');
 				}
-
-				break;
 			}
 
 			default:
-				this[aliases.element.setAttributeNS].call(this, namespace, name, value.toString());
+				return this[aliases.element.setAttributeNS].call(this, namespace, name, value.toString());
 		}
 	};
 
 	Element.prototype.setAttributeNodeNS = function(attribute) {
 		switch(trustedTypes.getAttributeType(this.tagName, attribute.localName, attribute.prefix)) {
 			case TrustedHTML.name: {
-				if (trustedTypes.isHTML(value)) {
-					this[aliases.element.setAttributeNodeNS].call(this, attribute);
+				if (trustedTypes.isHTML(attribute.value)) {
+					return this[aliases.element.setAttributeNodeNS].call(this, attribute);
 				} else {
 					throw new DOMException('Untrusted HTML');
 				}
-
-				break;
 			}
 
 			case TrustedScript.name: {
-				if (trustedTypes.isScript(value)) {
-					this[aliases.element.setAttributeNodeNS].call(this, attribute);
+				if (trustedTypes.isScript(attribute.value)) {
+					return this[aliases.element.setAttributeNodeNS].call(this, attribute);
 				} else {
 					throw new DOMException('Untrusted script');
 				}
-
-				break;
 			}
 
 			case TrustedScriptURL.name: {
-				if (trustedTypes.isScriptURL(value)) {
-					this[aliases.element.setAttributeNodeNS].call(this, attribute);
+				if (trustedTypes.isScriptURL(attribute.value)) {
+					return this[aliases.element.setAttributeNodeNS].call(this, attribute);
 				} else {
 					throw new DOMException('Untrusted script url');
 				}
-
-				break;
 			}
 
 			default:
-				this[aliases.element.setAttributeNodeNS].call(this, attribute);
+				return this[aliases.element.setAttributeNodeNS].call(this, attribute);
 		}
 	};
 }

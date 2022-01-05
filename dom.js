@@ -386,9 +386,12 @@ export function text(what, text, { base } = {}) {
 	return each(what, el => el.textContent = text, { base });
 }
 
-export function html(what, text, { base, sanitizer } = {}) {
+export function html(what, text, { base, sanitizer, policy } = {}) {
 	if (typeof sanitizer !== 'undefined' && sanitizer.setHTML instanceof Function) {
 		return each(what, el => el.setHTML(text, sanitizer), base);
+	} else if (typeof policy !== 'undefined' && policy.createHTML instanceof Function) {
+		text = policy.createHTML(text);
+		return each(what, el => el.innerHTML = text, { base });
 	} else {
 		return each(what, el => el.innerHTML = text, { base });
 	}
@@ -487,16 +490,21 @@ export async function beforeUnload({ signal } = {}) {
 /**
  * @deprecated [will be removed in v3.0.0]
  */
-export function parseHTML(text, { type = 'text/html', asFrag = true, head = true, sanitizer } = {}) {
+export function parseHTML(text, { type = 'text/html', asFrag = true, head = true, sanitizer, policy } = {}) {
 	console.warn('`parseHTML` is deprecated. Please use `parse` instead');
 	return parse(text, { type, asFrag, head, sanitizer });
 }
 
-export function parse(text, { type = 'text/html', asFrag = true, sanitizer } = {}) {
+export function parse(text, { type = 'text/html', asFrag = true, sanitizer, policy } = {}) {
 	if (asFrag === false) {
-		return new DOMParser().parseFromString(text, type);
+		const parser = new DOMParser();
+		if (typeof policy !== 'undefined' && policy.createHTML instanceof Function) {
+			return parser.parseFromString(policy.createHTML(text), type);
+		} else {
+			return new DOMParser().parseFromString(text, type);
+		}
 	} else {
-		return parseAsFragment(text, { sanitizer });
+		return parseAsFragment(text, { sanitizer, policy });
 	}
 }
 
@@ -508,9 +516,14 @@ export function documentToFragment(doc, { sanitizer } = {}) {
 		? sanitizer.sanitize(frag) : frag;
 }
 
-export function parseAsFragment(text, { sanitizer } = {}) {
+export function parseAsFragment(text, { sanitizer, policy } = {}) {
 	const tmp = document.createElement('template');
-	tmp.innerHTML = text;
+	if (typeof policy !== 'undefined' && policy.createHTML instanceof Function) {
+		tmp.innerHTML = policy.createHTML(text);
+	} else {
+		tmp.innerHTML = text;
+	}
+
 	return typeof sanitizer !== 'undefined' && sanitizer.sanitize instanceof Function
 		? sanitizer.sanitize(tmp.content)
 		: tmp.content;
