@@ -59,7 +59,7 @@ if (! Symbol.hasOwnProperty('toStringTag')) {
 /**
  * [getUnsetPolicyException description]
  * @param {TrustedTypesPolicy} policy  [description]
- * @param {string} method  [description]
+ * @param {String} method  [description]
  */
 function getUnsetPolicyException(policy, method) {
 	return function() {
@@ -73,7 +73,7 @@ function getUnsetPolicyException(policy, method) {
 class TrustedType {
 	/**
 	 * [constructor description]
-	 * @param {string} value  [description]
+	 * @param {String} value  [description]
 	 * @param {Symbol} key    [description]
 	 */
 	constructor (value, key) {
@@ -93,7 +93,7 @@ class TrustedType {
 
 	/**
 	 * [toString description]
-	 * @return {string} [description]
+	 * @return {String} [description]
 	 */
 	toString() {
 		return this[symbols.trustedValue];
@@ -101,7 +101,7 @@ class TrustedType {
 
 	/**
 	 * [toJSON description]
-	 * @return {string} [description]
+	 * @return {String} [description]
 	 */
 	toJSON() {
 		return this[symbols.trustedValue];
@@ -109,7 +109,8 @@ class TrustedType {
 }
 
 /**
- *
+ * [description]
+ * @Type {TrustedHTML}
  */
 export class TrustedHTML extends TrustedType {
 	[Symbol.toStringTag]() {
@@ -118,7 +119,8 @@ export class TrustedHTML extends TrustedType {
 }
 
 /**
- *
+ * [description]
+ * @Type {TrustedScript}
  */
 export class TrustedScript extends TrustedType {
 	[Symbol.toStringTag]() {
@@ -128,7 +130,7 @@ export class TrustedScript extends TrustedType {
 
 /**
  * [name description]
- * @type {Object}
+ * @type {TrustedScriptURL}
  */
 export class TrustedScriptURL extends TrustedType {
 	[Symbol.toStringTag]() {
@@ -138,12 +140,12 @@ export class TrustedScriptURL extends TrustedType {
 
 /**
  * [name description]
- * @type {Object}
+ * @type {TrustedTypesPolicy}
  */
 export class TrustedTypesPolicy {
 	/**
 	 * [constructor description]
-	 * @param {string} name             [description]
+	 * @param {String} name             [description]
 	 * @param {Function} createHTML       [description]
 	 * @param {Function} createScript     [description]
 	 * @param {Function} createScriptURL  [description]
@@ -195,7 +197,7 @@ export class TrustedTypesPolicy {
 
 /**
  * [policyName description]
- * @type {[type]}
+ * @type {[BeforeCreatePolicyEvent]}
  */
 export class BeforeCreatePolicyEvent extends Event {
 	constructor(type, policy, key) {
@@ -211,7 +213,7 @@ export class BeforeCreatePolicyEvent extends Event {
 
 /**
  * [enumerable description]
- * @type {Boolean}
+ * @type {TrustedTypeFactory}
  */
 export class TrustedTypeFactory extends EventTarget {
 	/**
@@ -241,7 +243,7 @@ export class TrustedTypeFactory extends EventTarget {
 
 	/**
 	 * [isHTML description]
-	 * @param  {[type]}  value               [description]
+	 * @param  {String}  value               [description]
 	 * @return {Boolean}       [description]
 	 */
 	isHTML(value) {
@@ -250,7 +252,7 @@ export class TrustedTypeFactory extends EventTarget {
 
 	/**
 	 * [isScript description]
-	 * @param  {[type]}  value               [description]
+	 * @param  {String}  value               [description]
 	 * @return {Boolean}       [description]
 	 */
 	isScript(value) {
@@ -259,7 +261,7 @@ export class TrustedTypeFactory extends EventTarget {
 
 	/**
 	 * [isScriptURL description]
-	 * @param  {[type]}  value               [description]
+	 * @param  {String}  value               [description]
 	 * @return {Boolean}       [description]
 	 */
 	isScriptURL(value) {
@@ -268,16 +270,12 @@ export class TrustedTypeFactory extends EventTarget {
 
 	/**
 	 * [createPolicy description]
-	 * @param  {string} name                          [description]
+	 * @param  {String} name                          [description]
 	 * @param  {Function} createHTML                    [description]
 	 * @param  {Function} createScript                  [description]
 	 * @param  {Function} createScriptURL               [description]
 	 */
-	createPolicy(name, {
-		createHTML,
-		createScript,
-		createScriptURL,
-	}) {
+	createPolicy(name, { createHTML, createScript, createScriptURL }) {
 		const policy = new TrustedTypesPolicy(name, { createHTML, createScript, createScriptURL }, symbols.trustedKey);
 		this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', policy, symbols.trustedKey));
 
@@ -290,10 +288,10 @@ export class TrustedTypeFactory extends EventTarget {
 
 	/**
 	 * [getAttributeType description]
-	 * @param  {string} tagName                 [description]
-	 * @param  {string} attribute               [description]
-	 * @param  {string} elementNs               [description]
-	 * @return {string}           [description]
+	 * @param  {String} tagName                 [description]
+	 * @param  {String} attribute               [description]
+	 * @param  {String} elementNs               [description]
+	 * @return {String}           [description]
 	 */
 	getAttributeType(tagName, attribute, elementNs/*, attrNs*/) {
 		tagName = tagName.toLowerCase();
@@ -331,9 +329,9 @@ export class TrustedTypeFactory extends EventTarget {
 
 	/**
 	 * [getPropertyType description]
-	 * @param  {string} tagName                [description]
-	 * @param  {string} property               [description]
-	 * @return {string}          [description]
+	 * @param  {String} tagName                [description]
+	 * @param  {String} property               [description]
+	 * @return {String}          [description]
 	 */
 	getPropertyType(tagName, property/*, elementNS*/) {
 		property = property.toLowerCase();
@@ -697,6 +695,8 @@ export function getDefaultPolicy(name = 'default', {
 					a.relList.add('external', 'noopener', 'noreferrer');
 				}
 			});
+
+			sanitized.querySelectorAll('img:not([loading])').forEach(img => img.loading = 'lazy');
 
 			return sanitized.innerHTML;
 		},
