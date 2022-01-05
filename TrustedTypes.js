@@ -431,7 +431,7 @@ function harden() {
 	});
 
 	DOMParser.prototype.parseFromString = function(input, type) {
-		if (['text/html', 'application/html', 'text/xhtml+xml', 'application/xhtml+xml'].includes(type)) {
+		if (['text/html', 'application/xhtml+xml'].includes(type)) {
 			if (trustedTypes.isHTML(input)) {
 				return this[aliases.parser.parseFromString].call(this, input.toString(), type);
 			} else {
