@@ -1,6 +1,7 @@
 import { signalAborted } from './abort.js';
 import { addListener, listen } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
+import { isHTML, isScriptURL, isTrustPolicy, getDefaultPolicy } from './trust.js';
 
 export function query(what, base = document) {
 	if (Array.isArray(what)) {
@@ -252,7 +253,7 @@ export function data(what, props = {}, { base } = {}) {
 export function attr(what, props = {}, { base, namespace = null } = {}) {
 	return each(what, item => {
 		Object.entries(props).forEach(([p, v]) => {
-			if (typeof v === 'string' || typeof v === 'number') {
+			if (typeof v === 'string' || typeof v === 'number' || isScriptURL(v)) {
 				if (typeof namespace === 'string') {
 					item.setAttributeNS(namespace, p, v);
 				} else {
@@ -386,9 +387,12 @@ export function text(what, text, { base } = {}) {
 	return each(what, el => el.textContent = text, { base });
 }
 
-export function html(what, text, { base, sanitizer } = {}) {
+export function html(what, text, { base, sanitizer, policy } = {}) {
 	if (typeof sanitizer !== 'undefined' && sanitizer.setHTML instanceof Function) {
 		return each(what, el => el.setHTML(text, sanitizer), base);
+	} else if (typeof policy !== 'undefined' && policy.createHTML instanceof Function) {
+		text = policy.createHTML(text);
+		return each(what, el => el.innerHTML = text, { base });
 	} else {
 		return each(what, el => el.innerHTML = text, { base });
 	}
@@ -409,7 +413,7 @@ export function on(what, when, ...args) {
 	return items;
 }
 
-export function off(what, when,...args) {
+export function off(what, when, ...args) {
 	return each(what, item => {
 		if (typeof when === 'string') {
 			item.removeEventListener(when, ...args);
@@ -487,16 +491,20 @@ export async function beforeUnload({ signal } = {}) {
 /**
  * @deprecated [will be removed in v3.0.0]
  */
-export function parseHTML(text, { type = 'text/html', asFrag = true, head = true, sanitizer } = {}) {
+export function parseHTML(text, { type = 'text/html', asFrag = true, head = true, sanitizer, policy } = {}) {
 	console.warn('`parseHTML` is deprecated. Please use `parse` instead');
-	return parse(text, { type, asFrag, head, sanitizer });
+	return parse(text, { type, asFrag, head, sanitizer, policy });
 }
 
-export function parse(text, { type = 'text/html', asFrag = true, sanitizer } = {}) {
-	if (asFrag === false) {
-		return new DOMParser().parseFromString(text, type);
+export function parse(text, { type = 'text/html', asFrag = true, sanitizer, policy = getDefaultPolicy() } = {}) {
+	const parser = new DOMParser();
+
+	if (asFrag) {
+		return parseAsFragment(text, { sanitizer, policy });
+	} else if (isTrustPolicy(policy) && ! isHTML(text)) {
+		return parser.parseFromString(policy.createHTML(text), type);
 	} else {
-		return parseAsFragment(text, { sanitizer });
+		return parser.parseFromString(text, type);
 	}
 }
 
@@ -504,13 +512,20 @@ export function documentToFragment(doc, { sanitizer } = {}) {
 	const clone = document.cloneNode(true);
 	const frag = document.createDocumentFragment();
 	frag.append(...clone.head.childNodes, ...clone.body.childNodes);
+
 	return typeof sanitizer !== 'undefined' && sanitizer.sanitize instanceof Function
 		? sanitizer.sanitize(frag) : frag;
 }
 
-export function parseAsFragment(text, { sanitizer } = {}) {
+export function parseAsFragment(text, { sanitizer, policy = getDefaultPolicy() } = {}) {
 	const tmp = document.createElement('template');
-	tmp.innerHTML = text;
+
+	if (isTrustPolicy(policy) && ! isHTML(text)) {
+		tmp.innerHTML = policy.createHTML(text);
+	} else {
+		tmp.innerHTML = text;
+	}
+
 	return typeof sanitizer !== 'undefined' && sanitizer.sanitize instanceof Function
 		? sanitizer.sanitize(tmp.content)
 		: tmp.content;
@@ -553,7 +568,7 @@ export function intersect(what, callback, options = {}) {
 }
 
 export function mutate(what, callback, options = {}) {
-	if ('MutationObserver' in window) {
+	if ('MutationObserver' in globalThis) {
 		const observer = new MutationObserver((records, observer) => {
 			records.forEach((record, index) => callback.apply(null, [record, observer, index]));
 		});

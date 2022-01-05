@@ -119,14 +119,12 @@ export function hasGa() {
 	return window.ga instanceof Function;
 }
 
-export async function importGa(id, params = {}) {
+export async function importGa(id, params = {}, { policy } = {}) {
 	const url = new URL('https://www.googletagmanager.com/gtag/js');
 	url.searchParams.set('id', id);
 	Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
-	await loadScript(url.href, {
-		crossOrigin: 'use-credentials',
-	}).then(() => {
+	await loadScript(url.href, { crossOrigin: 'use-credentials', policy, }).then(() => {
 		gtag('js', new Date());
 		gtag('config', id);
 		create(id, 'auto');

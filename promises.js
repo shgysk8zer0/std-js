@@ -176,8 +176,10 @@ export async function onTimeout(callback, {
 } = {}) {
 	const { resolve, reject, promise } = getDeferred({ signal, reason });
 
-	if (Number.isSafeInteger(timeout) && (! timeout < 0)) {
-		const id = setTimeout(() => callAsAsync(callback, args, { signal, thisArg }).then(resolve).catch(reject), timeout);
+	if (Number.isSafeInteger(timeout) && timeout >= 0) {
+		const id = setTimeout(() => {
+			callAsAsync(callback, args, { signal, thisArg }).then(resolve).catch(reject);
+		}, timeout);
 
 		if (signal instanceof AbortSignal) {
 			signalAborted(signal).finally(() => clearTimeout(id));

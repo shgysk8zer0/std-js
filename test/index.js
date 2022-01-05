@@ -3,18 +3,41 @@ import '../deprefixer.js';
 import '../theme-cookie.js';
 import { loadHandler } from './funcs.js';
 import { sleep } from '../promises.js';
-import { $ } from '../esQuery.js';
-// import kbdShortcuts from '../kbd_shortcuts.js';
-import { loadScript } from '../loader.js';
+import { toggleClass, on, replaceClass, data, attr, ready } from '../dom.js';
 import { init } from '../data-handlers.js';
 import { description, keywords, robots, thumbnail } from '../meta.js';
+import { enforce } from '/trust-enforcer.js';
+import { polyfill as locksPolyfill } from '/LockManager.js';
+import { Sanitizer } from '/Sanitizer.js';
+
+Promise.allSettled([
+	locksPolyfill(),
+]);
+
+
+const sanitizerConfig = {...Sanitizer.getDefaultConfiguration(), allowCustomElements: true };
+
+globalThis.trustedTypes.addEventListener('beforecreatepolicy', console.info);
+
+globalThis.trustedTypes.createPolicy('default', {
+	createHTML: input => new Sanitizer(sanitizerConfig).sanitizeFor('div', input).innerHTML,
+	createScriptURL: input => {
+		if ([location.origin, 'https://cdn.kernvalley.us'].includes(new URL(input, location.origin).origin)) {
+			return input;
+		} else {
+			throw new DOMException(`Untrusted script URL: "${input}"`);
+		}
+	},
+});
+
+enforce({ allowedPolicies: ['loader#html'], force: true });
 
 keywords(['javascript', 'ecmascript', 'es6', 'modules', 'library']);
 description('This is a JavaScript library testing page');
 robots(['nofollow', 'noindex', 'noarchive']);
 thumbnail('https://i.imgur.com/CbFnOO9h.jpg');
 
-$(document.documentElement).toggleClass({
+toggleClass(document.documentElement, {
 	'no-dialog': document.createElement('dialog') instanceof HTMLUnknownElement,
 	'no-details': document.createElement('details') instanceof HTMLUnknownElement,
 	'js': true,
@@ -22,7 +45,6 @@ $(document.documentElement).toggleClass({
 	'no-custom-elements': !('customElements' in window),
 });
 
-window.$ = $;
 init();
 
 cookieStore.addEventListener('change', async ({ changed, deleted }) => {
@@ -32,6 +54,9 @@ cookieStore.addEventListener('change', async ({ changed, deleted }) => {
 	const delList = document.createElement('details');
 	const changeSum = document.createElement('summary');
 	const delSum = document.createElement('summary');
+	const controller = new AbortController();
+	const { signal } = controller;
+	const id = crypto.randomUUID();
 
 	delList.classList.add('accordion');
 	delList.open = deleted.length !== 0;
@@ -48,36 +73,40 @@ cookieStore.addEventListener('change', async ({ changed, deleted }) => {
 		return item;
 	};
 
+	dialog.id = id;
 	changeList.append(changeSum, ...changed.map(makeItems));
 	delList.append(delSum, ...deleted.map(makeItems));
 	dialog.append(header, changeList, delList);
-	dialog.addEventListener('close', ({ target }) => target.remove());
+	dialog.addEventListener('close', ({ target }) => {
+		target.remove();
+		controller.abort();
+	}, { signal });
+
+	requestIdleCallback(() => {
+		on(document, {
+			click: ({ target }) => {
+				if (! target.matches('dialog[open], dialog[open] *')) {
+					document.getElementById(id).close();
+				}
+			},
+		}, { signal, passive: true });
+	});
+
 	document.body.append(dialog);
 	dialog.showModal();
-	await sleep(8000);
+	await sleep(8000, { signal });
 	dialog.close();
 });
 
-$.ready.then(async () => {
-	const loads = [
-		loadScript('https://cdn.polyfill.io/v3/polyfill.min.js'),
-	];
+ready().finally(async () => {
+	replaceClass(document.documentElement, 'no-js', 'js');
+	data(document.documentElement, {
+		foo: { a: 1, b: [1 ,2] },
+		fooBar: false,
+		url: new URL('./foo', document.baseURI),
+		now: new Date(),
+	});
 
-	if (! ('customElements' in window)) {
-		loads.push(loadScript('https://unpkg.com/@webcomponents/custom-elements@1.4.2/custom-elements.min.js', {
-			integrity: 'sha384-xyhN4T4+9VPh8uXl6uWjGzsqwNXN9C2tla8b6zSrSqYlMFUoeCdoxiEJU0js+GNE',
-		}));
-	}
-
-	if (! ('permissions' in navigator)) {
-		loads.push('/permissions.js', { type: 'module' });
-	}
-
-	await Promise.allSettled(loads);
-
-	const $doc = $(':root');
-	$doc.replaceClass('no-js', 'js');
-	$doc.data({foo: {a: 1, b: [1,2]}, fooBar: false, url: new URL('./foo', document.baseURI), now: new Date()});
-	$doc.attr({lang: 'en', dir: 'ltr'});
+	attr(document.documentElement, { lang: 'en', dir: 'ltr' });
 	loadHandler();
 });

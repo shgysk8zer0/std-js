@@ -1,6 +1,7 @@
 import * as handlers from './dataHandlers.js';
 import { $ } from './functions.js';
 import { clickHandler } from './actions.js';
+import { createHTML } from './trust.js';
 let observer = null;
 
 if (IntersectionObserver instanceof Function) {
@@ -22,7 +23,7 @@ async function infiniteScroll({ target, isIntersecting }, observer) {
 			if (resp.ok) {
 				const parser = new DOMParser();
 				const html = await resp.text();
-				const doc = parser.parseFromString(html, 'text/html');
+				const doc = parser.parseFromString(createHTML(html), 'text/html');
 				const frag = document.createDocumentFragment();
 				frag.append(...doc.body.children);
 				target.before(frag);
@@ -44,7 +45,7 @@ function lazyLoad(entries, observer) {
 			if (resp.ok) {
 				const parser = new DOMParser();
 				const html = await resp.text();
-				const content =  parser.parseFromString(html, 'text/html');
+				const content =  parser.parseFromString(createHTML(html), 'text/html');
 				entry.target.append(...content.body.childNodes);
 			} else {
 				throw new Error(`${resp.url} [${resp.status} ${resp.statusText}]`);

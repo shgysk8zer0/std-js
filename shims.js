@@ -434,6 +434,15 @@ if (document.createElement('dialog') instanceof HTMLUnknownElement && ! HTMLUnkn
 
 if (! (document.createElement('dialog').showModal instanceof Function)) {
 	HTMLUnknownElement.prototype.showModal = function() {
+		const controller = new AbortController();
+		const signal = controller.signal;
+		document.addEventListener('keydown', function escapeHandle({ key }) {
+			if (key === 'Escape') {
+				this.close();
+			}
+		}, { passive: true, signal });
+
+		this.addEventListener('close', () => controller.abort(), { once: true, signal });
 		this.open = true;
 		this.classList.add('modal');
 		const backdrop = document.createElement('div');
@@ -478,7 +487,13 @@ if (! HTMLLinkElement.prototype.hasOwnProperty('import')) {
 		if (resp.ok) {
 			const parser = new DOMParser();
 			const content = await resp.text();
-			link.import = parser.parseFromString(content, 'text/html');
+
+			if ('trustedTypes' in globalThis && globalThis.trustedTypes.defaultPolicy != null && globalThis.trustedTypes.createHTML instanceof Function) {
+				link.import = parser.parseFromString(globalThis.trustedTypes.createHTML(content), 'text/html');
+			} else {
+				link.import = parser.parseFromString(content, 'text/html');
+			}
+
 			link.dispatchEvent(new Event('load'));
 		} else {
 			link.dispatchEvent(new Event('error'));

@@ -169,6 +169,7 @@ export async function loadScript(src, {
 	integrity = null,
 	nonce = null,
 	parent = document.head,
+	policy,
 } = {}) {
 	const script = document.createElement('script');
 	script.async = async;
@@ -185,8 +186,12 @@ export async function loadScript(src, {
 	if (typeof nonce === 'string') {
 		script.nonce = nonce;
 	}
+	if (policy != null && policy.createScriptURL instanceof Function) {
+		await load(script, parent, 'src', policy.createScriptURL(src));
+	} else {
+		await load(script, parent, 'src', src);
+	}
 
-	await load(script, parent, 'src', src);
 	return script;
 }
 

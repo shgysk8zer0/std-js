@@ -1,0 +1,446 @@
+/**
+ * @See https://github.com/w3c/webappsec-trusted-types/blob/main/src/trustedtypes.js
+ * @See https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
+ */
+import { supported as isSupported } from './trust.js';
+
+/**
+ * [supported description]
+ */
+export const supported = isSupported();
+
+/**
+ * [symbols description]
+ * @type {Object}
+ */
+const symbols = {
+	trustedValue: Symbol('trusted-value'),
+	trustedKey: Symbol('trusted-key'),
+	emptyHTML: Symbol('policy-empty#html'),
+	emptyScript: Symbol('policy-empty#script'),
+	policy: Symbol.for('trust-policy'),
+};
+
+if (! Symbol.hasOwnProperty('toStringTag')) {
+	Symbol.toStringTag = Symbol('Symbol.toStringTag');
+}
+
+const policies = [];
+
+function getPolicy(name) {
+	return policies.find(policy => policy.name === name) || null;
+}
+
+function hasPolicy(name) {
+	return policies.some(policy => policy.name === name);
+}
+
+/**
+ * [getUnsetPolicyException description]
+ * @param {TrustedTypePolicy} policy  [description]
+ * @param {String} method  [description]
+ */
+function getUnsetPolicyException(policy, method) {
+	return function() {
+		throw new TypeError(`Failed to execute '${method}' on 'TrustedTypePolicy': Policy ${policy.name}'s TrustedTypePolicyOptions did not specify a '${method}' member.`);
+	};
+}
+
+/**
+ * [TrustedType description]
+ * @type {TrustedType}
+ */
+class TrustedType {
+	/**
+	 * [constructor description]
+	 * @param {String} value  [description]
+	 * @param {Symbol} key    [description]
+	 */
+	constructor(value, { key, policy }) {
+		if (key !== symbols.trustedKey) {
+			throw new TypeError('Invalid constructor');
+		} else {
+			Object.defineProperties(this, {
+				[symbols.trustedValue]: {
+					enumerable: false,
+					configurable: false,
+					writable: false,
+					value: value.toString(),
+				},
+				[symbols.policy]: {
+					enumerable: false,
+					configurable: false,
+					writable: false,
+					value: policy.name,
+				},
+			});
+
+			Object.freeze(this);
+		}
+	}
+
+	/**
+	 * [toString description]
+	 * @return {String} [description]
+	 */
+	toString() {
+		return this[symbols.trustedValue];
+	}
+
+	/**
+	 * [toJSON description]
+	 * @return {String} [description]
+	 */
+	toJSON() {
+		return this[symbols.trustedValue];
+	}
+}
+
+/**
+ * [description]
+ * @type {TrustedHTML}
+ */
+export class TrustedHTML extends TrustedType {
+	[Symbol.toStringTag]() {
+		return 'TrustedHTML';
+	}
+}
+
+/**
+ * [description]
+ * @type {TrustedScript}
+ */
+export class TrustedScript extends TrustedType {
+	[Symbol.toStringTag]() {
+		return 'TrustedScript';
+	}
+}
+
+/**
+ * [name description]
+ * @type {TrustedScriptURL}
+ */
+export class TrustedScriptURL extends TrustedType {
+	[Symbol.toStringTag]() {
+		return 'TrustedScriptURL';
+	}
+}
+
+/**
+ * [name description]
+ * @type {TrustedTypePolicy}
+ */
+export class TrustedTypePolicy {
+	/**
+	 * [constructor description]
+	 * @param {String} name             [description]
+	 * @param {Function} createHTML       [description]
+	 * @param {Function} createScript     [description]
+	 * @param {Function} createScriptURL  [description]
+	 * @param {String} key              [description]
+	 */
+	constructor(name, { createHTML, createScript, createScriptURL }, { key }) {
+		if (key !== symbols.trustedKey) {
+			throw new TypeError('Invalid constructor');
+		} else if (! name.toString().match(/^[-#a-zA-Z0-9=_/@.%]+$/g)) {
+			throw new TypeError(`Policy ${name} contains invalid characters.`);
+		}
+
+		Object.defineProperties(this, {
+			name: {
+				enumerable: true,
+				configurable: false,
+				writable: false,
+				value: name.toString(),
+			},
+			createHTML: {
+				enumerable: true,
+				configurable: false,
+				writable: false,
+				value: createHTML instanceof Function
+					? (...args) => new TrustedHTML(createHTML(...args), { key: symbols.trustedKey, policy: this })
+					: getUnsetPolicyException(this, 'createHTML'),
+			},
+			createScript: {
+				enumerable: true,
+				configurable: false,
+				writable: false,
+				value: createScript instanceof Function
+					? (...args) => new TrustedScript(createScript(...args), { key: symbols.trustedKey, policy: this })
+					: getUnsetPolicyException(this, 'createScript'),
+			},
+			createScriptURL: {
+				enumerable: true,
+				configurable: false,
+				writable: false,
+				value: createScriptURL instanceof Function
+					? (...args) => new TrustedScriptURL(createScriptURL(...args), { key: symbols.trustedKey, policy: this })
+					: getUnsetPolicyException(this, 'createScriptURL'),
+			},
+		});
+
+		policies.push(Object.freeze(this));
+	}
+}
+
+/**
+ * [policyName description]
+ * @type {[BeforeCreatePolicyEvent]}
+ */
+export class BeforeCreatePolicyEvent extends Event {
+	constructor(type, { policy, key }) {
+		super(name);
+
+		if (key !== symbols.trustedKey) {
+			throw new TypeError('Invalid constructor');
+		}
+
+		this.policyName = policy.name;
+	}
+}
+
+/**
+ * [enumerable description]
+ * @type {TrustedTypeFactory}
+ */
+export class TrustedTypeFactory extends EventTarget {
+	/**
+	 * [constructor description]
+	 * @param {Symbol} key  [description]
+	 */
+	constructor(key) {
+		super();
+
+		if (key !== symbols.trustedKey) {
+			throw new TypeError('Invalid constructor');
+		}
+
+		Object.defineProperties(this, {
+			[symbols.defaultPolicy]: {
+				enumerable: false,
+				configurable: false,
+				writable: true,
+				value: null,
+			},
+			[symbols.emptyHTML]: {
+				enumerable: false,
+				configurable: false,
+				writable: false,
+				value: this.createPolicy('empty#html', { createHTML: () => '' }),
+			},
+			[symbols.emptyScript]: {
+				enumerable: false,
+				configurable: false,
+				writable: false,
+				value: this.createPolicy('empty#script', { createScript: () => '' }),
+			},
+		});
+
+		this.addEventListener('beforecreatepolicy', event => {
+			if (this.onbeforecreatepolicy instanceof Function) {
+				this.onbeforecreatepolicy.call(this, event);
+			}
+		});
+	}
+
+	/**
+	 * [isHTML description]
+	 * @param  {String}  value               [description]
+	 * @return {Boolean}       [description]
+	 */
+	isHTML(value) {
+		return value instanceof globalThis.TrustedHTML;
+	}
+
+	/**
+	 * [isScript description]
+	 * @param  {String}  value               [description]
+	 * @return {Boolean}       [description]
+	 */
+	isScript(value) {
+		return value instanceof globalThis.TrustedScript;
+	}
+
+	/**
+	 * [isScriptURL description]
+	 * @param  {String}  value               [description]
+	 * @return {Boolean}       [description]
+	 */
+	isScriptURL(value) {
+		return value instanceof globalThis.TrustedScriptURL;
+	}
+
+	/**
+	 * [createPolicy description]
+	 * @param  {String} name                          [description]
+	 * @param  {Function} createHTML                    [description]
+	 * @param  {Function} createScript                  [description]
+	 * @param  {Function} createScriptURL               [description]
+	 */
+	createPolicy(name, { createHTML, createScript, createScriptURL }) {
+		if (! hasPolicy(name)) {
+			const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, { key: symbols.trustedKey });
+			this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', { policy, key: symbols.trustedKey }));
+
+			if (policy.name === 'default') {
+				this[symbols.defaultPolicy] = policy;
+			}
+
+			return policy;
+		} else {
+			throw new DOMException(`TrustedTypePolicy ${name} already set`);
+		}
+	}
+
+	/**
+	 * [getAttributeType description]
+	 * @param  {String} tagName                 [description]
+	 * @param  {String} attribute               [description]
+	 * @param  {String} elementNs               [description]
+	 * @return {String}           [description]
+	 */
+	getAttributeType(tagName, attribute, elementNs/*, attrNs*/) {
+		tagName = tagName.toLowerCase();
+		attribute = attribute.toLowerCase();
+
+		if (typeof elementNS === 'string' && elementNs.length !== 0) {
+			return null;
+		}
+
+		switch(tagName) {
+			case 'script': {
+				if (attribute === 'src') {
+					return TrustedScriptURL.name;
+				} else {
+					return null;
+				}
+			}
+
+			case 'iframe': {
+				if (attribute === 'srcdoc') {
+					return TrustedHTML.name;
+				} else {
+					return null;
+				}
+			}
+
+			default:
+				return null;
+		}
+	}
+
+	/**
+	 * [getPropertyType description]
+	 * @param  {String} tagName                [description]
+	 * @param  {String} property               [description]
+	 * @return {String}          [description]
+	 */
+	getPropertyType(tagName, property/*, elementNS*/) {
+		property = property.toLowerCase();
+		tagName = tagName.toLowerCase();
+
+		switch(tagName) {
+			case 'embed': {
+				if (property === 'src') {
+					return TrustedScriptURL.name;
+				} else {
+					return null;
+				}
+			}
+
+			case 'script': {
+				if (property === 'src') {
+					return TrustedScriptURL.name;
+				} else if (['text', 'innerText', 'textContent'].includes(property)) {
+					return TrustedScript.name;
+				} else if (['outerHTML', 'innerHTML'].includes(property)) {
+					return TrustedHTML.name;
+				} else {
+					return null;
+				}
+			}
+
+			default: {
+				if (['innerHTML', 'outerHTML'].includes(property)) {
+					return 'TrustedHTML';
+				} else {
+					return null;
+				}
+			}
+		}
+	}
+
+	/**
+	 * [emptyHTML description]
+	 * @return {TrustedHTML}
+	 */
+	get emptyHTML() {
+		return this[symbols.emptyHTML].createHTML('');
+	}
+
+	/**
+	 * [emptyScript description]
+	 * @return {TrustedScript}
+	 */
+	get emptyScript() {
+		return this[symbols.emptyScript].createScript('');
+	}
+
+	/**
+	 * [defaultPolicy description]
+	 * @return {TrustedTypePolicy} [description]
+	 */
+	get defaultPolicy() {
+		return getPolicy('default');
+	}
+
+	/**
+	 * [_isPolyfill_ description]
+	 * @return {Boolean} [description]
+	 */
+	get _isPolyfill_() {
+		return true;
+	}
+}
+
+/**
+ * [trustedTypes description]
+ * @type {TrustedTypeFactory}
+ */
+export const trustedTypes = new TrustedTypeFactory(symbols.trustedKey);
+
+/**
+ * [polyfill description]
+ * @param  {Boolean} [enableHarden=false]               [description]
+ * @return {[type]}                       [description]
+ */
+export function polyfill() {
+	if (! ('TrustedHTML' in globalThis)) {
+		globalThis.TrustedHTML = TrustedHTML;
+	}
+
+	if (! ('TrustedScript' in globalThis)) {
+		globalThis.TrustedScript = TrustedScript;
+	}
+
+	if (! ('TrustedScriptURL' in globalThis)) {
+		globalThis.TrustedScriptURL = TrustedScriptURL;
+	}
+
+	if (! ('trustedTypes' in globalThis)) {
+		globalThis.trustedTypes = trustedTypes;
+	} else {
+		try {
+			/**
+			 * Create these policies even if not needed to prevent
+			 * their use elsewhere. Not creating them but allowing them via CSP
+			 * would allow creating them as arbitrary policies.
+			 * @type {[type]}
+			 */
+			globalThis.createPolicy('empty#html', { createHTML: () => '' });
+			globalThis.createPolicy('empty#script', { createScript: () => '' });
+		} catch(err) {
+			console.error(err);
+		}
+	}
+}

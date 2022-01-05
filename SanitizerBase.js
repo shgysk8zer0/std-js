@@ -2,7 +2,22 @@ const protectedData = new WeakMap();
 import { SanitizerConfig as defaultConfig } from './SanitizerConfigBase.js';
 import { nativeSupport, getSantizerUtils } from './sanitizerUtils.js';
 import { parseAsFragment, documentToFragment } from './dom.js';
+import { polyfill as trustPolyfill } from './TrustedTypes.js';
+import { createPolicy } from './trust.js';
 
+try {
+	trustPolyfill();
+} catch(err) {
+	console.error(err);
+}
+
+/**
+ * Need to create a policy for the Sanitizer API since
+ * `trustedTypes.defaultPolicy.createHTML` will most likely use `new Sanitizer().sanitize()`
+ * which would create infinite recursion.
+ * @type {TrustedTypePolicy}
+ */
+const sanitizerPolicy = createPolicy('sanitizer#html', { createHTML: input => input });
 /**
  * @SEE https://wicg.github.io/sanitizer-api/
  * @SEE https://developer.mozilla.org/en-US/docs/Web/API/Sanitizer/Sanitizer
@@ -136,7 +151,7 @@ export class Sanitizer {
 
 	sanitizeFor(tag, content) {
 		const el = document.createElement(tag);
-		el.append(this.sanitize(parseAsFragment(content)));
+		el.append(this.sanitize(parseAsFragment(sanitizerPolicy.createHTML(content))));
 		return el;
 	}
 
