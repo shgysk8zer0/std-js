@@ -1,4 +1,5 @@
-export const nativeSupport = 'Sanitizer' in globalThis;
+export const supported = () => 'Sanitizer' in globalThis;
+export const nativeSupport = supported();
 
 export function getSantizerUtils(Sanitizer, defaultConfig) {
 	const setHTML = function setHTML(el, input, sanitizer = new Sanitizer()) {

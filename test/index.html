@@ -7,6 +7,27 @@
 		<meta name="description" content="A testing page for my JavaScript library" />
 		<meta name="robots" content="nofollow,noindex" />
 		<base href="/test/" />
+		<meta http-equiv="Content-Security-Policy" content="
+			default-src 'self';
+			base-uri 'self';
+			manifest-src 'self';
+			prefetch-src 'self' cdn.kernvalle.us;
+			script-src 'self' cdn.kernvalley.us;
+			worker-src 'self' cdn.kernvalley.us;
+			style-src 'self' cdn.kernvalley.us;
+			font-src cdn.kernvalley.us;
+			form-action 'none';
+			frame-src 'none';
+			object-src 'none';
+			media-src 'none';
+			child-src 'none';
+			frame-ancestors 'none';
+			connect-src 'self' cdn.kernvalley.us api.github.com/users/;
+			img-src 'self' avatars.githubusercontent.com/u/ gravatar.com/avatar/;
+			require-trusted-types-for 'script';
+			trusted-types default empty#html empty#script sanitizer#html loader#html loader#script-url;
+			upgrade-insecure-requests;"
+		/>
 		<!-- <link rel="import" name="contextmenu" href="components/contentextment.html" async="" />
 		<link rel="import" name="contact-form" href="components/contact-form.html" async="" />
 		<link rel="import" name="weather-dialog" href="components/weather-dialog.html" async="" />

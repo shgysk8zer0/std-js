@@ -3,7 +3,9 @@
  * @See https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API
  */
 import { supported as isSupported } from './trust.js';
+import { events } from './attributes.js';
 
+export const trustPolicies = ['empty#html', 'empty#script'];
 /**
  * [supported description]
  */
@@ -14,7 +16,7 @@ export const supported = isSupported();
  * @type {Object}
  */
 const symbols = {
-	trustedValue: Symbol('trusted-value'),
+	trustedValue: Symbol('[[Data]]'),
 	trustedKey: Symbol('trusted-key'),
 	emptyHTML: Symbol('policy-empty#html'),
 	emptyScript: Symbol('policy-empty#script'),
@@ -189,7 +191,7 @@ export class TrustedTypePolicy {
  */
 export class BeforeCreatePolicyEvent extends Event {
 	constructor(type, { policy, key }) {
-		super(name);
+		super(type);
 
 		if (key !== symbols.trustedKey) {
 			throw new TypeError('Invalid constructor');
@@ -303,8 +305,18 @@ export class TrustedTypeFactory extends EventTarget {
 		tagName = tagName.toLowerCase();
 		attribute = attribute.toLowerCase();
 
+		/**
+		 * @Todo handle namespaced attributes
+		 */
 		if (typeof elementNS === 'string' && elementNs.length !== 0) {
 			return null;
+		}
+
+		/**
+		 * This is an `on*` attribute
+		 */
+		if (events.includes(attribute)) {
+			return TrustedScript.name;
 		}
 
 		switch(tagName) {
@@ -338,6 +350,10 @@ export class TrustedTypeFactory extends EventTarget {
 	getPropertyType(tagName, property/*, elementNS*/) {
 		property = property.toLowerCase();
 		tagName = tagName.toLowerCase();
+
+		if (events.includes(property)) {
+			return TrustedScript.name;
+		}
 
 		switch(tagName) {
 			case 'embed': {
@@ -395,7 +411,7 @@ export class TrustedTypeFactory extends EventTarget {
 	}
 
 	/**
-	 * [_isPolyfill_ description]
+	 * For consistency with existing polyfill
 	 * @return {Boolean} [description]
 	 */
 	get _isPolyfill_() {

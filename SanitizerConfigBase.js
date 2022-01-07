@@ -1,43 +1,14 @@
+import { events } from './attributes.js';
+
+export const allowAttributes = undefined;
+export const allowComments = false;
+export const allowCustomElements = false;
+export const allowElements = undefined;
+export const blockElements = ['iframe', 'frame', 'object', 'embed', 'param'];
+export const dropAttributes = Object.fromEntries(events.map(event => [event, ['*']]));
+export const dropElements = ['script', 'link', 'title'];
+
 export const SanitizerConfig = {
-	allowComments: false,
-	allowCustomElements: false,
-	blockElements: ['iframe', 'frame', 'object', 'embed', 'param'],
-	dropElements: ['script', 'link', 'title'],
-	dropAttributes: {
-		onclick: ['*'],
-		onerror: ['*'],
-		onload: ['*'],
-		onloadstart: ['*'],
-		onloadend: ['*'],
-		onmouseenter: ['*'],
-		onmouseleave: ['*'],
-		onmousedown: ['*'],
-		onmouseup: ['*'],
-		onmousein: ['*'],
-		onmouseout: ['*'],
-		onpointerenter: ['*'],
-		onpointerleave: ['*'],
-		onpointerdown: ['*'],
-		onpointerup: ['*'],
-		onpointerin: ['*'],
-		onpointerout: ['*'],
-		onkeypress: ['*'],
-		onkeydown: ['*'],
-		onkeyup: ['*'],
-		onwheel: ['*'],
-		onscroll: ['*'],
-		onsubmit: ['*'],
-		onformdata: ['*'],
-		oncontextmenu: ['*'],
-		ondblclick: ['*'],
-		oncut: ['*'],
-		oncopy: ['*'],
-		onpaste: ['*'],
-		oninput: ['*'],
-		oninvalid: ['*'],
-		onchange: ['*'],
-		onbeforeinput: ['*'],
-		onfocus: ['*'],
-		onblur: ['*'],
-	},
+	allowAttributes, allowComments, allowElements, allowCustomElements,
+	blockElements, dropAttributes, dropElements,
 };
