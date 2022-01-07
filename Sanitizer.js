@@ -1,4 +1,4 @@
-import { Sanitizer as BaseSanitizer } from './SanitizerBase.js';
+import { Sanitizer as BaseSanitizer, trustPolicies } from './SanitizerBase.js';
 import { SanitizerConfig as defaultConfig } from './SanitizerConfig.js';
 import { getSantizerUtils, nativeSupport } from './sanitizerUtils.js';
 
@@ -24,4 +24,4 @@ export class Sanitizer extends BaseSanitizer {
 
 const { setHTML, polyfill } = getSantizerUtils(Sanitizer, defaultConfig);
 
-export { nativeSupport, setHTML, polyfill };
+export { nativeSupport, setHTML, polyfill, trustPolicies };

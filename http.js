@@ -303,11 +303,12 @@ export async function postHTML(url, {
 	head = true,
 	asFrag = true,
 	sanitizer = undefined,
+	policy,
 } = {}) {
 	const html = await postText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout });
 
-	return parse(html, { head, asFrag, sanitizer });
+	return parse(html, { head, asFrag, sanitizer, policy });
 }
 
 export async function postJSON(url, {
@@ -348,27 +349,33 @@ export async function postText(url, {
 	return await resp.text();
 }
 
-export function postNav(url, data = {}, { target = '_self' , enctype = 'application/x-www-form-urlencoded' } = {}) {
-	const form = document.createElement('form');
-	const inputs = Object.entries(data).map(([name, value]) => {
-		const input = document.createElement('input');
-		input.name = name;
-		input.type = 'hidden';
-		input.readOnly = true;
-		input.value = value;
-		return input;
-	});
+export function postNav(url, data = {}, {
+	target = '_self' ,
+	enctype = 'application/x-www-form-urlencoded',
+	signal,
+} = {}) {
+	if (! (signal instanceof AbortSignal && signal.aborted)) {
+		const form = document.createElement('form');
+		const inputs = Object.entries(data).map(([name, value]) => {
+			const input = document.createElement('input');
+			input.name = name;
+			input.type = 'hidden';
+			input.readOnly = true;
+			input.value = value;
+			return input;
+		});
 
-	form.action = url;
-	form.method = 'POST';
-	form.target = target;
-	form.enctype = enctype;
-	form.hidden = true;
-	form.append(...inputs);
-	form.addEventListener('submit', ({ target }) => setTimeout(() => target.remove), 100);
+		form.action = url;
+		form.method = 'POST';
+		form.target = target;
+		form.enctype = enctype;
+		form.hidden = true;
+		form.append(...inputs);
+		form.addEventListener('submit', ({ target }) => setTimeout(() => target.remove(), 100), { signal });
 
-	requestAnimationFrame(() => {
-		document.body.append(form);
-		form.submit();
-	});
+		requestAnimationFrame(() => {
+			document.body.append(form);
+			form.submit();
+		});
+	}
 }

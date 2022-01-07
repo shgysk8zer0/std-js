@@ -1,36 +1,35 @@
 import '../shims.js';
 import '../deprefixer.js';
 import '../theme-cookie.js';
-import { loadHandler } from './funcs.js';
+import { loadHandler, trustPolicies as loaderPolicies } from './funcs.js';
 import { sleep } from '../promises.js';
 import { toggleClass, on, replaceClass, data, attr, ready } from '../dom.js';
 import { init } from '../data-handlers.js';
 import { description, keywords, robots, thumbnail } from '../meta.js';
-import { enforce } from '/trust-enforcer.js';
-import { polyfill as locksPolyfill } from '/LockManager.js';
-import { Sanitizer } from '/Sanitizer.js';
+import { enforce } from '../trust-enforcer.js';
+import { polyfill as locksPolyfill } from '../LockManager.js';
+import { Sanitizer, trustPolicies as sanitizerPolicies } from '../Sanitizer.js';
 
 Promise.allSettled([
 	locksPolyfill(),
 ]);
 
-
 const sanitizerConfig = {...Sanitizer.getDefaultConfiguration(), allowCustomElements: true };
 
-globalThis.trustedTypes.addEventListener('beforecreatepolicy', console.info);
-
-globalThis.trustedTypes.createPolicy('default', {
+const policy = globalThis.trustedTypes.createPolicy('default', {
 	createHTML: input => new Sanitizer(sanitizerConfig).sanitizeFor('div', input).innerHTML,
+	createScript: () => globalThis.trustedTypes.emptyScript,
 	createScriptURL: input => {
-		if ([location.origin, 'https://cdn.kernvalley.us'].includes(new URL(input, location.origin).origin)) {
+		if (['https://cdn.kernvalley.us', location.origin].includes(new URL(input).origin)) {
 			return input;
 		} else {
-			throw new DOMException(`Untrusted script URL: "${input}"`);
+			throw new DOMException(`Untrusted script URL: <${input}>`);
 		}
-	},
+	}
 });
 
-enforce({ allowedPolicies: ['loader#html'], force: true });
+enforce({ allowedPolicies: [policy.name, ...loaderPolicies, ...sanitizerPolicies] });
+// enforce({ allowedPolicies: ['loader#html', policy.name, ...sanitizerPolicies], force: true });
 
 keywords(['javascript', 'ecmascript', 'es6', 'modules', 'library']);
 description('This is a JavaScript library testing page');
@@ -101,7 +100,7 @@ cookieStore.addEventListener('change', async ({ changed, deleted }) => {
 ready().finally(async () => {
 	replaceClass(document.documentElement, 'no-js', 'js');
 	data(document.documentElement, {
-		foo: { a: 1, b: [1 ,2] },
+		foo: { a: 1, b: [1, 2] },
 		fooBar: false,
 		url: new URL('./foo', document.baseURI),
 		now: new Date(),

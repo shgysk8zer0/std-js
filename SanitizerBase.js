@@ -18,11 +18,15 @@ try {
  * @type {TrustedTypePolicy}
  */
 const sanitizerPolicy = createPolicy('sanitizer#html', { createHTML: input => input });
+
+export const trustPolicies = [sanitizerPolicy.name];
+
 /**
  * @SEE https://wicg.github.io/sanitizer-api/
  * @SEE https://developer.mozilla.org/en-US/docs/Web/API/Sanitizer/Sanitizer
  * @TODO: Figure out how to handle `allowElements`, `allowAttributes`, and how each
  *        works with their `block*` and/or `drop*` counterparts.
+ * @TODO: Handle `svg:*` and `mathml:*`
  *
  * @NOTE: The spec is still under development and is likely to change.
  * @NOTE: This is a very imperfect implementation and may not perform very well,
@@ -103,10 +107,18 @@ export class Sanitizer {
 							} else if (typeof dropAttributes !== 'undefined') {
 								if (name in dropAttributes && ['*', tag].some(sel => dropAttributes[name].includes(sel))) {
 									ownerElement.removeAttribute(name);
+
+									if (name.startsWith('on')) {
+										delete ownerElement[name];
+									}
 								}
 							} else if (typeof allowAttributes !== 'undefined') {
 								if (! (name in allowAttributes && ['*', tag].some(sel => allowAttributes[name].includes(sel)))) {
 									ownerElement.removeAttribute(name);
+
+									if (name.startsWith('on')) {
+										delete ownerElement[name];
+									}
 								}
 							}
 
@@ -133,8 +145,9 @@ export class Sanitizer {
 						case Node.CDATA_SECTION_NODE:
 						case Node.PROCESSING_INSTRUCTION_NODE:
 						case Node.DOCUMENT_TYPE_NODE:
-						default:
+						default: {
 							node.parentElement.removeChild(node);
+						}
 					}
 				} catch(err) {
 					node.parentElement.removeChild(node);
@@ -145,6 +158,7 @@ export class Sanitizer {
 			};
 
 			sanitizeNode(frag);
+
 			return frag;
 		}
 	}

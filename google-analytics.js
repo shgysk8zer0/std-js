@@ -1,4 +1,5 @@
 import { loadScript } from './loader.js';
+export const trustPolicies = ['goog#html'];
 
 if (! Array.isArray(window.dataLayer)) {
 	window.dataLayer = [];

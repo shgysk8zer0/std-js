@@ -5,9 +5,10 @@ import { on, data } from '../dom.js';
 import * as mutations from '../mutations.js';
 import { DAYS } from '../date-consts.js';
 import { alert, prompt } from '../asyncDialog.js';
-import { createScriptURL, createPolicy } from '../trust.js';
+import { createPolicy } from '../trust.js';
 import { loadScript } from '../loader.js';
 import 'https://cdn.kernvalley.us/components/toast-message.js';
+export const trustPolicies = ['loader#script-url', 'loader#html'];
 
 const modules = [
 	'https://cdn.kernvalley.us/components/share-button.js',
@@ -19,19 +20,23 @@ export async function loadHandler() {
 		expires: new Date(Date.now() + 2 * DAYS),
 	});
 
+	const modulePolicy = createPolicy('loader#script-url', {
+		createScriptURL: input => {
+			if (modules.includes(input)) {
+				return input;
+			} else {
+				throw new DOMException(`Untrusted script URL: <${input}>`);
+			}
+		}
+	});
+
 	const policy = createPolicy('loader#html', {
-		createHTML: input => input,
+		createHTML: input => input
 	});
 
 	Promise.allSettled(
-		modules.map(url => loadScript(createScriptURL(url), { type: 'module' }))
-	).catch(console.error);
-
-	if (document.createElement('details') instanceof HTMLUnknownElement) {
-		on('details > summary', 'click', function() {
-			this.parentElement.open = ! this.parentElement.open;
-		});
-	}
+		modules.map(url => loadScript(modulePolicy.createScriptURL(url), { type: 'module' }))
+	);
 
 	mutations.init();
 
