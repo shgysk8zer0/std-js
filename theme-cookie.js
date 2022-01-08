@@ -1,14 +1,14 @@
 import { data, attr, ready, query } from './dom.js';
 
-if ('cookieStore' in window && cookieStore.get instanceof Function) {
+if ('cookieStore' in globalThis && cookieStore.get instanceof Function) {
 	cookieStore.get({ name: 'theme' }).then(async cookie => {
 		await ready();
 
-		const $data = query(':root, [data-theme="auto]');
+		const $data = query(':root, [data-theme="auto"]');
 		const $attr = query('[theme="auto"]');
 
 		const setTheme = async ({ name, value = 'auto' }) => {
-			if (name === 'theme') {
+			if (name === 'theme' && ['light', 'dark', 'auto'].includes(value)) {
 				document.dispatchEvent(new CustomEvent('themechange', { detail: { theme: value }}));
 
 				await Promise.all([

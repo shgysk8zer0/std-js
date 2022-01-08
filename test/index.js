@@ -1,35 +1,22 @@
 import '../shims.js';
 import '../deprefixer.js';
+import { trustPolicies as defaultPolicies } from '../shims/trustedTypes.js';
+import { trustPolicies as sanitizerPolicies } from '../shims/sanitizer.js';
 import '../theme-cookie.js';
 import { loadHandler, trustPolicies as loaderPolicies } from './funcs.js';
 import { sleep } from '../promises.js';
 import { toggleClass, on, replaceClass, data, attr, ready } from '../dom.js';
 import { init } from '../data-handlers.js';
 import { description, keywords, robots, thumbnail } from '../meta.js';
-import { enforce } from '../trust-enforcer.js';
-import { polyfill as locksPolyfill } from '../LockManager.js';
-import { Sanitizer, trustPolicies as sanitizerPolicies } from '../Sanitizer.js';
+import { SanitizerConfig as sanitizerConfig } from '../SanitizerConfig.js';
+import { trustPolicies as fetchPolicies } from '../http.js';
+import { createPolicy } from '../trust.js';
 
-Promise.allSettled([
-	locksPolyfill(),
-]);
+const sanitizer = new Sanitizer(sanitizerConfig);
 
-const sanitizerConfig = {...Sanitizer.getDefaultConfiguration(), allowCustomElements: true };
-
-const policy = globalThis.trustedTypes.createPolicy('default', {
-	createHTML: input => new Sanitizer(sanitizerConfig).sanitizeFor('div', input).innerHTML,
-	createScript: () => globalThis.trustedTypes.emptyScript,
-	createScriptURL: input => {
-		if (['https://cdn.kernvalley.us', location.origin].includes(new URL(input).origin)) {
-			return input;
-		} else {
-			throw new DOMException(`Untrusted script URL: <${input}>`);
-		}
-	}
+const policy = createPolicy('default', {
+	createHTML: input => sanitizer.sanitizeFor('div', input).innerHTML,
 });
-
-enforce({ allowedPolicies: [policy.name, ...loaderPolicies, ...sanitizerPolicies] });
-// enforce({ allowedPolicies: ['loader#html', policy.name, ...sanitizerPolicies], force: true });
 
 keywords(['javascript', 'ecmascript', 'es6', 'modules', 'library']);
 description('This is a JavaScript library testing page');

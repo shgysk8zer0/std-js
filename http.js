@@ -1,6 +1,21 @@
-import { parse } from './dom.js';
+import { parse, loaded } from './dom.js';
 import { signalAborted, abortTimeoutController } from './abort.js';
 import { features as eventFeatures } from './events.js';
+import { createHTML, createPolicy } from './trust.js';
+
+/**
+ * To be used when `integrity` is passed when `fetch()`ing HTML
+ * @type {TrustedTypePolicy}
+ */
+export const trustPolicies = ['fetch#html'];
+
+const fetchPolicyPromise = new Promise(async resolve => {
+	if (! ('trustedTypes' in globalThis)) {
+		await loaded();
+	}
+
+	resolve(createPolicy(trustPolicies[0], { createHTML: input => input }));
+});
 
 export function setURLParams(url, params) {
 	if (! (url instanceof URL)) {
@@ -160,11 +175,20 @@ export async function getHTML(url, {
 	head = true,
 	asFrag = true,
 	sanitizer = undefined,
+	policy,
 } = {}) {
 	const html = await getText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout });
 
-	return parse(html, { head, asFrag, sanitizer });
+	if (typeof integrity === 'string' && typeof policy === 'undefined') {
+		const fetchPolicy = await fetchPolicyPromise;
+		return parse(fetchPolicy.createHTML(html), { sanitizer });
+	} else if (policy != null && policy.createHTML instanceof Function) {
+		return parse(policy.createHTML(html, { sanitizer }));
+	} else {
+		return parse(html, { head, asFrag, sanitizer, policy });
+	}
+
 }
 
 export async function getText(url, {
@@ -308,7 +332,14 @@ export async function postHTML(url, {
 	const html = await postText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout });
 
-	return parse(html, { head, asFrag, sanitizer, policy });
+		if (typeof integrity === 'string' && typeof policy === 'undefined') {
+			const fetchPolicy = await fetchPolicyPromise;
+			return parse(fetchPolicy.createHTML(html), { sanitizer });
+		} else if (policy != null && policy.createHTML instanceof Function) {
+			return parse(policy.createHTML(html), { sanitizer });
+		} else {
+			return parse(html, { head, asFrag, sanitizer, policy });
+		}
 }
 
 export async function postJSON(url, {

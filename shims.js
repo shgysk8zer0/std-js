@@ -1,7 +1,7 @@
 /**
  * @TODO Remove this module import and have implementing scripts handle it themselves
  */
-import { polyfill as cookieStorePolyfill } from  './CookieStore.js';
+import './shims/cookieStore.js';
 
 if (typeof globalThis === 'undefined') {
 	/* global global: true */
@@ -34,8 +34,6 @@ if (! (HTMLScriptElement.supports instanceof Function)) {
 		}
 	};
 }
-
-cookieStorePolyfill();
 
 if (! globalThis.hasOwnProperty('AggregateError')) {
 	globalThis.AggregateError = class AggregateError extends Error {

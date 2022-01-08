@@ -1,7 +1,7 @@
 import { signalAborted } from './abort.js';
 import { addListener, listen } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
-import { isHTML, isScriptURL, isTrustPolicy, getDefaultPolicy } from './trust.js';
+import { isHTML, isScriptURL, isTrustPolicy } from './trust.js';
 
 export function query(what, base = document) {
 	if (Array.isArray(what)) {
@@ -496,7 +496,7 @@ export function parseHTML(text, { type = 'text/html', asFrag = true, head = true
 	return parse(text, { type, asFrag, head, sanitizer, policy });
 }
 
-export function parse(text, { type = 'text/html', asFrag = true, sanitizer, policy = getDefaultPolicy() } = {}) {
+export function parse(text, { type = 'text/html', asFrag = true, sanitizer, policy } = {}) {
 	const parser = new DOMParser();
 
 	if (asFrag) {
@@ -517,7 +517,7 @@ export function documentToFragment(doc, { sanitizer } = {}) {
 		? sanitizer.sanitize(frag) : frag;
 }
 
-export function parseAsFragment(text, { sanitizer, policy = getDefaultPolicy() } = {}) {
+export function parseAsFragment(text, { sanitizer, policy } = {}) {
 	const tmp = document.createElement('template');
 
 	if (isTrustPolicy(policy) && ! isHTML(text)) {
