@@ -1,7 +1,7 @@
 import { parse, loaded } from './dom.js';
 import { signalAborted, abortTimeoutController } from './abort.js';
 import { features as eventFeatures } from './events.js';
-import { createHTML, createPolicy } from './trust.js';
+import { createPolicy } from './trust.js';
 
 /**
  * To be used when `integrity` is passed when `fetch()`ing HTML
@@ -332,14 +332,14 @@ export async function postHTML(url, {
 	const html = await postText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout });
 
-		if (typeof integrity === 'string' && typeof policy === 'undefined') {
-			const fetchPolicy = await fetchPolicyPromise;
-			return parse(fetchPolicy.createHTML(html), { sanitizer });
-		} else if (policy != null && policy.createHTML instanceof Function) {
-			return parse(policy.createHTML(html), { sanitizer });
-		} else {
-			return parse(html, { head, asFrag, sanitizer, policy });
-		}
+	if (typeof integrity === 'string' && typeof policy === 'undefined') {
+		const fetchPolicy = await fetchPolicyPromise;
+		return parse(fetchPolicy.createHTML(html), { sanitizer });
+	} else if (policy != null && policy.createHTML instanceof Function) {
+		return parse(policy.createHTML(html), { sanitizer });
+	} else {
+		return parse(html, { head, asFrag, sanitizer, policy });
+	}
 }
 
 export async function postJSON(url, {

@@ -4,7 +4,7 @@ let polyfilled = false;
 if (nativeSupport) {
 	actuallySupported.then(supported => {
 		if (! supported) {
-			natigator.locks = LockManager;
+			navigator.locks = LockManager;
 		}
 	});
 } else {

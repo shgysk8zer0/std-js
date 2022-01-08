@@ -1,4 +1,4 @@
-import { polyfill, trustPolicies } from '../TrustedTypes.js'
+import { polyfill, trustPolicies } from '../TrustedTypes.js';
 const polyfilled = polyfill();
 export { trustPolicies, polyfilled };
-console.info(import.meta.url)
+console.info(import.meta.url);

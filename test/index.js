@@ -1,20 +1,19 @@
 import '../shims.js';
 import '../deprefixer.js';
-import { trustPolicies as defaultPolicies } from '../shims/trustedTypes.js';
-import { trustPolicies as sanitizerPolicies } from '../shims/sanitizer.js';
+import '../shims/trustedTypes.js';
+import '../shims/sanitizer.js';
 import '../theme-cookie.js';
-import { loadHandler, trustPolicies as loaderPolicies } from './funcs.js';
+import { loadHandler } from './funcs.js';
 import { sleep } from '../promises.js';
 import { toggleClass, on, replaceClass, data, attr, ready } from '../dom.js';
 import { init } from '../data-handlers.js';
 import { description, keywords, robots, thumbnail } from '../meta.js';
 import { SanitizerConfig as sanitizerConfig } from '../SanitizerConfig.js';
-import { trustPolicies as fetchPolicies } from '../http.js';
 import { createPolicy } from '../trust.js';
 
 const sanitizer = new Sanitizer(sanitizerConfig);
 
-const policy = createPolicy('default', {
+createPolicy('default', {
 	createHTML: input => sanitizer.sanitizeFor('div', input).innerHTML,
 });
 
