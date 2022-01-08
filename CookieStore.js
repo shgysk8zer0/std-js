@@ -9,7 +9,9 @@
 
 export const nativeSupport = 'cookieStore' in globalThis;
 
-let onchange = null;
+const symbols = {
+	constructor: Symbol('constructor'),
+};
 
 function getAllCookies() {
 	if (document.cookie.length === 0) {
@@ -122,18 +124,32 @@ function setter({
 }
 
 export class CookieStore extends EventTarget {
+	constructor(key) {
+		if (key !== symbols.constructor) {
+			throw new DOMException('Invalid constructor');
+		}
+
+		super();
+
+		Object.defineProperty(this, symbols.onchange, {
+			enumerable: false,
+			configurable: false,
+			writable: true,
+			value: null,
+		});
+	}
+
 	get onchange() {
-		return onchange;
+		return this[symbols.onchange];
 	}
 
 	set onchange(callback) {
+		if (this[symbols.onchange] instanceof Function) {
+			this.removeEventListener('change', this[symbols.onchange]);
+		}
+
 		if (callback instanceof Function) {
-			this.removeEventListener('change', onchange);
 			this.addEventListener('change', callback);
-			onchange = callback;
-		} else {
-			this.removeEventListener('change', onchange);
-			onchange = null;
 		}
 	}
 
@@ -201,9 +217,11 @@ export class CookieStore extends EventTarget {
 	}
 }
 
+export const cookieStore = new CookieStore(symbols.constructor);
+
 export function polyfill() {
 	if (! nativeSupport) {
-		globalThis.cookieStore = new CookieStore();
+		globalThis.cookieStore = cookieStore;
 		return true;
 	} else {
 		return false;

@@ -1,15 +1,8 @@
 const protectedData = new WeakMap();
 import { SanitizerConfig as defaultConfig } from './SanitizerConfigBase.js';
 import { nativeSupport, getSantizerUtils } from './sanitizerUtils.js';
-import { parseAsFragment, documentToFragment } from './dom.js';
-import { polyfill as trustPolyfill } from './TrustedTypes.js';
+import { parseAsFragment, documentToFragment, loaded } from './dom.js';
 import { createPolicy } from './trust.js';
-
-try {
-	trustPolyfill();
-} catch(err) {
-	console.error(err);
-}
 
 /**
  * Need to create a policy for the Sanitizer API since
@@ -17,8 +10,13 @@ try {
  * which would create infinite recursion.
  * @type {TrustedTypePolicy}
  */
-const sanitizerPolicy = createPolicy('sanitizer#html', { createHTML: input => input });
+let sanitizerPolicy = createPolicy('sanitizer#html', { createHTML: input => input });
 
+if (! ('trustedTypes' in globalThis)) {
+	loaded().then(() => sanitizerPolicy = createPolicy('sanitizer#html', { createHTML: input => input }));
+}
+
+console.log({ sanitizerPolicy: sanitizerPolicy.createHTML('<div>') });
 export const trustPolicies = [sanitizerPolicy.name];
 
 /**
