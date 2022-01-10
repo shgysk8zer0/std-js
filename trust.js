@@ -23,7 +23,7 @@ export function isHTML(input) {
 	if (supported()) {
 		return globalThis.trustedTypes.isHTML(input);
 	} else {
-		return true;
+		return typeof input === 'string';
 	}
 }
 
@@ -31,7 +31,7 @@ export function isScript(input) {
 	if (supported()) {
 		return globalThis.trustedTypes.isScript(input);
 	} else {
-		return true;
+		return typeof input === 'string';
 	}
 }
 
@@ -39,7 +39,7 @@ export function isScriptURL(input) {
 	if (supported()) {
 		return globalThis.trustedTypes.isScriptURL(input);
 	} else {
-		return true;
+		return typeof input === 'string' || input instanceof URL;
 	}
 }
 
