@@ -16,7 +16,6 @@ if (! ('trustedTypes' in globalThis)) {
 	loaded().then(() => sanitizerPolicy = createPolicy('sanitizer#html', { createHTML: input => input }));
 }
 
-console.log({ sanitizerPolicy: sanitizerPolicy.createHTML('<div>') });
 export const trustPolicies = [sanitizerPolicy.name];
 
 /**
