@@ -1,4 +1,11 @@
-export async function fromArrayBuffer(data, { algo = 'SHA-384' } = {}) {
+const SHA_256 = 'SHA-256';
+const SHA_384 = 'SHA-384';
+const SHA_512 = 'SHA-512';
+
+export const DEFAULT_ALGO = SHA_384;
+export const ALGOS = [SHA_256, SHA_384, SHA_512];
+
+export async function fromArrayBuffer(data, { algo = DEFAULT_ALGO } = {}) {
 	const buffer = await crypto.subtle.digest(algo.toUpperCase(), data);
 	const codeUnits = new Uint16Array(buffer);
 	const charCodes = new Uint8Array(codeUnits.buffer);
@@ -6,7 +13,7 @@ export async function fromArrayBuffer(data, { algo = 'SHA-384' } = {}) {
 	return `${algo.replace('-', '').toLowerCase()}-${hash}`;
 }
 
-export async function fromFile(file, { algo = 'SHA-384' } = {}) {
+export async function fromFile(file, { algo = DEFAULT_ALGO } = {}) {
 	if (file instanceof File) {
 		return fromArrayBuffer(await file.arrayBuffer(), { algo });
 	} else {
@@ -14,7 +21,7 @@ export async function fromFile(file, { algo = 'SHA-384' } = {}) {
 	}
 }
 
-export async function fromResponse(resp, { algo = 'SHA-384' } = {}) {
+export async function fromResponse(resp, { algo = DEFAULT_ALGO } = {}) {
 	if (! (resp instanceof Response)) {
 		throw new TypeError('Not a response');
 	} else if (resp.bodyUsed) {
@@ -25,7 +32,7 @@ export async function fromResponse(resp, { algo = 'SHA-384' } = {}) {
 }
 
 export async function fromURL(url, {
-	algo = 'SHA-384',
+	algo = DEFAULT_ALGO,
 	cache = 'no-store',
 	credentials = 'omit',
 	headers = new Headers(),
@@ -36,7 +43,7 @@ export async function fromURL(url, {
 	signal,
 } = {}) {
 	const resp = await fetch(url, { cache, credentials, headers, keepalive, mode, redirect, referrerPolicy, signal });
-	
+
 	if (resp.ok) {
 		return fromResponse(resp, { algo });
 	} else {
