@@ -1,7 +1,7 @@
 const protectedData = new WeakMap();
 import { SanitizerConfig as defaultConfig } from './SanitizerConfigBase.js';
 import { nativeSupport, getSantizerUtils } from './sanitizerUtils.js';
-import { parseAsFragment, documentToFragment, loaded } from './dom.js';
+import { parseAsFragment, documentToFragment } from './dom.js';
 import { createPolicy } from './trust.js';
 
 /**
@@ -10,13 +10,7 @@ import { createPolicy } from './trust.js';
  * which would create infinite recursion.
  * @type {TrustedTypePolicy}
  */
-let sanitizerPolicy = createPolicy('sanitizer#html', { createHTML: input => input });
-
-if (! ('trustedTypes' in globalThis)) {
-	loaded().then(() => sanitizerPolicy = createPolicy('sanitizer#html', { createHTML: input => input }));
-}
-
-export const trustPolicies = [sanitizerPolicy.name];
+let rawPolicy = createPolicy('sanitizer-raw#html', { createHTML: input => input });
 
 /**
  * @SEE https://wicg.github.io/sanitizer-api/
@@ -45,7 +39,7 @@ export class Sanitizer {
 
 	sanitize(input) {
 		if (input instanceof Document) {
-			return this.sanitize(documentToFragment(input));
+			return this.sanitize(documentToFragment(input, { policy: rawPolicy }));
 		} else if (input instanceof DocumentFragment) {
 			/* It'd be great if this could be moved to a worker script... */
 			const frag = input.cloneNode(true);
@@ -96,14 +90,15 @@ export class Sanitizer {
 						}
 
 						case Node.ATTRIBUTE_NODE: {
-							const { name, value, ownerElement } = node;
+							const { value, ownerElement } = node;
+							const name = node.name.toLowerCase();
 							const tag = ownerElement.tagName.toLowerCase();
 
 							if (name === 'href' && value.startsWith('javascript:')) {
-								ownerElement.removeAttribute(name);
+								ownerElement.removeAttributeNode(node);
 							} else if (typeof dropAttributes !== 'undefined') {
 								if (name in dropAttributes && ['*', tag].some(sel => dropAttributes[name].includes(sel))) {
-									ownerElement.removeAttribute(name);
+									ownerElement.removeAttributeNode(node);
 
 									if (name.startsWith('on')) {
 										delete ownerElement[name];
@@ -111,7 +106,7 @@ export class Sanitizer {
 								}
 							} else if (typeof allowAttributes !== 'undefined') {
 								if (! (name in allowAttributes && ['*', tag].some(sel => allowAttributes[name].includes(sel)))) {
-									ownerElement.removeAttribute(name);
+									ownerElement.removeAttributeNode(node);
 
 									if (name.startsWith('on')) {
 										delete ownerElement[name];
@@ -162,7 +157,7 @@ export class Sanitizer {
 
 	sanitizeFor(tag, content) {
 		const el = document.createElement(tag);
-		el.append(this.sanitize(parseAsFragment(sanitizerPolicy.createHTML(content))));
+		el.append(this.sanitize(parseAsFragment(rawPolicy.createHTML(content))));
 		return el;
 	}
 
@@ -172,5 +167,5 @@ export class Sanitizer {
 }
 
 const { setHTML, polyfill } = getSantizerUtils(Sanitizer, defaultConfig);
-
+export const trustPolicies = [rawPolicy.name];
 export { nativeSupport, setHTML, polyfill };
