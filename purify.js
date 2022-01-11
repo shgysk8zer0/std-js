@@ -6,7 +6,7 @@ import { events } from './attributes.js';
  * @type {TrustedTypePolicy}
  */
 const nullPolicy = createPolicy('purify-raw#html', { createHTML: input => input });
-const tags = ['script', 'object', 'embed', 'param', 'head', 'body', 'frame'];
+const tags = ['script', 'object', 'embed', 'param', 'head', 'body', 'frame', 'noscript'];
 const attributes = [...events, 'ping'];
 
 /**
