@@ -94,7 +94,7 @@ export class Sanitizer {
 							const name = node.name.toLowerCase();
 							const tag = ownerElement.tagName.toLowerCase();
 
-							if (name === 'href' && value.startsWith('javascript:')) {
+							if (name === 'href' && value.toLowerCase().startsWith('javascript:')) {
 								ownerElement.removeAttributeNode(node);
 							} else if (typeof dropAttributes !== 'undefined') {
 								if (name in dropAttributes && ['*', tag].some(sel => dropAttributes[name].includes(sel))) {
