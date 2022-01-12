@@ -6,7 +6,7 @@ import { events, urls } from './attributes.js';
  * @type {TrustedTypePolicy}
  */
 const nullPolicy = createPolicy('purify-raw#html', { createHTML: input => input });
-const tags = ['script', 'object', 'embed', 'param', 'head', 'body', 'frame', 'noscript'];
+const tags = ['script', 'object', 'embed', 'param', 'head', 'body', 'frame', 'noscript', 'base'];
 const attributes = [...events, 'ping', 'style'];
 const protocols = ['https:'];
 
