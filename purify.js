@@ -6,9 +6,16 @@ import { events, urls } from './attributes.js';
  * @type {TrustedTypePolicy}
  */
 const nullPolicy = createPolicy('purify-raw#html', { createHTML: input => input });
-const tags = ['script', 'object', 'embed', 'param', 'head', 'body', 'frame', 'noscript', 'base'];
+const tags = [
+	'script', 'object', 'embed', 'param', 'head', 'body', 'frame', 'noscript',
+	'base', 'iframe',
+];
 const attributes = [...events, 'ping', 'style'];
 const protocols = ['https:'];
+
+if (! protocols.includes(location.protocol)) {
+	protocols.push(location.protocol);
+}
 
 /**
  * [sanitize description]
@@ -47,7 +54,7 @@ function sanitize(node) {
 
 			if (
 				urls.includes(name)
-				&& !protocols.includes(new URL(value.trimStart().toLowerCase(), location.origin)).protocol
+				&& !protocols.includes(new URL(value, document.baseURI).protocol)
 			) {
 				ownerElement.removeAttributeNode(node);
 			} else if (attributes.includes(name)) {
@@ -94,16 +101,18 @@ export function createFragment(input) {
 	return tmp.content;
 }
 
+export function createElement(tag, input) {
+	const el = document.createElement(tag);
+	el.append(createFragment(input));
+	return el;
+}
+
 /**
  * [trustPolicy description]
  * @type {TrustedTypePolicy}
  */
 export const purify = createPolicy('purify#html', {
-	createHTML: input => {
-		const el = document.createElement('div');
-		el.append(createFragment(input));
-		return el.innerHTML;
-	},
+	createHTML: input => createElement('div', input).innerHTML,
 });
 
 /**
