@@ -14,6 +14,14 @@ if (typeof globalThis === 'undefined') {
 	}
 }
 
+if (! ('isSecureContext' in globalThis)) {
+	Object.defineProperty(Object.getPrototypeOf(globalThis), 'isSecureContext', {
+		enumerable: true,
+		configurable: false,
+		get: () => location.protocol === 'https:',
+	});
+}
+
 if (! (HTMLScriptElement.supports instanceof Function)) {
 	HTMLScriptElement.supports = function supports(type) {
 		switch(type.toLowerCase()) {

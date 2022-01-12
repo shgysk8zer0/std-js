@@ -4,7 +4,11 @@ import { nativeSupport, getSantizerUtils } from './sanitizerUtils.js';
 import { parseAsFragment, documentToFragment } from './dom.js';
 import { createPolicy } from './trust.js';
 import { urls } from './attributes.js';
-export const allowProtocols = ['https:'];
+const allowProtocols = ['https:'];
+
+if (! allowProtocols.includes(location.protocol)) {
+	allowProtocols.push(location.protocol);
+}
 
 /**
  * Need to create a policy for the Sanitizer API since
@@ -98,7 +102,7 @@ export class Sanitizer {
 
 							if (
 								urls.includes(name)
-								&& !allowProtocols.includes(new URL(value.trimStart().toLowerCase(), location.origin).protocol)
+								&& !allowProtocols.includes(new URL(value, document.baseURI).protocol)
 							) {
 								ownerElement.removeAttributeNode(node);
 							} else if (typeof dropAttributes !== 'undefined') {
@@ -173,4 +177,4 @@ export class Sanitizer {
 
 const { setHTML, polyfill } = getSantizerUtils(Sanitizer, defaultConfig);
 export const trustPolicies = [rawPolicy.name];
-export { nativeSupport, setHTML, polyfill };
+export { nativeSupport, setHTML, polyfill, allowProtocols };
