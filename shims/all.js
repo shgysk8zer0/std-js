@@ -1,3 +1,4 @@
+import './abort.js';
 import { trustPolicies as defaultPolicies } from './trustedTypes.js';
 import { trustPolicies as sanitizerPolicies } from './sanitizer.js';
 import './cookieStore.js';
