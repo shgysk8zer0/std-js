@@ -1,4 +1,5 @@
 import { allowComments, blockElements, dropElements } from './SanitizerConfigBase.js';
+import { events } from './attributes.js';
 export const allowAttributes = {
 	'abbr': ['*'],
 	// 'accept': ['*'],
@@ -181,13 +182,13 @@ export const allowAttributes = {
 	'span': ['*'],
 	'spellcheck': ['*'],
 	'src': ['img', 'script', 'source', 'audio', 'video'],
-	'srcdoc': ['iframe'],
+	// 'srcdoc': ['iframe'],
 	'srclang': ['*'],
 	'srcset': ['img'],
 	// 'standby': ['*'],
 	// 'start': ['*'],
 	'step': ['input'],
-	'style': ['*'],
+	// 'style': ['*'],
 	// 'summary': ['*'],
 	'tabindex': ['*'],
 	'target': ['a', 'form'],
@@ -331,7 +332,10 @@ export const allowElements = [
 	'wbr'
 ];
 
-export const dropAttributes = undefined;
+export const dropAttributes = {
+	'style': ['*'],
+	...Object.fromEntries(events.map(ev => [ev, ['*']])),
+};
 
 export const SanitizerConfig = {
 	allowAttributes, allowComments, allowElements, allowCustomElements,

@@ -3,6 +3,8 @@ import { SanitizerConfig as defaultConfig } from './SanitizerConfigBase.js';
 import { nativeSupport, getSantizerUtils } from './sanitizerUtils.js';
 import { parseAsFragment, documentToFragment } from './dom.js';
 import { createPolicy } from './trust.js';
+import { urls } from './attributes.js';
+export const allowProtocols = ['https:'];
 
 /**
  * Need to create a policy for the Sanitizer API since
@@ -94,7 +96,10 @@ export class Sanitizer {
 							const name = node.name.toLowerCase();
 							const tag = ownerElement.tagName.toLowerCase();
 
-							if (name === 'href' && value.toLowerCase().startsWith('javascript:')) {
+							if (
+								urls.includes(name)
+								&& !allowProtocols.includes(new URL(value.trimStart().toLowerCase(), location.origin).protocol)
+							) {
 								ownerElement.removeAttributeNode(node);
 							} else if (typeof dropAttributes !== 'undefined') {
 								if (name in dropAttributes && ['*', tag].some(sel => dropAttributes[name].includes(sel))) {
@@ -105,7 +110,7 @@ export class Sanitizer {
 									}
 								}
 							} else if (typeof allowAttributes !== 'undefined') {
-								if (! (name in allowAttributes && ['*', tag].some(sel => allowAttributes[name].includes(sel)))) {
+								if (! name.startsWith('data-') && ! (name in allowAttributes && ['*', tag].some(sel => allowAttributes[name].includes(sel)))) {
 									ownerElement.removeAttributeNode(node);
 
 									if (name.startsWith('on')) {

@@ -1,5 +1,5 @@
 import { createPolicy } from './trust.js';
-import { events } from './attributes.js';
+import { events, urls } from './attributes.js';
 
 /**
  * TrustedTypePolicy for internal use
@@ -7,7 +7,8 @@ import { events } from './attributes.js';
  */
 const nullPolicy = createPolicy('purify-raw#html', { createHTML: input => input });
 const tags = ['script', 'object', 'embed', 'param', 'head', 'body', 'frame', 'noscript'];
-const attributes = [...events, 'ping'];
+const attributes = [...events, 'ping', 'style'];
+const protocols = ['https:'];
 
 /**
  * [sanitize description]
@@ -44,9 +45,12 @@ function sanitize(node) {
 			const { value, ownerElement } = node;
 			const name = node.name.toLowerCase();
 
-			if (name === 'href' && value.toLowerCase().startsWith('javascript:')) {
+			if (
+				urls.includes(name)
+				&& !protocols.includes(new URL(value.trimStart().toLowerCase(), location.origin)).protocol
+			) {
 				ownerElement.removeAttributeNode(node);
-			} else if (attributes.includes(name.toLowerCase())) {
+			} else if (attributes.includes(name)) {
 				ownerElement.removeAttributeNode(node);
 			}
 
