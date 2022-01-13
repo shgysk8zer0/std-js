@@ -48,7 +48,8 @@
   },
   "scripts": {
     "test": "npm run lint:js && npm run lint:html",
-    "fix": "eslint . --fix",
+    "fix": "npm run fix:js",
+    "fix:js": "eslint . --fix",
     "lint:js": "eslint .",
     "lint:html": "htmlhint \"**/*.html\"",
     "start": "http-server ${npm_package_config_serve_path} -p ${npm_package_config_serve_port} -a ${npm_package_config_serve_domain} -o"

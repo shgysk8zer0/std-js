@@ -106,13 +106,13 @@ if (! ('reason' in AbortSignal.prototype)) {
 			const signal = staticAbort();
 			reasons.set(signal, reason);
 			return signal;
-		}
+		};
 	} else {
 		AbortSignal.abort = function abort(reason = new DOMException('Operation aborted')) {
 			const controller = new AbortController();
 			controller.abort(reason);
 			return controller.reason;
-		}
+		};
 	}
 
 	Object.defineProperty(AbortSignal.prototype, 'reason', {
@@ -130,7 +130,7 @@ if (! ('reason' in AbortSignal.prototype)) {
 	AbortController.prototype.abort = function(reason = new DOMException('Operation aborted')) {
 		abort.call(this);
 		reasons.set(this.signal, reason);
-	}
+	};
 }
 
 if (! (AbortSignal.prototype.throwIfAborted instanceof Function)) {
@@ -138,5 +138,5 @@ if (! (AbortSignal.prototype.throwIfAborted instanceof Function)) {
 		if (this.aborted) {
 			throw this.reason;
 		}
-	}
+	};
 }

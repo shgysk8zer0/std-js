@@ -140,7 +140,7 @@ export async function onIdle(callback, {
 	timeout,
 	thisArg = globalThis,
 	args = [],
-	reason = new DOMException('Operation aborted.'),
+	signal,
 } = {}) {
 	const { promise, resolve, reject } = getDeferred({ signal });
 	const id = requestIdleCallback(hrts => callAsAsync(callback, [hrts, ...args], { thisArg, signal }).then(resolve, reject), { timeout });
@@ -177,7 +177,7 @@ export async function onTimeout(callback, {
 
 export async function sleep(timeout, { signal } = {}) {
 	const { resolve, promise } = getDeferred({ signal });
-	onTimeout(() => resolve(), { signal, reason, timeout }).catch(() => resolve());
+	onTimeout(() => resolve(), { signal, timeout }).catch(() => resolve());
 	await promise;
 }
 

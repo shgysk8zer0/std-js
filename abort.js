@@ -1,7 +1,7 @@
 import './shims/abort.js';
 import { when, beforeUnload, unloaded } from './dom.js';
-import { infinitPromise, getDeferred } from './promises.js';
-import { features, listen } from './events.js';
+import { getDeferred } from './promises.js';
+import { listen } from './events.js';
 export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
 
 export const unloadSignal = getUnloadSignal();
