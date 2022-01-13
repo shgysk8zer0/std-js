@@ -32,7 +32,7 @@ export function isAsync(what) {
 	return isAsyncFunction(what) || what instanceof  Promise;
 }
 
-export function getDeferred({ signal, reason = new DOMException('Operation aborted') } = {}) {
+export function getDeferred({ signal } = {}) {
 	const deferred = {};
 
 	deferred.promise = new Promise((resolve, reject) => {
@@ -40,38 +40,26 @@ export function getDeferred({ signal, reason = new DOMException('Operation abort
 		deferred.reject = reject;
 	});
 
-	if (signal instanceof EventTarget) {
-		const callback = function({ target } = {}) {
-			deferred.reject(reason instanceof Error ? reason : new DOMException(console.error()));
-			if (target instanceof EventTarget) {
-				target.removeEventListener('abort', callback, { once: true });
-			}
-		};
-
+	if (signal instanceof EventTarget && signal.throwIfAborted instanceof Function) {
 		if (signal.aborted) {
-			deferred.reject(callback());
+			deferred.reject(signal.reason);
 		} else {
-			signal.addEventListener('abort', callback, { once: true });
-			deferred.promise.finally(callback);
+			signal.addEventListener('abort', ({ target }) => deferred.reject(target.reason), { once: true });
 		}
 	}
 
 	return Object.seal(deferred);
 }
 
-export async function callAsAsync(callback, args = [], {
-	thisArg = globalThis,
-	reason = new DOMException('Operation aborted'),
-	signal,
-} = {}) {
-	const { promise, resolve, reject } = getDeferred({ signal, reason });
+export async function callAsAsync(callback, args = [], { thisArg = globalThis, signal } = {}) {
+	const { promise, resolve, reject } = getDeferred({ signal });
 
 	if (! (callback instanceof Function)) {
 		reject(new TypeError('`callAsAsync` expects callback to be a function'));
 	} else if (! Array.isArray(args)) {
 		reject(new TypeError('`args` must be an array'));
 	} else if (signal instanceof AbortSignal && signal.aborted) {
-		reject(reason instanceof Error ? reason : new DOMException(reason));
+		reject(signal.reason);
 	} else if (isAsyncFunction(callback)) {
 		callback.call(thisArg, args).then(resolve).catch(reject);
 	} else {
@@ -120,28 +108,26 @@ export async function lock(name, callback, {
 	ifAvailable = false,
 	steal = false,
 	allowFallback = true,
-	reason = new DOMException('Operation aborted'),
 	signal,
 } = {}) {
 	if ((! allowFallback) || await locksSupported()) {
 		return await navigator.locks.request(name, { mode, ifAvailable, steal, signal }, async lock => {
 			if (lock) {
-				return await callAsAsync(callback, [lock, ...args], { thisArg, signal, reason });
+				return await callAsAsync(callback, [lock, ...args], { thisArg, signal });
 			}
 		});
 	} else {
-		return await callAsAsync(callback, [null, ...args], { signal, thisArg, reason });
+		return await callAsAsync(callback, [null, ...args], { signal, thisArg });
 	}
 }
 
 export async function onAnimationFrame(callback, {
 	thisArg = globalThis,
 	args = [],
-	reason = new DOMException('Operation aborted.'),
 	signal,
 } = {}) {
-	const { promise, resolve, reject } = getDeferred({ signal, reason });
-	const id = requestAnimationFrame(hrts => callAsAsync(callback, [hrts, ...args], { signal, thisArg, reason }).then(resolve, reject));
+	const { promise, resolve, reject } = getDeferred({ signal });
+	const id = requestAnimationFrame(hrts => callAsAsync(callback, [hrts, ...args], { signal, thisArg }).then(resolve, reject));
 
 	if (signal instanceof AbortSignal) {
 		signalAborted(signal).finally(() => cancelAnimationFrame(id));
@@ -155,10 +141,9 @@ export async function onIdle(callback, {
 	thisArg = globalThis,
 	args = [],
 	signal,
-	reason = new DOMException('Operation aborted.'),
 } = {}) {
-	const { promise, resolve, reject } = getDeferred({ signal, reason });
-	const id = requestIdleCallback(hrts => callAsAsync(callback, [hrts, ...args], { thisArg, signal, reason }).then(resolve, reject), { timeout });
+	const { promise, resolve, reject } = getDeferred({ signal });
+	const id = requestIdleCallback(hrts => callAsAsync(callback, [hrts, ...args], { thisArg, signal }).then(resolve, reject), { timeout });
 
 	if (signal instanceof AbortSignal) {
 		signalAborted(signal).finally(() => cancelIdleCallback(id));
@@ -172,9 +157,8 @@ export async function onTimeout(callback, {
 	thisArg = globalThis,
 	args = [],
 	signal,
-	reason = new DOMException('Operation aborted'),
 } = {}) {
-	const { resolve, reject, promise } = getDeferred({ signal, reason });
+	const { resolve, reject, promise } = getDeferred({ signal });
 
 	if (Number.isSafeInteger(timeout) && timeout >= 0) {
 		const id = setTimeout(() => {
@@ -191,9 +175,9 @@ export async function onTimeout(callback, {
 	return await promise;
 }
 
-export async function sleep(timeout, { signal, reason = new DOMException('Operation aborted') } = {}) {
-	const { resolve, promise } = getDeferred();
-	onTimeout(() => resolve(), { signal, reason, timeout }).catch(() => resolve());
+export async function sleep(timeout, { signal } = {}) {
+	const { resolve, promise } = getDeferred({ signal });
+	onTimeout(() => resolve(), { signal, timeout }).catch(() => resolve());
 	await promise;
 }
 
@@ -250,8 +234,8 @@ export async function rejectOn(targets, fail, { passive = true, capture = true }
 	return await promisifyEvents(targets, { success: null, fail,  passive, capture });
 }
 
-export async function abortablePromise(promise, signal, { reason } = {}) {
-	return await Promise.race([promise, signalAborted(signal, { reason })]);
+export async function abortablePromise(promise, signal) {
+	return await Promise.race([promise, signalAborted(signal)]);
 }
 
 export async function *eventGenerator(target, event, { signal, capture, passive } = {}) {

@@ -1,6 +1,5 @@
 import { parse, loaded } from './dom.js';
 import { signalAborted, abortTimeoutController } from './abort.js';
-import { features as eventFeatures } from './events.js';
 import { createPolicy } from './trust.js';
 
 /**
@@ -54,7 +53,9 @@ function getType({ headers }) {
 }
 
 export async function fetch(url, opts) {
-	if (opts.signal instanceof AbortSignal && eventFeatures.nativeSignal === false) {
+	if (opts.signal instanceof AbortSignal && opts.signal.aborted) {
+		throw opts.signal.reason;
+	} else if (opts.signal instanceof AbortSignal && ! ('signal' in Request.prototype)) {
 		return await Promise.race([globalThis.fetch(url), signalAborted(opts.signal)]);
 	} else {
 		return await globalThis.fetch(url, opts);

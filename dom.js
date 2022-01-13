@@ -431,17 +431,17 @@ export async function when(what, events, { capture, passive, signal, base } = {}
 
 	if (signal instanceof AbortSignal) {
 		if (signal.aborted) {
-			controller.abort();
+			controller.abort(signal.reason);
 		} else {
 			addEventListener([signal], ['abort'], () => {
-				controller.abort();
-				reject(new DOMException('Operation aborted'));
+				controller.abort(signal.reason);
+				reject(signal.reason);
 			}, { once: true, signal: controller.signal });
 		}
 	}
 
 	if (controller.signal.aborted) {
-		reject(new DOMException('Operation aborted'));
+		reject(controller.signal.reason);
 	} else {
 		on(query(what, base), events, event => {
 			resolve(event);

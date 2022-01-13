@@ -1,4 +1,5 @@
 import { css } from './dom.js';
+import { getDeferred } from './promises.js';
 
 function fadeIn(dialog) {
 	if (dialog.animate instanceof Function) {
@@ -28,39 +29,65 @@ const btnContainerStyles = {
 	'gap': '16px',
 };
 
-export async function alert(text) {
-	return await new Promise(resolve => {
+export async function alert(text, { signal } = {}) {
+	const { resolve, reject, promise } = getDeferred({ signal });
+
+	if (! (signal instanceof AbortSignal && signal.aborted)) {
 		const dialog = document.createElement('dialog');
 		const msg = document.createElement('div');
 		const close = document.createElement('button');
 		const btns = document.createElement('div');
+		const controller = new AbortController();
+
 		css(btns, btnContainerStyles);
 		btns.classList.add('flex', 'row', 'no-wrap');
 		close.classList.add('btn', 'btn-primary', 'grow-1');
 		css(close, btnStyles);
-
 		dialog.classList.add('clearfix');
 		msg.textContent = text;
 		close.textContent = 'Ok';
-
-		dialog.addEventListener('close', event => {
-			event.target.remove();
-			resolve();
-		});
-		close.addEventListener('click', event => event.target.closest('dialog[open]').close());
 		btns.append(close);
 		dialog.append(msg, document.createElement('br'), btns);
+
+		dialog.addEventListener('close', ({ target }) => {
+			resolve();
+			target.remove();
+
+			if (! controller.signal.aborted) {
+				controller.abort();
+			}
+		}, { once: true });
+
+		close.addEventListener('click', ({ target }) => {
+			target.closest('dialog[open]').close();
+		}, { signal: controller.signal });
+
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener('abort', () => {
+				reject(signal.reason);
+				controller.abort(signal.reason);
+				dialog.close();
+			}, { signal: controller.signal});
+		}
+
 		fadeIn(dialog);
-	});
+	} else {
+		reject(signal.reason);
+	}
+
+	return promise;
 }
 
-export async function confirm(text) {
-	return await new Promise(resolve => {
+export async function confirm(text, { signal } = {}) {
+	const { resolve, reject, promise } = getDeferred({ signal });
+
+	if (! (signal instanceof AbortSignal && signal.aborted)) {
 		const dialog = document.createElement('dialog');
 		const msg = document.createElement('div');
 		const close = document.createElement('button');
 		const ok = document.createElement('button');
 		const btns = document.createElement('div');
+		const controller = new AbortController();
 		css(btns, btnContainerStyles);
 
 		close.type = 'button';
@@ -74,29 +101,47 @@ export async function confirm(text) {
 		msg.textContent = text;
 		close.textContent = 'Cancel';
 		ok.textContent = 'Ok';
+		btns.append(close, ok);
+		dialog.append(msg, document.createElement('br'), btns);
 
 		dialog.addEventListener('close', event => {
 			event.target.remove();
 			resolve(event.returnValue && event.target.returnValue === 'confirm');
-		});
+
+			if (! controller.signal.aborted) {
+				controller.abort();
+			}
+			controller.abort();
+		}, { once: true });
 
 		close.addEventListener('click', event => {
 			event.target.closest('dialog[open]').close();
-		});
+		}, { signal: controller.signal });
 
 		ok.addEventListener('click', event => {
 			event.target.closest('dialog[open]').close('confirm');
-		});
+		},{ signal: controller.signal });
 
-		btns.append(close, ok);
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener('abort', ({ target }) => {
+				reject(target.reason);
+				controller.abort(target.reason);
+				dialog.close();
+			}, { signal: controller.signal });
+		}
 
-		dialog.append(msg, document.createElement('br'), btns);
 		fadeIn(dialog);
-	});
+	} else {
+		reject(signal.reason);
+	}
+
+	return promise;
 }
 
-export async function prompt(text, defaultValue = '') {
-	return await new Promise(resolve => {
+export async function prompt(text, defaultValue = '',{ signal } = {}) {
+	const { resolve, reject, promise } = getDeferred({ signal });
+
+	if (! (signal instanceof AbortSignal && signal.aborted)) {
 		const dialog = document.createElement('dialog');
 		const msg = document.createElement('div');
 		const close = document.createElement('button');
@@ -104,6 +149,7 @@ export async function prompt(text, defaultValue = '') {
 		const form = document.createElement('form');
 		const input = document.createElement('input');
 		const btns = document.createElement('div');
+		const controller = new AbortController();
 		css(btns, btnContainerStyles);
 
 		close.type = 'button';
@@ -132,27 +178,39 @@ export async function prompt(text, defaultValue = '') {
 		msg.textContent = text;
 		close.textContent = 'Cancel';
 		ok.textContent = 'Ok';
+		btns.append(ok, close);
+		form.append(input, document.createElement('br'), btns);
+		dialog.append(msg, form);
 
-		dialog.addEventListener('close', event => event.target.remove());
+		dialog.addEventListener('close', ({ target }) => {
+			target.remove();
+		},{ once: true });
 
-		close.addEventListener('click', event => {
-			event.target.closest('dialog[open]').close();
+		close.addEventListener('click', ({ target }) => {
 			resolve(null);
-		});
+			target.closest('dialog[open]').close();
+		}, { signal: controller.signal });
 
 		form.addEventListener('submit', event => {
 			event.preventDefault();
 			const data = new FormData(event.target);
-			event.target.closest('dialog[open]').close();
 			resolve(data.get('result'));
-		});
+			event.target.closest('dialog[open]').close();
+		}, { signal: controller.signal });
 
-		btns.append(ok, close);
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener('abort', ({ target }) => {
+				reject(target.reason);
+				controller.abort(target.reason);
+				dialog.close();
+			}, { signal: controller.signal });
+		}
 
-		form.append(input, document.createElement('br'), btns);
-
-		dialog.append(msg, form);
 		fadeIn(dialog);
 		input.select();
-	});
+	} else {
+		reject(signal.reason);
+	}
+
+	return promise;
 }

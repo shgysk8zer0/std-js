@@ -160,7 +160,7 @@ export class LockManager {
 		} else if (! ['exclusive', 'shared'].includes(mode)) {
 			throw new TypeError(`LockManager.request: '${mode}' (value of 'mode' member of LockOptions) is not a valid value for enumeration LockMode.`);
 		} else if (signal instanceof AbortSignal && signal.aborted) {
-			throw new DOMException('LockManager.request: The lock request is aborted');
+			throw signal.reason;
 		} else if (mode === 'shared' && steal) {
 			throw new DOMException('LockManager.request: `steal` is only supported for exclusive lock requests');
 		}

@@ -2,7 +2,7 @@ import { getDeferred, lock } from './promises.js';
 
 export async function save(file, { signal } = {}) {
 	if (signal instanceof EventTarget && signal.aborted) {
-		throw new DOMException('Operation aborted');
+		throw signal.reason;
 	} else if (file instanceof File) {
 		const link = document.createElement('a');
 		const url = URL.createObjectURL(file);
@@ -32,7 +32,7 @@ export async function open({
 	signal,
 } = {}) {
 	if (signal instanceof AbortSignal && signal.aborted) {
-		throw new DOMException('Operation aborted');
+		throw signal.reason;
 	} else {
 		return await lock('file-picker', async () => {
 			const { resolve, reject, promise } = getDeferred();
@@ -103,9 +103,9 @@ export async function open({
 				target.parentElement.close();
 			});
 
-			if (signal instanceof EventTarget) {
+			if (signal instanceof AbortSignal) {
 				const callback = function callback() {
-					reject(new DOMException('Operation aborted'));
+					reject(this.reason);
 					signal.removeEventListener('abort', callback);
 					dialog.close();
 				};

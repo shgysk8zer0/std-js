@@ -1,12 +1,20 @@
-import './abort-shims.js';
+import './shims/abort.js';
 import { when, beforeUnload, unloaded } from './dom.js';
-import { infinitPromise, getDeferred } from './promises.js';
-import { features, listen } from './events.js';
+import { getDeferred } from './promises.js';
+import { listen } from './events.js';
 export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
 
 export const unloadSignal = getUnloadSignal();
 
 export const beforeUnloadSignal = getBeforeUnloadSignal();
+
+export function throwIfAborted(signal) {
+	if (signal instanceof AbortController) {
+		throwIfAborted(signal.signal);
+	} else if (signal instanceof AbortSignal) {
+		signal.throwIfAborted();
+	}
+}
 
 export function getBeforeUnloadSignal() {
 	const controller = new AbortController();
@@ -28,42 +36,20 @@ export function isAborted(signal) {
 	}
 }
 
-export async function signalAborted(signal, { reason } = {}) {
+export async function signalAborted(signal) {
+	const { reject, promise } = getDeferred();
+
 	if (signal instanceof AbortController) {
-		return await signalAborted(signal.signal, { reason });
-	} else if (! (signal instanceof AbortSignal)) {
-		return infinitPromise;
+		return signalAborted(signal.signal);
+	} else if (! (signal instanceof EventTarget)) {
+		reject(new DOMException('Not an AbortSignal'));
 	} else if (signal.aborted) {
-		return typeof reason === 'undefined' ? Promise.resolve() : Promise.reject(reason);
-	} else if (typeof reason === 'string') {
-		const { reject, promise } = getDeferred();
-		if (features.once) {
-			signal.addEventListener('abort', () => reject(reason), { once: true });
-		} else {
-			const callback = () => {
-				reject(reason),
-				signal.removeEventListener('abort', callback);
-			};
-
-			signal.addEventListener('abort', callback);
-		}
-
-		return promise;
+		reject(signal.reason);
 	} else {
-		const { resolve, promise } = getDeferred();
-		if (features.once) {
-			signal.addEventListener('abort', () => resolve(), { once: true });
-		} else {
-			const callback = () => {
-				resolve();
-				signal.removeEventListener('abort', callback);
-			};
-
-			signal.addEventListener('abort', callback);
-		}
-
-		return promise;
+		signal.addEventListener('abort', ({ target }) => reject(target.reason),{ once: true });
 	}
+
+	return promise;
 }
 
 export function abortButtonController(button) {

@@ -2,7 +2,7 @@ import { query, when } from './dom.js';
 import { signalAborted } from './abort.js';
 import { getDeferred } from './promises.js';
 
-function getEventFeatures() {
+export function getEventFeatures() {
 	const el = document.createElement('div');
 	const eventFeatures = {
 		nativeSignal: 'AbortController' in globalThis && AbortController.prototype.hasOwnProperty('signal'),
@@ -145,26 +145,26 @@ export function debounce(func, wait = 17, immediate = false) {
 	};
 }
 
-export async function whenOnline() {
+export async function whenOnline({ signal } = {}) {
 	if (navigator.onLine === false) {
-		await when(window, 'online');
+		await when(window, 'online', { signal });
 	}
 }
 
-export async function whenOffline() {
+export async function whenOffline({ signal } = {}) {
 	if (navigator.onLine === true) {
-		await when(window, 'offline');
+		await when(window, 'offline', { signal });
 	}
 }
 
-export async function whenVisible() {
+export async function whenVisible({ signal } = {}) {
 	if (document.visibilityState === 'hidden') {
-		await when(document, 'visibilitychange');
+		await when(document, 'visibilitychange', { signal });
 	}
 }
 
-export async function whenHidden() {
+export async function whenHidden({ signal } = {}) {
 	if (document.visibilityState === 'visible') {
-		await when(document, 'visibilitychange');
+		await when(document, 'visibilitychange', { signal });
 	}
 }
