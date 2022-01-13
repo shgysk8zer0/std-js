@@ -128,8 +128,8 @@ if (! ('reason' in AbortSignal.prototype)) {
 	});
 
 	AbortController.prototype.abort = function(reason = new DOMException('Operation aborted')) {
-		abort.call(this);
 		reasons.set(this.signal, reason);
+		abort.call(this);
 	};
 }
 
