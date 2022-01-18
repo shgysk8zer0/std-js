@@ -36,6 +36,20 @@ export function setURLParams(url, params) {
 	return url;
 }
 
+export function setUTMParams(url, {
+	source: utm_source,
+	medium: utm_medium = 'referral',
+	content: utm_content,
+	campaign: utm_campaign,
+	term: utm_term,
+} = {}) {
+	if (typeof utm_source === 'string') {
+		return setURLParams(url, { utm_source, utm_medium, utm_content, utm_campaign, utm_term });
+	} else {
+		return new URL(url, document.baseURI);
+	}
+}
+
 function filename(src) {
 	if (typeof src === 'string') {
 		return new URL(src, location.origin).pathname.split('/').at(-1);
