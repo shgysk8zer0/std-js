@@ -1,6 +1,4 @@
-const SHA_256 = 'SHA-256';
-const SHA_384 = 'SHA-384';
-const SHA_512 = 'SHA-512';
+import { SHA_256, SHA_384, SHA_512 } from './hash.js';
 
 export const DEFAULT_ALGO = SHA_384;
 export const ALGOS = [SHA_256, SHA_384, SHA_512];
@@ -9,7 +7,7 @@ export async function fromArrayBuffer(data, { algo = DEFAULT_ALGO } = {}) {
 	const buffer = await crypto.subtle.digest(algo.toUpperCase(), data);
 	const codeUnits = new Uint16Array(buffer);
 	const charCodes = new Uint8Array(codeUnits.buffer);
-	const hash = btoa([...charCodes].map(code => String.fromCharCode(code)).join(''));
+	const hash = btoa(String.fromCharCode(...charCodes));
 	return `${algo.replace('-', '').toLowerCase()}-${hash}`;
 }
 
