@@ -1,3 +1,4 @@
+import { between } from './math.js';
 /**
  *
  * Array of supported encodings
@@ -43,32 +44,30 @@ export class TextDecoder {
 	}
 
 	decode(data) {
-		const { encoding, fatal } = this;
-		switch(encoding) {
+		switch(this.encoding) {
 			case 'utf-8':
 			case 'utf8': {
 				let prev = NaN;
-				// debugger;
-				return data.reduce((str, i) => {
-					console.log({ i, prev });
-					if (i < 128 && Number.isNaN(prev)) {
+				/**
+				 * For (0,127) we just take the charCode
+				 * For charCode 128+this will be in the form [n=194+, m=(128-191)]
+				 * where n increments after m reaches 191, increments, and rolls back to 128
+				 */
+				return data.reduce((str, i, n) => {
+					if (Number.isNaN(prev) && i < 128) {
 						return str + String.fromCharCode(i);
-					} else if (Number.isNaN(prev)) {
+					} else if (Number.isNaN(prev) && i > 193) {
 						prev = i;
 						return str;
-					} else if (i > 127 && ! Number.isNaN(prev)) {
-						/**
-						* const prev = 194 + Math.floor((i - 128) / 64);
-						* return [prev, (code % 64) + 128];
-						*/
-						const mod = Math.min(0, prev - 194) * 64;
-						const char = String.fromCharCode(mod + i + 128);
-						const encoded = new TextEncoder().encode(char);
-						console.log({ mod, i, char, encoded: `[${encoded.join(', ')}]` });
+					} else if (prev > 193 && between(128, i, 194)) {
+						const offset = (prev - 194) * 64;
 						prev = NaN;
-						return str + char;
-					} else if (fatal) {
-						throw new DOMException(`Invalid char index: ${i}`)
+						return str + String.fromCharCode(offset + i);
+					} else if (this.fatal) {
+						throw new RangeError(`Unhandled character at postion ${n}`);
+					} else {
+						prev = NaN;
+						return str;
 					}
 				}, '');
 
