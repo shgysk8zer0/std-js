@@ -45,9 +45,9 @@ export class HMAC {
 		if (! (data instanceof ArrayBuffer)) {
 			throw new TypeError('`sign()` accepts an ArrayBuffer');
 		} else {
-				const key = await this[symbols.key];
-				const buffer = await crypto.subtle.sign({ name: key.algorithm.name }, key, data);
-				return bufferToHex(buffer);
+			const key = await this[symbols.key];
+			const buffer = await crypto.subtle.sign({ name: key.algorithm.name }, key, data);
+			return bufferToHex(buffer);
 		}
 	}
 

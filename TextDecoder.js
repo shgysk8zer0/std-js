@@ -77,4 +77,4 @@ export class TextDecoder {
 				throw new TypeError(`Unsupported encoding '${this.encoding}'`);
 		}
 	}
-};
+}

@@ -25,5 +25,5 @@ if (! (globalThis.TextEncoder.prototype.encodeInto instanceof Function)) {
 
 			return { read: len, written: len };
 		}
-	}
+	};
 }
