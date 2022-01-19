@@ -11,6 +11,6 @@ if (! ('TextDecoder' in globalThis)) {
 
 if (! (globalThis.TextEncoder.prototype.encodeInto instanceof Function)) {
 	globalThis.TextEncoder.prototype.encodeInto = function(...args) {
-		return TextEncoder.prototype.encodeInto.apply(this, args)
+		return TextEncoder.prototype.encodeInto.apply(this, args);
 	};
 }
