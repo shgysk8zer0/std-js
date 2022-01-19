@@ -1,5 +1,5 @@
-import { SHA_512, SHA_384, SHA_256, SHA, bufferToHex, hexToBuffer } from './hash.js';
-export const ALGOS = [SHA_512, SHA_384, SHA_256, SHA];
+import { SHA_512, SHA_384, SHA_256, SHA_1, bufferToHex, hexToBuffer } from './hash.js';
+export const ALGOS = [SHA_512, SHA_384, SHA_256, SHA_1];
 export const DEFAULT_ALGO = SHA_512;
 
 const symbols = {

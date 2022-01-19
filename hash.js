@@ -1,8 +1,12 @@
-export const SHA = 'SHA-1';
+export const SHA_1 = 'SHA-1';
 export const SHA_256 = 'SHA-256';
 export const SHA_384 = 'SHA-384';
 export const SHA_512 = 'SHA-512';
-export { default  as md5 } from './md5.js';
+import { default  as md5Shim } from './md5.js';
+
+export async function md5(str) {
+	return md5Shim(str);
+}
 
 export function bufferToHex(buffer) {
 	if (! (buffer instanceof ArrayBuffer)) {
@@ -41,10 +45,13 @@ export function sha512(data) {
 }
 
 export async function hash(data, algo = SHA_256) {
-	if (typeof data === 'string') {
-		data = new TextEncoder().encode(data);
-	}
-	const buffer = await crypto.subtle.digest(algo.toUpperCase(), data);
+	if (data instanceof ArrayBuffer) {
+		const buffer = await crypto.subtle.digest(algo.toUpperCase(), data);
 
-	return bufferToHex(buffer);
+		return bufferToHex(buffer);
+	} else if (data instanceof File) {
+		return hash(await data.arrayBuffer(), algo);
+	} else if (typeof data === 'string') {
+		return hash(new TextEncoder().encode(data), algo);
+	}
 }
