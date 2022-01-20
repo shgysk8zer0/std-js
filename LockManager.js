@@ -1,6 +1,10 @@
 import { getDeferred, isAsync } from './promises.js';
 import { Lock } from './Lock.js';
 const locks = new Map();
+const symbols = {
+	lockKey: Symbol('lock-key'),
+};
+
 export const nativeSupport = 'locks' in navigator && navigator.locks.request instanceof Function;
 export async function checkSupport() {
 	return await new Promise(resolve => {
@@ -131,6 +135,11 @@ async function executeLock(lock) {
  * @see https://developer.mozilla.org/en-US/docs/Web/API/LockManager
  */
 export class LockManager {
+	constructor(key) {
+		if (key !== symbols.lockKey) {
+			throw new TypeError('Invalid constructor');
+		}
+	}
 	/**
 	 * @see https://developer.mozilla.org/en-US/docs/Web/API/LockManager/request
 	 * @param  {[type]}  name               [description]

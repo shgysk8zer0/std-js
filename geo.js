@@ -3,46 +3,36 @@ import { signalAborted } from './abort.js';
 
 export const supported = 'geolocation' in navigator;
 
-export async function *watch({ maximumAge, timeout, signal, enableHighAccuracy }) {
-	if (! supported || ! (navigator.geolocation.watchPosition instanceof Function)) {
-		throw new DOMException('GeoLocation API not supported');
-	} else if (signal instanceof AbortSignal && signal.aborted === true) {
-		throw new DOMException('Operation aborted');
+export function watch(success, error = console.error, { maximumAge, timeout, signal, enableHighAccuracy } = {}) {
+	if (! supported) {
+		error(new DOMException('GeoLocation API not supported'));
+		return;
+	} else if (signal instanceof AbortSignal && signal.aborted) {
+		error(signal.reason);
+		return;
 	} else {
-		const { callback, generator } = callbackGenerator();
-		const { promise, reject } = getDeferred({ signal });
-		const id = navigator.geolocation.watchPosition(callback, reject, { maximumAge, timeout, enableHighAccuracy});
-		let error;
-		promise.catch(err => error = err);
+		const id = navigator.geolocation.watchPosition(success, error, { maximumAge, timeout, enableHighAccuracy });
 
 		if (signal instanceof AbortSignal) {
-			signalAborted(signal).finally(() => navigator.geolocation.clearWatch(id));
+			signal.addEventListener('abort', () => {
+				navigator.geolocation.clearWatch(id);
+				error(signal.reason);
+			}, { once: true });
 		}
 
-		for await (const result of generator({ signal })) {
-			if (typeof error === 'undefined') {
-				yield result;
-			} else if (signal instanceof AbortSignal && signal.aborted) {
-				break;
-			} else {
-				throw error;
-			}
-		}
+		return id;
 	}
 }
 
 export async function get({ maximumAge, timeout, signal, enableHighAccuracy } = {}) {
-	if (! supported || ! (navigator.geolocation.getCurrentPosition instanceof Function)) {
+	if (! supported) {
 		throw new DOMException('GeoLocation API not supported');
-	} else if (signal instanceof AbortSignal && signal.aborted === true) {
-		throw new DOMException('Operation aborted');
+	} else if (signalAborted(signal)) {
+		throw new DOMException(signal.reason);
 	} else {
-		const { resolve, reject, promise } = getDeferred();
-		if (signal instanceof AbortSignal) {
-			signalAborted(signal).finally(() => reject(new DOMException('Operation aborted')));
-		}
+		const { resolve, reject, promise } = getDeferred({ signal });
 		navigator.geolocation.getCurrentPosition(resolve, reject, { maximumAge, timeout, enableHighAccuracy });
-		return promise;
 
+		return promise;
 	}
 }

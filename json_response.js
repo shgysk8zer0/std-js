@@ -1,5 +1,4 @@
-import { $ } from './functions.js';
-import { notify } from './deprecatedFunctions.js';
+import { $ } from './esQuery.js';
 
 export default async function handleJSON(json) {
 	if(typeof json === 'string') {
@@ -202,9 +201,6 @@ export default async function handleJSON(json) {
 			console.error(new Error(error));
 			console.error(error);
 		});
-	}
-	if ('notify' in json) {
-		notify(json.notify.title || '', json.notify);
 	}
 	return json;
 }

@@ -1,3 +1,6 @@
+import { errorToEvent } from '../dom.js';
+import './dialog.js';
+
 if (! (HTMLScriptElement.supports instanceof Function)) {
 	HTMLScriptElement.supports = function supports(type) {
 		switch(type.toLowerCase()) {
@@ -141,22 +144,21 @@ if (! HTMLElement.prototype.hasOwnProperty('contextMenu')){
 if (! HTMLLinkElement.prototype.hasOwnProperty('import')) {
 	[...document.querySelectorAll('link[rel~="import"]')].forEach(async link => {
 		link.import = null;
-		const url = new URL(link.href);
-		const resp = await fetch(url);
 
-		if (resp.ok) {
-			const parser = new DOMParser();
-			const content = await resp.text();
+		try {
+			const url = new URL(link.href);
+			const resp = await fetch(url);
 
-			if ('trustedTypes' in globalThis && globalThis.trustedTypes.defaultPolicy != null && globalThis.trustedTypes.createHTML instanceof Function) {
-				link.import = parser.parseFromString(globalThis.trustedTypes.createHTML(content), 'text/html');
+			if (resp.ok) {
+				const tmp = document.createElement('template');
+				tmp.innerHTML = await resp.text();
+				link.import = tmp.content;
+				link.dispatchEvent(new Event('load'));
 			} else {
-				link.import = parser.parseFromString(content, 'text/html');
+				link.dispatchEvent(errorToEvent(new Error(`<${resp.url}> [${resp.status} ${resp.statusText}]`)));
 			}
-
-			link.dispatchEvent(new Event('load'));
-		} else {
-			link.dispatchEvent(new Event('error'));
+		} catch(err) {
+			link.dispatchEvent(errorToEvent(err));
 		}
 	});
 }

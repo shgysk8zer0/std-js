@@ -1,7 +1,14 @@
-export const SHA_1 = 'SHA-1';
-export const SHA_256 = 'SHA-256';
-export const SHA_384 = 'SHA-384';
-export const SHA_512 = 'SHA-512';
+export const SHA_1          = 'SHA-1';
+export const SHA_256        = 'SHA-256';
+export const SHA_384        = 'SHA-384';
+export const SHA_512        = 'SHA-512';
+export const SHA            = SHA_1; // Alias of SHA_1
+export const HEX            = 'hex';
+export const BASE_64        = 'base64';
+export const ARRAY_BUFFER   = 'ArrayBuffer';
+export const SRI            = 'sri';
+const        DEFAULT_OUTPUT = HEX;
+
 import { default  as md5Shim } from './md5.js';
 
 export async function md5(str) {
@@ -28,30 +35,49 @@ export function hexToBuffer(hex) {
 	}
 }
 
-export function sha1(data) {
-	return hash(data, SHA_1);
+export function sha1(data, { output = DEFAULT_OUTPUT } = {}) {
+	return hash(data, { algorithm: SHA_1, output });
 }
 
-export function sha256(data) {
-	return hash(data, SHA_256);
+export function sha256(data, { output = DEFAULT_OUTPUT } = {}) {
+	return hash(data, { algorithm: SHA_256, output });
 }
 
-export function sha384(data) {
-	return hash(data, SHA_384);
+export function sha384(data, { output = DEFAULT_OUTPUT } = {}) {
+	return hash(data, { algorithm: SHA_384, output });
 }
 
-export function sha512(data) {
-	return hash(data, SHA_512);
+export function sha512(data, { output = DEFAULT_OUTPUT } = {}) {
+	return hash(data, { algorithm: SHA_512, output });
 }
 
-export async function hash(data, algo = SHA_256) {
-	if (data instanceof ArrayBuffer) {
-		const buffer = await crypto.subtle.digest(algo.toUpperCase(), data);
-
-		return bufferToHex(buffer);
-	} else if (data instanceof File) {
-		return hash(await data.arrayBuffer(), algo);
+export async function hash(data, { algorithm = SHA_256, output = DEFAULT_OUTPUT } = {}) {
+	if (data instanceof File) {
+		return hash(await data.arrayBuffer(), { algorithm, output });
 	} else if (typeof data === 'string') {
-		return hash(new TextEncoder().encode(data), algo);
+		return hash(new TextEncoder().encode(data), { algorithm, output });
+	} else if (data instanceof ArrayBuffer) {
+		const buffer = await crypto.subtle.digest(algorithm.toUpperCase(), data);
+
+		switch (output.toLowerCase()) {
+			case HEX:
+				return bufferToHex(buffer);
+
+			case BASE_64:
+				return btoa(buffer);
+
+			case SRI: {
+				const codeUnits = new Uint16Array(buffer);
+				const charCodes = new Uint8Array(codeUnits.buffer);
+				const result = btoa(String.fromCharCode(...charCodes));
+				return `${algorithm.replace('-', '').toLowerCase()}-${result}`;
+			}
+
+			case ARRAY_BUFFER:
+				return buffer;
+
+			default:
+				throw new TypeError(`Unsupported output format: '${output}'`);
+		}
 	}
 }
