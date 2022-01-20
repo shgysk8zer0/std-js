@@ -5,7 +5,6 @@ import './shims/element.js';
 import './shims/crypto.js';
 import './shims/cookieStore.js';
 import './shims/animation.js';
-import './shims/dialog.js';
 import './shims/math.js';
 import './shims/share.js';
 import './shims/appBadge.js';
