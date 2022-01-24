@@ -1,4 +1,4 @@
-import { getDeferred, callbackGenerator } from './promises.js';
+import { getDeferred } from './promises.js';
 import { signalAborted } from './abort.js';
 
 export const supported = 'geolocation' in navigator;

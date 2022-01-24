@@ -75,8 +75,8 @@ export default class esQuery extends Set {
 		return this;
 	}
 
-	async html(html, { policy, santizer } = {}) {
-		await html(this, HTML, { policy, sanitizer });
+	async html(str, { policy, sanitizer } = {}) {
+		await html(this, str, { policy, sanitizer });
 		return this;
 	}
 

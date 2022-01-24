@@ -4,7 +4,7 @@ import { getDeferred } from './promises.js';
 const expectedPattern = '38384040373937396665';
 
 export default async function konami({ signal, capture, passive = true } = {}) {
-	const { resolve, reject, promise } = getDeferred({ signal });
+	const { resolve, promise } = getDeferred({ signal });
 
 	let rollingPattern = '';
 
