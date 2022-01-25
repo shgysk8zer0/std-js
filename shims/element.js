@@ -22,27 +22,102 @@ if (! (HTMLScriptElement.supports instanceof Function)) {
 	};
 }
 
-if (! Element.prototype.hasOwnProperty('toggleAttribute')) {
-	Element.prototype.toggleAttribute = function(name, force) {
-		const forcePassed = arguments.length === 2;
-		const forceOn = !!force;
-		const forceOff = forcePassed && !force;
-
-		if (this.hasAttribute(name)) {
-			if (forceOn) {
-				return true;
-			} else {
-				this.removeAttribute(name);
-				return false;
-			}
+if (! (Element.prototype.closest instanceof Function)) {
+	Element.prototype.closest = function closest(selector) {
+		if (this.matches(selector)) {
+			return this;
 		} else {
-			if (forceOff) {
-				return false;
-			} else {
-				this.setAttribute(name, '');
-				return true;
+			let found = null;
+			let target = this.parentElement;
+
+			while(target instanceof Element) {
+				if (target.matches(selector)) {
+					found = target;
+					break;
+				} else {
+					target = target.parentElement;
+				}
 			}
+
+			return found;
 		}
+	};
+}
+
+if (! (Element.prototype.toggleAttribute instanceof Function)) {
+	Element.prototype.toggleAttribute = function(name, force) {
+		if (typeof force === 'undefined') {
+			return this.toggleAttribute(name, ! this.hasAttribute(name));
+		} else if (force) {
+			this.setAttribute(name, '');
+			return true;
+		} else {
+			this.removeAttribute(name);
+			return false;
+		}
+	};
+}
+
+if (! (Element.prototype.remove instanceof Function)) {
+	Element.prototype.remove = function remove() {
+		if (this.parentNode instanceof Node) {
+			this.parentNode.removeChild(this);
+		}
+	};
+}
+
+if (! (Element.prototype.after instanceof Function)) {
+	Element.prototype.after = function after(...items) {
+		items.forEach(item => {
+			if (item instanceof Node) {
+				this.insertAdjacentElement('afterend', item);
+			} else {
+				this.insertAdjacentText('afterend', item);
+			}
+		});
+	};
+}
+
+if (! (Element.prototype.before instanceof Function)) {
+	Element.prototype.before = function before(...items) {
+		items.forEach(item => {
+			if (item instanceof Node) {
+				this.insertAdjacentElement('beforebegin', item);
+			} else {
+				this.insertAdjacentText('beforebegin', item);
+			}
+		});
+	};
+}
+
+if (! (Element.prototype.append instanceof Function)) {
+	Element.prototype.append = function append(...items) {
+		items.forEach(item => {
+			if (item instanceof Node) {
+				this.appendChild(item);
+			} else {
+				this.appendChild(document.createTextNode(item));
+			}
+		});
+	};
+}
+
+if (! (Element.prototype.prepend instanceof Function)) {
+	Element.prototype.prepend = function prepend(...items) {
+		items.forEach(item => {
+			if (item instanceof Node) {
+				this.insertAdjacentElement('afterbegin', item);
+			} else {
+				this.insertAdjacentText('afterbegin', item);
+			}
+		});
+	};
+}
+
+if (! (Element.prototype.replaceWith instanceof Function)) {
+	Element.prototype.replaceWith = function replaceWith(...items) {
+		this.before(...items);
+		this.remove();
 	};
 }
 
@@ -53,19 +128,16 @@ if (! (Element.prototype.replaceChildren instanceof Function)) {
 	};
 
 	Document.prototype.replaceChildren = function(...items) {
-		[...this.children].forEach(el => el.remove());
-		this.append(...items);
+		Element.prototype.replaceChildren.apply(this, items);
 	};
 
 	DocumentFragment.prototype.replaceChildren = function(...items) {
-		[...this.children].forEach(el => el.remove());
-		this.append(...items);
+		Element.prototype.replaceChildren.apply(this, items);
 	};
 
 	if ('ShadowRoot' in globalThis) {
 		ShadowRoot.prototype.replaceChildren = function(...items) {
-			[...this.children].forEach(el => el.remove());
-			this.append(...items);
+			Element.prototype.replaceChildren.apply(this, items);
 		};
 	}
 }
@@ -114,6 +186,20 @@ if (! (HTMLImageElement.prototype.decode instanceof Function)) {
 	};
 }
 
+if (! (Element.prototype.setHTML instanceof Function)) {
+	Element.prototype.setHTML = function setHTML(input, sanitizer) {
+		if (
+			('Sanitizer' in globalThis && sanitizer instanceof globalThis.Sanitizer)
+			|| (typeof sanitizer !== 'undefined' && sanitizer.sanitizeFor instanceof Function)
+		) {
+			const el = sanitizer.sanitizeFor(this.tagName.toLowerCase(), input);
+			this.replaceChildren(...el.children);
+		} else {
+			throw new TypeError('`sanitizer` is not a valid Sanitizer');
+		}
+	};
+}
+
 if (! ('content' in document.createElement('template'))) {
 	Object.defineProperty(HTMLUnknownElement.prototype, 'content', {
 		get: function() {
@@ -126,6 +212,10 @@ if (! ('content' in document.createElement('template'))) {
 	});
 }
 
+/**
+ * @deprecated [to be removed in 3.0.0]
+ * `<menu type="context">` is no longer supported in any browser
+ */
 if (! HTMLElement.prototype.hasOwnProperty('contextMenu')){
 	Object.defineProperty(HTMLElement.prototype, 'contextMenu', {
 		get: function() {

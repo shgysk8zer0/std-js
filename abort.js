@@ -10,7 +10,7 @@ export const beforeUnloadSignal = getBeforeUnloadSignal();
 
 export function throwIfAborted(signal) {
 	if (signal instanceof AbortController) {
-		throwIfAborted(signal.signal);
+		signal.signal.throwIfAborted();
 	} else if (signal instanceof AbortSignal) {
 		signal.throwIfAborted();
 	}

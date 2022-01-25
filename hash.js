@@ -56,7 +56,9 @@ export async function hash(data, { algorithm = SHA_256, output = DEFAULT_OUTPUT 
 		return hash(await data.arrayBuffer(), { algorithm, output });
 	} else if (typeof data === 'string') {
 		return hash(new TextEncoder().encode(data), { algorithm, output });
-	} else if (data instanceof ArrayBuffer) {
+	} else if (typeof data === 'undefined') {
+		throw new TypeError('Cannot hash `undefined`');
+	} else if (data instanceof ArrayBuffer || data.buffer instanceof ArrayBuffer) {
 		const buffer = await crypto.subtle.digest(algorithm.toUpperCase(), data);
 
 		switch (output.toLowerCase()) {

@@ -1,46 +1,87 @@
 import { getDeferred } from './promises.js';
-import { addListener } from './events.js';
+import { listen } from './events.js';
 
-export async function load(target, parent, srcAttr, value) {
+function getSrcAttr(target) {
+	if (! (target instanceof Element)) {
+		throw new TypeError('Target must be an element');
+	} else if ('src' in target) {
+		return `src="${target.src}"`;
+	} else if ('href' in target) {
+		return `href="${target.href}"`
+	} else {
+		return '';
+	}
+}
+
+export async function load(target, parent, srcAttr, value, { signal } = {}) {
+	if (signal instanceof AbortSignal) {
+		signal.throwIfAborted();
+	}
+
 	if (parent instanceof Node) {
-		const promise = loaded(target);
+		const promise = loaded(target, { signal });
 		target[srcAttr] = value;
 		parent.append(target);
 		return await promise;
 	} else {
-		target[srcAttr] = parent;
+		target[srcAttr] = value;
 		return target;
 	}
 }
 
-export async function loaded(target) {
+export async function loaded(target, { signal } = {}) {
 	const { resolve, reject, promise } = getDeferred();
-	const controller = new AbortController();
-	const opts = { once: true, signal: controller.signal };
 
-	function load() {
-		resolve(target);
-		controller.abort();
-	}
-
-	function error(err) {
-		reject(err);
-		controller.abort();
-	}
-
-	if (target instanceof HTMLScriptElement && target.noModule === true) {
-		resolve(target);
-	} else if (target instanceof HTMLLinkElement && target.disabled === true) {
-		resolve(target);
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.error);
 	} else {
-		addListener([target], ['load'], load, opts);
-		addListener([target], ['error'], error, opts);
-	}
+		const controller = new AbortController();
+		const opts = { once: true, signal: controller.signal };
 
+		function load() {
+			resolve(target);
+			controller.abort();
+		}
+
+		function error(err) {
+			if (err.error instanceof Error) {
+				reject(err.error);
+				controller.abort(err.error);
+			} else {
+				const error = new DOMException(`Error loading <${target.tagName.toLowerCase()} ${getSrcAttr(target)}>`);
+				reject(error);
+				controller.abort(error);
+			}
+		}
+
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener('abort', ({ target: { reason }}) => {
+				reject(reason);
+				controller.abort(reason);
+			},{ signal: controller.signal });
+		}
+
+		if (target instanceof HTMLScriptElement && target.noModule && HTMScriptElement.supports('module')) {
+			resolve(target);
+		} else if (target instanceof HTMLLinkElement && target.disabled === true) {
+			resolve(target);
+		} else {
+			listen(target, 'load', load, opts);
+			listen(target, 'error', error, opts);
+		}
+	}
 	return await promise;
 }
 
-export async function loadLink(href = null, {
+/**
+ * @deprecated
+ */
+export async function loadLink(...args) {
+	console.warn('`loadLink()` is deprecated. Please us `createLink()` instead');
+	return createLink(...args);
+}
+
+export async function createLink(href = null, {
 	rel = [],
 	type = null,
 	as = null,
@@ -123,8 +164,13 @@ export async function preload(href, {
 	importance = 'auto',
 	media = null,
 	integrity = null,
+	signal,
 } = {}) {
-	const link = await loadLink(href, {
+	if (signal instanceof AbortSignal) {
+		signal.throwIfAborted();
+	}
+
+	const link = await createLink(href, {
 		rel: ['preload'], as, type, crossOrigin, referrerPolicy,
 		importance, media, integrity,
 	});
@@ -136,8 +182,13 @@ export async function preload(href, {
 export async function preconnect(href, {
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
+	signal,
 } = {}) {
-	const link = await loadLink(href, {rel: ['preconnect'], crossOrigin, referrerPolicy });
+	if (signal instanceof AbortSignal) {
+		signal.throwIfAborted();
+	}
+
+	const link = await createLink(href, { rel: ['preconnect'], crossOrigin, referrerPolicy });
 	document.head.append(link);
 	return link;
 }
@@ -145,13 +196,22 @@ export async function preconnect(href, {
 export async function dnsPrefetch(href, {
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
+	signal,
 } = {}) {
-	const link = await loadLink(href, {rel: ['dsn-prefetch'], crossOrigin, referrerPolicy });
+	if (signal instanceof AbortSignal) {
+		signal.throwIfAborted();
+	}
+
+	const link = await createLink(href, { rel: ['dsn-prefetch'], crossOrigin, referrerPolicy });
 	document.head.append(link);
 	return link;
 }
 
-export async function prerender(href) {
+export async function prerender(href, { signal } = {}) {
+	if (signal instanceof AbortSignal) {
+		signal.throwIfAborted();
+	}
+
 	const link = document.createElement('link');
 	link.relList.add('prerender');
 	link.href = href;
@@ -170,6 +230,7 @@ export async function loadScript(src, {
 	nonce = null,
 	parent = document.head,
 	policy,
+	signal,
 } = {}) {
 	const script = document.createElement('script');
 	script.async = async;
@@ -187,9 +248,9 @@ export async function loadScript(src, {
 		script.nonce = nonce;
 	}
 	if (policy != null && policy.createScriptURL instanceof Function) {
-		await load(script, parent, 'src', policy.createScriptURL(src));
+		await load(script, parent, 'src', policy.createScriptURL(src), { signal });
 	} else {
-		await load(script, parent, 'src', src);
+		await load(script, parent, 'src', src, { signal });
 	}
 
 	return script;
@@ -206,17 +267,18 @@ export async function loadStylesheet(href, {
 	title = null,
 	nonce = null,
 	parent = document.head,
+	signal,
 } = {}) {
-	const link = await loadLink(null, {
+	const link = await createLink(null, {
 		rel, media, crossOrigin, referrerPolicy, integrity, disabled, importance,
 		title, nonce,
 	});
 	/* Do not wait for load event if disabled */
 	if (disabled) {
-		load(link, parent, 'href', href);
+		load(link, parent, 'href', href, { signal });
 		return link;
 	} else {
-		await load(link, parent, 'href', href);
+		await load(link, parent, 'href', href,{ signal });
 		return link;
 	}
 }
@@ -236,7 +298,12 @@ export async function loadImage(src, {
 	classes = [],
 	role = 'img',
 	alt = '',
+	signal,
 } = {}) {
+	if (signal instanceof AbortSignal) {
+		signal.throwIfAborted();
+	}
+
 	const img = new Image(width, height);
 
 	if (typeof loading === 'string') {
