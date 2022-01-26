@@ -1,12 +1,12 @@
 import './shims/object.js';
 import './shims/array.js';
 import './shims/globalThis.js';
+import './shims/math.js';
 import './shims/secure-context.js';
 import './shims/navigator.js';
 import './shims/performance.js';
 import './shims/abort.js';
 import './shims/errors.js';
-import './shims/math.js';
 import './shims/match-media.js';
 import './shims/promise.js';
 import './shims/element.js';
