@@ -78,3 +78,18 @@ if (! (Array.prototype.groupByToMap instanceof Function)) {
 		}, new Map());
 	};
 }
+
+/**
+ * @see https://github.com/tc39/proposal-array-from-async
+ */
+if (! (Array.fromAsync instanceof Function)) {
+	Array.fromAsync = async function fromAsync(items, mapFn, thisArg) {
+		let arr = [];
+
+		for await (const item of items) {
+			arr.push(await item);
+		}
+
+		return Array.from(arr, mapFn, thisArg);
+	};
+}

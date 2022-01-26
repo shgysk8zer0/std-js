@@ -60,6 +60,14 @@ export function filter(what, callback, { base } = {}) {
 	return query(what, base).filter(callback);
 }
 
+export function groupByToMap(what, callback, { base } = {}) {
+	return query(what, base).groupByToMap(callback);
+}
+
+export function groupBy(what, callback, { base } = {}) {
+	return query(what, base).groupBy(callback);
+}
+
 export function create(tag, {
 	text = null,
 	id,

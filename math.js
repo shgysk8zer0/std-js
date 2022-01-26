@@ -1,5 +1,3 @@
-import './shims/math.js';
-
 export function between(min, val, max) {
 	return val >= min && val <= max;
 }
