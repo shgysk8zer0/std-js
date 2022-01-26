@@ -54,6 +54,7 @@ if (! (Array.prototype.groupBy instanceof Function)) {
 			} else {
 				groups[key].push(item);
 			}
+
 			return groups;
 		}, {});
 	};
