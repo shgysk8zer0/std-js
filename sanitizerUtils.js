@@ -17,13 +17,6 @@ export function getSantizerUtils(Sanitizer, defaultConfig) {
 			polyfilled = true;
 		}
 
-		if (! (Element.prototype.setHTML instanceof Function)) {
-			Element.prototype.setHTML = function setHTML(content, sanitizer = new globalThis.Sanitizer()) {
-				setHTML(this, content, sanitizer);
-			};
-			polyfilled = true;
-		}
-
 		return polyfilled;
 	};
 

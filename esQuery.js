@@ -4,7 +4,7 @@ import { debounce } from './events.js';
 import { get as getLocation } from './geo.js';
 import { mediaQuery } from './media-queries.js';
 import {
-	attr, toggleAttr, css, data, addClass, removeClass, toggleClass,
+	attr, toggleAttr, css, data, addClass, removeClass, toggleClass, query,
 	replaceClass, text, html, on, off, animate, ready, loaded, intersect,
 } from './dom.js';
 import {
@@ -21,21 +21,7 @@ const PREFIXES = [
 /*============================ esQuery Functions =======================*/
 export default class esQuery extends Set {
 	constructor(what, base = document) {
-		if (what instanceof EventTarget) {
-			super([what]);
-		} else if (Array.isArray(what)) {
-			super(what);
-		} else if (typeof what === 'string') {
-			const matches = super(base.querySelectorAll(what));
-
-			if (base.matches instanceof Function && base.matches(what)) {
-				matches.add(base);
-			}
-		} else if (typeof what === 'object' && what[Symbol.iterator] instanceof Function) {
-			super(what);
-		} else {
-			throw new TypeError('Invalid "what" given to esQuery() constructor');
-		}
+		super(query(what, base));
 	}
 
 	get parents() {
@@ -89,8 +75,8 @@ export default class esQuery extends Set {
 		return this;
 	}
 
-	async html(HTML) {
-		await html(this, HTML);
+	async html(str, { policy, sanitizer } = {}) {
+		await html(this, str, { policy, sanitizer });
 		return this;
 	}
 
@@ -968,7 +954,7 @@ export default class esQuery extends Set {
 		return this.on(event, callback, { once: true, capture, passive, signal });
 	}
 
-	async debounce(event, callback, wait = 17, immediate = false, capture, once, passive, signal) {
+	async debounce(event, callback, wait = 17, immediate = false, { capture, once, passive, signal } = {}) {
 		return this.on(event, debounce(callback, wait, immediate), { capture, once, passive, signal });
 	}
 

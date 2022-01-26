@@ -1,32 +1,37 @@
 import { data, attr, ready, query } from './dom.js';
 
-if ('cookieStore' in globalThis && cookieStore.get instanceof Function) {
-	cookieStore.get({ name: 'theme' }).then(async cookie => {
-		await ready();
+const COOKIE_NAME   = 'theme';
+const THEMES        = ['light', 'dark', 'auto'];
+const DEFAULT_THEME = 'auto';
+const EVENT         = 'themechange';
 
+if ('cookieStore' in globalThis && globalThis.cookieStore.get instanceof Function) {
+	Promise.all([
+		cookieStore.get({ name: COOKIE_NAME }),
+		ready(),
+	]).then(([cookie]) => {
 		const $data = query(':root, [data-theme="auto"]');
 		const $attr = query('[theme="auto"]');
 
-		const setTheme = async ({ name, value = 'auto' }) => {
-			if (name === 'theme' && ['light', 'dark', 'auto'].includes(value)) {
-				document.dispatchEvent(new CustomEvent('themechange', { detail: { theme: value }}));
-
-				await Promise.all([
-					data($data, { theme: value }),
-					attr($attr, { theme: value }),
-				]);
+		const setTheme = ({ name, value: theme = DEFAULT_THEME } = {}) => {
+			if (name === COOKIE_NAME && THEMES.includes(theme)) {
+				document.dispatchEvent(new CustomEvent(EVENT, { detail: { theme }}));
+				requestAnimationFrame(() => {
+					data($data, { theme });
+					attr($attr, { theme });
+				});
 			}
 		};
 
 		if (cookie && typeof cookie.value === 'string') {
-			setTheme(cookie).catch(console.error);
+			setTheme(cookie);
 		}
 
-		cookieStore.addEventListener('change', ({ changed, deleted }) => {
-			const cookie = [...changed, ...deleted].find(({ name }) => name === 'theme');
+		globalThis.cookieStore.addEventListener('change', ({ changed, deleted }) => {
+			const cookie = [...changed, ...deleted].find(({ name }) => name === COOKIE_NAME);
 
 			if (cookie) {
-				setTheme(cookie).catch(console.error);
+				setTheme(cookie);
 			}
 		});
 	});

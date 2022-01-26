@@ -1,6 +1,6 @@
 import { SHA_512, SHA_384, SHA_256, SHA_1, bufferToHex, hexToBuffer } from './hash.js';
 export const ALGOS = [SHA_512, SHA_384, SHA_256, SHA_1];
-export const DEFAULT_ALGO = SHA_512;
+export const DEFAULT_ALGORITHM = SHA_512;
 
 const symbols = {
 	key: Symbol('key'),
@@ -9,7 +9,7 @@ const symbols = {
 };
 
 export class HMAC {
-	constructor(password, { algorithm = DEFAULT_ALGO } = {}) {
+	constructor(password, { algorithm = DEFAULT_ALGORITHM } = {}) {
 		const encoder = new TextEncoder();
 		Object.defineProperties(this, {
 			[symbols.algorithm]: {
@@ -94,13 +94,19 @@ export class HMAC {
 		}
 	}
 
-	static async generateKey(password, { algorithm: hash = DEFAULT_ALGO, encoder = new TextEncoder() } = {}) {
+	static async generateKey(password, {
+		format = 'raw',
+		algorithm: hash = DEFAULT_ALGORITHM,
+		extractable = false,
+		encoder = new TextEncoder(),
+		usages = ['sign', 'verify'],
+	} = {}) {
 		return await crypto.subtle.importKey(
-			'raw',
+			format,
 			encoder.encode(password),
 			{ name: 'HMAC', hash },
-			true,
-			['sign', 'verify']
+			extractable,
+			usages
 		);
 	}
 }

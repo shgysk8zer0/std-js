@@ -1,19 +1,24 @@
-export default async function konami() {
-	await new Promise(resolve => {
-		// Keycodes for: ↑ ↑ ↓ ↓ ← → ← → B A
-		const expectedPattern = '38384040373937396665';
-		let rollingPattern = '';
+import { getDeferred } from './promises.js';
 
-		const listener = event => {
-			rollingPattern += event.keyCode;
-			rollingPattern = rollingPattern.slice(-expectedPattern.length);
+// Keycodes for: ↑ ↑ ↓ ↓ ← → ← → B A
+const expectedPattern = '38384040373937396665';
 
-			if (rollingPattern === expectedPattern) {
-				window.removeEventListener('keydown', listener);
-				resolve();
-			}
-		};
+export default async function konami({ signal, capture, passive = true } = {}) {
+	const { resolve, promise } = getDeferred({ signal });
 
-		window.addEventListener('keydown', listener);
-	});
+	let rollingPattern = '';
+
+	const listener = event => {
+		rollingPattern += event.keyCode;
+		rollingPattern = rollingPattern.slice(-expectedPattern.length);
+
+		if (rollingPattern === expectedPattern) {
+			globalThis.removeEventListener('keydown', listener, { capture, passive, signal });
+			resolve();
+		}
+	};
+
+	globalThis.addEventListener('keydown', listener, { capture, passive, signal });
+
+	return promise;
 }

@@ -239,7 +239,7 @@ export async function abortablePromise(promise, signal) {
 }
 
 export async function *eventGenerator(target, event, { signal, capture, passive } = {}) {
-	const{ callback, generator } = callbackGenerator();
+	const { callback, generator } = callbackGenerator();
 	listen(target, event, callback, { signal, capture, passive });
 
 	if (! (signal instanceof AbortSignal)) {

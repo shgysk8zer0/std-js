@@ -1,21 +1,6 @@
 /**
  * HTML API using data-* attributes
  */
-import {selectElement} from './deprecatedFunctions.js';
-
-export function copy() {
-	let el = null;
-	if (this.dataset.copy.length) {
-		el = document.querySelector(this.dataset.copy);
-	} else {
-		el = this;
-	}
-
-	if (el instanceof Element) {
-		selectElement(el);
-		document.execCommand('copy');
-	}
-}
 
 export function show() {
 	const target = document.querySelector(this.dataset.show);

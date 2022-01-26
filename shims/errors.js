@@ -1,3 +1,5 @@
+import { errorToEvent } from '../dom.js';
+
 if (! globalThis.hasOwnProperty('AggregateError')) {
 	globalThis.AggregateError = class AggregateError extends Error {
 		constructor(errors, message) {
@@ -14,7 +16,6 @@ if (! globalThis.hasOwnProperty('AggregateError')) {
 
 if (! (globalThis.reportError instanceof Function)) {
 	globalThis.reportError = function reportError(error) {
-		const { message, name, fileName: filename, lineNumber: lineno, columnNumber: colno } = error;
-		globalThis.dispatchEvent(new ErrorEvent('error', { error, message: `${name}: ${message}`, filename, lineno, colno }));
+		globalThis.dispatchEvent(errorToEvent(error));
 	};
 }
