@@ -1,4 +1,3 @@
-import './shims/abort.js';
 import { when, beforeUnload, unloaded } from './dom.js';
 import { getDeferred } from './promises.js';
 import { listen } from './events.js';

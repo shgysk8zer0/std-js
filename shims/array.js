@@ -9,6 +9,18 @@ const SHIM_TARGETS = [Array, String, globalThis.Int8Array, globalThis.Uint8Array
 	globalThis.Float64Array, globalThis.BigInt64Array, globalThis.BigUint64Array,
 ];
 
+if (! (Array.from instanceof Function)) {
+	Array.from = function from(iter) {
+		return Array.of(...iter);
+	};
+}
+
+if (! (Array.of instanceof Function)) {
+	Array.of = function of(...items) {
+		return items;
+	};
+}
+
 if (! (Array.prototype.at instanceof Function)) {
 	const at = function at(n) {
 		n = Math.trunc(n) || 0;
