@@ -9,18 +9,6 @@ const SHIM_TARGETS = [Array, String, globalThis.Int8Array, globalThis.Uint8Array
 	globalThis.Float64Array, globalThis.BigInt64Array, globalThis.BigUint64Array,
 ];
 
-if (! (Array.from instanceof Function)) {
-	Array.from = function from(iter) {
-		return Array.of(...iter);
-	};
-}
-
-if (! (Array.of instanceof Function)) {
-	Array.of = function of(...items) {
-		return items;
-	};
-}
-
 if (! (Array.prototype.at instanceof Function)) {
 	const at = function at(n) {
 		n = Math.trunc(n) || 0;
@@ -45,7 +33,7 @@ if (! (Array.prototype.at instanceof Function)) {
  * @see https://github.com/tc39/proposal-array-grouping
  */
 if (! (Array.prototype.groupBy instanceof Function)) {
-	Array.prototype.groupBy = function groupBy(callback, thisArg = this) {
+	Array.prototype.groupBy = function groupBy(callback, thisArg = globalThis) {
 		return this.reduce((groups, item, index, arr) => {
 			const key = callback.call(thisArg, item, index, arr);
 
@@ -64,7 +52,7 @@ if (! (Array.prototype.groupBy instanceof Function)) {
  * @see https://github.com/tc39/proposal-array-grouping
  */
 if (! (Array.prototype.groupByToMap instanceof Function)) {
-	Array.prototype.groupByToMap = function groupByToMap(callback, thisArg = this) {
+	Array.prototype.groupByToMap = function groupByToMap(callback, thisArg = globalThis) {
 		return this.reduce((map, item, index, arr) => {
 			const key = callback.call(thisArg, item, index, arr);
 
@@ -83,7 +71,7 @@ if (! (Array.prototype.groupByToMap instanceof Function)) {
  * @see https://github.com/tc39/proposal-array-from-async
  */
 if (! (Array.fromAsync instanceof Function)) {
-	Array.fromAsync = async function fromAsync(items, mapFn, thisArg) {
+	Array.fromAsync = async function fromAsync(items, mapFn, thisArg = globalThis) {
 		let arr = [];
 
 		for await (const item of items) {

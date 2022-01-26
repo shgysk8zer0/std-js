@@ -1,5 +1,3 @@
-import './element-legacy.js';
-import './element-deprecated.js';
 import './dialog.js';
 
 if (! (HTMLScriptElement.supports instanceof Function)) {
