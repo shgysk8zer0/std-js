@@ -19,7 +19,7 @@ if (! (Set.prototype.difference instanceof Function)) {
 		}
 
 		return new Set([...this].filter(item => ! iterable.has(item)));
-	}
+	};
 }
 
 if (! (Set.prototype.union instanceof Function)) {
