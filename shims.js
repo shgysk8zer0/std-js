@@ -16,3 +16,4 @@ import './shims/cookieStore.js';
 import './shims/animation.js';
 import './shims/trustedTypes.js';
 import './shims/sanitizer.js';
+import './shims/set.js';
