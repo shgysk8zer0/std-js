@@ -1,30 +1,73 @@
 import './shims/errors.js';
 import './shims/array.js';
+import './shims/math.js';
+import './shims/match-media.js';
 import './shims/promise.js';
 import './shims/element.js';
 import './shims/crypto.js';
 import './shims/cookieStore.js';
 import './shims/animation.js';
-import './shims/math.js';
 import './shims/share.js';
 import './shims/appBadge.js';
 
 if (typeof globalThis === 'undefined') {
 	/* global global: true */
 	if (typeof self !== 'undefined') {
-		self.globalThis = self;
+		Object.defineProperty(self, 'globalThis', {
+			enumerable: false,
+			writable: true,
+			configurable: true,
+			value: self,
+		});
 	} else if (typeof window !== 'undefined') {
-		window.globalThis = window;
+		Object.defineProperty(Window.prototype, 'globalThis', {
+			enumerable: false,
+			writable: true,
+			configurable: true,
+			value: window,
+		});
 	} else if (typeof global !== 'undefined') {
-		global.globalThis = global;
+		Object.defineProperty(global, 'globalThis', {
+			enumerable: false,
+			writable: true,
+			configurable: true,
+			value: global,
+		});
+	} else {
+		Object.defineProperty(this, 'globalThis', {
+			enumerable: false,
+			writable: true,
+			configurable: true,
+			value: this,
+		});
 	}
 }
 
 if (! ('isSecureContext' in globalThis)) {
-	Object.defineProperty(Object.getPrototypeOf(globalThis), 'isSecureContext', {
+	const hostnames = ['localhost', '127.0.0.1'];
+	const HTTPS = 'https:';
+	const protocols = [HTTPS, 'file:', 'wss:'];
+	const hasSecureScripts = (document = globalThis.document) => {
+		return [...document.scripts].every(({ src }) => {
+			if (src.length === 0) {
+				return true;
+			} else {
+				const { protocol, hostname } = new URL(src, document.baseURI);
+				return protocol === HTTPS || hostname === location.hostname;
+			}
+		});
+	};
+
+	Object.defineProperty(globalThis, 'isSecureContext', {
 		enumerable: true,
-		configurable: false,
-		get: () => location.protocol === 'https:',
+		configurable: true,
+		get: function isSecureContext() {
+			if (protocols.includes(location.protocol) || hostnames.includes(location.hostname)) {
+				return hasSecureScripts();
+			} else {
+				return false;
+			}
+		}
 	});
 }
 

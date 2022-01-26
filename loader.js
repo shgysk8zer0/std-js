@@ -7,7 +7,7 @@ function getSrcAttr(target) {
 	} else if ('src' in target) {
 		return `src="${target.src}"`;
 	} else if ('href' in target) {
-		return `href="${target.href}"`
+		return `href="${target.href}"`;
 	} else {
 		return '';
 	}
@@ -38,12 +38,12 @@ export async function loaded(target, { signal } = {}) {
 		const controller = new AbortController();
 		const opts = { once: true, signal: controller.signal };
 
-		function load() {
+		const load = function load() {
 			resolve(target);
 			controller.abort();
-		}
+		};
 
-		function error(err) {
+		const error = function error(err) {
 			if (err.error instanceof Error) {
 				reject(err.error);
 				controller.abort(err.error);
@@ -52,7 +52,7 @@ export async function loaded(target, { signal } = {}) {
 				reject(error);
 				controller.abort(error);
 			}
-		}
+		};
 
 		if (signal instanceof AbortSignal) {
 			signal.addEventListener('abort', ({ target: { reason }}) => {
@@ -61,7 +61,7 @@ export async function loaded(target, { signal } = {}) {
 			},{ signal: controller.signal });
 		}
 
-		if (target instanceof HTMLScriptElement && target.noModule && HTMScriptElement.supports('module')) {
+		if (target instanceof HTMLScriptElement && target.noModule && HTMLScriptElement.supports('module')) {
 			resolve(target);
 		} else if (target instanceof HTMLLinkElement && target.disabled === true) {
 			resolve(target);
