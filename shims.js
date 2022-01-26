@@ -1,4 +1,3 @@
-import './shims/object.js';
 import './shims/array.js';
 import './shims/globalThis.js';
 import './shims/math.js';
@@ -17,3 +16,5 @@ import './shims/animation.js';
 import './shims/trustedTypes.js';
 import './shims/sanitizer.js';
 import './shims/set.js';
+import './shims/map.js';
+import './shims/weakMap.js';
