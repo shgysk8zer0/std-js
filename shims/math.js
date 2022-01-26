@@ -48,7 +48,7 @@ if (! Math.hasOwnProperty('fround')) {
 		return function(x) {
 			return array[0] = x, array[0];
 		};
-	})(Float32Array(1));
+	})(new Float32Array(1));
 }
 
 if (! (Math.clamp instanceof Function)) {
