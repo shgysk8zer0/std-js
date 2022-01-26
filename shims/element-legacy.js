@@ -123,3 +123,14 @@ if (! (Element.prototype.getAttributeNames instanceof Function)) {
 		return Array.from(this.attributes).map(({ name }) => name);
 	};
 }
+
+if (! ('hidden' in Element.prototype)) {
+	Object.defineProperty(Element.prototype, 'hidden', {
+		get: function() {
+			return this.hasAttribute('hidden');
+		},
+		set: function(value) {
+			this.toggleAttribute('hidden', value);
+		}
+	});
+}

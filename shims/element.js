@@ -23,8 +23,6 @@ if (! (HTMLScriptElement.supports instanceof Function)) {
 	};
 }
 
-
-
 if (! HTMLImageElement.prototype.hasOwnProperty('complete')) {
 	/**
 	 * Note: This shim cannot detect if an image has an error while loading
