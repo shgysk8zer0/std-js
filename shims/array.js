@@ -40,3 +40,40 @@ if (! (Array.prototype.at instanceof Function)) {
 		}
 	}
 }
+
+/**
+ * @see https://github.com/tc39/proposal-array-grouping
+ */
+if (! (Array.prototype.groupBy instanceof Function)) {
+	Array.prototype.groupBy = function groupBy(callback, thisArg = this) {
+		return this.reduce((groups, item, index, arr) => {
+			const key = callback.call(thisArg, item, index, arr);
+
+			if (! groups.hasOwnProperty(key)) {
+				groups[key] = [item];
+			} else {
+				groups[key].push(item);
+			}
+			return groups;
+		}, {});
+	};
+}
+
+/**
+ * @see https://github.com/tc39/proposal-array-grouping
+ */
+if (! (Array.prototype.groupByToMap instanceof Function)) {
+	Array.prototype.groupByToMap = function groupByToMap(callback, thisArg = this) {
+		return this.reduce((map, item, index, arr) => {
+			const key = callback.call(thisArg, item, index, arr);
+
+			if (! map.has(key)) {
+				map.set(key, [item]);
+			} else {
+				map.get(key).push(item);
+			}
+
+			return map;
+		}, new Map());
+	};
+}
