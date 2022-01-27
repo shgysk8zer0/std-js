@@ -1,10 +1,15 @@
-export function between(min, val, max) {
-	return val >= min && val <= max;
-}
+export const divisibleBy = (num, divisor) => num % divisor === 0;
 
-export function clamp(value, min, max) {
-	return Math.min(Math.max(value, min), max);
-}
+export const even = (num) => divisibleBy(num, 2);
+
+export const odd = (num) => ! even(num);
+
+export const between = (min, val, max) => val >= min && val <= max;
+
+/**
+ * @deprecated Use `Math.clamp()` instead
+ */
+export const clamp = (value, min, max) => Math.clamp(min, value, max);
 
 export function* range(start, end, step = 1) {
 	[start, end] = [Math.min(start, end), Math.max(start, end)];
