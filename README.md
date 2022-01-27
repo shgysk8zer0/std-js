@@ -21,31 +21,49 @@
 
 ## Navigation
 - [Installing](#installing)
-- [Contributing](./docs/CONTRIBUTING.md)
+- [Contributing](./.github/CONTRIBUTING.md)
 - [Contact](#contact-developer)
 - [Exporting](#exporting)
 - [Importing](#importing)
 - [Example](#example)
 
-> The purpose of this library is not so much to provide alternatives to jQuery, etc,
-> but rather to provide polyfills and wrappers to native JavaScript, enabling use
-> of modern JavaScript with less headache over browser support and implementation.  
-> It was, in part, influenced by the syntax of jQuery, but its purpose is different
-> in that this places little emphasis on style and animation. Rather, its
-> emphasis is on asynchronous event handling though [Mutation Observers](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver)
-> and [Promises](https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Promise.jsm/Promise).
-> The "$" function can be thought of as a NodeList converted into an array, with
-> a few Element methods that will be run on each element, as well as event handlers
-> (e.g. `$('a').click()`).
+> This ain't jQuery or React or any of that... This is a JavaScript library for
+> front-end developers who want the full power that modern JavaScript has to
+> offer with minimal bundle sizes, polyfills where needed, and a familiar but
+> terse syntax. It's friendly enough for beginners, but powerful enough for even
+> the most experienced developer.
+
+> It supports your [`AbortSignal`](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal).
+> It supports [`trustedTypes`](https://developer.mozilla.org/en-US/docs/Web/API/TrustedTypePolicy)
+> and [`Sanitizer`](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Sanitizer_API)
+> and [`cookieStore`](https://developer.mozilla.org/en-US/docs/Web/API/CookieStore)
+> and your [`navigator.locks`](https://developer.mozilla.org/en-US/docs/Web/API/LockManager).
+> And if you call in the next five minutes, I'll even throw in support for
+> `array.groupBy()` & `set.difference()` (*TC39 proposals*) for free!
 
 ### Installing
-Simply clone or add as a submodule:
+Were you expecting this to be where I tell you to `npm install` something?
 
-`git submodule add git://github.com/shgysk8zer0/std-js.git path/to/use`
+![We don't do that here meme](https://i.imgflip.com/2si67r.jpg)
+
+Maybe someday it'll be published on NPM, but until then you can either download
+it or add it as a submodule. There's just no reason for this to be restricted to
+NPM or to rely on it, and we're all using `git` anyways, right?
+
+```bash
+git submodule add https://github.com/shgysk8zer0/std-js.git path/to/use
+```
+
+**To Update** `git submodule update --remote /path/to/use` (*assuming you added as a submodule*).
+
+**Tip 1** Since this is all native JavaScript modules, you can easily plop everything
+on some CDN and `import { stuff } from 'https://cdn.example.com/js/std-js/stuff.js';`.
+
+**Tip 2** Use [Dependabot](https://github.com/dependabot) to automatically get
+Pull Requests when a submodule (*like std-js*) is updated.
 
 ### Contact Developer
 - [Open an issue](https://github.com/shgysk8zer0/std-js/issues)
-- [Email](mailto:admin@kernvalley.us?subject=std-js)
 
 ### Exporting
 ```js
@@ -72,17 +90,17 @@ export const FOO = 'bar';
 
 ```js
 // Spiffy.js
-// Default export (can only specify on default and should be only export)
+// Default export (can only specify one default and should be only export)
 export default class Spiffy {
   // Class body
 }
 ```
 ### Importing
 ```js
-// shim.js
+// dialog.js
 // Does not export anything.
 if (! ('HTMLDialogElement' in window)) {
-  Object.defineProperty(HTMLElement.prototype, 'open', {
+  Object.defineProperty(HTMLUnknownElement.prototype, 'open', {
     get: function() {
       return this.hasAttribute('open');
     },
@@ -99,8 +117,8 @@ if (! ('HTMLDialogElement' in window)) {
 ```
 ```js
 // main.js
-// Import and run shim.js
-import './shim.js';
+// Import and run dialog.js
+import './dialog.js';
 
 // Import specific functions/classes/objects/etc.
 // Must be valid relative or absolute path, so relative paths
@@ -111,10 +129,10 @@ import {myFunc, MyClass as CustomClass} from './exports.js';
 // Or import everything into an object / namespace
 import * as exports from './exports.js';
 /**
- * const exports = {myFunc, unused, MyClass, FOO};
+ * const exports = { myFunc, unused, MyClass, FOO };
  */
 
-// Import default (`export default`)
+// Import default (matching `export default`)
 import Spiffy from './Spiffy.js';
 
 // Import everything from a remote script
@@ -123,30 +141,89 @@ import 'https://cdn.polyfill.io/v2/polyfill.min.js';
 
 ### Example
 ```js
-import {$, wait} from './functions.js';
-import handleJSON from './json_response.js';
-import * as mutations from './mutations.js';
+import './shims/sanitizer.js';
+import './shims/trust.js';
+import './shims/cookieStore.js';
+import { html, on, attr, data, supportsElement, toggleClass } from './dom.js';
+import { loadStylesheet, loadImage, preconnect } from './loader.js';
+import { prefersColorScheme } from './match-media.js';
+import { createPolicy } from './trust.js';
+import { getJSON } from './http.js';
+import { pwned } from './pwned.js';
+import { YEARS } from './date-consts.js';
+import { md5 } from './hash.js';
+import { getBeforeUnloadSignal } from './abort.js';
+// std-js does not provide these... They're just here for example
+import { title, allowedOrigins } from './consts.js';
+import { getCookiesConsent, createResultCard } from './funcs.js';
 
-// Note that almost all DOM operations are async
-$(document).ready(async () => {
-  $('[data-remove]').click(mutations.remove);
-  $('[data-show-modal]').click(mutations.showModal);
-  $(document.body).watch(mutations.events, mutations.options, mutations.filter);
+toggleClass(document.documentElement, {
+  'no-dialog': ! supportsElement('dialog'),
+  'no-details': ! supportsElement('details'),
+  'js': true,
+  'no-js': false,
+});
 
-  // Use promises
-  $('#container p').some(p => p.textContent.startsWith('Lorem impsum')).then(ipsum => {
-    if (ipsum) {
-      $('.no-ipum').hide();
+const policy = createPolicy('default', {
+  createHTML: input => new Sanitizer().sanitizeFor('div', input).innerHTML,
+  createScript: () => trustedTypes.emptyScript,
+  createScriptURL: input => {
+    if (allowedorigins.includes(new URL(input, document.baseURI).origin)) {
+      return input;
+    } else {
+      throw new Error(`Untrusted script URL: '${input}'`);
     }
-  });
-  // Or `await` results (Here, to search nodes by their text)
-  // In this example, `found` would be a regular `Element`
-  const found = await $('div').find(el => el.textContent.startsWith('Delete me'));
-  if (found) {
-    found.remove();
-  }
+  },
+});
 
-  document.querySelector('.someClass').textContent = 'baz ';
-  // Will most likely result in textContent of "baz foo bar"
-}, {once: true});
+const signal = getBeforeUnloadSignal();
+
+data(':root', {
+  theme: prefersColorScheme(), // 'light' or 'dark'
+  layout: 'default',
+});
+
+loadStylesheet('/style.css');
+
+cookieStore.get({ name: 'cookie-consent' }).then(async cookie => {
+  if (cookie == null) {
+    if (await geCookieConsent()) {
+      cookieStore.set({ name: 'cookie-consent', value: 'granted', expires: 2 * YEARS });
+    }
+  }
+});
+
+ready({ signal }).then(() => {
+  html('heading', policy.createHTML(title));
+  preconnect('https://api.pwnedpasswords.com');
+  preconnect('https://secure.gravatar.com');
+  
+  on('input[type="password"]', {
+    change: async ({ target }) => {
+      attr('.pwned-notice', { hidden: ! await pwned(target.value) });
+    }
+  }, { signal });
+  
+  on('input[type="email"]', {
+    change: async ({ target }) => {
+      if (target.validity.valid) {
+        const hash = await md5(input.value);
+        const url = new URL(hash, 'https://secure.gravatar.com/avatar/');
+        url.searchParams.set('s', 96);
+        const img = await loadImage(url, { height: 96, width: 96 });
+        document.getElementById('gravatar-container').replaceChildren(img);
+      }
+    }
+  }, { signal });
+  
+  on(document.forms.search, {
+    submit: async event => {
+      event.preventDefault();
+      const body = new FormData(event.target);
+      const results = await getJSON(event.target.action, { body, signal });
+      document.getElementById('search-results').replaceChildren(...await Array.fromAsync(results));
+    },
+    reset: () => document.getElementById('search-results').replaceChildren(),
+  }, { signal });
+});
 ```
