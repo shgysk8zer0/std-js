@@ -50,17 +50,18 @@ if (! (Array.prototype.groupBy instanceof Function)) {
 
 /**
  * @see https://github.com/tc39/proposal-array-grouping
+ * @requires `Map.prototype.emplace`
  */
 if (! (Array.prototype.groupByToMap instanceof Function)) {
 	Array.prototype.groupByToMap = function groupByToMap(callback, thisArg = globalThis) {
 		return this.reduce((map, item, index, arr) => {
-			const key = callback.call(thisArg, item, index, arr);
-
-			if (! map.has(key)) {
-				map.set(key, [item]);
-			} else {
-				map.get(key).push(item);
-			}
+			map.emplace(callback.call(thisArg, item, index, arr), {
+				insert: () => [item],
+				update: existing => {
+					existing.push(item);
+					return existing;
+				}
+			});
 
 			return map;
 		}, new Map());
