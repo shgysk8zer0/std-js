@@ -12,7 +12,9 @@ if (! (Map.prototype.emplace instanceof Function)) {
 			return value;
 		} else if (typeof existing !== 'undefined' && update instanceof Function) {
 			const value = update.call(this, existing, key, this);
-			this.set(key, value);
+			if (value !== existing) {
+				this.set(key, value);
+			}
 			return value;
 		} else {
 			throw new Error('Key is not found and no `insert()` given');
