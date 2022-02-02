@@ -1,3 +1,9 @@
+if (! (Object.hasOwn instanceof Function)) {
+	Object.hasOwn = function hasOwn(obj, prop) {
+		return Object.prototype.hasOwnProperty.call(obj, prop);
+	};
+}
+
 if (! (Object.keys instanceof Function)) {
 	Object.keys = function keys(obj) {
 		const arr = [];
