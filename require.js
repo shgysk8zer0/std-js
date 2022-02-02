@@ -1,4 +1,6 @@
 (function(global) {
+	'use strict';
+
 	const dependencies = {};
 	const loading = {};
 
@@ -20,6 +22,15 @@
 		} else {
 			return dependencies[dep];
 		}
+	}
+
+	function setDependency(name, value) {
+		return Object.defineProperty(dependencies, name, {
+			enumerable: true,
+			configurable: false,
+			writable: false,
+			value: value,
+		});
 	}
 
 	async function loadDependency(dep) {
@@ -76,17 +87,15 @@
 	function define(...args) {
 		switch(args.length) {
 			case 3: {
-				const [name, deps, callback] = args;
+				const [name, deps, factory] = args;
 
 				if (typeof name !== 'string' || name.length === 0) {
 					throw new TypeError('Invalid name');
-				} else if (! (callback instanceof Function)) {
-					throw new TypeError('Callback must be a function');
 				} else if (! (Array.isArray(deps) && deps.every(dep => typeof dep === 'string' && dep.length !== 0))) {
 					throw new TypeError('Dependencies must be an array of strings');
 				} else if (hasDependency(name)) {
 					throw new Error(`${name} is already defined`);
-				} else {
+				} else if (factory instanceof Function) {
 					if (! Object.hasOwn(loading, name)) {
 						Object.defineProperty(loading, name, {
 							enumerable: true,
@@ -99,8 +108,8 @@
 						const { resolve, reject, promise } = loading[name];
 
 						try {
-							const mod = await callback.apply(null, mods);
-							dependencies[name] = mod;
+							const mod = await factory.apply(null, mods);
+							setDependency(name, mod);
 							resolve(mod);
 							delete loading[name];
 						} catch(err) {
@@ -109,6 +118,9 @@
 							return promise;
 						}
 					});
+				} else {
+					setDependency(name, factory);
+					break;
 				}
 			}
 
@@ -124,12 +136,39 @@
 				}
 			}
 
+			case 1:
+				if (args[0] instanceof Function) {
+					const module = { exports: {}};
+					const exports = module.exports;
+					const retVal = args[0].call(null, require, module, exports);
+
+					Object.entries(exports).forEach(([name, value]) => {
+						if (hasDependency(name)) {
+							throw new Error(`${name} is already defined`);
+						} else {
+							setDependency(name, value);
+						}
+					});
+				} else if (typeof args[0] !== 'undefined') {
+					Object.entries(args[0]).forEach(([name, value]) => {
+						if (hasDependency(name)) {
+							throw new Error(`${name} is already defined`);
+						} else {
+							setDependency(name, value);
+						}
+					});
+				} else {
+					throw new TypeError('Invalid arguments to `define()`');
+				}
+				break;
+
 			default:
 				throw new TypeError('Invalid arguments to `define()`');
 		}
 	}
 
 	dependencies.require = require;
+	define.amd = {};
 
 	if (! (global.require instanceof Function)) {
 		global.require = require;
