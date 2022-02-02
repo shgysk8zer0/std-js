@@ -51,7 +51,7 @@ export async function signalAborted(signal) {
 	return promise;
 }
 
-export function abortButtonController(button) {
+export function abortButtonController(button, { reason } = {}) {
 	if (! (button instanceof HTMLButtonElement)) {
 		throw new TypeError('Not a <button>');
 	}
@@ -59,26 +59,30 @@ export function abortButtonController(button) {
 	const controller = new AbortController();
 	button.disabled = false;
 
-	listen(button, 'click', () => controller.abort(), { signal: controller.signal, once: true });
+	listen(button, 'click', () => controller.abort(reason), { signal: controller.signal, once: true });
 	listen(controller.signal, 'abort', () => button.disabled = true, { once: true });
 
 	return controller;
 }
 
-export function abortTimeoutController(timeout) {
+export function abortTimeoutController(timeout, { reason } = {}) {
 	const controller = new AbortController();
 
-	abortableTimeout(() => controller.abort(), timeout, { signal: controller.signal });
+	abortableTimeout(() => controller.abort(reason), timeout, { signal: controller.signal });
 
 	return controller;
 }
 
-export function abortEventController(what, events, { passive, capture } = {}) {
+export function abortTimeoutSignal(timeout, { reason } = {}) {
+	return abortTimeoutController(timeout, { reason }).signal;
+}
+
+export function abortEventController(what, events, { passive, capture, reason } = {}) {
 	const controller = new AbortController();
 
 	when(what, events, { signal: controller.signal, capture, passive, once: true }).then(() => {
 		if (! controller.signal.aborted) {
-			controller.abort();
+			controller.abort(reason);
 		}
 	});
 

@@ -1,44 +1,48 @@
-import { addListener } from './events.js';
+import { listen } from './events.js';
 import { getDeferred } from './promises.js';
 
-export async function *yieldEvents(target, event, { signal, passive, capture } = {}) {
+export async function *yieldEvents(target, event, { signal, passive, capture, throwError = false } = {}) {
 	if (! (target instanceof EventTarget)) {
 		throw new TypeError('Target is not a valid `EventTarget`');
-	} else if (typeof event !== 'string') {
+	} else if (typeof event !== 'string' || event.length === 0) {
 		throw new TypeError('Not a valid event');
 	} else if (signal instanceof AbortSignal && signal.aborted) {
-		throw new DOMException('Operation aborted');
+		throw signal.reason;
 	} else {
 		const key = Symbol(`${event}-promise`);
 		const controller = new AbortController();
-		const callback = function(event) {
-			if (typeof this[key] !== 'undefined') {
-				const { resolve } = this[key];
-				delete this[key];
+
+		listen(target, event, function(event) {
+			const { resolve, reject } = this[key];
+			delete this[key];
+
+			if (signal instanceof AbortSignal && signal.aborted) {
+				reject(signal.reson);
+			} else {
 				resolve(event);
 			}
-		};
-
-		if (signal instanceof AbortSignal && ! signal.aborted) {
-			signal.addEventListener('abort', () => {
-				controller.abort();
-				if (typeof target[key] !== 'undefined') {
-					const { resolve } = target[key];
-					delete target[key];
-					resolve();
-				}
-			}, { signal: controller.signal, once: true });
-		}
-
-		addListener([target], [event], callback , { signal: controller.signal, passive, capture });
+		}, { signal: controller.signal, passive, capture });
 
 		while (! controller.signal.aborted) {
-			if (typeof target[key] !== 'undefined') {
-				await target[key].promise;
-			}
+			try {
+				if (typeof target[key] !== 'undefined') {
+					await target[key].promise;
+				}
 
-			target[key] = getDeferred();
-			yield await target[key].promise;
+				target[key] = getDeferred({ signal });
+
+				yield await target[key].promise;
+			} catch(err) {
+				delete target[key];
+
+				if (! controller.signal.aborted) {
+					controller.abort(err);
+				}
+
+				if (throwError) {
+					throw err;
+				}
+			}
 		}
 	}
 }
