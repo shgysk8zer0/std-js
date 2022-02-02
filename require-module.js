@@ -1,22 +1,51 @@
 import { getDeferred } from './promises.js';
 const dependencies = {};
 
-async function whenDefined(deps) {
-	return Promise.all(deps.map(dep => require(dep)));
-}
+/**
+ * @todo Make this synchronous and throw if a module is not defined
+ */
+export async function require(...args) {
+	switch(args.length) {
+		case 0:
+			throw new Error('No arguments given to `require()`');
 
-export async function require(dep) {
-	if (! Object.hasOwn(dependencies, dep)) {
-		Object.defineProperty(dependencies, dep, {
-			value: getDeferred(),
-			enumerable: true,
-			writable: false
-		});
+		case 1:
+			if (Array.isArray(args[0])) {
+				return Promise.all(args[0].map(dep => require(dep)));
+			} else if (typeof args[0] === 'string' && args[0].length !== 0) {
+				if (! Object.hasOwn(dependencies, args[0])) {
+					Object.defineProperty(dependencies, args[0], {
+						value: getDeferred(),
+						enumerable: true,
+						writable: false
+					});
+				}
+
+				return dependencies[args[0]].promise;
+			} else {
+				throw new TypeError('Invalid arguments for `require()`');
+			}
+
+		case 2:
+			const [deps, callback] = args;
+
+			if (callback instanceof Function) {
+				return require(deps).then(mods => {
+					if (Array.isArray(mods)) {
+						return callback.apply(null, mods);
+					} else {
+						return callback.call(null, mods);
+					}
+				});
+			} else {
+				throw new TypeError('`require()` callback must be a function');
+			}
 	}
-
-	return dependencies[dep].promise;
 }
 
+/**
+ * @todo Remove use of `require()` and implement similar async loading instead
+ */
 export function define(...args) {
 	switch(args.length) {
 		case 3: {
@@ -34,7 +63,7 @@ export function define(...args) {
 				}
 
 				const { resolve, reject } = dependencies[name];
-				return whenDefined(deps).then(args => callback.apply(globalThis, args)).then(resolve).catch(reject);
+				return require(deps, callback).then(resolve, reject);
 			}
 		}
 
@@ -46,11 +75,13 @@ export function define(...args) {
 			} else if (! (Array.isArray(deps) && deps.every(dep => typeof dep === 'string' && dep.length !== 0))) {
 				throw new TypeError('Dependencies must be an array of strings or empty array');
 			} else {
-				return whenDefined(deps).then(args => callback.apply(globalThis, args));
+				return require(deps, callback);
 			}
 		}
 
 		default:
-			throw new TypeError('Invalid arguments');
+			throw new TypeError('Invalid arguments to `define()`');
 	}
 }
+
+define('require', [], () => require);
