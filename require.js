@@ -71,16 +71,17 @@
 					throw new TypeError('Invalid arguments for `require()`');
 				}
 
-			case 2:
+			case 2: {
 				const [deps, callback] = args;
 
 				if (! (callback instanceof Function)) {
 					throw new TypeError('`require()` callback must be a function');
 				} else if (! Array.isArray(deps)) {
-					throw new TypeError(`require() dependencies must be an array`);
+					throw new TypeError('`require() dependencies must be an array`');
 				} else {
 					return callback.apply(null, require(deps));
 				}
+			}
 		}
 	}
 
@@ -114,9 +115,9 @@
 							delete loading[name];
 						} catch(err) {
 							reject(err);
-						} finally {
-							return promise;
 						}
+
+						return promise;
 					});
 				} else {
 					setDependency(name, factory);
@@ -140,7 +141,7 @@
 				if (args[0] instanceof Function) {
 					const module = { exports: {}};
 					const exports = module.exports;
-					const retVal = args[0].call(null, require, module, exports);
+					args[0].call(null, require, module, exports);
 
 					Object.entries(exports).forEach(([name, value]) => {
 						if (hasDependency(name)) {
