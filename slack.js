@@ -1,5 +1,4 @@
 import { sha256 } from './hash.js';
-import { uuidv6 } from './uuid.js';
 import { POST } from './http.js';
 
 const errorObj = Object.seal({
@@ -28,7 +27,7 @@ export async function signatureHeaders({ uuid }) {
 
 export async function send(endpoint, { name, email, phone, subject, body, url }, { signal } = {}) {
 	try {
-		const uuid = uuidv6();
+		const uuid = crypto.randomUUID();
 		const data = new FormData();
 
 		data.set('name', name);
