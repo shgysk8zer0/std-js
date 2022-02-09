@@ -1,17 +1,17 @@
 {
-	"@context": "http:\/\/schema.org",
+	"@context": "http://schema.org",
 	"@type": "Article",
 	"headline": "Lorem Ipsum",
 	"articleBody": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.",
 	"author": {
-		"@context": "http:\/\/schema.org",
+		"@context": "http://schema.org",
 		"@type": "Person",
 		"givenName": "Chris",
 		"familyName": "Zuber",
-		"url": "https:\/\/shgysk8zer0.github.io",
+		"url": "https://shgysk8zer0.github.io",
 		"birthDate": "1985-03-26",
 		"homeLocation": {
-			"@context": "http:\/\/schema.org",
+			"@context": "http://schema.org",
 			"@type": "PostalAddress",
 			"addressLocality": "Lake Isabella",
 			"addressRegion": "California",
@@ -19,9 +19,9 @@
 			"email": "mailto:admin@kernvalley.us"
 		},
 		"image": {
-			"@context": "http:\/\/schema.org",
+			"@context": "http://schema.org",
 			"@type": "ImageObject",
-			"contentUrl": "https:\/\/gravatar.com\/avatar\/43578597e449298f5488c2407c8a8ae5",
+			"contentUrl": "https://gravatar.com/avatar/43578597e449298f5488c2407c8a8ae5",
 			"width": 80,
 			"height": 80
 		}
