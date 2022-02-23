@@ -540,7 +540,11 @@ export function parseAsFragment(text, { sanitizer, policy } = {}) {
 }
 
 export function animate(what, keyframes, opts = { duration: 400 }) {
-	if (Element.prototype.animate instanceof Function) {
+	if (opts.signal instanceof AbortSignal && opts.signal.aborted) {
+		throw opts.signal.reason;
+	} else if (! (Element.prototype.animate instanceof Function)) {
+		throw new DOMException('Animations not supported');
+	} else {
 		if (Number.isInteger(opts)) {
 			opts = { duration: opts };
 		}
@@ -548,30 +552,30 @@ export function animate(what, keyframes, opts = { duration: 400 }) {
 		const animations = query(what).map(item => item.animate(keyframes, opts));
 
 		if (opts.signal instanceof AbortSignal) {
-			signalAborted(opts.signal).finally(() => animations.forEach(anim => anim.cancel()));
+			opts.signal.addEventListener('abort', () => animations.forEach(anim => anim.cancel()), { once: true });
 		}
 
 		return animations;
-	} else {
-		throw new DOMException('Animations not supported');
 	}
 }
 
-export function intersect(what, callback, options = {}) {
-	if ('IntersectionObserver' in window) {
+export function intersect(what, callback, { root, rootMargin, signal, threshold } = {}) {
+	if (signal instanceof AbortSignal && signal.aborted) {
+		throw signal.reason;
+	} else if (! ('IntersectionObserver' in globalThis)) {
+		throw new DOMException('IntersectionObserver not supported');
+	} else {
 		const observer = new IntersectionObserver((entries, observer) => {
 			entries.forEach((entry, index) => callback.apply(null, [entry, observer, index]));
-		}, options);
+		}, { root, rootMargin, threshold });
 
 		each(what, item => observer.observe(item));
 
-		if (options.signal instanceof AbortSignal) {
-			signalAborted(options.signal).finally(() => observer.disconnect());
+		if (signal instanceof AbortSignal) {
+			signalAborted(signal).finally(() => observer.disconnect());
 		}
 
 		return observer;
-	} else {
-		throw new DOMException('IntersectionObserver not supported');
 	}
 }
 
