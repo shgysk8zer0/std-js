@@ -29,7 +29,7 @@ export async function whenIntersecting(target, { signal, base = document } = {})
 
 		if (signal instanceof AbortSignal) {
 			signal.addEventListener('abort', ({ target: { reason }}) => {
-				reject(signal.reason);
+				reject(reason);
 			}, { once: true });
 		}
 	} else {
