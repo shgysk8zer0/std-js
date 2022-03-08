@@ -2,6 +2,15 @@ import './locks.js';
 import './share.js';
 import './appBadge.js';
 
+if (! Navigator.prototype.hasOwnProperty('pdfViewerEnabled')) {
+	Object.defineProperty(navigator, 'pdfViewerEnabled', {
+		enumerable: true,
+		configurable: false,
+		writable: false,
+		value: false,
+	});
+}
+
 if (! (Navigator.prototype.getInstalledRelatedApps instanceof Function)) {
 	Navigator.prototype.getInstalledRelatedApps = async () => [];
 }
