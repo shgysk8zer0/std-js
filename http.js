@@ -1,5 +1,6 @@
 import { parse, loaded } from './dom.js';
 import { signalAborted, abortTimeoutController } from './abort.js';
+import { setURLParams, setUTMParams } from './utility.js';
 import { createPolicy } from './trust.js';
 
 /**
@@ -15,40 +16,6 @@ const fetchPolicyPromise = new Promise(async resolve => {
 
 	resolve(createPolicy(trustPolicies[0], { createHTML: input => input }));
 });
-
-export function setURLParams(url, params) {
-	if (! (url instanceof URL)) {
-		url = new URL(url, document.baseURI);
-	}
-
-	if (params instanceof HTMLFormElement) {
-		return setURLParams(url, new FormData(params));
-	} else if (params instanceof FormData) {
-		return setURLParams(url, Object.fromEntries(params));
-	} else if (params instanceof URLSearchParams) {
-		return setURLParams(url, Object.fromEntries(params));
-	} else if (Array.isArray(params) || typeof params === 'string') {
-		return setURLParams(url, new URLSearchParams(params));
-	} else if (typeof params === 'object') {
-		url.search = new URLSearchParams({ ...Object.fromEntries(url.searchParams), ...params});
-	}
-
-	return url;
-}
-
-export function setUTMParams(url, {
-	source: utm_source,
-	medium: utm_medium = 'referral',
-	content: utm_content,
-	campaign: utm_campaign,
-	term: utm_term,
-} = {}) {
-	if (typeof utm_source === 'string') {
-		return setURLParams(url, { utm_source, utm_medium, utm_content, utm_campaign, utm_term });
-	} else {
-		return new URL(url, document.baseURI);
-	}
-}
 
 function filename(src) {
 	if (typeof src === 'string') {
@@ -425,3 +392,5 @@ export function postNav(url, data = {}, {
 		});
 	}
 }
+
+export { setURLParams, setUTMParams };
