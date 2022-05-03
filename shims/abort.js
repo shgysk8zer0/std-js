@@ -140,3 +140,19 @@ if (! (AbortSignal.prototype.throwIfAborted instanceof Function)) {
 		}
 	};
 }
+
+if (! (AbortSignal.timeout instanceof Function)) {
+	AbortSignal.timeout = function(ms) {
+		if (typeof ms === 'undefined') {
+			throw new TypeError('At least one 1 argument required but only 0 passed');
+		} else if (! Number.isFinite(ms)) {
+			throw new TypeError('Argument 1 is not a finite value, so it is out of range for unsigned long long.');
+		} else if (ms < 0) {
+			throw new TypeError('Argument 1 is out of range for unsigned long long.');
+		} else {
+			const controller = new AbortController();
+			setTimeout(() => controller.abort(new DOMException('The operation timed out.')), ms);
+			return controller.signal;
+		}
+	};
+}
