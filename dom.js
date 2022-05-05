@@ -491,8 +491,32 @@ export async function unloaded({ signal } = {}) {
 }
 
 export async function beforeUnload({ signal } = {}) {
-	const { promise, resolve } = getDeferred();
+	const { promise, resolve } = getDeferred({ signal });
 	listen(globalThis, 'beforeunload', resolve, { signal, once: true, capture: true });
+	return promise;
+}
+
+export async function whenPageVisible({ signal } = {}) {
+	const { promise, resolve } = getDeferred({ signal });
+
+	if (document.visibilityState === 'visible') {
+		resolve();
+	} else {
+		listen(document, 'visibilitychange', () => resolve(), { once: true, signal });
+	}
+
+	return promise;
+}
+
+export async function whenPageHidden({ signal } = {}) {
+	const { promise, resolve } = getDeferred({ signal });
+
+	if (document.visibilityState === 'hidden') {
+		resolve();
+	} else {
+		listen(document, 'visibilitychange', () => resolve(), { once: true, signal });
+	}
+
 	return promise;
 }
 
