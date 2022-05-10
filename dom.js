@@ -2,6 +2,7 @@ import { signalAborted } from './abort.js';
 import { addListener, listen } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
 import { isHTML, isScriptURL, isTrustPolicy } from './trust.js';
+import { errorToEvent } from './utility.js';
 
 export function query(what, base = document) {
 	if (Array.isArray(what)) {
@@ -664,13 +665,4 @@ export function createTable(data, { caption, header, footer } = {}) {
 	return table;
 }
 
-export function errorToEvent(error, type = 'error') {
-	if (error instanceof Error) {
-		const { message, name, fileName: filename, lineNumber: lineno, columnNumber: colno } = error;
-		return new ErrorEvent(type, { error, message: `${name}: ${message}`, filename, lineno, colno });
-	} else {
-		throw new TypeError('`errorToEvent()` only accepts Errors');
-	}
-}
-
-export { addListener, isAsync };
+export { addListener, isAsync, errorToEvent };

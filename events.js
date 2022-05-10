@@ -1,6 +1,7 @@
 import { query, when } from './dom.js';
 import { signalAborted } from './abort.js';
 import { getDeferred } from './promises.js';
+import { debounce as db, throttle } from './utility.js';
 
 export function getEventFeatures() {
 	const el = document.createElement('div');
@@ -125,24 +126,8 @@ export function removeListener(targets, events, callback, { capture, once, passi
  * @return function             Rate limited function
  */
 export function debounce(func, wait = 17, immediate = false) {
-	let timeout;
-
-	return function(...args) {
-		const later = () => {
-			timeout = null;
-
-			if (! immediate) {
-				func.apply(this, args);
-			}
-		};
-
-		clearTimeout(timeout);
-		timeout = setTimeout(later, wait);
-
-		if (immediate && ! timeout) {
-			func.apply(this, args);
-		}
-	};
+	console.warn('debounce() in events.js is deprecated. Please use utility.js instead.');
+	return immediate ? throttle(func, { delay: wait }): db(func, { delay: wait });
 }
 
 export async function whenOnline({ signal } = {}) {
