@@ -14,6 +14,15 @@ export function amd(name, factory, requires = {}) {
 	}
 }
 
+export function errorToEvent(error, type = 'error') {
+	if (error instanceof Error) {
+		const { message, name, fileName: filename, lineNumber: lineno, columnNumber: colno } = error;
+		return new ErrorEvent(type, { error, message: `${name}: ${message}`, filename, lineno, colno });
+	} else {
+		throw new TypeError('`errorToEvent()` only accepts Errors');
+	}
+}
+
 export function setURLParams(url, params) {
 	if (! (url instanceof URL)) {
 		url = new URL(url, document.baseURI);
@@ -45,5 +54,38 @@ export function setUTMParams(url, {
 		return setURLParams(url, { utm_source, utm_medium, utm_content, utm_campaign, utm_term });
 	} else {
 		return new URL(url, document.baseURI);
+	}
+}
+
+export function debounce(callback, { delay = 17, thisArg } = {}) {
+	if (! (callback instanceof Function)) {
+		throw new TypeError('Callback must be a function');
+	} else if (! Number.isFinite(delay) || delay < 0) {
+		throw new TypeError('Timeout must be a positive intiger');
+	} else {
+		let to;
+		return function(...args) {
+			if (typeof to === 'number') {
+				clearTimeout(to);
+				to = null;
+			}
+			to = setTimeout((...args) => callback.apply(thisArg, args), delay, ...args);
+		};
+	}
+}
+
+export function throttle(callback, { delay = 17, thisArg } = {}) {
+	if (! (callback instanceof Function)) {
+		throw new TypeError('Callback must be a function');
+	} else if (! Number.isFinite(delay) || delay < 0) {
+		throw new TypeError('Timeout must be a positive intiger');
+	} else {
+		let to;
+		return function(...args) {
+			if (typeof to !== 'number') {
+				to = setTimeout(() => to = null, delay);
+				callback.apply(thisArg, args);
+			}
+		};
 	}
 }
