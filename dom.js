@@ -422,6 +422,10 @@ export function on(what, when, ...args) {
 	return items;
 }
 
+export function prevent(what, event = 'submit', { signal, capture } = {}) {
+	return on(what, event, ev => ev.preventDefault(), { signal, capture });
+}
+
 export function off(what, when, ...args) {
 	return each(what, item => {
 		if (typeof when === 'string') {
