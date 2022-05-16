@@ -626,6 +626,72 @@ export function mutate(what, callback, options = {}) {
 	}
 }
 
+export async function scriptLoaded(script) {
+	const { resolve, reject, promise } = getDeferred();
+
+	if (! (script instanceof HTMLScriptElement)) {
+		reject(new TypeError('Expected a <script>'));
+	} else {
+		const controller = new AbortController();
+		const signal = controller.signal;
+
+		addListener(script, 'load', () => {
+			resolve();
+			controller.abort();
+		}, { signal });
+
+		addListener(script, 'error', () => {
+			reject(new DOMException(`Error loading <script src="${script.src}">`));
+			controller.abort();
+		}, { signal });
+
+		return promise;
+	}
+}
+
+export async function linkLoaded(link) {
+	const { resolve, reject, promise } = getDeferred();
+
+	if (! (link instanceof HTMLLinkElement)) {
+		reject(new TypeError('Expected a <link>'));
+	} else {
+		const controller = new AbortController();
+		const signal = controller.signal;
+
+		addListener(link, 'load', () => {
+			resolve();
+			controller.abort();
+		}, { signal });
+
+		addListener(link, 'error', () => {
+			reject(new DOMException(`Error loading <link src="${link.href}">`));
+			controller.abort();
+		}, { signal });
+
+		return promise;
+	}
+}
+
+export function stripComments(node) {
+	if (! (node instanceof Node)) {
+		throw new TypeError('Cannot strip comments from non-node');
+	} else {
+		switch(node.nodeType) {
+			case Node.ELEMENT_NODE:
+			case Node.DOCUMENT_NODE:
+			case Node.DOCUMENT_FRAGMENT_NODE:
+				if (node.hasChildNodes()) {
+					[...node.childNodes].forEach(stripComments);
+				}
+				break;
+
+			case Node.COMMENT_NODE:
+				node.remove();
+				break;
+		}
+	}
+}
+
 export function supportsElement(...tags) {
 	return ! tags.some(tag => document.createElement(tag) instanceof HTMLUnknownElement);
 }
