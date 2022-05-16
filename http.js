@@ -1,5 +1,5 @@
 import { parse, loaded } from './dom.js';
-import { signalAborted, abortTimeoutController } from './abort.js';
+import { signalAborted } from './abort.js';
 import { setURLParams, setUTMParams } from './utility.js';
 import { createPolicy } from './trust.js';
 
@@ -63,7 +63,7 @@ export async function GET(url, {
 	}
 
 	if (typeof signal === 'undefined' && Number.isInteger(timeout)) {
-		signal = abortTimeoutController(timeout).signal;
+		signal = AbortSignal.timeout(timeout);
 	} else if (signal instanceof AbortController) {
 		signal = signal.signal;
 	}
@@ -104,7 +104,7 @@ export async function POST(url, {
 	}
 
 	if (typeof signal === 'undefined' && Number.isInteger(timeout)) {
-		signal = abortTimeoutController(timeout).signal;
+		signal = AbortSignal.timeout(timeout);
 	} else if (signal instanceof AbortController) {
 		signal = signal.signal;
 	}
@@ -133,7 +133,7 @@ export async function DELETE(url, {
 	}
 
 	if (typeof signal === 'undefined' && Number.isInteger(timeout)) {
-		signal = abortTimeoutController(timeout).signal;
+		signal = AbortSignal.timeout(timeout);
 	} else if (signal instanceof AbortController) {
 		signal = signal.signal;
 	}
