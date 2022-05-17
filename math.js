@@ -6,10 +6,7 @@ export const odd = (num) => ! even(num);
 
 export const between = (min, val, max) => val >= min && val <= max;
 
-/**
- * @deprecated Use `Math.clamp()` instead
- */
-export const clamp = (value, min, max) => Math.clamp(min, value, max);
+export const clamp = (min, value, max) => Math.min(max, Math.max(min, value));
 
 export function* range(start, end, step = 1) {
 	[start, end] = [Math.min(start, end), Math.max(start, end)];
