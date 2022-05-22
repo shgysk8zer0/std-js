@@ -1,3 +1,5 @@
+import { randomInt } from './math.js';
+
 /* global define */
 export function amd(name, factory, requires = {}) {
 	if (typeof define === 'function' && define.amd) {
@@ -87,5 +89,11 @@ export function throttle(callback, { delay = 17, thisArg } = {}) {
 				callback.apply(thisArg, args);
 			}
 		};
+	}
+}
+
+export function random(arr) {
+	if (Array.isArray(arr) && arr.length !== 0) {
+		return arr[randomInt(0, arr.length)];
 	}
 }
