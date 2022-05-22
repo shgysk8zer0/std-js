@@ -40,6 +40,12 @@ export function randomInt(min = 0, max = 100) {
 	return min + crypto.getRandomValues(new Uint32Array(1))[0] % (max - min + 1);
 }
 
+export function* rng({ length = 32 } = {}) {
+	for (const num of crypto.getRandomValues(new Uint8ClampedArray(length))) {
+		yield num;
+	}
+}
+
 export function sigma(start, end, callback) {
 	let sum = 0;
 	for (let num of range(start, end)) {
