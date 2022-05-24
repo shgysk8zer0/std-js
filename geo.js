@@ -33,3 +33,74 @@ export async function get({ maximumAge, timeout, signal, enableHighAccuracy } = 
 	}
 	return promise;
 }
+
+export async function recordGeoJSON({
+	filename           = `${new Date().toISOString()}.geojson`,
+	enableHighAccuracy = true,
+	marker,
+	maximumAge,
+	signal,
+	timeout,
+	type               = 'application/geo+json',
+} = {}) {
+	const { resolve, reject, promise } = getDeferred();
+
+	if (! (signal instanceof AbortSignal)) {
+		reject(new TypeError('signal must be an instance of `AbortSignal`.'));
+	} else if (signal.aborted) {
+		reject(signal.reason);
+	} else if (! supported) {
+		reject(new DOMException('GeoLocation API not supported.'));
+	} else {
+		const coords = [];
+		if (marker instanceof HTMLElement && marker.tagName === 'LEAFLET-MARKER' && marker.closest('leaflet-map') instanceof HTMLElement) {
+			watch(
+				({ coords: { latitude, longitude }}) => {
+					coords.push([longitude, latitude]);
+					marker.geo = { latitude, longitude };
+					marker.closest('leaflet-map').flyTo({ latitude, longitude });
+				},
+				err => console.error(err),
+				{ signal, enableHighAccuracy, maximumAge, timeout },
+			);
+		} else {
+			watch(
+				({ coords: { latitude, longitude }}) => coords.push([longitude, latitude]),
+				err => console.error(err),
+				{ signal, enableHighAccuracy, maximumAge, timeout },
+			);
+		}
+
+		signal.addEventListener('abort', () => {
+			if (coords.length === 0) {
+				reject(new DOMException('No coordinates recorded.'));
+			} else {
+				if (marker instanceof HTMLElement && marker.tagName === 'LEAFLET-MARKER') {
+					marker.remove();
+				}
+
+				const geo = JSON.stringify({
+					'type': 'FeatureCollection',
+					'features': [
+						{
+							'type': 'Feature',
+							'geometry': {
+								'type': 'LineString',
+								'coordinates': coords,
+							},
+							'properties': {
+								'generated': new Date().toISOString(),
+							},
+						}
+					]
+				}, null, 4);
+
+				const file = new File([geo], filename, { type });
+				console.log(file);
+				resolve(file);
+			}
+		});
+	}
+
+	return promise;
+}
