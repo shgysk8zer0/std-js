@@ -35,8 +35,8 @@ export async function get({ maximumAge, timeout, signal, enableHighAccuracy } = 
 }
 
 export async function recordGeoJSON({
-	filename           = `${new Date().toISOString()}.geojson`,
 	enableHighAccuracy = true,
+	filename           = `${new Date().toISOString()}.geojson`,
 	marker,
 	maximumAge,
 	signal,
@@ -53,7 +53,10 @@ export async function recordGeoJSON({
 		reject(new DOMException('GeoLocation API not supported.'));
 	} else {
 		const coords = [];
-		if (marker instanceof HTMLElement && marker.tagName === 'LEAFLET-MARKER' && marker.closest('leaflet-map') instanceof HTMLElement) {
+		if (
+			marker instanceof HTMLElement && marker.tagName === 'LEAFLET-MARKER'
+				&& marker.closest('leaflet-map') instanceof HTMLElement
+		) {
 			watch(
 				({ coords: { latitude, longitude }}) => {
 					coords.push([longitude, latitude]);
@@ -81,25 +84,20 @@ export async function recordGeoJSON({
 
 				const geo = JSON.stringify({
 					'type': 'FeatureCollection',
-					'features': [
-						{
-							'type': 'Feature',
-							'geometry': {
-								'type': 'LineString',
-								'coordinates': coords,
-							},
-							'properties': {
-								'generated': new Date().toISOString(),
-							},
-						}
-					]
+					'features': [{
+						'type': 'Feature',
+						'geometry': {
+							'type': 'LineString',
+							'coordinates': coords,
+						},
+						'properties': { 'generated': new Date().toISOString() },
+					}]
 				}, null, 4);
 
 				const file = new File([geo], filename, { type });
-				console.log(file);
 				resolve(file);
 			}
-		});
+		}, { once: true });
 	}
 
 	return promise;
