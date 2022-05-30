@@ -1,25 +1,29 @@
 if (! (globalThis.requestIdleCallback instanceof Function)) {
-	globalThis.requestIdleCallback = function(callback, { timeout = 50 } = {}) {
-		const now = Date.now();
+	const isValidTimeout = timeout => Number.isSafeInteger(timeout) && timeout > 0;
 
-		return requestAnimationFrame(function() {
-			const idle = {
-				timeRemaining: function() {
-					return Math.max(0, timeout - (Date.now() - now));
-				}
-			};
+	globalThis.requestIdleCallback = function(callback, { timeout } = {}) {
+		const start = performance.now();
+		const timeRemaining = () => isValidTimeout(timeout)
+			? Math.max(0, timeout - (performance.now() - start))
+			: Math.max(0, 600 - (performance.now() - start));
 
-			idle.didTimeout = idle.timeRemaining() === 0;
-
-			callback(idle);
-		});
+		return setTimeout(() => callback({
+			didTimeout: isValidTimeout(timeout) ? timeRemaining() === 0 : false,
+			timeRemaining,
+		}), 1);
 	};
 }
 
-if (! ( globalThis.cancelIdleCallback instanceof Function)) {
-	globalThis.cancelIdleCallback = function(id) {
-		cancelAnimationFrame(id);
-	};
+if (! (globalThis.cancelIdleCallback instanceof Function)) {
+	globalThis.cancelIdleCallback = id => clearTimeout(id);
+}
+
+if (! (globalThis.requestAnimationFrame instanceof Function)) {
+	globalThis.requestAnimationFrame = callback => setTimeout(() => callback(Date.now()), 1000 / 60);
+}
+
+if (! (globalThis.cancelAnimationFrame instanceof Function)) {
+	globalThis.cancelAnimationFrame = id => clearTimeout(id);
 }
 
 if (! (globalThis.queueMicrotask instanceof Function)) {
