@@ -19,7 +19,7 @@ if (! (globalThis.cancelIdleCallback instanceof Function)) {
 }
 
 if (! (globalThis.requestAnimationFrame instanceof Function)) {
-	globalThis.requestAnimationFrame = callback => setTimeout(() => callback(Date.now()), 1000 / 60);
+	globalThis.requestAnimationFrame = callback => setTimeout(() => callback(performance.now()), 1000 / 60);
 }
 
 if (! (globalThis.cancelAnimationFrame instanceof Function)) {
