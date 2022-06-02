@@ -1,10 +1,12 @@
-export const divisibleBy = (num, divisor) => num % divisor === 0;
+export const isNumber = num => typeof num === 'number' && ! Number.isNaN(num);
 
-export const even = (num) => divisibleBy(num, 2);
+export const divisibleBy = (num, divisor) => isNumber(num) && num % divisor === 0;
 
-export const odd = (num) => ! even(num);
+export const even = num => divisibleBy(num, 2);
 
-export const between = (min, val, max) => val >= min && val <= max;
+export const odd = num => ! even(num);
+
+export const between = (min, val, max) => isNumber(val) && val >= min && val <= max;
 
 export const clamp = (min, value, max) => Math.min(max, Math.max(min, value));
 
