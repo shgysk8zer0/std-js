@@ -89,8 +89,14 @@ export function create(tag, {
 	itemid,
 	itemref,
 	children,
-	events,
 	styles,
+	events: {
+		capture,
+		once,
+		passive,
+		signal,
+		...events
+	} = {},
 	...rest
 } = {}) {
 	const el = document.createElement(tag, { is });
@@ -159,8 +165,8 @@ export function create(tag, {
 		el.hidden = hidden;
 	}
 
-	if (typeof events === 'object') {
-		on(el, events);
+	if (typeof events === 'object' && Object.keys(events).length !== 0) {
+		on(el, events, { capture, once, passive, signal });
 	}
 
 	if (typeof itemref === 'string') {
