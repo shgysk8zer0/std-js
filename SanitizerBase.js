@@ -176,5 +176,6 @@ export class Sanitizer {
 }
 
 const { setHTML, polyfill } = getSantizerUtils(Sanitizer, defaultConfig);
+export const createHTML = input => rawPolicy.createHTML(input);
 export const trustPolicies = [rawPolicy.name];
 export { nativeSupport, setHTML, polyfill, allowProtocols };
