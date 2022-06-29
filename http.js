@@ -51,6 +51,7 @@ export async function GET(url, {
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers(),
+	priority = undefined,
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -69,7 +70,7 @@ export async function GET(url, {
 	}
 
 	return await fetch(url, { method: 'GET', mode, credentials, referrerPolicy,
-		headers, cache, redirect, integrity, keepalive, signal });
+		headers, cache, priority, redirect, integrity, keepalive, signal });
 }
 
 export async function POST(url, {
@@ -80,6 +81,7 @@ export async function POST(url, {
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers(),
+	priority = undefined,
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -110,7 +112,7 @@ export async function POST(url, {
 	}
 
 	return await fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy,
-		headers, cache, redirect, integrity, keepalive, signal });
+		headers, cache, priority, redirect, integrity, keepalive, signal });
 }
 
 export async function DELETE(url, {
@@ -121,6 +123,7 @@ export async function DELETE(url, {
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers(),
+	priority = undefined,
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -139,7 +142,7 @@ export async function DELETE(url, {
 	}
 
 	return await fetch(url, { method: 'DELETE', mode, credentials, referrerPolicy,
-		headers, cache, redirect, integrity, keepalive, signal });
+		headers, cache, priority, redirect, integrity, keepalive, signal });
 }
 
 export async function getHTML(url, {
@@ -150,6 +153,7 @@ export async function getHTML(url, {
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers({ Accept: 'text/html' }),
+	priority = undefined,
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -160,7 +164,7 @@ export async function getHTML(url, {
 	policy,
 } = {}) {
 	const html = await getText(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, priority, redirect, integrity, keepalive, signal, timeout });
 
 	if (typeof integrity === 'string' && typeof policy === 'undefined') {
 		const fetchPolicy = await fetchPolicyPromise;
@@ -181,13 +185,14 @@ export async function getText(url, {
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers({ Accept: 'text/plain' }),
+	priority = undefined,
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
 } = {}) {
 	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, priority, redirect, integrity, keepalive, signal, timeout });
 
 	return await resp.text();
 }
@@ -200,13 +205,14 @@ export async function getJSON(url, {
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers({ Accept: 'application/json' }),
+	priority = undefined,
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
 } = {}) {
 	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, priority, redirect, integrity, keepalive, signal, timeout });
 
 	return await resp.json();
 }
@@ -220,6 +226,7 @@ export async function getFile(url, {
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers(),
+	priority = undefined,
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -230,7 +237,7 @@ export async function getFile(url, {
 	}
 
 	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, priority, redirect, integrity, keepalive, signal, timeout });
 
 	if (resp.ok) {
 		const type = getType(resp);
@@ -302,6 +309,7 @@ export async function postHTML(url, {
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers({ Accept: 'text/html' }),
+	priority = undefined,
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -312,7 +320,7 @@ export async function postHTML(url, {
 	policy,
 } = {}) {
 	const html = await postText(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, priority, redirect, integrity, keepalive, signal, timeout });
 
 	if (typeof integrity === 'string' && typeof policy === 'undefined') {
 		const fetchPolicy = await fetchPolicyPromise;
@@ -332,13 +340,14 @@ export async function postJSON(url, {
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers({ Accept: 'application/json' }),
+	priority = undefined,
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
 } = {}) {
 	const resp = await POST(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, priority, redirect, integrity, keepalive, signal, timeout });
 
 	return await resp.json();
 }
@@ -351,13 +360,14 @@ export async function postText(url, {
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers({ Accept: 'text/plain' }),
+	priority = undefined,
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
 } = {}) {
 	const resp = await POST(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, priority, redirect, integrity, keepalive, signal, timeout });
 
 	return await resp.text();
 }

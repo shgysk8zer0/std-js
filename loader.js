@@ -88,6 +88,7 @@ export async function createLink(href = null, {
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
 	importance = 'auto',
+	fetchPriority = undefined,
 	integrity = null,
 	nonce = null,
 	media = 'all',
@@ -135,10 +136,6 @@ export async function createLink(href = null, {
 		link.media = media;
 	}
 
-	if (typeof href === 'string') {
-		link.href = href;
-	}
-
 	if (disabled) {
 		link.disabled = true;
 	}
@@ -153,6 +150,14 @@ export async function createLink(href = null, {
 		link.sizes.add(sizes);
 	}
 
+	if (typeof fetchPriority === 'string' && fetchPriority.length !== 0) {
+		link.fetchPriority = fetchPriority;
+	}
+
+	if (typeof href === 'string') {
+		link.href = href;
+	}
+
 	return link;
 }
 
@@ -162,6 +167,7 @@ export async function preload(href, {
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
 	importance = 'auto',
+	fetchPriority = undefined,
 	media = null,
 	integrity = null,
 	signal,
@@ -172,7 +178,7 @@ export async function preload(href, {
 
 	const link = await createLink(href, {
 		rel: ['preload'], as, type, crossOrigin, referrerPolicy,
-		importance, media, integrity,
+		importance, media, integrity, fetchPriority,
 	});
 
 	document.head.append(link);
@@ -226,6 +232,7 @@ export async function loadScript(src, {
 	type = 'text/javascript',
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
+	fetchPriority = undefined,
 	integrity = null,
 	nonce = null,
 	parent = document.head,
@@ -247,6 +254,11 @@ export async function loadScript(src, {
 	if (typeof nonce === 'string') {
 		script.nonce = nonce;
 	}
+
+	if (typeof fetchPriority === 'string' && fetchPriority.length !== 0) {
+		script.fetchPriority = fetchPriority;
+	}
+
 	if (policy != null && policy.createScriptURL instanceof Function) {
 		await load(script, parent, 'src', policy.createScriptURL(src), { signal });
 	} else {
@@ -264,6 +276,7 @@ export async function loadStylesheet(href, {
 	integrity = null,
 	disabled = false,
 	importance = 'auto',
+	fetchPriority = undefined,
 	title = null,
 	nonce = null,
 	parent = document.head,
@@ -271,7 +284,7 @@ export async function loadStylesheet(href, {
 } = {}) {
 	const link = await createLink(null, {
 		rel, media, crossOrigin, referrerPolicy, integrity, disabled, importance,
-		title, nonce,
+		title, nonce, fetchPriority,
 	});
 	/* Do not wait for load event if disabled */
 	if (disabled) {
@@ -289,6 +302,7 @@ export async function loadImage(src, {
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
 	importance = 'auto',
+	fetchPriority = undefined,
 	sizes = null,
 	srcset = null,
 	height = undefined,
@@ -332,6 +346,10 @@ export async function loadImage(src, {
 
 	if (Array.isArray(classes) && classes.length !== 0) {
 		img.classList.add(...classes);
+	}
+
+	if (typeof fetchPriority === 'string' && fetchPriority.length !== 0) {
+		img.fetchPriority = fetchPriority;
 	}
 
 	if (typeof srcset === 'object' && srcset !== null) {
