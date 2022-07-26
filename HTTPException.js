@@ -1,7 +1,7 @@
 const symbols = { resp: Symbol('resp') };
 
 export class HTTPException extends Error {
-	constructor(resp = Resp.error(), { message, cause } = {}) {
+	constructor(resp = Response.error(), { message, cause } = {}) {
 		super(
 			typeof message === 'string' ? message :`<${resp.url}> [${resp.status} ${resp.statusText}]`,
 			{ cause }
