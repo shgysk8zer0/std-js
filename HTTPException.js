@@ -2,12 +2,10 @@ const symbols = { resp: Symbol('resp') };
 
 export class HTTPException extends Error {
 	constructor(resp, { message, cause } = {}) {
-		debugger;
 		super(
-			typeof message === 'string'
-				? message :`<${resp.url}> [${resp.status} ${resp.statusText}]`,
-				{ cause }
-			);
+			typeof message === 'string' ? message :`<${resp.url}> [${resp.status} ${resp.statusText}]`,
+			{ cause }
+		);
 
 		Object.defineProperty(this, symbols.resp, {
 			value: resp,
