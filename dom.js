@@ -487,8 +487,9 @@ export async function ready({ signal } = {}) {
 
 		if (signal instanceof AbortSignal) {
 			signal.addEventListener('abort',
-				({ target }) => reject(target.reason || new DOMException('Operation aborted.'))
-			, { once: true });
+				({ target }) => reject(target.reason || new DOMException('Operation aborted.')),
+				{ once: true }
+			);
 		}
 	} else {
 		resolve();
@@ -554,8 +555,9 @@ export async function loaded({ signal } = {}) {
 
 		if (signal instanceof AbortSignal) {
 			signal.addEventListener('abort',
-				({ target }) => reject(target.reason || new DOMException('Operation aborted.'))
-			, { once: true });
+				({ target }) => reject(target.reason || new DOMException('Operation aborted.')),
+				{ once: true }
+			);
 		}
 	} else {
 		resolve();
