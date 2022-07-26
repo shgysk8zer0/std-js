@@ -4,6 +4,12 @@ import { getDeferred, isAsync } from './promises.js';
 import { isHTML, isScriptURL, isTrustPolicy } from './trust.js';
 import { errorToEvent } from './utility.js';
 
+export const readyStates = ['loading', 'interactive', 'complete'];
+
+export const readyStateIndex = (state = document.readyState) => readyStates.indexOf(state);
+
+export const reachedState = state => ! readyStateIndex(document.readyState) > readyStateIndex(state);
+
 export function query(what, base = document) {
 	if (Array.isArray(what)) {
 		return what;
@@ -474,7 +480,7 @@ export async function when(what, events, { capture, passive, signal, base } = {}
 export async function ready({ signal } = {}) {
 	const { promise, resolve } = getDeferred();
 
-	if (document.readyState === 'loading') {
+	if (readyStateIndex() === 0) {
 		listen(document, 'DOMContentLoaded', resolve, { signal, once: true, capture: true });
 	} else {
 		resolve();
@@ -483,10 +489,57 @@ export async function ready({ signal } = {}) {
 	return promise;
 }
 
+export async function whenReadyState(state, { signal } = {}) {
+	const { resolve, reject, promise } = getDeferred();
+	const stateIndex = readyStateIndex(state);
+
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.reason || new DOMException('Operation aborted.'));
+	} else if (stateIndex < 0) {
+		reject(new DOMException(`Invalid state: ${state}`));
+	} else if (stateIndex > readyStateIndex()) {
+		const controller = new AbortController();
+		let settled = false;
+
+		controller.signal.addEventListener('abort', ({ target }) => {
+			if (! settled) {
+				reject(target.reason || new DOMException('Operation aborted.'));
+				settled = true;
+			}
+		}, { once: true });
+
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener('abort', ({ target }) => {
+				controller.abort(target.reason);
+			}, { once: true, signal: controller.signal });
+		}
+
+		document.addEventListener('readystatechange', () => {
+			if (document.readyState === state) {
+				resolve();
+				settled = true;
+				controller.abort();
+			}
+		}, { signal: controller.signal });
+	} else {
+		resolve();
+	}
+
+	return promise;
+}
+
+export async function interactive({ signal } = {}) {
+	await whenReadyState('interactive', { signal });
+}
+
+export async function complete({ signal } = {}) {
+	await whenReadyState('complete', { signal });
+}
+
 export async function loaded({ signal } = {}) {
 	const { promise, resolve } = getDeferred();
 
-	if (document.readyState !== 'complete') {
+	if (readyStateIndex() < 2) {
 		listen(globalThis, 'load', resolve, { signal, once: true, capture: true });
 	} else {
 		resolve();
