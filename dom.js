@@ -478,10 +478,18 @@ export async function when(what, events, { capture, passive, signal, base } = {}
 }
 
 export async function ready({ signal } = {}) {
-	const { promise, resolve } = getDeferred();
+	const { promise, resolve, reject } = getDeferred();
 
-	if (readyStateIndex() === 0) {
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.reason || new DOMException('Operation aborted.'));
+	} else if (readyStateIndex() === 0) {
 		listen(document, 'DOMContentLoaded', resolve, { signal, once: true, capture: true });
+
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener('abort',
+				({ target }) => reject(target.reason || new DOMException('Operation aborted.'))
+			, { once: true });
+		}
 	} else {
 		resolve();
 	}
@@ -537,10 +545,18 @@ export async function complete({ signal } = {}) {
 }
 
 export async function loaded({ signal } = {}) {
-	const { promise, resolve } = getDeferred();
+	const { promise, resolve, reject } = getDeferred();
 
-	if (readyStateIndex() < 2) {
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.reason || new DOMException('Operation aborted.'));
+	} else if (readyStateIndex() < 2) {
 		listen(globalThis, 'load', resolve, { signal, once: true, capture: true });
+
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener('abort',
+				({ target }) => reject(target.reason || new DOMException('Operation aborted.'))
+			, { once: true });
+		}
 	} else {
 		resolve();
 	}
