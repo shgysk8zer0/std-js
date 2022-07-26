@@ -2,6 +2,7 @@ import { parse, loaded } from './dom.js';
 import { signalAborted } from './abort.js';
 import { setURLParams, setUTMParams } from './utility.js';
 import { createPolicy } from './trust.js';
+import { HTTPException } from './HTTPException.js';
 
 /**
  * To be used when `integrity` is passed when `fetch()`ing HTML
@@ -33,13 +34,21 @@ function getType({ headers }) {
 	}
 }
 
-export async function fetch(url, opts) {
+export async function fetch(url, opts = {}) {
 	if (opts.signal instanceof AbortSignal && opts.signal.aborted) {
-		throw opts.signal.reason;
+		throw new HTTPException(Response.error(), { cause: opts.signal.reason });
 	} else if (opts.signal instanceof AbortSignal && ! ('signal' in Request.prototype)) {
-		return await Promise.race([globalThis.fetch(url), signalAborted(opts.signal)]);
+		return await Promise.race([
+			globalThis.fetch(url, opts),
+			signalAborted(opts.signal),
+		]);
 	} else {
-		return await globalThis.fetch(url, opts);
+		return await globalThis.fetch(url, opts).then(resp => {
+			if (resp.ok) return resp;
+			else throw new HTTPException(resp, { message: opts.errorMessage, cause: opts.cause });
+		}).catch(cause => {
+			throw new HTTPException(Response.error(), { cause });
+		});
 	}
 }
 
@@ -55,6 +64,7 @@ export async function GET(url, {
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
+	errorMessage,
 } = {}) {
 	if (typeof body !== 'undefined') {
 		url = setURLParams(url, body);
@@ -69,7 +79,7 @@ export async function GET(url, {
 	}
 
 	return await fetch(url, { method: 'GET', mode, credentials, referrerPolicy,
-		headers, cache, redirect, integrity, keepalive, signal });
+		headers, cache, redirect, integrity, keepalive, signal, errorMessage });
 }
 
 export async function POST(url, {
@@ -84,6 +94,7 @@ export async function POST(url, {
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
+	errorMessage,
 } = {}) {
 	if (typeof body === 'object' && ! (body instanceof FormData)) {
 		if (body instanceof HTMLFormElement) {
@@ -110,7 +121,7 @@ export async function POST(url, {
 	}
 
 	return await fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy,
-		headers, cache, redirect, integrity, keepalive, signal });
+		headers, cache, redirect, integrity, keepalive, signal, errorMessage });
 }
 
 export async function DELETE(url, {
@@ -125,6 +136,7 @@ export async function DELETE(url, {
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
+	errorMessage,
 } = {}) {
 	if (typeof body !== 'undefined') {
 		url = setURLParams(url, body);
@@ -139,7 +151,7 @@ export async function DELETE(url, {
 	}
 
 	return await fetch(url, { method: 'DELETE', mode, credentials, referrerPolicy,
-		headers, cache, redirect, integrity, keepalive, signal });
+		headers, cache, redirect, integrity, keepalive, signal, errorMessage });
 }
 
 export async function getHTML(url, {
@@ -158,9 +170,10 @@ export async function getHTML(url, {
 	asFrag = true,
 	sanitizer = undefined,
 	policy,
+	errorMessage,
 } = {}) {
 	const html = await getText(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
 
 	if (typeof integrity === 'string' && typeof policy === 'undefined') {
 		const fetchPolicy = await fetchPolicyPromise;
@@ -185,9 +198,10 @@ export async function getText(url, {
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
+	errorMessage,
 } = {}) {
 	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
 
 	return await resp.text();
 }
@@ -204,9 +218,10 @@ export async function getJSON(url, {
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
+	errorMessage,
 } = {}) {
 	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
 
 	return await resp.json();
 }
@@ -224,20 +239,17 @@ export async function getFile(url, {
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
+	errorMessage,
 } = {}) {
 	if (typeof name !== 'string') {
 		name = filename(url);
 	}
 
 	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
 
-	if (resp.ok) {
-		const type = getType(resp);
-		return new File([await resp.blob()], name, { type });
-	} else {
-		throw new Error(`Error fetching ${name}`);
-	}
+	const type = getType(resp);
+	return new File([await resp.blob()], name, { type });
 }
 
 export async function submitForm(form) {
@@ -310,9 +322,10 @@ export async function postHTML(url, {
 	asFrag = true,
 	sanitizer = undefined,
 	policy,
+	errorMessage,
 } = {}) {
 	const html = await postText(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
 
 	if (typeof integrity === 'string' && typeof policy === 'undefined') {
 		const fetchPolicy = await fetchPolicyPromise;
@@ -336,9 +349,10 @@ export async function postJSON(url, {
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
+	errorMessage,
 } = {}) {
 	const resp = await POST(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
 
 	return await resp.json();
 }
@@ -355,9 +369,10 @@ export async function postText(url, {
 	keepalive = undefined,
 	signal = undefined,
 	timeout = null,
+	errorMessage,
 } = {}) {
 	const resp = await POST(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout });
+		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
 
 	return await resp.text();
 }
