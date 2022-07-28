@@ -34,21 +34,47 @@ function getType({ headers }) {
 	}
 }
 
+function handleResponse(resp, { cause, message } = {}) {
+	if (! (resp instanceof Response)) {
+		throw new TypeError('Expected a Response object');
+	} else if (! resp.ok) {
+		throw new HTTPException(resp, { cause, message });
+	} else {
+		return resp;
+	}
+}
+
+function handleError(err) {
+	if (err instanceof HTTPException) {
+		throw err;
+	} else if (err instanceof Error) {
+		throw new HTTPException(Response.error(), { cause: err, message: err.message });
+	} else if (typeof err === 'string') {
+		throw new HTTPException(Response.error(), {
+			cause: new DOMException('Unknown network error'),
+			message: err,
+		});
+	} else {
+		throw new HTTPException(Response.error(), {
+			cause: new DOMException('Unknown network error'),
+			message: 'Unknown network error',
+		});
+	}
+}
+
 export async function fetch(url, opts = {}) {
 	if (opts.signal instanceof AbortSignal && opts.signal.aborted) {
-		throw new HTTPException(Response.error(), { cause: opts.signal.reason });
+		throw new HTTPException(Response.error(), {
+			cause: opts.signal.reason,
+			message: opts.signal.reason instanceof Error ? opts.signal.reason.message : opts.signal.reason,
+		});
 	} else if (opts.signal instanceof AbortSignal && ! ('signal' in Request.prototype)) {
 		return await Promise.race([
 			globalThis.fetch(url, opts),
 			signalAborted(opts.signal),
-		]);
+		]).then(resp => handleResponse(resp, { message: opts.errorMessage }), handleError);
 	} else {
-		return await globalThis.fetch(url, opts).then(resp => {
-			if (resp.ok) return resp;
-			else throw new HTTPException(resp, { message: opts.errorMessage, cause: opts.cause });
-		}).catch(cause => {
-			throw new HTTPException(Response.error(), { cause });
-		});
+		return await globalThis.fetch(url, opts).then(resp => handleResponse(resp, { message: opts.errorMessage }), handleError);
 	}
 }
 
