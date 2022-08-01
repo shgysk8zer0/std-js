@@ -9,6 +9,34 @@ const SHIM_TARGETS = [Array, String, globalThis.Int8Array, globalThis.Uint8Array
 	globalThis.Float64Array, globalThis.BigInt64Array, globalThis.BigUint64Array,
 ];
 
+if (! (Array.prototype.findLast instanceof Function)) {
+	Array.prototype.findLast = function(callback, thisArg) {
+		let found = undefined;
+
+		this.forEach((item, index, arr) => {
+			if (callback.call(thisArg, item, index, arr)) {
+				found = item;
+			}
+		}, thisArg);
+
+		return found;
+	};
+}
+
+if (! (Array.prototype.findLastIndex instanceof Function)) {
+	Array.prototype.findLastIndex = function(callback, thisArg) {
+		let found = -1;
+
+		this.forEach((item, index, arr) => {
+			if (callback.call(thisArg, item, index, arr)) {
+				found = index;
+			}
+		}, thisArg);
+
+		return found;
+	};
+}
+
 if (! (Array.prototype.at instanceof Function)) {
 	const at = function at(n) {
 		n = Math.trunc(n) || 0;
