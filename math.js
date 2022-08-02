@@ -49,15 +49,15 @@ export function* rng({ length = 32 } = {}) {
 }
 
 export function sigma(start, end, callback) {
-	let sum = 0;
-	for (let num of range(start, end)) {
-		sum += callback(num);
-	}
-	return sum;
+	return Array.from(range(start, end)).reduce((sum, num) => sum + callback(num));
 }
 
 export function sum(...nums) {
-	return nums.reduce((sum, num) => sum + num, 0);
+	return nums.reduce((sum, num) => sum + num);
+}
+
+export function product(...nums) {
+	return nums.reduce((prod, num) => prod * num);
 }
 
 export function mean(...nums) {
