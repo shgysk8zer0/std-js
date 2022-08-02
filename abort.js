@@ -3,10 +3,6 @@ import { getDeferred } from './promises.js';
 import { listen } from './events.js';
 export const supported =  'AbortController' in window && AbortController.prototype.hasOwnProperty('signal');
 
-export const unloadSignal = getUnloadSignal();
-
-export const beforeUnloadSignal = getBeforeUnloadSignal();
-
 export function throwIfAborted(signal) {
 	if (signal instanceof AbortController) {
 		signal.signal.throwIfAborted();
