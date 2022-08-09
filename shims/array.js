@@ -9,7 +9,7 @@ const SHIM_TARGETS = [Array, String, globalThis.Int8Array, globalThis.Uint8Array
 	globalThis.Float64Array, globalThis.BigInt64Array, globalThis.BigUint64Array,
 ];
 
-if ((Array.prototype.flat instanceof Function)) {
+if (! (Array.prototype.flat instanceof Function)) {
 	Array.prototype.flat = function(depth = 1) {
 		const result = [];
 		depth = Math.min(Number.MAX_SAFE_INTEGER, Math.max(0, depth));
