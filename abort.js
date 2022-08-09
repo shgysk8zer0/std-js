@@ -61,7 +61,11 @@ export function abortButtonController(button, { reason } = {}) {
 	return controller;
 }
 
+/**
+ * @deprecated
+ */
 export function abortTimeoutController(timeout, { reason } = {}) {
+	console.warn('`abortTimeoutController()` is deprecated. Use `AbortSignal.timeout()` instead.');
 	const controller = new AbortController();
 
 	abortableTimeout(() => controller.abort(reason), timeout, { signal: controller.signal });
@@ -69,6 +73,9 @@ export function abortTimeoutController(timeout, { reason } = {}) {
 	return controller;
 }
 
+/**
+ * @deprecated
+ */
 export function abortTimeoutSignal(timeout, { reason } = {}) {
 	return abortTimeoutController(timeout, { reason }).signal;
 }
@@ -127,8 +134,11 @@ export function abortableIdleCallback(callback, { signal, timeout } = {}) {
 
 export function signalRaceController(...signals) {
 	const controller = new AbortController();
+	const signal = anyAbortedSignal(...signals);
 
-	Promise.race(signals.map(signal => signalAborted(signal))).finally(() => controller.abort());
+	signal.addEventListener('abort', ({ target }) => {
+		controller.abort(target.reason || new DOMException('Operation aborted.'));
+	}, { signal: controller.signal });
 
 	return controller;
 }
@@ -139,4 +149,29 @@ export function signalAllController(...signals) {
 	Promise.all(signals.map(signal => signalAborted(signal))).finally(() => controller.abort());
 
 	return controller;
+}
+
+export function anyAbortedSignal(...signals) {
+	if (AbortSignal.any instanceof Function) {
+		return AbortSignal.any(signals);
+	} else {
+		const controller = new AbortController();
+
+		for (const signal of signals) {
+			if (! (signal instanceof AbortSignal)) {
+				const err = new TypeError('`signal` is not an `AbortSignal`');
+				controller.abort(err);
+				throw err;
+			} else if (signal.aborted) {
+				controller.abort(signal.reason || new DOMException('Operation aborted.'));
+				break;
+			} else {
+				signal.addEventListener('abort', ({ target }) => {
+					controller.abort(target.reason || new DOMException('Operation aborted.'));
+				}, { signal: controller.signal });
+			}
+		}
+
+		return controller.signal;
+	}
 }
