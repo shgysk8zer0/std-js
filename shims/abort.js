@@ -156,3 +156,35 @@ if (! (AbortSignal.timeout instanceof Function)) {
 		}
 	};
 }
+
+/**
+ * @see https://chromestatus.com/feature/5202879349522432
+ * @TODO How do I handle if a signal is already aborted
+ * @TODO Should controller abort on a TypeError
+ */
+if (! (AbortSignal.any instanceof Function)) {
+	AbortSignal.any = function(signals) {
+		if (! Array.isArray(signals)) {
+			throw new TypeError('Expected an array of signals');
+		}
+
+		const controller = new AbortController();
+
+		for (const signal of signals) {
+			if (! (signal instanceof AbortSignal)) {
+				const err = new TypeError('`signal` is not an `AbortSignal`');
+				controller.abort(err);
+				throw err;
+			} else if (signal.aborted) {
+				controller.abort(signal.reason || new DOMException('Operation aborted.'));
+				break;
+			} else {
+				signal.addEventListener('abort', ({ target }) => {
+					controller.abort(target.reason || new DOMException('Operation aborted.'));
+				}, { signal: controller.signal });
+			}
+		}
+
+		return controller.signal;
+	};
+}
