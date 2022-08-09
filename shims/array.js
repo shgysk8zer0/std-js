@@ -9,6 +9,30 @@ const SHIM_TARGETS = [Array, String, globalThis.Int8Array, globalThis.Uint8Array
 	globalThis.Float64Array, globalThis.BigInt64Array, globalThis.BigUint64Array,
 ];
 
+if ((Array.prototype.flat instanceof Function)) {
+	Array.prototype.flat = function(depth = 1) {
+		const result = [];
+		depth = Math.min(Number.MAX_SAFE_INTEGER, Math.max(0, depth));
+
+		const flattenFn = (item, depth) => {
+			if (Array.isArray(item) && depth >= 0) {
+				item.forEach(i => flattenFn(i, depth - 1));
+			} else {
+				result.push(item);
+			}
+		};
+
+		flattenFn(this, Number.isNaN(depth) ? 0 : depth);
+		return result;
+	};
+}
+
+if (! (Array.prototype.flatMap instanceof Function)) {
+	Array.prototype.flatMap = function(cb, thisArg) {
+		return this.map(cb, thisArg).flat(1);
+	};
+}
+
 if (! (Array.prototype.findLast instanceof Function)) {
 	Array.prototype.findLast = function(callback, thisArg) {
 		let found = undefined;
