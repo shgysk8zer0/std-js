@@ -84,8 +84,8 @@ if (! (Array.prototype.at instanceof Function)) {
 /**
  * @see https://github.com/tc39/proposal-array-grouping
  */
-if (! (Array.prototype.groupBy instanceof Function)) {
-	Array.prototype.groupBy = function groupBy(callback, thisArg = globalThis) {
+if (! (Array.prototype.group instanceof Function)) {
+	Array.prototype.group = function group(callback, thisArg = globalThis) {
 		return this.reduce((groups, item, index, arr) => {
 			const key = callback.call(thisArg, item, index, arr);
 
@@ -101,11 +101,19 @@ if (! (Array.prototype.groupBy instanceof Function)) {
 }
 
 /**
+ * @deprecated [renamed to `group()`]
+ */
+Array.prototype.groupBy = function groupBy(...args) {
+	console.warn('`goupBy` is deprecated. Please use `group` instead.');
+	return this.group(...args);
+};
+
+/**
  * @see https://github.com/tc39/proposal-array-grouping
  * @requires `Map.prototype.emplace`
  */
-if (! (Array.prototype.groupByToMap instanceof Function)) {
-	Array.prototype.groupByToMap = function groupByToMap(callback, thisArg = globalThis) {
+if (! (Array.prototype.groupToMap instanceof Function)) {
+	Array.prototype.groupToMap = function groupToMap(callback, thisArg = globalThis) {
 		return this.reduce((map, item, index, arr) => {
 			map.emplace(callback.call(thisArg, item, index, arr), {
 				insert: () => [item],
@@ -119,6 +127,14 @@ if (! (Array.prototype.groupByToMap instanceof Function)) {
 		}, new Map());
 	};
 }
+
+/**
+ * @deprecated [renamed to `groupToMap()`]
+ */
+Array.prototype.groupByToMap = function groupByToMap(...args) {
+	console.warn('`goupByToMap` is deprecated. Please use `groupToMap` instead.');
+	return this.groupToMap(...args);
+};
 
 /**
  * @see https://github.com/tc39/proposal-array-from-async

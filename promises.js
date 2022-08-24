@@ -177,8 +177,9 @@ export async function onTimeout(callback, {
 
 export async function sleep(timeout, { signal } = {}) {
 	const { resolve, promise } = getDeferred({ signal });
-	onTimeout(() => resolve(), { signal, timeout }).catch(() => resolve());
-	await promise;
+	onTimeout(() => resolve(performance.now()), { signal, timeout })
+		.catch(() => resolve(performance.now()));
+	return await promise;
 }
 
 export async function promisifyEvents(targets, { success, fail = 'error', passive = true, capture = true } = {}) {

@@ -1,5 +1,7 @@
 import { randomInt } from './math.js';
 
+const funcs = new WeakMap();
+
 /* global define */
 export function amd(name, factory, requires = {}) {
 	if (typeof define === 'function' && define.amd) {
@@ -23,6 +25,21 @@ export function errorToEvent(error, type = 'error') {
 	} else {
 		throw new TypeError('`errorToEvent()` only accepts Errors');
 	}
+}
+
+
+export function callOnce(callback, thisArg) {
+	const func = function(...args) {
+		if (funcs.has(func)) {
+			return funcs.get(func);
+		} else {
+			const retVal = callback.apply(thisArg, args);
+			funcs.set(func, retVal);
+			return retVal;
+		}
+	};
+
+	return func;
 }
 
 export function setURLParams(url, params) {

@@ -1,5 +1,8 @@
 import './shims/array.js';
 import './shims/globalThis.js';
+import './shims/function.js';
+import './shims/number.js';
+import './shims/iterator.js';
 import './shims/math.js';
 import './shims/secure-context.js';
 import './shims/navigator.js';
