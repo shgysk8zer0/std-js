@@ -47,3 +47,10 @@ if ('Promise' in globalThis && ! (Promise.race instanceof Function)) {
 		promises.forEach(promise => promise.then(resolve, reject));
 	});
 }
+
+if ('Promise' in globalThis && ! (Promise.try instanceof Function)) {
+	/**
+	 * @see https://github.com/tc39/proposal-promise-try
+	 */
+	Promise.try = callback => new Promise(resolve => resolve(callback()));
+}

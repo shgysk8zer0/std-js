@@ -11,11 +11,15 @@ export const between = (min, val, max) => isNumber(val) && val >= min && val <= 
 export const clamp = (min, value, max) => Math.min(max, Math.max(min, value));
 
 export function* range(start, end, step = 1) {
-	[start, end] = [Math.min(start, end), Math.max(start, end)];
+	if (Number.range instanceof Function) {
+		return Number.range(start, end, step);
+	} else {
+		[start, end] = [Math.min(start, end), Math.max(start, end)];
 
-	while (start <= end) {
-		yield start;
-		start += step;
+		while (start <= end) {
+			yield start;
+			start += step;
+		}
 	}
 }
 
