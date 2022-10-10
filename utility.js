@@ -2,6 +2,12 @@ import { randomInt } from './math.js';
 
 const funcs = new WeakMap();
 
+export function getURLResolver({ base = document.baseURI, path = './' } = {}) {
+	const url = new URL(path, base).href;
+
+	return path => new URL(path, url).href;
+}
+
 /* global define */
 export function amd(name, factory, requires = {}) {
 	if (typeof define === 'function' && define.amd) {
