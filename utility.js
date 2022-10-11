@@ -8,6 +8,18 @@ export function getURLResolver({ base = document.baseURI, path = './' } = {}) {
 	return path => new URL(path, url).href;
 }
 
+export function isNull(val) {
+	return Object.is(val, null);
+}
+
+export function isUndefined(val) {
+	return typeof val === 'undefined';
+}
+
+export function isNullish(val) {
+	return isUndefined(val) || isNull(val);
+}
+
 /* global define */
 export function amd(name, factory, requires = {}) {
 	if (typeof define === 'function' && define.amd) {
