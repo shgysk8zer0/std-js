@@ -112,7 +112,7 @@ Array.prototype.groupBy = function groupBy(...args) {
  * @see https://github.com/tc39/proposal-array-grouping
  * @requires `Map.prototype.emplace`
  */
-if (! (Array.prototype.groupToMap instanceof Function)) {
+if (! (Array.prototype.groupToMap instanceof Function) && (Map.prototype.emplace instanceof Function)) {
 	Array.prototype.groupToMap = function groupToMap(callback, thisArg = globalThis) {
 		return this.reduce((map, item, index, arr) => {
 			map.emplace(callback.call(thisArg, item, index, arr), {
@@ -131,10 +131,12 @@ if (! (Array.prototype.groupToMap instanceof Function)) {
 /**
  * @deprecated [renamed to `groupToMap()`]
  */
-Array.prototype.groupByToMap = function groupByToMap(...args) {
-	console.warn('`goupByToMap` is deprecated. Please use `groupToMap` instead.');
-	return this.groupToMap(...args);
-};
+if (Map.prototype.emplace instanceof Function) {
+	Array.prototype.groupByToMap = function groupByToMap(...args) {
+		console.warn('`goupByToMap` is deprecated. Please use `groupToMap` instead.');
+		return this.groupToMap(...args);
+	};
+}
 
 /**
  * @see https://github.com/tc39/proposal-array-from-async
@@ -148,5 +150,72 @@ if (! (Array.fromAsync instanceof Function)) {
 		}
 
 		return Array.from(arr, mapFn, thisArg);
+	};
+}
+
+/**
+ * @see https://github.com/tc39/proposal-array-equality/
+ */
+if (! (Array.prototype.equals instanceof Function)) {
+	Array.prototype.equals = function equals(arr) {
+		if (this === arr) {
+			return true;
+		} else if (! Array.isArray(arr)) {
+			return false;
+		} else if (this.length !== arr.length) {
+			return false;
+		} else {
+			return this.every((item, i) => {
+				const val = arr[i];
+				if (Array.isArray(item)) {
+					return Array.isArray(val) && item.equals(val);
+				} else {
+					return Object.is(item, val);
+				}
+			});
+		}
+	};
+}
+/**
+ * @see https://github.com/tc39/proposal-array-unique
+ */
+if (! (Array.prototype.uniqueBy instanceof Function)) {
+	Array.prototype.uniqueBy = function uniqueBy(arg) {
+		if (typeof arg === 'undefined') {
+			return [...new Set(this)];
+		} else if (typeof arg === 'string') {
+			const found = [];
+
+			return this.filter(obj => {
+				const key = obj[arg];
+				if (found.includes(key)) {
+					return false;
+				} else {
+					found.push(key);
+					return true;
+				}
+			});
+		} else if (arg instanceof Function) {
+			const found = [];
+
+			return this.filter((...args) => {
+				try {
+					const key = arg.apply(this, args);
+
+					if (typeof key !== 'string') {
+						return false;
+					} else if (found.includes(key)) {
+						return false;
+					} else {
+						found.push(key);
+						return true;
+					}
+				} catch(err) {
+					return false;
+				}
+			});
+		} else {
+			throw new TypeError('Not a valid argument for uniqueBy');
+		}
 	};
 }
