@@ -22,3 +22,4 @@ import './shims/set.js';
 import './shims/map.js';
 import './shims/weakMap.js';
 import './shims/window.js';
+import './shims/scheduler.js';
