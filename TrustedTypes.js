@@ -11,6 +11,8 @@ export const trustPolicies = ['empty#html', 'empty#script'];
  */
 export const supported = isSupported();
 
+let allowDuplicates = true;
+
 /**
  * [symbols description]
  * @type {Object}
@@ -280,7 +282,7 @@ export class TrustedTypeFactory extends EventTarget {
 	 * @param  {Function} createScriptURL               [description]
 	 */
 	createPolicy(name, { createHTML, createScript, createScriptURL }) {
-		if (! hasPolicy(name)) {
+		if (this.allowDuplicates || ! hasPolicy(name)) {
 			const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, { key: symbols.trustedKey });
 			this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', { policy, key: symbols.trustedKey }));
 
@@ -416,6 +418,18 @@ export class TrustedTypeFactory extends EventTarget {
 	 */
 	get _isPolyfill_() {
 		return true;
+	}
+
+	static get allowDuplicates() {
+		return allowDuplicates;
+	}
+
+	static set allowDuplicates(val) {
+		if (typeof val === 'boolean') {
+			allowDuplicates = val;
+		} else {
+			throw new TypeError('`allowDuplicates()` requires a boolean');
+		}
 	}
 }
 
