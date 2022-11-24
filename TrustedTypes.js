@@ -282,7 +282,7 @@ export class TrustedTypeFactory extends EventTarget {
 	 * @param  {Function} createScriptURL               [description]
 	 */
 	createPolicy(name, { createHTML, createScript, createScriptURL }) {
-		if (this.allowDuplicates || ! hasPolicy(name)) {
+		if (TrustedTypeFactory.allowDuplicates || ! hasPolicy(name)) {
 			const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, { key: symbols.trustedKey });
 			this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', { policy, key: symbols.trustedKey }));
 
