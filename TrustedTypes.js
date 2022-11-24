@@ -280,18 +280,14 @@ export class TrustedTypeFactory extends EventTarget {
 	 * @param  {Function} createScriptURL               [description]
 	 */
 	createPolicy(name, { createHTML, createScript, createScriptURL }) {
-		if (! hasPolicy(name)) {
-			const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, { key: symbols.trustedKey });
-			this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', { policy, key: symbols.trustedKey }));
+		const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, { key: symbols.trustedKey });
+		this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', { policy, key: symbols.trustedKey }));
 
-			if (policy.name === 'default') {
-				this[symbols.defaultPolicy] = policy;
-			}
-
-			return policy;
-		} else {
-			throw new DOMException(`TrustedTypePolicy ${name} already set`);
+		if (policy.name === 'default') {
+			this[symbols.defaultPolicy] = policy;
 		}
+
+		return policy;
 	}
 
 	/**
