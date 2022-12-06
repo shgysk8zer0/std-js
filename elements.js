@@ -204,3 +204,71 @@ export function createLink(href = null, {
 
 	return link;
 }
+
+export function createIframe(src, {
+	width = null,
+	height = null,
+	name = null,
+	id = null,
+	srcdoc = null,
+	loading = 'eager',
+	frameBorder = 0,
+	fetchPriority = 'auto',
+	sandbox = ['allow-scripts'],
+	allow = [],
+	referrerPolicy = REFERRER_POLICY,
+	classList = [],
+	data: dataset = {},
+	styles = {},
+} = {}) {
+	const iframe = document.createElement('iframe');
+	iframe.loading = loading;
+	iframe.fetchPriority = fetchPriority;
+	iframe.referrerPolicy = referrerPolicy;
+	iframe.frameBorder = frameBorder.toString();
+
+	if (typeof id === 'string') {
+		iframe.id = id;
+	}
+
+	if (typeof name === 'string') {
+		iframe.name = name;
+	}
+
+	if (Array.isArray(sandbox)) {
+		iframe.sandbox.add(...sandbox);
+	}
+
+	if (Array.isArray(classList) && classList.length !== 0) {
+		iframe.classList.add(...classList);
+	}
+
+	if (typeof height === 'number' && ! Number.isNaN(height)) {
+		iframe.height = height;
+	}
+
+	if (typeof width === 'number' && ! Number.isNaN(width)) {
+		iframe.width = width;
+	}
+
+	if (Array.isArray(allow) && allow.length !== 0) {
+		iframe.allow = allow.join(' ');
+	}
+
+	if (typeof srcdoc === 'string' && srcdoc.length !== 0) {
+		iframe.srcdoc = srcdoc;
+	} else if (srcdoc instanceof Document) {
+		iframe.srcdoc = srcdoc.documentElement.outerHTML.replace(/\n/g, '');
+	}
+
+	data([iframe], dataset);
+	css([iframe], styles);
+
+	if (typeof src === 'string' || src instanceof URL) {
+		iframe.src = src;
+	} else if (src instanceof Document) {
+		iframe.srcdoc = src.documentElement.outerHTML.replace(/\n/g,'');
+	}
+
+	return iframe;
+}
