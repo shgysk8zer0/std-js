@@ -1,4 +1,5 @@
 import { data, css } from './dom.js';
+import { REFERRER_POLICY } from './defaults.js';
 
 export function createScript(src, {
 	async = true,
@@ -123,7 +124,7 @@ export function createImage(src, {
 	if (typeof src === 'string' && src.length !== 0) {
 		img.src = src;
 	} else if (src instanceof URL) {
-		img.src = url.href;
+		img.src = src.href;
 	}
 
 	return img;

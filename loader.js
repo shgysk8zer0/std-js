@@ -1,5 +1,4 @@
-import { getDeferred } from './promises.js';
-import { listen, loaded } from './events.js';
+import { loaded } from './events.js';
 import { createScript, createImage, createLink } from './elements.js';
 
 /**
@@ -122,7 +121,7 @@ export async function loadStylesheet(href, {
 		title, nonce,
 	});
 
-	const promise = loaded(link);
+	const promise = loaded(link, { signal });
 
 	parent.append(link);
 
