@@ -3,7 +3,6 @@ import { addListener, listen, loaded as whenLoaded } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
 import { isHTML, isScriptURL, isTrustPolicy } from './trust.js';
 import { errorToEvent } from './utility.js';
-import { REFERRER_POLICY } from './defaults.js';
 
 export const readyStates = ['loading', 'interactive', 'complete'];
 

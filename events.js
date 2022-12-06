@@ -26,7 +26,7 @@ export async function loaded(target, {
 			 * <img loading="lazy"> will not load until appended
 			 */
 			resolve(target);
-		} else if (target instanceof HTMLImageElement && img.decode instanceof Function) {
+		} else if (target instanceof HTMLImageElement && target.decode instanceof Function) {
 			await target.decode();
 			return target;
 		} else {
