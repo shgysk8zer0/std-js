@@ -1,77 +1,6 @@
 import { getDeferred } from './promises.js';
-import { listen } from './events.js';
-
-function getSrcAttr(target) {
-	if (! (target instanceof Element)) {
-		throw new TypeError('Target must be an element');
-	} else if ('src' in target) {
-		return `src="${target.src}"`;
-	} else if ('href' in target) {
-		return `href="${target.href}"`;
-	} else {
-		return '';
-	}
-}
-
-export async function load(target, parent, srcAttr, value, { signal } = {}) {
-	if (signal instanceof AbortSignal) {
-		signal.throwIfAborted();
-	}
-
-	if (parent instanceof Node) {
-		const promise = loaded(target, { signal });
-		target[srcAttr] = value;
-		parent.append(target);
-		return await promise;
-	} else {
-		target[srcAttr] = value;
-		return target;
-	}
-}
-
-export async function loaded(target, { signal } = {}) {
-	const { resolve, reject, promise } = getDeferred();
-
-	if (signal instanceof AbortSignal && signal.aborted) {
-		reject(signal.error);
-	} else {
-		const controller = new AbortController();
-		const opts = { once: true, signal: controller.signal };
-
-		const load = function load() {
-			resolve(target);
-			controller.abort();
-		};
-
-		const error = function error(err) {
-			if (err.error instanceof Error) {
-				reject(err.error);
-				controller.abort(err.error);
-			} else {
-				const error = new DOMException(`Error loading <${target.tagName.toLowerCase()} ${getSrcAttr(target)}>`);
-				reject(error);
-				controller.abort(error);
-			}
-		};
-
-		if (signal instanceof AbortSignal) {
-			signal.addEventListener('abort', ({ target: { reason }}) => {
-				reject(reason);
-				controller.abort(reason);
-			},{ signal: controller.signal });
-		}
-
-		if (target instanceof HTMLScriptElement && target.noModule && HTMLScriptElement.supports('module')) {
-			resolve(target);
-		} else if (target instanceof HTMLLinkElement && target.disabled === true) {
-			resolve(target);
-		} else {
-			listen(target, 'load', load, opts);
-			listen(target, 'error', error, opts);
-		}
-	}
-	return await promise;
-}
+import { listen, loaded } from './events.js';
+import { createScript, createImage, createLink } from './elements.js';
 
 /**
  * @deprecated
@@ -81,87 +10,12 @@ export async function loadLink(...args) {
 	return createLink(...args);
 }
 
-export async function createLink(href = null, {
-	rel = [],
-	type = null,
-	as = null,
-	crossOrigin = 'anonymous',
-	referrerPolicy = 'no-referrer',
-	importance = 'auto',
-	integrity = null,
-	nonce = null,
-	media = 'all',
-	disabled = false,
-	title = null,
-	sizes = [],
-}) {
-	const link = document.createElement('link');
-
-	if (Array.isArray(rel)) {
-		link.relList.add(...rel);
-	} else if (typeof rel === 'string') {
-		link.relList.add(rel);
-	}
-
-	if (typeof type === 'string') {
-		link.type = type;
-	}
-
-	if (typeof as === 'string') {
-		link.as = as;
-	}
-
-	if (typeof crossOrigin === 'string') {
-		link.crossOrigin = crossOrigin;
-	}
-
-	if (typeof referrerPolicy === 'string') {
-		link.referrerPolicy = referrerPolicy;
-	}
-
-	if (typeof importance === 'string') {
-		link.importance = importance;
-	}
-
-	if (typeof integrity === 'string') {
-		link.integrity = integrity;
-	}
-
-	if (typeof nonce === 'string') {
-		link.nonce = nonce;
-	}
-
-	if (typeof media === 'string') {
-		link.media = media;
-	}
-
-	if (typeof href === 'string') {
-		link.href = href;
-	}
-
-	if (disabled) {
-		link.disabled = true;
-	}
-
-	if (typeof title === 'string') {
-		link.title = title;
-	}
-
-	if (Array.isArray(sizes) && sizes.length !== 0) {
-		link.sizes.add(...sizes);
-	} else if (typeof sizes === 'string') {
-		link.sizes.add(sizes);
-	}
-
-	return link;
-}
-
 export async function preload(href, {
 	as = 'fetch',
 	type = null,
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
-	importance = 'auto',
+	fetchPriority = 'auto',
 	media = null,
 	integrity = null,
 	signal,
@@ -170,9 +24,9 @@ export async function preload(href, {
 		signal.throwIfAborted();
 	}
 
-	const link = await createLink(href, {
+	const link = createLink(href, {
 		rel: ['preload'], as, type, crossOrigin, referrerPolicy,
-		importance, media, integrity,
+		fetchPriority, media, integrity,
 	});
 
 	document.head.append(link);
@@ -188,7 +42,7 @@ export async function preconnect(href, {
 		signal.throwIfAborted();
 	}
 
-	const link = await createLink(href, { rel: ['preconnect'], crossOrigin, referrerPolicy });
+	const link = createLink(href, { rel: ['preconnect'], crossOrigin, referrerPolicy });
 	document.head.append(link);
 	return link;
 }
@@ -202,7 +56,7 @@ export async function dnsPrefetch(href, {
 		signal.throwIfAborted();
 	}
 
-	const link = await createLink(href, { rel: ['dsn-prefetch'], crossOrigin, referrerPolicy });
+	const link = createLink(href, { rel: ['dsn-prefetch'], crossOrigin, referrerPolicy });
 	document.head.append(link);
 	return link;
 }
@@ -223,37 +77,31 @@ export async function loadScript(src, {
 	async = true,
 	defer = false,
 	noModule = false,
-	type = 'text/javascript',
+	type = 'application/javascript',
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
 	integrity = null,
 	nonce = null,
+	fetchPriority = 'auto',
 	parent = document.head,
 	policy,
 	signal,
+	data = {},
 } = {}) {
-	const script = document.createElement('script');
-	script.async = async;
-	script.defer = defer;
-	script.type = type;
-	script.noModule = noModule;
-	script.crossOrigin = crossOrigin;
-	script.referrerPolicy = referrerPolicy;
+	const script = createScript(src, {
+		async, defer, noModule, type, crossOrigin, referrerPolicy, integrity,
+		nonce, fetchPriority, policy, data,
+	});
 
-	if (typeof integrity === 'string') {
-		script.integrity = integrity;
-	}
+	const promise = loaded(script, { signal });
 
-	if (typeof nonce === 'string') {
-		script.nonce = nonce;
-	}
-	if (policy != null && policy.createScriptURL instanceof Function) {
-		await load(script, parent, 'src', policy.createScriptURL(src), { signal });
+	if (parent instanceof Element) {
+		parent.append(script);
 	} else {
-		await load(script, parent, 'src', src, { signal });
+		document.head.append(script);
 	}
 
-	return script;
+	return await promise;
 }
 
 export async function loadStylesheet(href, {
@@ -263,24 +111,22 @@ export async function loadStylesheet(href, {
 	referrerPolicy = 'no-referrer',
 	integrity = null,
 	disabled = false,
-	importance = 'auto',
+	fetchPriority = 'auto',
 	title = null,
 	nonce = null,
 	parent = document.head,
 	signal,
 } = {}) {
-	const link = await createLink(null, {
-		rel, media, crossOrigin, referrerPolicy, integrity, disabled, importance,
+	const link = await createLink(href, {
+		rel, media, crossOrigin, referrerPolicy, integrity, disabled, fetchPriority,
 		title, nonce,
 	});
-	/* Do not wait for load event if disabled */
-	if (disabled) {
-		load(link, parent, 'href', href, { signal });
-		return link;
-	} else {
-		await load(link, parent, 'href', href,{ signal });
-		return link;
-	}
+
+	const promise = loaded(link);
+
+	parent.append(link);
+
+	return await promise;
 }
 
 export async function loadImage(src, {
@@ -288,7 +134,7 @@ export async function loadImage(src, {
 	decoding = 'async',
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
-	importance = 'auto',
+	fetchPriority = 'auto',
 	sizes = null,
 	srcset = null,
 	height = undefined,
@@ -296,6 +142,7 @@ export async function loadImage(src, {
 	slot = null,
 	part = [],
 	classes = [],
+	classList = [],
 	role = 'img',
 	alt = '',
 	signal,
@@ -304,83 +151,16 @@ export async function loadImage(src, {
 		signal.throwIfAborted();
 	}
 
-	const img = new Image(width, height);
-
-	if (typeof loading === 'string') {
-		img.loading = loading;
-	}
-
-	if (typeof decoding === 'string') {
-		img.decoding = decoding;
-	}
-
-	if (typeof crossOrigin === 'string') {
-		img.crossOrigin = crossOrigin;
-	}
-
-	if (typeof referrerPolicy === 'string') {
-		img.referrerPolicy = referrerPolicy;
-	}
-
-	if (typeof importance === 'string') {
-		img.importance = importance;
-	}
-
-	if (typeof role === 'string') {
-		img.role = role;
-	}
-
 	if (Array.isArray(classes) && classes.length !== 0) {
-		img.classList.add(...classes);
+		console.warn('`classes` is deprecated. Please use `classList` instead.');
 	}
 
-	if (typeof srcset === 'object' && srcset !== null) {
-		img.srcset = Object.entries(srcset).map(([size, src]) => `${src} ${size}`).join(', ');
-	} else if (Array.isArray(srcset) && srcset.length !== 0) {
-		img.srcset = srcset.join(', ');
-	} else if (typeof srcset === 'string') {
-		img.srcset = srcset;
-	}
+	const img = createImage(src, {
+		loading, decoding, crossOrigin, referrerPolicy, sizes, srcset, height,
+		width, slot, part, classList: [...classList, ...classes], role, alt, fetchPriority,
+	});
 
-	if (Array.isArray(sizes) && sizes.length !== 0) {
-		img.sizes = sizes.join(', ');
-	} else if (typeof sizes === 'string') {
-		img.sizes = sizes;
-	}
+	await loaded(img, { signal });
 
-	if (typeof alt === 'string') {
-		img.alt = alt;
-	}
-
-	if (typeof slot === 'string') {
-		img.slot = slot;
-	}
-
-	if (Array.isArray(part) && part.length !== 0 && 'part' in img) {
-		img.part.add(...part);
-	} else if (typeof part === 'string' && 'part' in img) {
-		img.part.add(part);
-	}
-
-	/**
-	 * `lazy` would make the image not start to load until appended.
-	 * For this reason, we cannot wait for the `load` event because it will never occur
-	 */
-	if (loading === 'lazy') {
-		img.src = src;
-		return img;
-	} else if (img.decode instanceof Function) {
-		try {
-			img.src = src;
-			await img.decode();
-			return img;
-		} catch(err) {
-			console.error(err);
-			throw new DOMException(`Error loading image: ${img.src}`);
-		}
-	} else {
-		const prom = loaded(img);
-		img.src = src;
-		return prom;
-	}
+	return img;
 }

@@ -1,8 +1,9 @@
 import { signalAborted } from './abort.js';
-import { addListener, listen } from './events.js';
+import { addListener, listen, loaded as whenLoaded } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
 import { isHTML, isScriptURL, isTrustPolicy } from './trust.js';
 import { errorToEvent } from './utility.js';
+import { REFERRER_POLICY } from './defaults.js';
 
 export const readyStates = ['loading', 'interactive', 'complete'];
 
@@ -703,50 +704,26 @@ export function mutate(what, callback, options = {}) {
 	}
 }
 
+/**
+ * @Deprecated
+ */
 export async function scriptLoaded(script) {
-	const { resolve, reject, promise } = getDeferred();
-
-	if (! (script instanceof HTMLScriptElement)) {
-		reject(new TypeError('Expected a <script>'));
-	} else {
-		const controller = new AbortController();
-		const signal = controller.signal;
-
-		addListener(script, 'load', () => {
-			resolve();
-			controller.abort();
-		}, { signal });
-
-		addListener(script, 'error', () => {
-			reject(new DOMException(`Error loading <script src="${script.src}">`));
-			controller.abort();
-		}, { signal });
-
-		return promise;
-	}
+	console.warn('`scriptLoaded()` is deprecated. Use `loaded()` from `events.js` instead.');
+	/*
+	 * `loaded()` aliased as `whenLoaded()`
+	 */
+	return await whenLoaded(script);
 }
 
+/**
+ * @Deprecated
+ */
 export async function linkLoaded(link) {
-	const { resolve, reject, promise } = getDeferred();
-
-	if (! (link instanceof HTMLLinkElement)) {
-		reject(new TypeError('Expected a <link>'));
-	} else {
-		const controller = new AbortController();
-		const signal = controller.signal;
-
-		addListener(link, 'load', () => {
-			resolve();
-			controller.abort();
-		}, { signal });
-
-		addListener(link, 'error', () => {
-			reject(new DOMException(`Error loading <link src="${link.href}">`));
-			controller.abort();
-		}, { signal });
-
-		return promise;
-	}
+	console.warn('`linkLoaded()` is deprecated. Use `loaded()` from `events.js` instead.');
+	/*
+	 * `loaded()` aliased as `whenLoaded()`
+	 */
+	return await whenLoaded(link);
 }
 
 export function stripComments(node) {

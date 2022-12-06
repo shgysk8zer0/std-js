@@ -3,6 +3,65 @@ import { signalAborted } from './abort.js';
 import { getDeferred } from './promises.js';
 import { debounce as db, throttle } from './utility.js';
 
+export async function loaded(target, {
+	signal: passedSignal,
+	success = 'load',
+	error = 'error',
+} = {}) {
+	return await new Promise(async (resolve, reject) => {
+		if (passedSignal instanceof AbortSignal && passedSignal.aborted) {
+			reject(passedSignal.reason);
+		} else if (target instanceof HTMLScriptElement && target.noModule && HTMLScriptElement.supports('module')) {
+			/**
+			 * <script nomodule> will never load
+			 */
+			resolve(target);
+		} else if (target instanceof HTMLLinkElement && target.disabled) {
+			/**
+			 * <link disabled> will never load
+			 */
+			resolve(target);
+		} else if (target instanceof HTMLImageElement && target.loading === 'lazy' && !(target.parentElement instanceof Element)) {
+			/**
+			 * <img loading="lazy"> will not load until appended
+			 */
+			resolve(target);
+		} else if (target instanceof HTMLImageElement && img.decode instanceof Function) {
+			await target.decode();
+			return target;
+		} else {
+			const controller = new AbortController();
+			const signal = passedSignal instanceof AbortSignal ? AbortSignal.any([
+				passedSignal,
+				controller.signal,
+			]) : passedSignal;
+
+			listen(target, success, ({ target }) => {
+				resolve(target);
+				controller.abort();
+			}, { once: true, signal });
+
+			listen(target, error, ({ target: { tagName, src, href} }) => {
+				const error = new Error(`Failed to load <${tagName.toLowerCase()}>`, {
+					cause: new Error(`Request to ${src || href} failed`),
+				});
+
+				reject(error);
+				controller.abort(error);
+			}, { once: true, signal });
+
+			if (passedSignal instanceof AbortSignal) {
+				listen(passedSignal, 'abort', ({ target: { reason }}) => {
+					if (! controller.signal.aborted) {
+						reject(reason);
+						controller.abort(reason);
+					}
+				}, { once: true, signal: controller.signal });
+			}
+		}
+	});
+}
+
 export function getEventFeatures() {
 	const el = document.createElement('div');
 	const eventFeatures = {
