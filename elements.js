@@ -206,10 +206,10 @@ export function createLink(href = null, {
 }
 
 export function createIframe(src, {
-	width = null,
-	height = null,
 	name = null,
 	id = null,
+	width = null,
+	height = null,
 	srcdoc = null,
 	loading = 'eager',
 	frameBorder = 0,
@@ -253,6 +253,28 @@ export function createIframe(src, {
 
 	if (Array.isArray(allow) && allow.length !== 0) {
 		iframe.allow = allow.join(' ');
+	} else if (typeof allow === 'object' && ! Object.is(allow, null)) {
+		const quoted = ['self', 'none'];
+
+		iframe.allow = Object.entries(allow).map(([key, val]) => {
+			if (Array.isArray(val)) {
+				const vals = val.map(item => {
+					if (quoted.includes(item)) {
+						return `'${item}'`;
+					} else {
+						return item;
+					}
+				}).join(' ');
+
+				return `${key} ${vals}`;
+			} else if (quoted.includes(val)) {
+				return `${key} '${val}'`;
+			} else {
+				return `${key} ${val}`;
+			}
+		}).join('; ') + ';';
+	} else if (typeof allow === 'string') {
+		iframe.allow = allow;
 	}
 
 	if (typeof srcdoc === 'string' && srcdoc.length !== 0) {
