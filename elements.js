@@ -220,6 +220,9 @@ export function createIframe(src, {
 	classList = [],
 	data: dataset = {},
 	styles = {},
+	part = [],
+	slot = null,
+	title = null,
 } = {}) {
 	const iframe = document.createElement('iframe');
 	iframe.loading = loading;
@@ -234,6 +237,14 @@ export function createIframe(src, {
 	if (typeof name === 'string') {
 		iframe.name = name;
 	}
+	
+	if (typeof title === 'string') {
+		iframe.title = title;
+	}
+	
+	if (typeof slot === 'string') {
+		iframe.slot = slot;
+	}
 
 	if (Array.isArray(sandbox)) {
 		iframe.sandbox.add(...sandbox);
@@ -241,6 +252,10 @@ export function createIframe(src, {
 
 	if (Array.isArray(classList) && classList.length !== 0) {
 		iframe.classList.add(...classList);
+	}
+	
+	if (Array.isArray(part) && part.length !== 0 && 'part' in iframe) {
+		iframe.part.add(...part);
 	}
 
 	if (typeof height === 'number' && ! Number.isNaN(height)) {
