@@ -2,7 +2,7 @@ import { createIframe } from '../elements.js';
 
 export function createKRVMaps({
 	width, height, markers = [], loading = 'lazy',
-	latitude = NaN, longitude = NaN, popup, tiles,
+	latitude = NaN, longitude = NaN, popup, tiles, target,
 	maxZoom = NaN, minZoom = NaN, zoom = NaN, zoomControl = false,
 } = {}) {
 	const src = new URL('https://maps.kernvalley.us/embed');
@@ -19,7 +19,9 @@ export function createKRVMaps({
 		src.searchParams.set('latitude', latitude);
 	}
 
-	if (typeof popup === 'string' && popup.length !== 0) {
+	if (typeof target === 'string') {
+		src.hash = `#${target}`;
+	}else if (typeof popup === 'string' && popup.length !== 0) {
 		src.searchParams.set('popup', popup);
 	} else if (popup instanceof HTMLElement) {
 		src.searchParams.set('popup', popup.outerHTML);
