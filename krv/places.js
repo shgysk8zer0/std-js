@@ -36,6 +36,8 @@ export const getActivities = async ({ signal } = {}) => getJSON(activities, { si
 
 export const getBars = async ({ signal } = {}) => getJSON(bars, { signal });
 
+export const getBusinesses = async ({ signal } = {}) => getJSON(businesses, { signal });
+
 export const getCafes = async ({ signal } = {}) => getJSON(cafes, { signal });
 
 export const getCampgrounds = async ({ signal } = {}) => getJSON(campgrounds, { signal });
