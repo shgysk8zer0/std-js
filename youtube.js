@@ -12,6 +12,6 @@ export function createYouTubeEmbed(video, {
 	const src = cookies ? new URL(`./${video}`, cookie) : new URL(`./${video}`, noCookie);
 
 	return createIframe(src, {
-		width, height, loading, title, fetchPriority, referrerPolicy, allow, sandbox, loading,
+		width, height, loading, title, fetchPriority, referrerPolicy, allow, sandbox,
 	});
 }
