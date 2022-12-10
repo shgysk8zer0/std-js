@@ -282,6 +282,9 @@ export function createIframe(src, {
 
 	if (Array.isArray(allow) && allow.length !== 0) {
 		iframe.allow = allow.join(' ');
+		if (allow.includes('fullscreen')) {
+			iframe.allowFullscreen = true;
+		}
 	} else if (isObject(allow)) {
 		const quoted = ['self', 'none'];
 
@@ -302,6 +305,10 @@ export function createIframe(src, {
 				return `${key} ${val}`;
 			}
 		}).join('; ') + ';';
+
+		if ('fullscreen' in allow) {
+			iframe.allowFullscreen = true;
+		}
 	} else if (typeof allow === 'string') {
 		iframe.allow = allow;
 	}
