@@ -44,7 +44,7 @@ export function getScript(site, {
 	fetchPriority = FETCH_PRIORITY,
 } = {}) {
 	return createScript(getSiteURL(site), {
-		referrerPolicy, type, nonce, noModule,policy, fetchPriority, data: { timestamp },
+		referrerPolicy, type, nonce, noModule,policy, fetchPriority, dataset: { timestamp },
 	});
 }
 
