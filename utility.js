@@ -8,6 +8,10 @@ export function getURLResolver({ base = document.baseURI, path = './' } = {}) {
 	return path => new URL(path, url).href;
 }
 
+export function isObject(thing) {
+	return typeof thing === 'object' && ! Object.is(thing, null) && ! Array.isArray(thing);
+}
+
 export function isNull(val) {
 	return Object.is(val, null);
 }
