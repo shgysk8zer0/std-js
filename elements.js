@@ -1,4 +1,6 @@
 import { data, css } from './dom.js';
+import { isTrustPolicy } from './trust.js';
+import { isObject } from './utility.js';
 import { REFERRER_POLICY } from './defaults.js';
 
 export function createScript(src, {
@@ -11,7 +13,7 @@ export function createScript(src, {
 	referrerPolicy = REFERRER_POLICY,
 	noModule = false,
 	fetchPriority = 'auto',
-	data: dataset = {},
+	dataset = null,
 	policy = null,
 } = {}) {
 	const script = document.createElement('script');
@@ -31,12 +33,14 @@ export function createScript(src, {
 		script.nonce = nonce;
 	}
 
-	data(script, dataset);
+	if (isObject(dataset)) {
+		data(script, dataset);
+	}
 
-	if (Object.is(policy, null) || !(policy.createScriptURL instanceof Function)) {
-		script.src = src;
-	} else {
+	if (isTrustPolicy(policy)) {
 		script.src = policy.createScriptURL(src);
+	} else {
+		script.src = src;
 	}
 
 	return script;
@@ -61,8 +65,8 @@ export function createImage(src, {
 	slot = null,
 	part = [],
 	classList = [],
-	data: dataset = {},
-	styles = {},
+	dataset = null,
+	styles = null,
 } = {}) {
 	const img = new Image(width, height);
 	img.alt = alt;
@@ -104,7 +108,7 @@ export function createImage(src, {
 		img.classList.add(...classList);
 	}
 
-	if (typeof srcset === 'object' && srcset !== null) {
+	if (isObject(srcset)) {
 		img.srcset = Object.entries(srcset).map(([size, src]) => `${src} ${size}`).join(', ');
 	} else if (Array.isArray(srcset) && srcset.length !== 0) {
 		img.srcset = srcset.join(', ');
@@ -118,8 +122,13 @@ export function createImage(src, {
 		img.sizes = sizes;
 	}
 
-	data([img], dataset);
-	css([img], styles);
+	if (isObject(dataset)) {
+		data([img], dataset);
+	}
+
+	if (isObject(styles)) {
+		css([img], styles);
+	}
 
 	if (typeof src === 'string' && src.length !== 0) {
 		img.src = src;
@@ -141,6 +150,7 @@ export function createLink(href = null, {
 	nonce = null,
 	media = 'all',
 	disabled = false,
+	dataset = null,
 	title = null,
 	sizes = [],
 }) {
@@ -202,6 +212,10 @@ export function createLink(href = null, {
 		link.sizes.add(sizes);
 	}
 
+	if (isObject(dataset)) {
+		data(link, dataset);
+	}
+
 	return link;
 }
 
@@ -218,8 +232,8 @@ export function createIframe(src, {
 	allow = [],
 	referrerPolicy = REFERRER_POLICY,
 	classList = [],
-	data: dataset = {},
-	styles = {},
+	dataset = null,
+	styles = null,
 	part = [],
 	slot = null,
 	title = null,
@@ -237,11 +251,11 @@ export function createIframe(src, {
 	if (typeof name === 'string') {
 		iframe.name = name;
 	}
-	
+
 	if (typeof title === 'string') {
 		iframe.title = title;
 	}
-	
+
 	if (typeof slot === 'string') {
 		iframe.slot = slot;
 	}
@@ -253,7 +267,7 @@ export function createIframe(src, {
 	if (Array.isArray(classList) && classList.length !== 0) {
 		iframe.classList.add(...classList);
 	}
-	
+
 	if (Array.isArray(part) && part.length !== 0 && 'part' in iframe) {
 		iframe.part.add(...part);
 	}
@@ -268,7 +282,7 @@ export function createIframe(src, {
 
 	if (Array.isArray(allow) && allow.length !== 0) {
 		iframe.allow = allow.join(' ');
-	} else if (typeof allow === 'object' && ! Object.is(allow, null)) {
+	} else if (isObject(allow)) {
 		const quoted = ['self', 'none'];
 
 		iframe.allow = Object.entries(allow).map(([key, val]) => {
@@ -298,8 +312,13 @@ export function createIframe(src, {
 		iframe.srcdoc = srcdoc.documentElement.outerHTML.replace(/\n/g, '');
 	}
 
-	data([iframe], dataset);
-	css([iframe], styles);
+	if (isObject(dataset)) {
+		data([iframe], dataset);
+	}
+
+	if (isObject(styles)) {
+		css([iframe], styles);
+	}
 
 	if (typeof src === 'string' || src instanceof URL) {
 		iframe.src = src;
