@@ -69,7 +69,7 @@ export function createKRVEvents({ theme, source, width, height, loading = 'lazy'
 	});
 }
 
-export function createWFDEvents({ theme, source, width, height, loading = 'lazy' } = {}) {
+export function createWFDEvents({ theme, source, width, height, loading = 'lazy', images = false } = {}) {
 	const src = new URL('https://whiskeyflatdays.com/embed/');
 
 	if (typeof theme === 'string') {
@@ -78,6 +78,10 @@ export function createWFDEvents({ theme, source, width, height, loading = 'lazy'
 
 	if (typeof source === 'string') {
 		src.searchParams.set('source', source);
+	}
+	
+	if (images) {
+		src.searchParams.set('images', '');
 	}
 
 	return createIframe(src, {
