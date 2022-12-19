@@ -102,7 +102,7 @@ export function createWFDEvents({
 	if (typeof source === 'string') {
 		src.searchParams.set('source', source);
 	}
-	
+
 	if (images) {
 		src.searchParams.set('images', '');
 	}
