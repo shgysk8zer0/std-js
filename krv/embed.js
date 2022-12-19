@@ -1,15 +1,27 @@
 import { createIframe } from '../elements.js';
 
 export function createKRVMaps({
-	width, height, markers = [], loading = 'lazy',
+	width, height, markers = [], loading = 'lazy', locate, fullscreen,
 	latitude = NaN, longitude = NaN, popup, tiles, target,
 	maxZoom = NaN, minZoom = NaN, zoom = NaN, zoomControl = false,
+	fetchPriority = 'auto', title, id, classList, referrerPolicy = 'no-referrer',
 	styles, dataset, slot, part,
 } = {}) {
 	const src = new URL('https://maps.kernvalley.us/embed');
+	const allow = [];
 
 	if (Array.isArray(markers) && markers.length !== 0) {
 		src.searchParams.set('markers', markers.join('|'));
+	}
+
+	if (locate) {
+		src.searchParams.set('locate', '');
+		allow.push('geolocation');
+	}
+
+	if (fullscreen) {
+		src.searchParams.set('fullscreen', '');
+		allow.push('fullscreen');
 	}
 
 	if (! Number.isNaN(longitude)) {
@@ -49,11 +61,17 @@ export function createKRVMaps({
 	}
 
 	return createIframe(src, {
-		height, width, referrerPolicy: 'no-referrer', loading, styles, dataset, slot, part,
+		height, width, referrerPolicy, loading, title, classList, id,
+		fetchPriority, allow, sandbox: ['allow-scripts', 'allow-popups'],
+		styles, dataset, slot, part,
 	});
 }
 
-export function createKRVEvents({ theme, source, width, height, loading = 'lazy', styles, dataset, slot, part } = {}) {
+export function createKRVEvents({
+	theme, source, width, height, loading = 'lazy',
+	fetchPriority = 'auto', title, id, classList, referrerPolicy = 'no-referrer',
+	styles, dataset, slot, part,
+} = {}) {
 	const src = new URL('https://events.kernvalley.us/embed/');
 
 	if (typeof theme === 'string') {
@@ -65,12 +83,16 @@ export function createKRVEvents({ theme, source, width, height, loading = 'lazy'
 	}
 
 	return createIframe(src, {
-		height, width, referrerPolicy: 'no-referrer', styles, dataset,
-		sandbox: ['allow-scripts', 'allow-popups'], loading, slot, part,
+		height, width, referrerPolicy, title, id, classList, fetchPriority, loading,
+		sandbox: ['allow-scripts', 'allow-popups'], styles, dataset, slot, part,
 	});
 }
 
-export function createWFDEvents({ theme, source, width, height, loading = 'lazy', images = false, styles, dataset, slot, part, } = {}) {
+export function createWFDEvents({
+	theme, source, width, height, loading = 'lazy', images = false,
+	fetchPriority = 'auto', title, id, classList, referrerPolicy = 'no-referrer',
+	styles, dataset, slot, part,
+} = {}) {
 	const src = new URL('https://whiskeyflatdays.com/embed/');
 
 	if (typeof theme === 'string') {
@@ -80,13 +102,13 @@ export function createWFDEvents({ theme, source, width, height, loading = 'lazy'
 	if (typeof source === 'string') {
 		src.searchParams.set('source', source);
 	}
-	
+
 	if (images) {
 		src.searchParams.set('images', '');
 	}
 
 	return createIframe(src, {
-		height, width, referrerPolicy: 'no-referrer',
-		sandbox: ['allow-scripts', 'allow-popups'], loading, styles, dataset, slot, part,
+		height, width, referrerPolicy, fetchPriority, loading, title, classList, id,
+		sandbox: ['allow-scripts', 'allow-popups'], styles, dataset, slot, part,
 	});
 }
