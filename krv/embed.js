@@ -1,14 +1,26 @@
 import { createIframe } from '../elements.js';
 
 export function createKRVMaps({
-	width, height, markers = [], loading = 'lazy',
+	width, height, markers = [], loading = 'lazy', locate, fullscreen,
 	latitude = NaN, longitude = NaN, popup, tiles, target,
 	maxZoom = NaN, minZoom = NaN, zoom = NaN, zoomControl = false,
+	fetchPriority = 'auto', title, id, classList, referrerPolicy = 'no-referrer',
 } = {}) {
 	const src = new URL('https://maps.kernvalley.us/embed');
+	const allow = [];
 
 	if (Array.isArray(markers) && markers.length !== 0) {
 		src.searchParams.set('markers', markers.join('|'));
+	}
+
+	if (locate) {
+		src.searchParams.set('locate', '');
+		allow.push('geolocation');
+	}
+
+	if (fullscreen) {
+		src.searchParams.set('fullscreen', '');
+		allow.push('fullscreen');
 	}
 
 	if (! Number.isNaN(longitude)) {
@@ -48,11 +60,15 @@ export function createKRVMaps({
 	}
 
 	return createIframe(src, {
-		height, width, referrerPolicy: 'no-referrer', loading,
+		height, width, referrerPolicy, loading, title, classList, id,
+		fetchPriority, allow, sandbox: ['allow-scripts', 'allow-popups'],
 	});
 }
 
-export function createKRVEvents({ theme, source, width, height, loading = 'lazy' } = {}) {
+export function createKRVEvents({
+	theme, source, width, height, loading = 'lazy',
+	fetchPriority = 'auto', title, id, classList, referrerPolicy = 'no-referrer',
+} = {}) {
 	const src = new URL('https://events.kernvalley.us/embed/');
 
 	if (typeof theme === 'string') {
@@ -64,12 +80,15 @@ export function createKRVEvents({ theme, source, width, height, loading = 'lazy'
 	}
 
 	return createIframe(src, {
-		height, width, referrerPolicy: 'no-referrer',
+		height, width, referrerPolicy, title, id, classList, fetchPriority,
 		sandbox: ['allow-scripts', 'allow-popups'], loading,
 	});
 }
 
-export function createWFDEvents({ theme, source, width, height, loading = 'lazy', images = false } = {}) {
+export function createWFDEvents({
+	theme, source, width, height, loading = 'lazy', images = false,
+	fetchPriority = 'auto', title, id, classList, referrerPolicy = 'no-referrer',
+} = {}) {
 	const src = new URL('https://whiskeyflatdays.com/embed/');
 
 	if (typeof theme === 'string') {
@@ -85,7 +104,7 @@ export function createWFDEvents({ theme, source, width, height, loading = 'lazy'
 	}
 
 	return createIframe(src, {
-		height, width, referrerPolicy: 'no-referrer',
+		height, width, referrerPolicy, fetchPriority, title, classList, id,
 		sandbox: ['allow-scripts', 'allow-popups'], loading,
 	});
 }
