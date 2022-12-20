@@ -9,6 +9,7 @@ export function createKRVMaps({
 } = {}) {
 	const src = new URL('https://maps.kernvalley.us/embed');
 	const allow = [];
+	const sandbox = ['allow-scripts', 'allow-popups'];
 
 	if (Array.isArray(markers) && markers.length !== 0) {
 		src.searchParams.set('markers', markers.join('|'));
@@ -22,6 +23,8 @@ export function createKRVMaps({
 	if (fullscreen) {
 		src.searchParams.set('fullscreen', '');
 		allow.push('fullscreen');
+		/* Unfortunately, `allow-same-origin` is necessary for fullscreen */
+		sandbox.push('allow-same-origin');
 	}
 
 	if (! Number.isNaN(longitude)) {
@@ -62,8 +65,7 @@ export function createKRVMaps({
 
 	return createIframe(src, {
 		height, width, referrerPolicy, loading, title, classList, id,
-		fetchPriority, allow, sandbox: ['allow-scripts', 'allow-popups'],
-		styles, dataset, slot, part,
+		fetchPriority, allow, sandbox, styles, dataset, slot, part,
 	});
 }
 
