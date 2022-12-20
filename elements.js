@@ -281,7 +281,8 @@ export function createIframe(src, {
 	}
 
 	if (Array.isArray(allow) && allow.length !== 0) {
-		iframe.allow = allow.join(' ');
+		iframe.allow = allow.join('; ');
+
 		if (allow.includes('fullscreen')) {
 			iframe.allowFullscreen = true;
 		}
@@ -296,7 +297,7 @@ export function createIframe(src, {
 					} else {
 						return item;
 					}
-				}).join(' ');
+				}).join('; ');
 
 				return `${key} ${vals}`;
 			} else if (quoted.includes(val)) {
