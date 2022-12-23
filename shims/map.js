@@ -11,7 +11,7 @@ if (! (Map.prototype.emplace instanceof Function)) {
 			const value = update.call(this, existing, key, this);
 
 			if (value !== existing) {
-				this.set(key, existing);
+				this.set(key, value);
 			}
 
 			return value;
