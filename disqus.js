@@ -1,4 +1,4 @@
-import { createScript } from './dom.js';
+import { createScript } from './elements.js';
 import { loaded } from './events.js';
 
 const TYPE = 'application/javascript';
