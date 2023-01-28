@@ -1,7 +1,82 @@
-import { data, css } from './dom.js';
+import { data, attr, css } from './dom.js';
+import { listen } from './events.js';
 import { isTrustPolicy } from './trust.js';
 import { isObject, isNullish } from './utility.js';
 import { REFERRER_POLICY } from './defaults.js';
+
+export function createElement(tag, {
+	id        = null,
+	classList = [],
+	hidden    = false,
+	dataset   = {},
+	part      = [],
+	slot      = null,
+	is        = null,
+	styles    = {},
+	children  = [],
+	text = null,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
+	...attrs
+} = {}) {
+	if (typeof tag !== 'string') {
+		throw new TypeError('tag must be a string');
+	} else {
+		const el = document.createElement(tag, { is });
+		el.hidden = hidden;
+
+		if (typeof id === 'string') {
+			el.id = id;
+		}
+
+		if (Array.isArray(classList) && classList.length !== 0) {
+			el.classList.add(...classList);
+		}
+
+		if (isObject(dataset)) {
+			data([el], dataset);
+		}
+
+		if (Array.isArray(part) && part.length !== 0) {
+			el.part.add(...part);
+		} else if(typeof part === 'string') {
+			el.part.add(part);
+		}
+
+		if (typeof slot === 'string') {
+			el.slot = slot;
+		}
+
+		if (isObject(styles)) {
+			css([el], styles);
+		}
+
+		Object.entries(events).forEach(([event, callback]) => {
+			listen(el, event, callback, { capture, passive, once, signal });
+		});
+
+		if (typeof text === 'string') {
+			el.textContent = text;
+		}
+
+		if (Array.isArray(children)) {
+			el.append(...children);
+		}
+
+		if (typeof is === 'string') {
+			attrs.is = is;
+		}
+
+		attr([el], attrs);
+
+		return el;
+	}
+}
 
 export function createScript(src, {
 	async = true,
@@ -23,7 +98,10 @@ export function createScript(src, {
 		...events
 	} = {},
 } = {}) {
-	const script = document.createElement('script');
+	const script = createElement('script', {
+		dataset,
+		events: { capture, passive, once, signal, ...events },
+	});
 	script.type = type;
 	script.noModule = noModule;
 	script.async = async;
@@ -36,12 +114,8 @@ export function createScript(src, {
 		script.integrity = integrity;
 	}
 
-	if (typeof script === 'string') {
+	if (typeof nonce === 'string') {
 		script.nonce = nonce;
-	}
-
-	if (isObject(dataset)) {
-		data(script, dataset);
 	}
 
 	if (isTrustPolicy(policy)) {
@@ -49,10 +123,6 @@ export function createScript(src, {
 	} else {
 		script.src = src;
 	}
-
-	Object.entries(events).forEach(([event, callback]) => {
-		script.addEventListener(event, callback, { capture, passive, once, signal });
-	});
 
 	return script;
 }
@@ -86,16 +156,29 @@ export function createImage(src, {
 		...events
 	} = {},
 } = {}) {
-	const img = new Image(width, height);
+	const img = createElement('img', {
+		id,
+		classList,
+		dataset,
+		slot,
+		part,
+		styles,
+		events: { capture, passive, once, signal, ...events },
+	});
+
+	if (Number.isSafeInteger(width)) {
+		img.width = width;
+	}
+
+	if (Number.isSafeInteger(height)) {
+		img.height = height;
+	}
+
 	img.alt = alt;
 	img.referrerPolicy = referrerPolicy;
 	img.loading = loading;
 	img.decoding = decoding;
 	img.fetchPriority = fetchPriority;
-
-	if (typeof id === 'string') {
-		img.id = id;
-	}
 
 	if (typeof role === 'string') {
 		img.role = role;
@@ -114,18 +197,6 @@ export function createImage(src, {
 		img.toggleAttribute('itemscope', itemscope);
 	}
 
-	if (typeof slot === 'string') {
-		img.slot = slot;
-	}
-
-	if (Array.isArray(part) && part.length !== 0 && 'part' in img) {
-		img.part.add(...part);
-	}
-
-	if (Array.isArray(classList) && classList.length !== 0) {
-		img.classList.add(...classList);
-	}
-
 	if (isObject(srcset)) {
 		img.srcset = Object.entries(srcset).map(([size, src]) => `${src} ${size}`).join(', ');
 	} else if (Array.isArray(srcset) && srcset.length !== 0) {
@@ -140,23 +211,11 @@ export function createImage(src, {
 		img.sizes = sizes;
 	}
 
-	if (isObject(dataset)) {
-		data([img], dataset);
-	}
-
-	if (isObject(styles)) {
-		css([img], styles);
-	}
-
 	if (typeof src === 'string' && src.length !== 0) {
 		img.src = src;
 	} else if (src instanceof URL) {
 		img.src = src.href;
 	}
-
-	Object.entries(events).forEach(([event, callback]) => {
-		img.addEventListener(event, callback, { capture, passive, once, signal });
-	});
 
 	return img;
 }
@@ -183,7 +242,10 @@ export function createLink(href = null, {
 		...events
 	} = {},
 }) {
-	const link = document.createElement('link');
+	const link = createElement('link', {
+		dataset,
+		events: { capture, passive, once, signal, ...events },
+	});
 
 	if (Array.isArray(rel)) {
 		link.relList.add(...rel);
@@ -241,14 +303,6 @@ export function createLink(href = null, {
 		link.sizes.add(sizes);
 	}
 
-	if (isObject(dataset)) {
-		data(link, dataset);
-	}
-
-	Object.entries(events).forEach(([event, callback]) => {
-		link.addEventListener(event, callback, { capture, passive, once, signal });
-	});
-
 	return link;
 }
 
@@ -278,15 +332,20 @@ export function createIframe(src, {
 		...events
 	} = {},
 } = {}) {
-	const iframe = document.createElement('iframe');
+	const iframe = createElement('iframe', {
+		id,
+		classList,
+		dataset,
+		styles,
+		part,
+		slot,
+		events: { capture, passive, once, signal, ...events },
+	});
+
 	iframe.loading = loading;
 	iframe.fetchPriority = fetchPriority;
 	iframe.referrerPolicy = referrerPolicy;
 	iframe.frameBorder = frameBorder.toString();
-
-	if (typeof id === 'string') {
-		iframe.id = id;
-	}
 
 	if (typeof name === 'string') {
 		iframe.name = name;
@@ -296,20 +355,8 @@ export function createIframe(src, {
 		iframe.title = title;
 	}
 
-	if (typeof slot === 'string') {
-		iframe.slot = slot;
-	}
-
 	if (Array.isArray(sandbox)) {
 		iframe.sandbox.add(...sandbox);
-	}
-
-	if (Array.isArray(classList) && classList.length !== 0) {
-		iframe.classList.add(...classList);
-	}
-
-	if (Array.isArray(part) && part.length !== 0 && 'part' in iframe) {
-		iframe.part.add(...part);
 	}
 
 	if (typeof height === 'number' && ! Number.isNaN(height)) {
@@ -360,23 +407,11 @@ export function createIframe(src, {
 		iframe.srcdoc = srcdoc.documentElement.outerHTML.replace(/\n/g, '');
 	}
 
-	if (isObject(dataset)) {
-		data([iframe], dataset);
-	}
-
-	if (isObject(styles)) {
-		css([iframe], styles);
-	}
-
 	if (typeof src === 'string' || src instanceof URL) {
 		iframe.src = src;
 	} else if (src instanceof Document) {
 		iframe.srcdoc = src.documentElement.outerHTML.replace(/\n/g,'');
 	}
-
-	Object.entries(events).forEach(([event, callback]) => {
-		iframe.addEventListener(event, callback, { capture, passive, once, signal });
-	});
 
 	return iframe;
 }
@@ -467,7 +502,17 @@ export function createInput(name, {
 	if (typeof name !== 'string') {
 		throw new TypeError('name must be a string');
 	} else {
-		const input = document.createElement('input');
+		const input = createElement('input', {
+			id,
+			classList,
+			dataset,
+			styles,
+			part,
+			slot,
+			events: { capture, passive, once, signal, ...events },
+			...attrs
+		});
+
 		input.name = name;
 		input.type = type;
 		input.required = required;
@@ -476,26 +521,8 @@ export function createInput(name, {
 		input.multiple = multiple;
 		input.checked = checked;
 
-		if (typeof id === 'string') {
-			input.id = id;
-		}
-
 		if (typeof autocomplete === 'string') {
 			input.autocomplete = autocomplete;
-		}
-
-		if (Array.isArray(classList) && classList.length !== 0) {
-			input.classList.add(...classList);
-		}
-
-		if (typeof slot === 'string') {
-			input.slot = slot;
-		}
-
-		if (Array.isArray(part) && part.length !== 0) {
-			input.part.add(...part);
-		} else if (typeof part === 'string') {
-			input.part.add(part);
 		}
 
 		if (typeof list === 'string') {
@@ -534,27 +561,11 @@ export function createInput(name, {
 			input.value = value;
 		}
 
-		if (isObject(styles)) {
-			Object.entries(styles).forEach(([prop, val]) => input.styles.setProperty(prop, val));
-		}
-
 		if (typeof accept === 'string') {
 			input.accept = accept;
 		} else if (Array.isArray(accept)) {
 			input.accept = accept.join(',');
 		}
-
-		if (isObject(events)) {
-			Object.entries(events).forEach(([event, callback]) => {
-				input.addEventListener(event, callback, { capture, passive, once, signal });
-			});
-		}
-
-		if (isObject(dataset)) {
-			Object.entries(dataset).forEach(([prop, val]) => input.dataset[prop] = val);
-		}
-
-		Object.entries(attrs).forEach(([prop, val]) => input.setAttribute(prop, val));
 
 		return input;
 	}
@@ -578,52 +589,32 @@ export function createSelect(name, options = [], {
 		signal,
 		...events
 	} = {},
+	...attrs
 } = {}) {
 	if (typeof name !== 'string') {
 		throw new TypeError('name must be a string');
 	} else if (! Array.isArray(options)) {
 		throw new TypeError('options must be an array');
 	} else {
-		const select = document.createElement('select');
+		const select = createElement('select', {
+			id,
+			classList,
+			dataset,
+			styles,
+			part,
+			slot,
+			events: { capture, passive, once, signal, ...events },
+			...attrs
+		});
 		select.name = name;
 		select.multiple = multiple;
 		select.disabled = disabled;
 		select.required = required;
 		select.append(...options.map(createOption));
 
-		if (typeof id === 'string') {
-			select.id = id;
-		}
-
-		if (Array.isArray(classList) && classList.length !== 0) {
-			select.classList.add(...classList);
-		}
-
-		if (isObject(dataset)) {
-			Object.entries(dataset).forEach(([prop, value]) => select.dataset[prop] = value);
-		}
-
 		if (typeof autocomplete === 'string') {
 			select.autocomplete = autocomplete;
 		}
-
-		if (isObject(styles)) {
-			Object.entries(styles).forEach(([prop, value]) => select.style.setProperty(prop, value));
-		}
-
-		if (typeof slot === 'string') {
-			select.slot = slot;
-		}
-
-		if (Array.isArray(part)) {
-			select.part.add(...part);
-		} else if (typeof part === 'string') {
-			select.part.add(part);
-		}
-
-		Object.entries(events).forEach(([event, callback]) => {
-			select.addEventListener(event, callback, { capture, passive, once, signal });
-		});
 
 		return select;
 	}
