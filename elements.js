@@ -518,6 +518,7 @@ export function createInput(name, {
 	value,
 	placeholder,
 	pattern,
+	inputMode,
 	min = NaN,
 	max = NaN,
 	step = NaN,
@@ -561,6 +562,10 @@ export function createInput(name, {
 
 		if (typeof autocomplete === 'string') {
 			input.autocomplete = autocomplete;
+		}
+
+		if (typeof inputMode === 'string') {
+			input.inputMode = inputMode;
 		}
 
 		if (typeof list === 'string') {
