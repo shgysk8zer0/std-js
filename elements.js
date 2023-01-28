@@ -1,7 +1,133 @@
-import { data, css } from './dom.js';
+import { data, attr, css } from './dom.js';
+import { listen } from './events.js';
 import { isTrustPolicy } from './trust.js';
-import { isObject } from './utility.js';
+import { isObject, isNullish } from './utility.js';
 import { REFERRER_POLICY } from './defaults.js';
+
+export function createElement(tag, {
+	/* structured data attributes        */
+	'@context':    context    = 'https://schema.org',
+	'@type':       type       = undefined,
+	'@identifier': identifier = undefined,
+	itemtype                  = undefined,
+	itemprop                  = undefined,
+	itemscope                 = undefined,
+	itemref                   = undefined,
+	itemid                    = undefined,
+
+	/* Global attributes                  */
+	id                        = undefined,
+	classList                 = undefined,
+	hidden                    = undefined,
+	dataset                   = undefined,
+	accessKey                 = undefined,
+	title                     = undefined,
+
+	/* custom element attributes          */
+	part                      = undefined,
+	slot                      = undefined,
+	is                        = undefined,
+
+	/* non-attribute stuff / other        */
+	children                  = undefined,
+	styles                    = undefined,
+	text                      = undefined,
+	events: { capture, passive, once, signal, ...events } = {},
+	...attrs
+} = {}) {
+	if (typeof tag !== 'string') {
+		throw new TypeError('tag must be a string');
+	} else {
+		const el = document.createElement(tag, { is });
+		el.hidden = hidden;
+
+		if (typeof title === 'string') {
+			el.title = title;
+		}
+
+		if (typeof id === 'string') {
+			el.id = id;
+		} else if (typeof identifier === 'string') {
+			el.id = identifier;
+		}
+
+		if (Array.isArray(classList) && classList.length !== 0) {
+			el.classList.add(...classList);
+		}
+
+		if (isObject(dataset)) {
+			data([el], dataset);
+		}
+
+		if (Array.isArray(part) && part.length !== 0) {
+			el.part.add(...part);
+		} else if(typeof part === 'string') {
+			el.part.add(part);
+		}
+
+		if (typeof slot === 'string') {
+			el.slot = slot;
+		}
+
+		if (isObject(styles)) {
+			css([el], styles);
+		}
+
+		Object.entries(events).forEach(([event, callback]) => {
+			listen(el, event, callback, { capture, passive, once, signal });
+		});
+
+		if (typeof text === 'string') {
+			el.textContent = text;
+		}
+
+		if (Array.isArray(children)) {
+			el.append(...children.filter(el => typeof el === 'string' || el instanceof Element));
+		}
+
+		if (typeof is === 'string') {
+			attrs.is = is;
+		}
+
+		if (typeof itemtype === 'string') {
+			attrs.itemtype = itemtype;
+		} else if (typeof type === 'string') {
+			attrs.itemtype = new URL(type, context).href;
+		}
+
+		if (typeof itemprop === 'string') {
+			attrs.itemprop = itemprop;
+		} else if (Array.isArray(itemprop)) {
+			attrs.itemprop = itemprop.join(' ');
+		}
+
+		if (typeof itemref === 'string') {
+			attrs.itemref = itemref;
+		} else if (Array.isArray(itemref)) {
+			attrs.itemref = itemref.join(' ');
+		}
+
+		if (typeof itemscope === 'boolean' || typeof itemscope === 'string') {
+			attrs.itemscope = itemscope;
+		} else if (attrs.hasOwnProperty('itemtype')) {
+			attrs.itemscope = true;
+		}
+
+		if (typeof itemid === 'string') {
+			attrs.itemid = itemid;
+		}
+
+		if (Array.isArray(accessKey)) {
+			el.accessKey = accessKey.join(' ');
+		} else if (typeof accesskey === 'string') {
+			el.accessKey = accessKey;
+		}
+
+		attr([el], attrs);
+
+		return el;
+	}
+}
 
 export function createScript(src, {
 	async = true,
@@ -15,8 +141,18 @@ export function createScript(src, {
 	fetchPriority = 'auto',
 	dataset = null,
 	policy = null,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
 } = {}) {
-	const script = document.createElement('script');
+	const script = createElement('script', {
+		dataset,
+		events: { capture, passive, once, signal, ...events },
+	});
 	script.type = type;
 	script.noModule = noModule;
 	script.async = async;
@@ -29,12 +165,8 @@ export function createScript(src, {
 		script.integrity = integrity;
 	}
 
-	if (typeof script === 'string') {
+	if (typeof nonce === 'string') {
 		script.nonce = nonce;
-	}
-
-	if (isObject(dataset)) {
-		data(script, dataset);
 	}
 
 	if (isTrustPolicy(policy)) {
@@ -67,17 +199,33 @@ export function createImage(src, {
 	classList = [],
 	dataset = null,
 	styles = null,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
 } = {}) {
-	const img = new Image(width, height);
+	const img = createElement('img', {
+		id, classList, dataset, slot, part, styles,
+		itemtype, itemprop, itemscope,
+		events: { capture, passive, once, signal, ...events },
+	});
+
+	if (Number.isSafeInteger(width)) {
+		img.width = width;
+	}
+
+	if (Number.isSafeInteger(height)) {
+		img.height = height;
+	}
+
 	img.alt = alt;
 	img.referrerPolicy = referrerPolicy;
 	img.loading = loading;
 	img.decoding = decoding;
 	img.fetchPriority = fetchPriority;
-
-	if (typeof id === 'string') {
-		img.id = id;
-	}
 
 	if (typeof role === 'string') {
 		img.role = role;
@@ -85,27 +233,6 @@ export function createImage(src, {
 
 	if (typeof crossOrigin === 'string') {
 		img.crossOrigin = crossOrigin;
-	}
-
-	if (typeof itemprop === 'string') {
-		img.setAttribute('itemprop', itemprop);
-	}
-
-	if (typeof itemtype === 'string') {
-		img.setAttribute('itemtype', new URL(itemtype, 'https://schema.org/').href);
-		img.toggleAttribute('itemscope', itemscope);
-	}
-
-	if (typeof slot === 'string') {
-		img.slot = slot;
-	}
-
-	if (Array.isArray(part) && part.length !== 0 && 'part' in img) {
-		img.part.add(...part);
-	}
-
-	if (Array.isArray(classList) && classList.length !== 0) {
-		img.classList.add(...classList);
 	}
 
 	if (isObject(srcset)) {
@@ -120,14 +247,6 @@ export function createImage(src, {
 		img.sizes = sizes.join(', ');
 	} else if (typeof sizes === 'string') {
 		img.sizes = sizes;
-	}
-
-	if (isObject(dataset)) {
-		data([img], dataset);
-	}
-
-	if (isObject(styles)) {
-		css([img], styles);
 	}
 
 	if (typeof src === 'string' && src.length !== 0) {
@@ -153,8 +272,18 @@ export function createLink(href = null, {
 	dataset = null,
 	title = null,
 	sizes = [],
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
 }) {
-	const link = document.createElement('link');
+	const link = createElement('link', {
+		dataset,
+		events: { capture, passive, once, signal, ...events },
+	});
 
 	if (Array.isArray(rel)) {
 		link.relList.add(...rel);
@@ -212,10 +341,6 @@ export function createLink(href = null, {
 		link.sizes.add(sizes);
 	}
 
-	if (isObject(dataset)) {
-		data(link, dataset);
-	}
-
 	return link;
 }
 
@@ -237,16 +362,28 @@ export function createIframe(src, {
 	part = [],
 	slot = null,
 	title = null,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
 } = {}) {
-	const iframe = document.createElement('iframe');
+	const iframe = createElement('iframe', {
+		id,
+		classList,
+		dataset,
+		styles,
+		part,
+		slot,
+		events: { capture, passive, once, signal, ...events },
+	});
+
 	iframe.loading = loading;
 	iframe.fetchPriority = fetchPriority;
 	iframe.referrerPolicy = referrerPolicy;
 	iframe.frameBorder = frameBorder.toString();
-
-	if (typeof id === 'string') {
-		iframe.id = id;
-	}
 
 	if (typeof name === 'string') {
 		iframe.name = name;
@@ -256,20 +393,8 @@ export function createIframe(src, {
 		iframe.title = title;
 	}
 
-	if (typeof slot === 'string') {
-		iframe.slot = slot;
-	}
-
 	if (Array.isArray(sandbox)) {
 		iframe.sandbox.add(...sandbox);
-	}
-
-	if (Array.isArray(classList) && classList.length !== 0) {
-		iframe.classList.add(...classList);
-	}
-
-	if (Array.isArray(part) && part.length !== 0 && 'part' in iframe) {
-		iframe.part.add(...part);
 	}
 
 	if (typeof height === 'number' && ! Number.isNaN(height)) {
@@ -320,14 +445,6 @@ export function createIframe(src, {
 		iframe.srcdoc = srcdoc.documentElement.outerHTML.replace(/\n/g, '');
 	}
 
-	if (isObject(dataset)) {
-		data([iframe], dataset);
-	}
-
-	if (isObject(styles)) {
-		css([iframe], styles);
-	}
-
 	if (typeof src === 'string' || src instanceof URL) {
 		iframe.src = src;
 	} else if (src instanceof Document) {
@@ -335,4 +452,208 @@ export function createIframe(src, {
 	}
 
 	return iframe;
+}
+
+export function createOption(option) {
+	if (isObject(option)) {
+		const { label, value, disabled = false, selected = false, options } = option;
+
+		if (Array.isArray(options)) {
+			return createOptGroup(label, options);
+		} else {
+			const opt = document.createElement('option');
+			opt.label = label;
+			opt.value = value;
+			opt.disabled = disabled;
+			opt.selected = selected;
+			return opt;
+		}
+	} else {
+		const opt = document.createElement('option');
+		opt.label = option;
+		opt.value = option;
+		return opt;
+	}
+}
+
+export function createOptGroup(label, options) {
+	if (typeof label !== 'string') {
+		throw new TypeError('label must be a string');
+	} else if (! Array.isArray(options)) {
+		throw new TypeError('options must be an array');
+	} else {
+		const optgroup = document.createElement('optgroup');
+		optgroup.label = label;
+		optgroup.append(...options.map(createOption));
+		return optgroup;
+	}
+}
+
+export function createDatalist(id, items) {
+	if (typeof id !== 'string') {
+		throw new TypeError('id must be a string');
+	} else if (! Array.isArray(items) || items.length == 0) {
+		throw new TypeError('Items must be a non-empty array');
+	} else {
+		const list = document.createElement('datalist');
+		list.id = id;
+
+		list.append(...items.map(createOption));
+
+		return list;
+	}
+}
+
+export function createInput(name, {
+	type = 'text',
+	required = false,
+	disabled = false,
+	readOnly = false,
+	multiple = false,
+	checked = false,
+	accept,
+	id,
+	classList,
+	list,
+	value,
+	placeholder,
+	pattern,
+	min = NaN,
+	max = NaN,
+	step = NaN,
+	minLength = NaN,
+	maxLength = NaN,
+	autocomplete,
+	styles,
+	dataset,
+	part,
+	slot,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
+	...attrs
+} = {}) {
+	if (typeof name !== 'string') {
+		throw new TypeError('name must be a string');
+	} else {
+		const input = createElement('input', {
+			id,
+			classList,
+			dataset,
+			styles,
+			part,
+			slot,
+			events: { capture, passive, once, signal, ...events },
+			...attrs
+		});
+
+		input.name = name;
+		input.type = type;
+		input.required = required;
+		input.disabled = disabled;
+		input.readOnly = readOnly;
+		input.multiple = multiple;
+		input.checked = checked;
+
+		if (typeof autocomplete === 'string') {
+			input.autocomplete = autocomplete;
+		}
+
+		if (typeof list === 'string') {
+			input.setAttribute('list', list);
+		}
+
+		if (typeof placeholder === 'string') {
+			input.placeholder = placeholder;
+		}
+
+		if (typeof pattern === 'string') {
+			input.pattern = pattern;
+		}
+
+		if (! isNullish(min)) {
+			input.min = min;
+		}
+
+		if (! isNullish(max)) {
+			input.max = max;
+		}
+
+		if (Number.isSafeInteger(minLength) && minLength >= 0) {
+			input.minLength = minLength;
+		}
+
+		if (Number.isSafeInteger(maxLength) && maxLength > 0) {
+			input.maxLength = maxLength;
+		}
+
+		if (! isNullish(step)) {
+			input.step = step;
+		}
+
+		if (! isNullish(value)) {
+			input.value = value;
+		}
+
+		if (typeof accept === 'string') {
+			input.accept = accept;
+		} else if (Array.isArray(accept)) {
+			input.accept = accept.join(',');
+		}
+
+		return input;
+	}
+}
+
+export function createSelect(name, options = [], {
+	required = false,
+	disabled = false,
+	multiple = false,
+	id,
+	classList,
+	dataset,
+	autocomplete,
+	styles,
+	slot,
+	part,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
+	...attrs
+} = {}) {
+	if (typeof name !== 'string') {
+		throw new TypeError('name must be a string');
+	} else if (! Array.isArray(options)) {
+		throw new TypeError('options must be an array');
+	} else {
+		const select = createElement('select', {
+			id,
+			classList,
+			dataset,
+			styles,
+			part,
+			slot,
+			events: { capture, passive, once, signal, ...events },
+			...attrs
+		});
+		select.name = name;
+		select.multiple = multiple;
+		select.disabled = disabled;
+		select.required = required;
+		select.append(...options.map(createOption));
+
+		if (typeof autocomplete === 'string') {
+			select.autocomplete = autocomplete;
+		}
+
+		return select;
+	}
 }
