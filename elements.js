@@ -1,6 +1,6 @@
 import { data, css } from './dom.js';
 import { isTrustPolicy } from './trust.js';
-import { isObject } from './utility.js';
+import { isObject, isNullish } from './utility.js';
 import { REFERRER_POLICY } from './defaults.js';
 
 export function createScript(src, {
@@ -15,6 +15,13 @@ export function createScript(src, {
 	fetchPriority = 'auto',
 	dataset = null,
 	policy = null,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
 } = {}) {
 	const script = document.createElement('script');
 	script.type = type;
@@ -43,6 +50,10 @@ export function createScript(src, {
 		script.src = src;
 	}
 
+	Object.entries(events).forEach(([event, callback]) => {
+		script.addEventListener(event, callback, { capture, passive, once, signal });
+	});
+
 	return script;
 }
 
@@ -67,6 +78,13 @@ export function createImage(src, {
 	classList = [],
 	dataset = null,
 	styles = null,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
 } = {}) {
 	const img = new Image(width, height);
 	img.alt = alt;
@@ -136,6 +154,10 @@ export function createImage(src, {
 		img.src = src.href;
 	}
 
+	Object.entries(events).forEach(([event, callback]) => {
+		img.addEventListener(event, callback, { capture, passive, once, signal });
+	});
+
 	return img;
 }
 
@@ -153,6 +175,13 @@ export function createLink(href = null, {
 	dataset = null,
 	title = null,
 	sizes = [],
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
 }) {
 	const link = document.createElement('link');
 
@@ -216,6 +245,10 @@ export function createLink(href = null, {
 		data(link, dataset);
 	}
 
+	Object.entries(events).forEach(([event, callback]) => {
+		link.addEventListener(event, callback, { capture, passive, once, signal });
+	});
+
 	return link;
 }
 
@@ -237,6 +270,13 @@ export function createIframe(src, {
 	part = [],
 	slot = null,
 	title = null,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
 } = {}) {
 	const iframe = document.createElement('iframe');
 	iframe.loading = loading;
@@ -334,5 +374,257 @@ export function createIframe(src, {
 		iframe.srcdoc = src.documentElement.outerHTML.replace(/\n/g,'');
 	}
 
+	Object.entries(events).forEach(([event, callback]) => {
+		iframe.addEventListener(event, callback, { capture, passive, once, signal });
+	});
+
 	return iframe;
+}
+
+export function createOption(option) {
+	if (isObject(option)) {
+		const { label, value, disabled = false, selected = false, options } = option;
+
+		if (Array.isArray(options)) {
+			return createOptGroup(label, options);
+		} else {
+			const opt = document.createElement('option');
+			opt.label = label;
+			opt.value = value;
+			opt.disabled = disabled;
+			opt.selected = selected;
+			return opt;
+		}
+	} else {
+		const opt = document.createElement('option');
+		opt.label = option;
+		opt.value = option;
+		return opt;
+	}
+}
+
+export function createOptGroup(label, options) {
+	if (typeof label !== 'string') {
+		throw new TypeError('label must be a string');
+	} else if (! Array.isArray(options)) {
+		throw new TypeError('options must be an array');
+	} else {
+		const optgroup = document.createElement('optgroup');
+		optgroup.label = label;
+		optgroup.append(...options.map(createOption));
+		return optgroup;
+	}
+}
+
+export function createDatalist(id, items) {
+	if (typeof id !== 'string') {
+		throw new TypeError('id must be a string');
+	} else if (! Array.isArray(items) || items.length == 0) {
+		throw new TypeError('Items must be a non-empty array');
+	} else {
+		const list = document.createElement('datalist');
+		list.id = id;
+
+		list.append(...items.map(createOption));
+
+		return list;
+	}
+}
+
+export function createInput(name, {
+	type = 'text',
+	required = false,
+	disabled = false,
+	readOnly = false,
+	multiple = false,
+	checked = false,
+	accept,
+	id,
+	classList,
+	list,
+	value,
+	placeholder,
+	pattern,
+	min = NaN,
+	max = NaN,
+	step = NaN,
+	minLength = NaN,
+	maxLength = NaN,
+	autocomplete,
+	styles,
+	dataset,
+	part,
+	slot,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
+	...attrs
+} = {}) {
+	if (typeof name !== 'string') {
+		throw new TypeError('name must be a string');
+	} else {
+		const input = document.createElement('input');
+		input.name = name;
+		input.type = type;
+		input.required = required;
+		input.disabled = disabled;
+		input.readOnly = readOnly;
+		input.multiple = multiple;
+		input.checked = checked;
+
+		if (typeof id === 'string') {
+			input.id = id;
+		}
+
+		if (typeof autocomplete === 'string') {
+			input.autocomplete = autocomplete;
+		}
+
+		if (Array.isArray(classList) && classList.length !== 0) {
+			input.classList.add(...classList);
+		}
+
+		if (typeof slot === 'string') {
+			input.slot = slot;
+		}
+
+		if (Array.isArray(part) && part.length !== 0) {
+			input.part.add(...part);
+		} else if (typeof part === 'string') {
+			input.part.add(part);
+		}
+
+		if (typeof list === 'string') {
+			input.setAttribute('list', list);
+		}
+
+		if (typeof placeholder === 'string') {
+			input.placeholder = placeholder;
+		}
+
+		if (typeof pattern === 'string') {
+			input.pattern = pattern;
+		}
+
+		if (! isNullish(min)) {
+			input.min = min;
+		}
+
+		if (! isNullish(max)) {
+			input.max = max;
+		}
+
+		if (Number.isSafeInteger(minLength) && minLength >= 0) {
+			input.minLength = minLength;
+		}
+
+		if (Number.isSafeInteger(maxLength) && maxLength > 0) {
+			input.maxLength = maxLength;
+		}
+
+		if (! isNullish(step)) {
+			input.step = step;
+		}
+
+		if (! isNullish(value)) {
+			input.value = value;
+		}
+
+		if (isObject(styles)) {
+			Object.entries(styles).forEach(([prop, val]) => el.styles.setProperty(prop, val));
+		}
+
+		if (typeof accept === 'string') {
+			input.accept = accept;
+		} else if (Array.isArray(accept)) {
+			input.accept = accept.join(',');
+		}
+
+		if (isObject(events)) {
+			Object.entries(events).forEach(([event, callback]) => {
+				input.addEventListener(event, callback, { capture, passive, once, signal });
+			});
+		}
+
+		if (isObject(dataset)) {
+			Object.entries(dataset).forEach(([prop, val]) => input.dataset[prop] = value);
+		}
+
+		Object.entries(attrs).forEach(([prop, val]) => input.setAttribute(prop, val));
+
+		return input;
+	}
+}
+
+export function createSelect(name, options = [], {
+	required = false,
+	disabled = false,
+	multiple = false,
+	id,
+	classList,
+	dataset,
+	autocomplete,
+	styles,
+	slot,
+	part,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
+} = {}) {
+	if (typeof name !== 'string') {
+		throw new TypeError('name must be a string');
+	} else if (! Array.isArray(options)) {
+		throw new TypeError('options must be an array');
+	} else {
+		const select = document.createElement('select');
+		select.name = name;
+		select.multiple = multiple;
+		select.disabled = disabled;
+		select.required = required;
+		select.append(...options.map(createOption));
+
+		if (typeof id === 'string') {
+			select.id = id;
+		}
+
+		if (Array.isArray(classList) && classList.length !== 0) {
+			select.classList.add(...classList);
+		}
+
+		if (isObject(dataset)) {
+			Object.entries(dataset).forEach(([prop, value]) => select.dataset[prop] = value);
+		}
+
+		if (typeof autocomplete === 'string') {
+			select.autocomplete = autocomplete;
+		}
+
+		if (isObject(styles)) {
+			Object.entries(styles).forEach(([prop, value]) => select.style.setProperty(prop, value));
+		}
+
+		if (typeof slot === 'string') {
+			select.slot = slot;
+		}
+
+		if (Array.isArray(part)) {
+			select.part.add(...part);
+		} else if (typeof part === 'string') {
+			select.part.add(part);
+		}
+
+		Object.entries(events).forEach(([event, callback]) => {
+			select.addEventListener(event, callback, { capture, passive, once, signal });
+		});
+
+		return select;
+	}
 }

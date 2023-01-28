@@ -21,7 +21,7 @@ export function isUndefined(val) {
 }
 
 export function isNullish(val) {
-	return isUndefined(val) || isNull(val);
+	return isUndefined(val) || isNull(val) || Number.isNaN(val);
 }
 
 /* global define */
