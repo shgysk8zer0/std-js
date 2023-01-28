@@ -535,7 +535,7 @@ export function createInput(name, {
 		}
 
 		if (isObject(styles)) {
-			Object.entries(styles).forEach(([prop, val]) => el.styles.setProperty(prop, val));
+			Object.entries(styles).forEach(([prop, val]) => input.styles.setProperty(prop, val));
 		}
 
 		if (typeof accept === 'string') {
@@ -551,7 +551,7 @@ export function createInput(name, {
 		}
 
 		if (isObject(dataset)) {
-			Object.entries(dataset).forEach(([prop, val]) => input.dataset[prop] = value);
+			Object.entries(dataset).forEach(([prop, val]) => input.dataset[prop] = val);
 		}
 
 		Object.entries(attrs).forEach(([prop, val]) => input.setAttribute(prop, val));
