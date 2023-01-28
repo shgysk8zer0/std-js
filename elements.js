@@ -5,23 +5,34 @@ import { isObject, isNullish } from './utility.js';
 import { REFERRER_POLICY } from './defaults.js';
 
 export function createElement(tag, {
-	id        = null,
-	classList = [],
-	hidden    = false,
-	dataset   = {},
-	part      = [],
-	slot      = null,
-	is        = null,
-	styles    = {},
-	children  = [],
-	text = null,
-	events: {
-		capture,
-		passive,
-		once,
-		signal,
-		...events
-	} = {},
+	/* structured data attributes        */
+	'@context':    context    = 'https://schema.org',
+	'@type':       type       = undefined,
+	'@identifier': identifier = undefined,
+	itemtype                  = undefined,
+	itemprop                  = undefined,
+	itemscope                 = undefined,
+	itemref                   = undefined,
+	itemid                    = undefined,
+
+	/* Global attributes                  */
+	id                        = undefined,
+	classList                 = undefined,
+	hidden                    = undefined,
+	dataset                   = undefined,
+	accessKey                 = undefined,
+	title                     = undefined,
+
+	/* custom element attributes          */
+	part                      = undefined,
+	slot                      = undefined,
+	is                        = undefined,
+
+	/* non-attribute stuff / other        */
+	children                  = undefined,
+	styles                    = undefined,
+	text                      = undefined,
+	events: { capture, passive, once, signal, ...events } = {},
 	...attrs
 } = {}) {
 	if (typeof tag !== 'string') {
@@ -30,8 +41,14 @@ export function createElement(tag, {
 		const el = document.createElement(tag, { is });
 		el.hidden = hidden;
 
+		if (typeof title === 'string') {
+			el.title = title;
+		}
+
 		if (typeof id === 'string') {
 			el.id = id;
+		} else if (typeof identifier === 'string') {
+			el.id = identifier;
 		}
 
 		if (Array.isArray(classList) && classList.length !== 0) {
@@ -65,11 +82,45 @@ export function createElement(tag, {
 		}
 
 		if (Array.isArray(children)) {
-			el.append(...children);
+			el.append(...children.filter(el => typeof el === 'string' || el instanceof Element));
 		}
 
 		if (typeof is === 'string') {
 			attrs.is = is;
+		}
+
+		if (typeof itemtype === 'string') {
+			attrs.itemtype = itemtype;
+		} else if (typeof type === 'string') {
+			attrs.itemtype = new URL(type, context).href;
+		}
+
+		if (typeof itemprop === 'string') {
+			attrs.itemprop = itemprop;
+		} else if (Array.isArray(itemprop)) {
+			attrs.itemprop = itemprop.join(' ');
+		}
+
+		if (typeof itemref === 'string') {
+			attrs.itemref = itemref;
+		} else if (Array.isArray(itemref)) {
+			attrs.itemref = itemref.join(' ');
+		}
+
+		if (typeof itemscope === 'boolean' || typeof itemscope === 'string') {
+			attrs.itemscope = itemscope;
+		} else if (attrs.hasOwnProperty('itemtype')) {
+			attrs.itemscope = true;
+		}
+
+		if (typeof itemid === 'string') {
+			attrs.itemid = itemid;
+		}
+
+		if (Array.isArray(accessKey)) {
+			el.accessKey = accessKey.join(' ');
+		} else if (typeof accesskey === 'string') {
+			el.accessKey = accessKey;
 		}
 
 		attr([el], attrs);
@@ -157,12 +208,8 @@ export function createImage(src, {
 	} = {},
 } = {}) {
 	const img = createElement('img', {
-		id,
-		classList,
-		dataset,
-		slot,
-		part,
-		styles,
+		id, classList, dataset, slot, part, styles,
+		itemtype, itemprop, itemscope,
 		events: { capture, passive, once, signal, ...events },
 	});
 
@@ -186,15 +233,6 @@ export function createImage(src, {
 
 	if (typeof crossOrigin === 'string') {
 		img.crossOrigin = crossOrigin;
-	}
-
-	if (typeof itemprop === 'string') {
-		img.setAttribute('itemprop', itemprop);
-	}
-
-	if (typeof itemtype === 'string') {
-		img.setAttribute('itemtype', new URL(itemtype, 'https://schema.org/').href);
-		img.toggleAttribute('itemscope', itemscope);
 	}
 
 	if (isObject(srcset)) {
