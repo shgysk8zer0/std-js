@@ -219,3 +219,36 @@ if (! (Array.prototype.uniqueBy instanceof Function)) {
 		}
 	};
 }
+
+/**
+ * Change Array by copy proposal
+ * @Note: Not clear if should use `structedClone` or `[...this]` for copies
+ * @see https://github.com/tc39/proposal-change-array-by-copy
+ */
+if (! (Array.prototype.toReversed instanceof Function)) {
+  Array.prototype.toReversed = function toReversed() {
+    return [...this].reverse();
+  };
+}
+
+if (! (Array.prototype.toSorted instanceof Function)) {
+  Array.prototype.toSorted = function toSorted(cmpFn) {
+    return [...this].sort(cmpFn);
+  };
+}
+
+if (! (Array.prototype.toSpliced instanceof Function)) {
+  Array.prototype.toSpliced = function toSpliced(start, deleteCount, ...items) {
+    const cpy = [...this];
+    cpy.splice(start, deleteCount, ...items);
+    return cpy;
+  };
+}
+
+if (! (Array.prototype.with instanceof Function)) {
+  Array.prototype.with = function (index, value) {
+    const cpy = [...this];
+    cpy[index] = value;
+    return cpy;
+  };
+}
