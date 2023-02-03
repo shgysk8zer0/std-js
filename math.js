@@ -23,6 +23,9 @@ export function* range(start, end, step = 1) {
 	}
 }
 
+/**
+ * Note: Requires iterator helper methods & `Number.range()`
+ */
 export function isPrime(n) {
 	if (! Number.isSafeInteger(n) || n < 2) {
 		return false;
@@ -30,9 +33,14 @@ export function isPrime(n) {
 		return true;
 	} else {
 		const sqrtAndOne = Math.floor(Math.sqrt(n)) + 1;
-		return ! range(2, sqrtAndOne).some(f => n % f === 0);
+		return ! Number.range(2, sqrtAndOne).some(f => n % f === 0);
 	}
 }
+
+/**
+ * Note: Requires iterator helper methods & `Number.range()`
+ */
+export const primes = (start = 2, end = Infinity) => Number.range(start, end).filter(isPrime);
 
 export function* fibonacci(terms = Number.MAX_SAFE_INTEGER) {
 	if (! (Number.isSafeInteger(terms) && terms > 0)) {
