@@ -23,6 +23,17 @@ export function* range(start, end, step = 1) {
 	}
 }
 
+export function isPrime(n) {
+	if (! Number.isSafeInteger(n) || n < 2) {
+		return false;
+	} else if (n === 2 || n === 3) {
+		return true;
+	} else {
+		const sqrtAndOne = Math.floor(Math.sqrt(n)) + 1;
+		return ! range(2, sqrtAndOne).some(f => n % f === 0);
+	}
+}
+
 export function* fibonacci(terms = Number.MAX_SAFE_INTEGER) {
 	if (! (Number.isSafeInteger(terms) && terms > 0)) {
 		throw new TypeError('Invalid terms given');
