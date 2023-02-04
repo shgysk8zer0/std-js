@@ -29,11 +29,13 @@ export function* range(start, end, step = 1) {
 export function isPrime(n) {
 	if (! Number.isSafeInteger(n) || n < 2) {
 		return false;
-	} else if (n === 2 || n === 3) {
+	} else if (n === 2 || n === 3 || n === 5 || n === 7) {
 		return true;
+	} else if (n % 2 === 0) {
+		return false;
 	} else {
 		const sqrtAndOne = Math.floor(Math.sqrt(n)) + 1;
-		return ! Number.range(2, sqrtAndOne).some(f => n % f === 0);
+		return ! Number.range(3, sqrtAndOne, 2).some(f => n % f === 0);
 	}
 }
 
