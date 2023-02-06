@@ -1,6 +1,6 @@
 {
   "name": "std-js",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "description": "A JavaScript library for making front-end development sane!",
   "config": {
     "serve": {
@@ -44,15 +44,21 @@
     "url": "https://github.com/shgysk8zer0/std-js/issues"
   },
   "engines": {
-    "npm": ">=3.5"
+    "npm": ">=8.19.3"
   },
   "scripts": {
     "test": "npm run lint:js && npm run lint:html",
+    "preversion": "npm test",
+    "start": "http-server ${npm_package_config_serve_path} -p ${npm_package_config_serve_port} -a ${npm_package_config_serve_domain} -o",
     "fix": "npm run fix:js",
     "fix:js": "eslint . --fix",
     "lint:js": "eslint .",
     "lint:html": "htmlhint \"**/*.html\"",
-    "start": "http-server ${npm_package_config_serve_path} -p ${npm_package_config_serve_port} -a ${npm_package_config_serve_domain} -o"
+    "create:lock": "npm i --package-lock-only --ignore-scripts",
+    "version:bump": "npm run version:bump:patch",
+    "version:bump:patch": "npm version --no-git-tag-version patch",
+    "version:bump:minor": "npm version --no-git-tag-version minor",
+    "version:bump:major": "npm version --no-git-tag-version major"
   },
   "devDependencies": {
     "eslint": "^8.0.1",

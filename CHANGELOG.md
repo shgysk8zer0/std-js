@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.7.0] - 2023-02-06
+
+### Changed
+- Update to Node v18.13.0
+- Numerous package updates
+
 ### Added
 - Create `ShoppingCart` class utilizing `IndexedDB`
 - Add `EventObserver` class, which is a generator `yield`ing dispatched events
