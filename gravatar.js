@@ -4,8 +4,8 @@ import { setURLParams } from './utility.js';
 import { REFERRER_POLICY } from './defaults.js';
 const GRAVATAR = 'https://secure.gravatar.com/avatar/';
 const SIZE = 80;
-const FALLBACK = 'mp';
-const FORCE = 'y';
+const FALLBACK = 'mm';
+const FORCE = false;
 const RATING = undefined;
 
 export async function gravatarURL(email, {
@@ -15,7 +15,7 @@ export async function gravatarURL(email, {
 	rating: r = RATING,
 } = {}) {
 	const hash = await md5(email);
-	return setURLParams(new URL(hash, GRAVATAR), { s, d, f, r });
+	return setURLParams(new URL(hash, GRAVATAR), { s, d, f: f ? 'y': undefined, r });
 }
 
 export function changeGravatarSize(url, size) {
