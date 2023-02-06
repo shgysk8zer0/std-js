@@ -44,7 +44,7 @@
     "url": "https://github.com/shgysk8zer0/std-js/issues"
   },
   "engines": {
-    "npm": ">=3.5"
+    "npm": ">=8.19.3"
   },
   "scripts": {
     "test": "npm run lint:js && npm run lint:html",

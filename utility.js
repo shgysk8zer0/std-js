@@ -64,10 +64,8 @@ export function callOnce(callback, thisArg) {
 	return func;
 }
 
-export function setURLParams(url, params) {
-	if (! (url instanceof URL)) {
-		url = new URL(url, document.baseURI);
-	}
+export function setURLParams(forURL, params) {
+	const url = new URL(forURL, document.baseURI);
 
 	if (params instanceof HTMLFormElement) {
 		return setURLParams(url, new FormData(params));
@@ -77,8 +75,20 @@ export function setURLParams(url, params) {
 		return setURLParams(url, Object.fromEntries(params));
 	} else if (Array.isArray(params) || typeof params === 'string') {
 		return setURLParams(url, new URLSearchParams(params));
-	} else if (typeof params === 'object') {
-		url.search = new URLSearchParams({ ...Object.fromEntries(url.searchParams), ...params});
+	} else if (isObject(params)) {
+		Object.entries(params).forEach(([k, v]) => {
+			if (typeof v === 'string' || (typeof v === 'number' && ! Number.isNaN(v))) {
+				url.searchParams.set(k, v);
+			} else if (typeof v === 'boolean') {
+				if (v) {
+					url.searchParams.set(k, '');
+				} else {
+					url.searchParams.delete(k);
+				}
+			} else if (! isNullish(v)) {
+				url.searchParams.set(k, v.toString());
+			}
+		});
 	}
 
 	return url;
@@ -91,7 +101,7 @@ export function setUTMParams(url, {
 	campaign: utm_campaign,
 	term: utm_term,
 } = {}) {
-	if (typeof utm_source === 'string') {
+	if (! (url instanceof URL)) {
 		return setURLParams(url, { utm_source, utm_medium, utm_content, utm_campaign, utm_term });
 	} else {
 		return new URL(url, document.baseURI);
