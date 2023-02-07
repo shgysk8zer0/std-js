@@ -1,7 +1,7 @@
 import { signalAborted } from './abort.js';
 import { addListener, listen, loaded as whenLoaded } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
-import { isHTML, isScriptURL, isTrustPolicy } from './trust.js';
+import { isHTML, isTrustPolicy } from './trust.js';
 import { errorToEvent } from './utility.js';
 import { data as setData, css as setCss, attr as setAttr } from './attrs.js';
 
@@ -706,3 +706,4 @@ export function createTable(data, { caption, header, footer } = {}) {
 }
 
 export { addListener, isAsync, errorToEvent };
+
