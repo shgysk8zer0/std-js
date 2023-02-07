@@ -39,9 +39,11 @@ export async function createGravatarImage(email, {
 	alt = '',
 	id = null,
 	crossOrigin = 'anonymous',
+	'@type': type,
+	'@context': context,
 	itemprop = null,
 	itemtype = null,
-	itemscope = true,
+	itemscope = undefined,
 	// sizes = null,
 	// srcset = null,
 	referrerPolicy = REFERRER_POLICY,
@@ -61,13 +63,15 @@ export async function createGravatarImage(email, {
 		signal,
 		...events
 	} = {},
+	...attrs
 } = {}) {
 	const url = await gravatarURL(email, { size, fallback, force, rating });
 
 	return createImage(url, {
 		alt, id, crossOrigin, itemprop, itemtype, itemscope, referrerPolicy,
 		fetchPriority, loading, decoding, role, slot, part, classList, dataset,
-		styles, events: { capture, passive, once, signal, ...events },
+		'@type': type, '@context': context, height: size, width: size,
+		styles, events: { capture, passive, once, signal, ...events }, ...attrs
 	});
 }
 
