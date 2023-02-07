@@ -1,8 +1,9 @@
 import { signalAborted } from './abort.js';
 import { addListener, listen, loaded as whenLoaded } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
-import { isHTML, isScriptURL, isTrustPolicy } from './trust.js';
+import { isHTML, isTrustPolicy } from './trust.js';
 import { errorToEvent } from './utility.js';
+import { data as setData, css as setCss, attr as setAttr } from './attrs.js';
 
 export const readyStates = ['loading', 'interactive', 'complete'];
 
@@ -218,99 +219,15 @@ export function meta({ name, itemprop, property, charset, content }) {
 }
 
 export function css(what, props = {}, { base, priority } = {}) {
-	return each(what, item => {
-		Object.entries(props).forEach(([p, v]) => {
-			if (typeof v === 'string' || typeof v === 'number') {
-				item.style.setProperty(p, v, priority);
-			} else if (v instanceof URL) {
-				item.type.setProperty(p, v.href, priority);
-			} else {
-				item.style.removeProperty(p);
-			}
-		});
-	}, { base });
+	return each(what, item => setCss(item, props, { priority }), { base });
 }
 
 export function data(what, props = {}, { base } = {}) {
-	return each(what, item => {
-		Object.entries(props).forEach(([p, v]) => {
-			if (v instanceof Date) {
-				v = v.toISOString();
-			} else if (v instanceof URL) {
-				v = v.href;
-			}
-
-			switch (typeof v) {
-				case 'string':
-				case 'number':
-					item.dataset[p] = v.toString();
-					break;
-
-				case 'boolean':
-					if (v) {
-						item.dataset[p] = '';
-					} else {
-						delete item.dataset[p];
-					}
-					break;
-
-				case 'undefined':
-					delete item.dataset[p];
-					break;
-
-				default:
-					if (v === null) {
-						delete item.dataset[p];
-					} else if (v instanceof Date) {
-						item.dataset[p] = v.toISOString();
-					} else {
-						item.dataset[p] = JSON.stringify(v);
-					}
-			}
-		});
-	}, { base });
+	return each(what, item => setData(item, props), { base });
 }
 
 export function attr(what, props = {}, { base, namespace = null } = {}) {
-	return each(what, item => {
-		Object.entries(props).forEach(([p, v]) => {
-			if (typeof v === 'string' || typeof v === 'number' || isScriptURL(v)) {
-				if (typeof namespace === 'string') {
-					item.setAttributeNS(namespace, p, v);
-				} else {
-					item.setAttribute(p, v);
-				}
-			} else if (typeof v === 'boolean') {
-				if (typeof namespace === 'string') {
-					v ? item.setAttributeNS(namespace, p, '') : item.removeAttributeNS(namespace, p);
-				} else {
-					item.toggleAttribute(p, v);
-				}
-			} else if (v instanceof Date) {
-				if (typeof namespace === 'string') {
-					item.setAttributeNS(namespace, p, v.toISOString());
-				} else {
-					item.setAttribute(p, v.toISOString());
-				}
-			} else if (v instanceof URL) {
-				if (typeof namespace === 'string') {
-					item.setAttributeNS(namespace, p, v.href);
-				} else {
-					item.setAttribute(p, v.href);
-				}
-			} else if (typeof v === 'undefined' || v === null) {
-				if (typeof namespace === 'string') {
-					item.removeAttributeNS(namespace, p);
-				} else {
-					item.removeAttribute(p);
-				}
-			} else if (typeof namespace === 'string') {
-				item.setAttributeNS(namespace, p, JSON.stringify(v));
-			} else {
-				item.setAttribute(p, JSON.stringify(v));
-			}
-		});
-	}, { base });
+	return each(what, item => setAttr(item, props, { namespace }), { base });
 }
 
 export function toggleAttr(what, attrs, { base, force, signal } = {}) {
@@ -789,3 +706,4 @@ export function createTable(data, { caption, header, footer } = {}) {
 }
 
 export { addListener, isAsync, errorToEvent };
+

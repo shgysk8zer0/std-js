@@ -1,4 +1,4 @@
-import { data, attr, css } from './dom.js';
+import { data, attr, css } from './attrs.js';
 import { listen } from './events.js';
 import { isTrustPolicy } from './trust.js';
 import { isObject, isNullish } from './utility.js';
@@ -56,7 +56,7 @@ export function createElement(tag, {
 		}
 
 		if (isObject(dataset)) {
-			data([el], dataset);
+			data(el, dataset);
 		}
 
 		if (Array.isArray(part) && part.length !== 0) {
@@ -70,7 +70,7 @@ export function createElement(tag, {
 		}
 
 		if (isObject(styles)) {
-			css([el], styles);
+			css(el, styles);
 		}
 
 		Object.entries(events).forEach(([event, callback]) => {
@@ -123,7 +123,7 @@ export function createElement(tag, {
 			el.accessKey = accessKey;
 		}
 
-		attr([el], attrs);
+		attr(el, attrs);
 
 		return el;
 	}
@@ -148,10 +148,12 @@ export function createScript(src, {
 		signal,
 		...events
 	} = {},
+	...attrs
 } = {}) {
 	const script = createElement('script', {
 		dataset,
 		events: { capture, passive, once, signal, ...events },
+		...attrs,
 	});
 	script.type = type;
 	script.noModule = noModule;
@@ -184,9 +186,11 @@ export function createImage(src, {
 	height = undefined,
 	width = undefined,
 	crossOrigin = null,
+	'@type': type,
+	'@context': context,
 	itemprop = null,
 	itemtype = null,
-	itemscope = true,
+	itemscope = undefined,
 	sizes = null,
 	srcset = null,
 	referrerPolicy = REFERRER_POLICY,
@@ -206,11 +210,13 @@ export function createImage(src, {
 		signal,
 		...events
 	} = {},
+	...attrs
 } = {}) {
 	const img = createElement('img', {
 		id, classList, dataset, slot, part, styles,
-		itemtype, itemprop, itemscope,
+		itemtype, itemprop, itemscope, '@type': type, '@context': context,
 		events: { capture, passive, once, signal, ...events },
+		...attrs
 	});
 
 	if (Number.isSafeInteger(width)) {
