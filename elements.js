@@ -33,6 +33,20 @@ export function createElement(tag, {
 	styles                    = undefined,
 	text                      = undefined,
 	events: { capture, passive, once, signal, ...events } = {},
+	animation: {
+		keyframes,
+		duration = 0,
+		delay = 0,
+		endDelay = 0,
+		easing = 'linear',
+		direction = 'normal',
+		fill = 'none',
+		iterations = 1,
+		iterationStart = 0,
+		composite = 'replace',
+		iterationComposite = 'replace',
+		pseudoElement,
+	} = {},
 	...attrs
 } = {}) {
 	if (typeof tag !== 'string') {
@@ -125,6 +139,13 @@ export function createElement(tag, {
 
 		attr(el, attrs);
 
+		if (Array.isArray(keyframes) || isObject(keyframes) && el.animate instanceof Function) {
+			el.animate(keyframes, {
+				duration, delay, endDelay, easing, direction, fill, iterations,
+				iterationStart, composite, iterationComposite, pseudoElement,
+			});
+		}
+
 		return el;
 	}
 }
@@ -141,13 +162,7 @@ export function createScript(src, {
 	fetchPriority = 'auto',
 	dataset = null,
 	policy = null,
-	events: {
-		capture,
-		passive,
-		once,
-		signal,
-		...events
-	} = {},
+	events: { capture, passive, once, signal, ...events } = {},
 	...attrs
 } = {}) {
 	const script = createElement('script', {
@@ -203,19 +218,14 @@ export function createImage(src, {
 	classList = [],
 	dataset = null,
 	styles = null,
-	events: {
-		capture,
-		passive,
-		once,
-		signal,
-		...events
-	} = {},
+	animation,
+	events: { capture, passive, once, signal, ...events } = {},
 	...attrs
 } = {}) {
 	const img = createElement('img', {
 		id, classList, dataset, slot, part, styles,
 		itemtype, itemprop, itemscope, '@type': type, '@context': context,
-		events: { capture, passive, once, signal, ...events },
+		events: { capture, passive, once, signal, ...events }, animation,
 		...attrs
 	});
 
@@ -278,16 +288,11 @@ export function createLink(href = null, {
 	dataset = null,
 	title = null,
 	sizes = [],
-	events: {
-		capture,
-		passive,
-		once,
-		signal,
-		...events
-	} = {},
+	events: { capture, passive, once, signal, ...events } = {},
+	...rest
 }) {
 	const link = createElement('link', {
-		dataset,
+		dataset, ...rest,
 		events: { capture, passive, once, signal, ...events },
 	});
 
@@ -368,22 +373,14 @@ export function createIframe(src, {
 	part = [],
 	slot = null,
 	title = null,
-	events: {
-		capture,
-		passive,
-		once,
-		signal,
-		...events
-	} = {},
+	animation,
+	events: { capture, passive, once, signal, ...events } = {},
+	...rest
 } = {}) {
 	const iframe = createElement('iframe', {
-		id,
-		classList,
-		dataset,
-		styles,
-		part,
-		slot,
+		id, classList, dataset, styles, part, slot, animation,
 		events: { capture, passive, once, signal, ...events },
+		...rest
 	});
 
 	iframe.loading = loading;
@@ -535,25 +532,15 @@ export function createInput(name, {
 	dataset,
 	part,
 	slot,
-	events: {
-		capture,
-		passive,
-		once,
-		signal,
-		...events
-	} = {},
+	animation,
+	events: { capture, passive, once, signal, ...events } = {},
 	...attrs
 } = {}) {
 	if (typeof name !== 'string') {
 		throw new TypeError('name must be a string');
 	} else {
 		const input = createElement('input', {
-			id,
-			classList,
-			dataset,
-			styles,
-			part,
-			slot,
+			id, classList, dataset, styles, part, slot, animation,
 			events: { capture, passive, once, signal, ...events },
 			...attrs
 		});
@@ -631,13 +618,8 @@ export function createSelect(name, options = [], {
 	styles,
 	slot,
 	part,
-	events: {
-		capture,
-		passive,
-		once,
-		signal,
-		...events
-	} = {},
+	animation,
+	events: { capture, passive, once, signal, ...events } = {},
 	...attrs
 } = {}) {
 	if (typeof name !== 'string') {
@@ -646,15 +628,11 @@ export function createSelect(name, options = [], {
 		throw new TypeError('options must be an array');
 	} else {
 		const select = createElement('select', {
-			id,
-			classList,
-			dataset,
-			styles,
-			part,
-			slot,
+			id, classList, dataset, styles, part, slot, animation,
 			events: { capture, passive, once, signal, ...events },
 			...attrs
 		});
+
 		select.name = name;
 		select.multiple = multiple;
 		select.disabled = disabled;
