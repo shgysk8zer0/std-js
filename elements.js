@@ -33,6 +33,20 @@ export function createElement(tag, {
 	styles                    = undefined,
 	text                      = undefined,
 	events: { capture, passive, once, signal, ...events } = {},
+	animation: {
+		keyframes,
+		duration = 0,
+		delay = 0,
+		endDelay = 0,
+		easing = 'linear',
+		direction = 'normal',
+		fill = 'none',
+		iterations = 1,
+		iterationStart = 0,
+		composite = 'replace',
+		iterationComposite = 'replace',
+		pseudoElement,
+	} = {},
 	...attrs
 } = {}) {
 	if (typeof tag !== 'string') {
@@ -124,6 +138,13 @@ export function createElement(tag, {
 		}
 
 		attr(el, attrs);
+
+		if (Array.isArray(keyframes) || isObject(keyframes) && el.animate instanceof Function) {
+			el.animate(keyframes, {
+				duration, delay, endDelay, easing, direction, fill, iterations,
+				iterationStart, composite, iterationComposite, pseudoElement,
+			});
+		}
 
 		return el;
 	}
