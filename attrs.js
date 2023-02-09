@@ -2,17 +2,11 @@ import { clamp, between } from './math.js';
 import { isObject } from './utility.js';
 import { isScriptURL } from './trust.js';
 
-export function getAttrs(el, { includeId = false } = {}) {
+export function getAttrs(el) {
 	if (typeof el === 'string') {
-		return getAttrs(document.querySelector(el), { includeId });
+		return getAttrs(document.querySelector(el));
 	} else if (el instanceof Element) {
-		const attrs = Object.fromEntries([...el.attributes].map(({ name, value }) => [name, value]));
-
-		if (includeId) {
-			attrs.id = el.id;
-		}
-
-		return attrs;
+		return Object.fromEntries([...el.attributes].map(({ name, value }) => [name, value]));
 	} else {
 		throw new TypeError(`Expected an element or selector but got a ${typeof el}`);
 	}

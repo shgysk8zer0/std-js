@@ -21,8 +21,12 @@ export function copyAs(target, tag, {
 		const el = document.createElement(tag, { is });
 
 		if (includeAttributes && target.hasAttributes()) {
-			Object.entries(getAttrs(target, { includeId }))
+			Object.entries(getAttrs(target))
 				.forEach(([name, value]) => el.setAttribute(name, value));
+
+			if (! includeId) {
+				el.removeAttribute('id');
+			}
 		}
 
 		if (includeChildren && target.hasChildNodes()) {
