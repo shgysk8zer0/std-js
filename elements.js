@@ -1,8 +1,41 @@
-import { data, attr, css } from './attrs.js';
+import { data, attr, css, getAttrs } from './attrs.js';
 import { listen } from './events.js';
 import { isTrustPolicy } from './trust.js';
 import { isObject, isNullish } from './utility.js';
 import { REFERRER_POLICY } from './defaults.js';
+
+export function copyAs(target, tag, {
+	includeAttributes = true,
+	includeChildren = true,
+	includeId = true,
+	deep = true,
+	is,
+} = {}) {
+	if (typeof tag !== 'string') {
+		throw new TypeError(`Expected tag to be a string but got a ${typeof tag}`);
+	} else if (typeof target === 'string') {
+		return copyAs(document.querySelector(target), tag, { includeAttributes, includeChildren, includeId, deep });
+	} else if (! (target instanceof Element)) {
+		throw new TypeError(`Expected target to be a string or Element but got a ${typeof target}`);
+	} else {
+		const el = document.createElement(tag, { is });
+
+		if (includeAttributes && target.hasAttributes()) {
+			Object.entries(getAttrs(target))
+				.forEach(([name, value]) => el.setAttribute(name, value));
+
+			if (! includeId) {
+				el.removeAttribute('id');
+			}
+		}
+
+		if (includeChildren && target.hasChildNodes()) {
+			el.append(...[...target.childNodes].map(node => node.cloneNode(deep)));
+		}
+
+		return el;
+	}
+}
 
 export function createElement(tag, {
 	/* structured data attributes        */
