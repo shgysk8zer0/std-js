@@ -6,7 +6,7 @@ export function getAttrs(el, { includeId = false } = {}) {
 	if (typeof el === 'string') {
 		return getAttrs(document.querySelector(el), { includeId });
 	} else if (el instanceof Element) {
-		const attrs = Object.fromEntries([...document.body.attributes].map(({ name, value }) => [name, value]));
+		const attrs = Object.fromEntries([...el.attributes].map(({ name, value }) => [name, value]));
 
 		if (includeId) {
 			attrs.id = el.id;
