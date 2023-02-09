@@ -1,5 +1,5 @@
 import { getDeferred } from './promises.js';
-import { createImage, createElement } from './elements.js';
+import { createElement } from './elements.js';
 
 export const EXTENSIONS = {
 	'image/jpeg': '.jpg',
@@ -26,10 +26,8 @@ export async function resizeImageFile(file, {
 	const { naturalWidth, naturalHeight } = img;
 	const width = naturalWidth * (height / naturalHeight);
 
-	if (! (file instanceof File) || ! file.type.startsWith('image/')) {
-		reject(new TypeError('Not an image file'));
-	} else if (typeof height !== 'number' || height < 1 || Number.isNaN(height)) {
-		reject(new TypeError('Height is not an integer'));
+	if (typeof height !== 'number' || height < 1 || Number.isNaN(height)) {
+		reject(new TypeError('Height must be a positive integer'));
 	} else if (! supportsType(type)) {
 		reject(new TypeError(`Unsupported type: ${type}`));
 	} else if ('OffscreenCanvas' in globalThis) {
@@ -90,15 +88,14 @@ export async function fileToImage(file, { width, height } = {}) {
 	} else if (! file.type.startsWith('image/')) {
 		throw new TypeError('Expected an image file');
 	} else {
-		const img = createImage(URL.createObjectURL(file), {
-			width, height,
-		});
+		const img = new Image(width, height);
+		img.src = URL.createObjectURL(file);
 		await img.decode();
 		return img;
 	}
 }
 
-export async function fileToCanvas(file, { height, x = 0, y = 0 } = {}) {
+export async function fileToCanvas(file, { height = DEFAULT_HEIGHT, x = 0, y = 0 } = {}) {
 	const img = await fileToImage(file);
 	const { naturalWidth, naturalHeight } = img;
 	const width = naturalWidth * (height / naturalHeight);
