@@ -2,6 +2,22 @@ import { clamp, between } from './math.js';
 import { isObject } from './utility.js';
 import { isScriptURL } from './trust.js';
 
+export function getAttrs(el, { includeId = false } = {}) {
+	if (typeof el === 'string') {
+		return getAttrs(document.querySelector(el), { includeId });
+	} else if (el instanceof Element) {
+		const attrs = Object.fromEntries([...document.body.attributes].map(({ name, value }) => [name, value]));
+
+		if (includeId) {
+			attrs.id = el.id;
+		}
+
+		return attrs;
+	} else {
+		throw new TypeError(`Expected an element or selector but got a ${typeof el}`);
+	}
+}
+
 export function data(el, props = {}) {
 	if (! (el instanceof Element)) {
 		throw new TypeError('el must be an Element');
