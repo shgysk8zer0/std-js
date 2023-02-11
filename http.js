@@ -1,6 +1,6 @@
 import { parse, loaded } from './dom.js';
 import { signalAborted } from './abort.js';
-import { setURLParams, setUTMParams } from './utility.js';
+import { setURLParams, setUTMParams, isObject, isNullish } from './utility.js';
 import { createPolicy } from './trust.js';
 import { HTTPException } from './HTTPException.js';
 
@@ -401,6 +401,44 @@ export async function postText(url, {
 		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
 
 	return await resp.text();
+}
+
+export function navigateTo(to, {
+	params = {},
+	utm: {
+		source: utm_source,
+		medium: utm_medium = 'referral',
+		content: utm_content,
+		campaign: utm_campaign,
+		term: utm_term,
+	} = {},
+	allowedOrigins = [],
+	requirePath = false,
+	origin = location.origin,
+} = {}) {
+	const url = new URL(to, origin);
+
+	if (! Array.isArray(allowedOrigins)) {
+		throw new TypeError('`allowedOrigins` must be an array');
+	} else if (! (url.origin === location.origin || allowedOrigins.includes(url.origin))) {
+		throw new TypeError(`${url.origin} is not an allowed origin`);
+	} else if (requirePath && url.pathname.length === 1) {
+		throw new TypeError('`pathname` is required');
+	} else if (! isObject(params)) {
+		throw new TypeError('Expected `params` to be an object');
+	} else {
+		if (typeof utm_source === 'string') {
+			Object.entries({...params, utm_source, utm_medium, utm_content, utm_campaign, utm_term })
+				.filter(([,v]) => ! isNullish(v))
+				.forEach(([k, v]) => url.searchParams.set(k, v));
+		} else {
+			Object.entries(params)
+				.filter(([,v]) => ! isNullish(v))
+				.forEach(([k, v]) => url.searchParams.set(k, v));
+		}
+
+		location.href = url.href;
+	}
 }
 
 export function postNav(url, data = {}, {
