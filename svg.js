@@ -70,7 +70,7 @@ export function createSVGElement (tag, {
 	}
 	
 	if (Array.isArray(children) && children.length !== 0) {
-		el.append(...children.filter(node => typeof node === 'text' || node instanceof Element));
+		el.append(...children.filter(node => (typeof node === 'string') || (node instanceof Element)));
 	}
 
 	return el;
@@ -142,7 +142,7 @@ export function useSVG(sprite, {
 	animation,
 	...rest
 } = {}) {
-	const svg = createSVG({ fill, height, width, classList, label, slot, part, animation, hidden: true, ...rest });
+	const svg = createSVG({ id, fill, height, width, classList, label, slot, part, animation, hidden: true, ...rest });
 	const use = createSVGElement('use');
 
 	if (typeof src === 'string') {
