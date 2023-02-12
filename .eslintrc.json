@@ -32,6 +32,7 @@
     "globals": {
       "cookieStore": "readonly",
       "globalThis": "readonly",
-      "Sanitizer": "readonly"
+      "Sanitizer": "readonly",
+      "scheduler": "readonly"
     }
 }
