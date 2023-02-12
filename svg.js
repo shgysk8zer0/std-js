@@ -2,7 +2,7 @@ import { SVG, XLINK } from './namespaces.js';
 import { isObject } from './utility.js';
 
 export function createSVGElement (tag, {
-	fill, stroke, width, height, pathLength,
+	fill, stroke, width, height, pathLength, children = [], id, classList = [],
 	animation: {
 		keyframes,
 		duration = 0,
@@ -19,6 +19,14 @@ export function createSVGElement (tag, {
 	} = {},
 	...rest } = {}) {
 	const el = document.createElementNS(SVG, tag);
+	
+	if (typeof id === 'string') {
+		el.id = id;
+	}
+	
+	if (Array.isArray(classList) && classList.length !== 0) {
+		el.classList.add(...classList);
+	}
 
 	if (typeof fill === 'string') {
 		el.setAttribute('fill', fill);
@@ -60,11 +68,16 @@ export function createSVGElement (tag, {
 			iterationStart, composite, iterationComposite, pseudoElement,
 		});
 	}
+	
+	if (Array.isArray(children) && children.length !== 0) {
+		el.append(...children.filter(node => (typeof node === 'string') || (node instanceof Element)));
+	}
 
 	return el;
 }
 
 export function createSVG({
+	id = null,
 	fill = null,
 	viewBox = null,
 	height = null,
@@ -79,7 +92,7 @@ export function createSVG({
 	part = [],
 	...rest
 } = {}) {
-	const svg = createSVGElement('svg', { width, height, fill, animation, ...rest });
+	const svg = createSVGElement('svg', { width, height, fill, animation, children, id, classList, ...rest });
 
 	svg.setAttribute('role', role);
 
@@ -105,10 +118,6 @@ export function createSVG({
 		svg.classList.add(...classList);
 	}
 
-	if (Array.isArray(children) && children.length !== 0) {
-		svg.append(...children);
-	}
-
 	if (Array.isArray(part) && part.length !== 0) {
 		if('part' in svg) {
 			svg.part.add(...part);
@@ -121,6 +130,7 @@ export function createSVG({
 }
 
 export function useSVG(sprite, {
+	id = null,
 	src = '/img/icons.svg',
 	fill = null,
 	height = null,
@@ -132,7 +142,7 @@ export function useSVG(sprite, {
 	animation,
 	...rest
 } = {}) {
-	const svg = createSVG({ fill, height, width, classList, label, slot, part, animation, hidden: true, ...rest });
+	const svg = createSVG({ id, fill, height, width, classList, label, slot, part, animation, hidden: true, ...rest });
 	const use = createSVGElement('use');
 
 	if (typeof src === 'string') {
@@ -148,8 +158,8 @@ export function useSVG(sprite, {
 	return svg;
 }
 
-export function createPath(d, { fill, stroke, pathLength, animation, ...rest } = {}) {
-	const path = createSVGElement('path', { fill, stroke, pathLength, animation, ...rest });
+export function createPath(d, { id, fill, stroke, pathLength, animation, ...rest } = {}) {
+	const path = createSVGElement('path', { id, fill, stroke, pathLength, animation, ...rest });
 
 	if (Array.isArray(d) && d.length !== 0) {
 		path.setAttribute('d', d.join(' '));
@@ -162,20 +172,24 @@ export function createPath(d, { fill, stroke, pathLength, animation, ...rest } =
 	return path;
 }
 
-export function createRect({ width, height, x, y, rx, ry, fill, stroke, pathLength, animation, ...rest }) {
-	return createSVGElement('rect', { width, height, x, y, rx, ry, fill, stroke, pathLength, animation, ...rest });
+export function createGroup({ id, fill, stroke, children, animation, ...attrs }) {
+	return createSVGElement('g', { id, fill, stroke, children, animation, ...attrs });
 }
 
-export function createCircle({ width, height, cx, cy, r, fill, stroke, pathLength, animation, ...rest }) {
-	return createSVGElement('circle', { width, height, cx, cy, r, fill, stroke, pathLength, animation, ...rest });
+export function createRect({ id, width, height, x, y, rx, ry, fill, stroke, pathLength, animation, ...rest }) {
+	return createSVGElement('rect', { id, width, height, x, y, rx, ry, fill, stroke, pathLength, animation, ...rest });
 }
 
-export function createEllipse({ width, height, cx, cy, rx, ry, fill, stroke, pathLength, animation, ...rest }) {
-	return createSVGElement('ellipse', { width, height, cx, cy, rx, ry, fill, stroke, pathLength, animation, ...rest });
+export function createCircle({ id, width, height, cx, cy, r, fill, stroke, pathLength, animation, ...rest }) {
+	return createSVGElement('circle', { id, width, height, cx, cy, r, fill, stroke, pathLength, animation, ...rest });
 }
 
-export function createPolygon(points, { fill, stroke, pathLength, animation, ...rest } = {}) {
-	const polygon = createSVGElement('polygon', { fill, stroke, pathLength, animation, ...rest });
+export function createEllipse({ id, width, height, cx, cy, rx, ry, fill, stroke, pathLength, animation, ...rest }) {
+	return createSVGElement('ellipse', { id, width, height, cx, cy, rx, ry, fill, stroke, pathLength, animation, ...rest });
+}
+
+export function createPolygon(points, { id, fill, stroke, pathLength, animation, ...rest } = {}) {
+	const polygon = createSVGElement('polygon', { id, fill, stroke, pathLength, animation, ...rest });
 
 	if (Array.isArray(points) && points.length !== 0) {
 		polygon.setAttribute('points', points.map(([x, y]) => `${x},${y}`).join(' '));
@@ -188,8 +202,8 @@ export function createPolygon(points, { fill, stroke, pathLength, animation, ...
 	return polygon;
 }
 
-export function createPolyline(points, { fill, stroke, pathLength, animation, ...rest } = {}) {
-	const polyline = createSVGElement('polyline', { fill, stroke, pathLength, animation, ...rest });
+export function createPolyline(points, { id, fill, stroke, pathLength, animation, ...rest } = {}) {
+	const polyline = createSVGElement('polyline', { id, fill, stroke, pathLength, animation, ...rest });
 
 	if (Array.isArray(points) && points.length !== 0) {
 		polyline.setAttribute('points', points.map(([x, y]) => `${x},${y}`).join(' '));
@@ -202,10 +216,10 @@ export function createPolyline(points, { fill, stroke, pathLength, animation, ..
 	return polyline;
 }
 
-export function createLine([[x1, y1], [x2, y2]], { fill, stroke, pathLength, animation, ...rest } = {}) {
+export function createLine([[x1, y1], [x2, y2]], { id, fill, stroke, pathLength, animation, ...rest } = {}) {
 	if (! [x1, x2, y1, y2].every(n => typeof n === 'number' && ! Number.isNaN(n))) {
 		throw new TypeError('Invalid coordinates in <line>.');
 	} else {
-		return createSVGElement('line', { fill, stroke, x1, y1, x2, y2, pathLength, animation, ...rest });
+		return createSVGElement('line', { id, fill, stroke, x1, y1, x2, y2, pathLength, animation, ...rest });
 	}
 }
