@@ -1,6 +1,6 @@
-import { createSVG, createPath } from './svg.js';
+import { createSVG, createPath, createGroup, createCircle } from './svg.js';
 
-export function createOcticon({
+/*export function createOcticon({
 	size = 16,
 	fill = 'currentColor',
 	width,
@@ -15,6 +15,36 @@ export function createOcticon({
 		height: size, width: width * parseInt(size / 16), fill, classList, part, animation, ...rest,
 		children: [
 			createPath(path, { 'fill-rule': 'evenodd' }),
+		]
+	});
+}*/
+
+/**
+ * Adwaita Icons
+ */
+export function createAddressBookIcon({
+	height = 16,
+	width = 14,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		height, width, fill, classList, part, animation, ...rest,
+		children: [
+			createPath('M1.189 14c0 1.09.91 2 2 2h8.823c1.09 0 2-.91 2-2V3c0-1.09-.91-2-2-2H3.189c-1.09 0-2 .91-2 2h10.823v11H1.189z', {
+				'fill-rule': 'evenodd',
+			}),
+			createPath('M.594 12a.502.502 0 1 0 .093 1H2.5a.5.5 0 1 0 0-1H.687a.5.5 0 0 0-.093 0zm0-2a.502.502 0 1 0 .093 1H2.5a.5.5 0 1 0 0-1H.687a.5.5 0 0 0-.093 0zm0-2a.502.502 0 1 0 .093 1H2.5a.5.5 0 1 0 0-1H.687a.5.5 0 0 0-.093 0zm0-2a.502.502 0 1 0 .093 1H2.5a.5.5 0 1 0 0-1H.687a.5.5 0 0 0-.093 0zm0-2a.502.502 0 1 0 .093 1H2.5a.5.5 0 1 0 0-1H.687a.5.5 0 0 0-.093 0z', {
+				'fill-rule': 'evenodd',
+			}),
+			createPath('M7 10c.328.066.666.007 1 0 .334-.007.669.04 1 0 .624-.074 1.196-.462 1.523-.998a2.41 2.41 0 0 0 .26-1.817A2.807 2.807 0 0 0 9.75 5.652 3.366 3.366 0 0 0 8.009 5a3.737 3.737 0 0 0-2.565.746 3.69 3.69 0 0 0-1.382 2.285 3.647 3.647 0 0 0 .185 1.895c.228.6.618 1.137 1.119 1.54.5.402 1.11.668 1.744.76A3.647 3.647 0 0 0 9 12v-1c-.453.299-1 .453-1.542.437a2.677 2.677 0 0 1-1.513-.53 2.676 2.676 0 0 1-.932-1.304A2.677 2.677 0 0 1 5 8a2.818 2.818 0 0 1 1.154-1.511A3.13 3.13 0 0 1 8 6c.537.026 1.082.193 1.483.551.2.18.362.404.456.656.095.252.12.53.061.793-.054.24-.18.464-.355.637a1.294 1.294 0 0 1-.645.34V8a1.628 1.628 0 0 0-.595-.737 1.628 1.628 0 0 0-.905-.277c-.32 0-.64.098-.905.277-.266.18-.476.44-.595.737-.158.394-.152.856.033 1.238.186.383.55.678.967.762m1.036-.977a.708.708 0 0 1-.814.132.707.707 0 0 1-.378-.732.707.707 0 0 1 .453-.554A.706.706 0 0 1 8 8', {
+				'letter-spacing': '0',
+				'word-spacing': '0',
+			})
 		]
 	});
 }
@@ -59,6 +89,49 @@ export function createBellIcon({
 	});
 }
 
+/**
+ * Adwaita Icons
+ */
+export function createCallStartIcon({
+	height = 16,
+	width = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		height, width, fill, classList, part, animation, ...rest,
+		children: [
+			createPath('M13.032 1c.534 0 .969.427.969.969v.062c-.017 6.613-5.383 11.97-12 11.97H1.97c-.545 0-.97-.447-.97-1v-3c0-.555.447-1 1-1h2c.555 0 1 .445 1 1v.468A8.967 8.967 0 0 0 10.47 5H10c-.553 0-1-.446-1-1V2c0-.554.447-1 1-1h3.032z', {
+				'overflow': 'visible',
+			})
+		]
+	});
+}
+
+export function createCheckIcon({
+	height = 16,
+	width = 14,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		height, width, fill, classList, part, animation, ...rest,
+		children: [
+			createPath('M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z', {
+				'fill-rule': 'evenodd',
+			})
+		]
+	});
+}
+
 export function createCreditCardIcon({
 	height = 16,
 	width = 16,
@@ -95,6 +168,68 @@ export function createCommentIcon({
 			createPath('M14 1H2c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1h2v3.5L7.5 11H14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 9H7l-2 2v-2H2V2h12v8z', {
 				'fill-rule': 'evenodd',
 			})
+		]
+	});
+}
+
+/**
+ * Adwaita Icons
+ */
+export function createContactNewIcon({
+	height = 16,
+	width = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		height, width, fill, classList, part, animation, ...rest,
+		children: [
+			createGroup({
+				transform: 'translate(-261 -727)',
+				children: [
+					createPath('M269.55 735.09c-.705.624-1.54.906-2.555.906s-1.853-.29-2.558-.914c-1.11.363-2.436 1.288-2.438 2.902l-.004 3.012c0 .554.446 1 1 1h8c.554 0 1-.446 1-1v-3c0-1.387-1.102-2.556-2.445-2.906z'),
+					createCircle({ cx: 49.5, cy: 342.5, r: 2.5, transform: 'matrix(1.2 0 0 1.2 207.6 321)' }),
+					//<circle cx="49.5" cy="342.5" r="2.5" transform="matrix(1.2 0 0 1.2 207.6 321)"/>
+					createPath('M273 728v1.997h-2v1.996h2v1.997h2v-1.997h2v-1.996h-2V728z')
+				]
+			}),
+			createPath('M14 1H2c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1h2v3.5L7.5 11H14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 9H7l-2 2v-2H2V2h12v8z', {
+				'fill-rule': 'evenodd',
+			})
+		]
+	});
+}
+
+/**
+ * Adwaita Icons
+ */
+export function createDialogPasswordIcon({
+	height = 16,
+	width = 14,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		height, width, fill, classList, part, animation, ...rest,
+		children: [
+			createPath('M5 3C2.25 3 0 5.25 0 8s2.25 5 5 5c1.586 0 2.903-.845 3.813-2h5.593l.22-.75 1.03-4L15.97 5H8.813C7.903 3.845 6.586 3 5 3zm0 2c1.116 0 2.038.595 2.563 1.5l.312.5h5.531l-.53 2H7.874l-.312.5C7.038 10.405 6.116 11 5 11c-1.669 0-3-1.331-3-3s1.331-3 3-3z', {
+				'overflow': 'visible',
+			}),
+			createPath('M14.498 8H9l-.563 2H14z', {
+				'overflow': 'visible',
+				'opacity': 0.35,
+			}),
+			createPath('M5 8a1 1 0 1 1-2 0 1 1 0 1 1 2 0z', {
+				'overflow': 'visible',
+			}),
 		]
 	});
 }
@@ -294,6 +429,32 @@ export function createLinkExternalIcon({
 		children: [
 			createPath('M11 10h1v3c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h3v1H1v10h10v-3zM6 2l2.25 2.25L5 7.5 6.5 9l3.25-3.25L12 8V2H6z', {
 				'fill-rule': 'evenodd',
+			})
+		]
+	});
+}
+
+/**
+ * Adwaita Icons
+ */
+export function createPublicShareIcon({
+	height = 16,
+	width = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		height, width, fill, classList, part, animation, ...rest,
+		children: [
+			createPath('M5.969 7.969a2.969 2.969 0 1 1-5.938 0 2.969 2.969 0 1 1 5.938 0zm9.969 5a2.969 2.969 0 1 1-5.938 0 2.969 2.969 0 1 1 5.938 0zm0-10a2.969 2.969 0 1 1-5.938 0 2.969 2.969 0 1 1 5.938 0z', {
+				'overflow': 'visible',
+			}),
+			createPath('M12.625 2.156L2.562 7.031.75 7.938l1.812.906 10.032 5.062.906-1.812-8.22-4.156 8.219-4-.875-1.782z', {
+				'overflow': 'visible',
 			})
 		]
 	});
@@ -579,6 +740,8 @@ export function createSettingsIcon({
 	});
 }
 
+export const createShareIcon = (...args) => createPublicShareIcon(...args);
+
 export function createSignOutIcon({
 	height = 16,
 	width = 16,
@@ -594,6 +757,31 @@ export function createSignOutIcon({
 		children: [
 			createPath('M11.992 8.994V6.996H7.995v-2h3.997V2.999l3.998 2.998-3.998 2.998zm-1.998 2.998H5.996V2.998L2 1h7.995v2.998h1V1c0-.55-.45-.999-1-.999H.999A1.001 1.001 0 0 0 0 1v11.372c0 .39.22.73.55.91L5.996 16v-3.008h3.998c.55 0 1-.45 1-1V7.996h-1v3.998z', {
 				'fill-rule': 'evenodd',
+			})
+		]
+	});
+}
+
+export const createSignUpIcon = (...args) => createContactNewIcon(...args);
+
+export function createSystemSoftwareInstallIcon({
+	height = 16,
+	width = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		height, width, fill, classList, part, animation, ...rest,
+		children: [
+			createPath('M3 8h10v7.059c0 .492-.472.937-.996.937H4c-.539 0-1-.43-1-1z', {
+				'overflow': 'visible',
+			}),
+			createPath('M6.688 2.969a1 1 0 0 0-.657.375L3.22 6.812a1 1 0 0 0-.22.625v1a1 1 0 1 0 2 0v-.656l2.594-3.156a1 1 0 0 0-.907-1.656zm2.218 3a1 1 0 1 0-.031 2l2.156.375V8.5a1 1 0 1 0 2 0v-1a1 1 0 0 0-.812-1l-3-.5a1 1 0 0 0-.313-.031z', {
+				'overflow': 'visible',
 			})
 		]
 	});
