@@ -128,9 +128,13 @@ export function setBool(el, attr, val) {
 	el.toggleAttribute(attr, val);
 }
 
-export function getInt(el, attr, { fallback = NaN } = {}) {
+export function getInt(el, attr, {
+	fallback = NaN,
+	min = Number.MIN_SAFE_INTEGER,
+	max = Number.MAX_SAFE_INTEGER,
+} = {}) {
 	if (el.hasAttribute(attr)) {
-		const val = parseInt(el.getAttribute(attr));
+		const val = clamp(min, parseInt(el.getAttribute(attr)), max);
 		return Number.isNaN(val) ? fallback : val;
 	} else {
 		return fallback;
@@ -150,9 +154,13 @@ export function setInt(el, attr, val, {
 	}
 }
 
-export function getFloat(el, attr, { fallback = NaN } = {}) {
+export function getFloat(el, attr, {
+	fallback = NaN,
+	min = Number.MIN_SAFE_INTEGER,
+	max = Number.MAX_SAFE_INTEGER,
+} = {}) {
 	if (el.hasAttribute(attr)) {
-		const val = parseFloat(el.getAttribute(attr)) || fallback;
+		const val = clamp(min, parseFloat(el.getAttribute(attr)), max);
 		return Number.isNaN(val) ? fallback : val;
 	} else {
 		return fallback;
@@ -206,7 +214,7 @@ export function getURL(el, attr, { base = document.baseURI } = {}) {
 
 export function setURL(el, attr, val, {
 	base = document.baseURI,
-	requirePath = true,
+	requirePath = false,
 } = {}) {
 	if ((val instanceof URL) && (! requirePath || val.pathname.length > 1)) {
 		el.setAttribute(attr, val.href);
