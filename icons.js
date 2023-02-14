@@ -1,4 +1,6 @@
-import { createSVG, createPath, createGroup, createCircle } from './svg.js';
+import {
+	createSVG, createPath, createGroup, createCircle, createRect, translate, rotate,
+} from './svg.js';
 
 /**
  * Adwaita Icons
@@ -14,7 +16,7 @@ export function createAddressBookIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M1.189 14c0 1.09.91 2 2 2h8.823c1.09 0 2-.91 2-2V3c0-1.09-.91-2-2-2H3.189c-1.09 0-2 .91-2 2h10.823v11H1.189z', {
 				'fill-rule': 'evenodd',
@@ -41,7 +43,7 @@ export function createAlertIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z', {
 				'fill-rule': 'evenodd',
@@ -84,7 +86,7 @@ export function createCallStartIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M13.032 1c.534 0 .969.427.969.969v.062c-.017 6.613-5.383 11.97-12 11.97H1.97c-.545 0-.97-.447-.97-1v-3c0-.555.447-1 1-1h2c.555 0 1 .445 1 1v.468A8.967 8.967 0 0 0 10.47 5H10c-.553 0-1-.446-1-1V2c0-.554.447-1 1-1h3.032z', {
 				'overflow': 'visible',
@@ -104,7 +106,7 @@ export function createCheckIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z', {
 				'fill-rule': 'evenodd',
@@ -124,7 +126,7 @@ export function createCreditCardIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M12 9H2V8h10v1zm4-6v9c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h14c.55 0 1 .45 1 1zm-1 3H1v6h14V6zm0-3H1v1h14V3zm-9 7H2v1h4v-1z', {
 				'fill-rule': 'evenodd',
@@ -144,7 +146,7 @@ export function createCommentIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M14 1H2c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1h2v3.5L7.5 11H14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 9H7l-2 2v-2H2V2h12v8z', {
 				'fill-rule': 'evenodd',
@@ -167,14 +169,13 @@ export function createContactNewIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createGroup({
-				transform: 'translate(-261 -727)',
+				transform: translate(-261, -727),
 				children: [
 					createPath('M269.55 735.09c-.705.624-1.54.906-2.555.906s-1.853-.29-2.558-.914c-1.11.363-2.436 1.288-2.438 2.902l-.004 3.012c0 .554.446 1 1 1h8c.554 0 1-.446 1-1v-3c0-1.387-1.102-2.556-2.445-2.906z'),
 					createCircle({ cx: 49.5, cy: 342.5, r: 2.5, transform: 'matrix(1.2 0 0 1.2 207.6 321)' }),
-					//<circle cx="49.5" cy="342.5" r="2.5" transform="matrix(1.2 0 0 1.2 207.6 321)"/>
 					createPath('M273 728v1.997h-2v1.996h2v1.997h2v-1.997h2v-1.996h-2V728z')
 				]
 			}),
@@ -199,7 +200,7 @@ export function createDialogPasswordIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M5 3C2.25 3 0 5.25 0 8s2.25 5 5 5c1.586 0 2.903-.845 3.813-2h5.593l.22-.75 1.03-4L15.97 5H8.813C7.903 3.845 6.586 3 5 3zm0 2c1.116 0 2.038.595 2.563 1.5l.312.5h5.531l-.53 2H7.874l-.312.5C7.038 10.405 6.116 11 5 11c-1.669 0-3-1.331-3-3s1.331-3 3-3z', {
 				'overflow': 'visible',
@@ -326,7 +327,7 @@ export function createLinkIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z', {
 				'fill-rule': 'evenodd',
@@ -429,7 +430,7 @@ export function createPublicShareIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M5.969 7.969a2.969 2.969 0 1 1-5.938 0 2.969 2.969 0 1 1 5.938 0zm9.969 5a2.969 2.969 0 1 1-5.938 0 2.969 2.969 0 1 1 5.938 0zm0-10a2.969 2.969 0 1 1-5.938 0 2.969 2.969 0 1 1 5.938 0z', {
 				'overflow': 'visible',
@@ -532,7 +533,7 @@ export function createPinIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M10 1.2V2l.5 1L6 6H2.2c-.44 0-.67.53-.34.86L5 10l-4 5 5-4 3.14 3.14a.5.5 0 0 0 .86-.34V10l3-4.5 1 .5h.8c.44 0 .67-.53.34-.86L10.86.86a.5.5 0 0 0-.86.34z', {
 				'fill-rule': 'evenodd',
@@ -692,7 +693,7 @@ export function createSearchIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13 6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0 .52-.09.7-.3a.996.996 0 0 0 0-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7 2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z', {
 				'fill-rule': 'evenodd',
@@ -712,7 +713,7 @@ export function createSettingsIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M4 7H3V2h1v5zm-1 7h1v-3H3v3zm5 0h1V8H8v6zm5 0h1v-2h-1v2zm1-12h-1v6h1V2zM9 2H8v2h1V2zM5 8H2c-.55 0-1 .45-1 1s.45 1 1 1h3c.55 0 1-.45 1-1s-.45-1-1-1zm5-3H7c-.55 0-1 .45-1 1s.45 1 1 1h3c.55 0 1-.45 1-1s-.45-1-1-1zm5 4h-3c-.55 0-1 .45-1 1s.45 1 1 1h3c.55 0 1-.45 1-1s-.45-1-1-1z', {
 				'fill-rule': 'evenodd',
@@ -734,7 +735,7 @@ export function createSignOutIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M11.992 8.994V6.996H7.995v-2h3.997V2.999l3.998 2.998-3.998 2.998zm-1.998 2.998H5.996V2.998L2 1h7.995v2.998h1V1c0-.55-.45-.999-1-.999H.999A1.001 1.001 0 0 0 0 1v11.372c0 .39.22.73.55.91L5.996 16v-3.008h3.998c.55 0 1-.45 1-1V7.996h-1v3.998z', {
 				'fill-rule': 'evenodd',
@@ -744,6 +745,45 @@ export function createSignOutIcon({
 }
 
 export const createSignUpIcon = (...args) => createContactNewIcon(...args);
+
+export function createSpinnerIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	const height = 12.837;
+	const width = 26.263;
+	const rx = 6.4187;
+	const ry = rx;
+
+	return createSVG({
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
+		viewBox: [0, 0, 106.82, 106.82],
+		children: [
+			createGroup({
+				transform: translate(-73.591, -148.34),
+				children: [
+					createRect({ height, width, rx, ry, x: 154.15,  y: 195.33,                                            }),
+					createRect({ height, width, rx, ry, x: 36.256,  y: 231.8,   transform: rotate(-30),                   }),
+					createRect({ height, width, rx, ry, x: -84.075, y: 204.44,  transform: rotate(-60), opacity: 0.0833,  }),
+					createRect({ height, width, rx, ry, x: -174.6,  y: 120.58,  transform: rotate(-90), opacity: 0.16666, }),
+					createRect({ height, width, rx, ry, x: -211.07, y: 2.6915,  transform: rotate(240), opacity: 0.25,    }),
+					createRect({ height, width, rx, ry, x: -183.71, y: -117.64, transform: rotate(210), opacity: 0.3333,  }),
+					createRect({ height, width, rx, ry, x: -99.854, y: -208.17, transform: rotate(180), opacity: 0.4166,  }),
+					createRect({ height, width, rx, ry, x: 18.035,  y: -244.64, transform: rotate(150), opacity: 0.5,     }),
+					createRect({ height, width, rx, ry, x: 138.37,  y: -217.28, transform: rotate(120), opacity: 0.5833,  }),
+					createRect({ height, width, rx, ry, x: 228.9,   y: -133.42, transform: rotate(90),  opacity: 0.6666,  }),
+					createRect({ height, width, rx, ry, x: 265.37,  y: -15.529, transform: rotate(60),  opacity: 0.75,    }),
+					createRect({ height, width, rx, ry, x: 238.01,  y: 104.8,   transform: rotate(30),  opacity: 0.8333,  }),
+				]
+			})
+		],
+	});
+}
 
 export function createSystemSoftwareInstallIcon({
 	size = 16,
@@ -756,7 +796,7 @@ export function createSystemSoftwareInstallIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M3 8h10v7.059c0 .492-.472.937-.996.937H4c-.539 0-1-.43-1-1z', {
 				'overflow': 'visible',
@@ -819,7 +859,7 @@ export function createThumbsUpIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M13.991 13.991c-.05.69-1.269 1-1.998 1H5.666l-1.668-1V7.995c1.359 0 2.108-.75 3.128-1.879 1.229-1.359 1.139-2.558.879-4.127-.08-.5.5-1 1-1 .829 0 1.998 2.729 1.998 3.998l-.02 1.03c0 .689.33.969 1.02.969H14c.63 0 .98.36 1 .999l-1 5.996-.01.01zm0-7.995h-2.018l.02-.98C11.993 3.719 10.823 0 8.994 0c-.58 0-1.169.3-1.559.77-.36.41-.5.909-.42 1.409.25 1.479.28 2.278-.629 3.278-1 1.089-1.48 1.549-2.388 1.549h-2C.94 6.996 0 7.935 0 8.994v3.998c0 1.06.94 1.999 1.999 1.999h1.719l1.439.86c.16.089.33.139.52.139h6.325c1.13 0 2.839-.5 2.999-1.879l.979-5.946c.02-.08.02-.14.02-.2-.03-1.17-.84-1.969-1.999-1.969h-.01z', {
 				'fill-rule': 'evenodd',
@@ -839,7 +879,7 @@ export function createThumbsDownIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M15.97 7.825L15 1.88C14.83.499 13.123 0 11.994 0H5.686c-.2 0-.38.05-.53.14L3.719 1h-1.72C.94 1 0 1.938 0 2.997v3.998c0 1.059.94 2.018 1.999 1.998h1.999c.909 0 1.389.45 2.388 1.55.91.999.88 1.798.63 3.267-.08.5.06 1 .42 1.42.39.47.979.769 1.558.769 1.83 0 2.999-3.718 2.999-5.017l-.02-.98h2.038c1.16 0 1.949-.799 1.979-1.968 0-.06.02-.13-.02-.2v-.01zm-1.969 1.19h-1.989c-.7 0-1.029.28-1.029.969l.03 1.03c0 1.268-1.17 3.997-1.999 3.997-.5 0-1.079-.5-.999-1 .25-1.579.34-2.778-.89-4.137-1.019-1.13-1.768-1.879-3.127-1.879V1.999l1.668-1h6.327c.729 0 1.948.31 1.998 1l.02.02 1 5.996c-.03.64-.38 1-1 1h-.01z', {
 				'fill-rule': 'evenodd',
@@ -859,7 +899,7 @@ export function createToolsIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 16, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M4.48 7.27c.26.26 1.28 1.33 1.28 1.33l.56-.58-.88-.91 1.69-1.8s-.76-.74-.43-.45c.32-1.19.03-2.51-.87-3.44C4.93.5 3.66.2 2.52.51l1.93 2-.51 1.96-1.89.52-1.93-2C-.19 4.17.1 5.48 1 6.4c.94.98 2.29 1.26 3.48.87zm6.44 1.94l-2.33 2.3 3.84 3.98c.31.33.73.49 1.14.49.41 0 .82-.16 1.14-.49.63-.65.63-1.7 0-2.35l-3.79-3.93zM16 2.53L13.55 0 6.33 7.46l.88.91-4.31 4.46-.99.53-1.39 2.27.35.37 2.2-1.44.51-1.02L7.9 9.08l.88.91L16 2.53z', {
 				'fill-rule': 'evenodd',
@@ -879,7 +919,7 @@ export function createTrashCanIcon({
 } = {}) {
 	return createSVG({
 		viewBox: [0, 0, 14, 16],
-		...rest, height: size, width: parseInt(16 * (size / 16)), fill, classList, part, slot, animation,
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
 			createPath('M11 2H9c0-.55-.45-1-1-1H5c-.55 0-1 .45-1 1H2c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1v9c0 .55.45 1 1 1h7c.55 0 1-.45 1-1V5c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1zm-1 12H3V5h1v8h1V5h1v8h1V5h1v8h1V5h1v9zm1-10H2V3h9v1z', {
 				'fill-rule': 'evenodd',

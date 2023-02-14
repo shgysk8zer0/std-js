@@ -1,8 +1,21 @@
 import { SVG, XLINK } from './namespaces.js';
 import { isObject } from './utility.js';
+import { css, data, attr } from './attrs.js';
+
+export const rotate = n => `rotate(${n})`;
+export const scale = n => `scale(${n})`;
+export const translate = (x, y) => `translate(${x}, ${y})`;
 
 export function createSVGElement (tag, {
 	fill, stroke, width, height, pathLength, children = [], id, classList = [],
+	styles, dataset,
+	events: {
+		capture,
+		passive,
+		once,
+		signal,
+		...events
+	} = {},
 	animation: {
 		keyframes,
 		duration = 0,
@@ -48,19 +61,11 @@ export function createSVGElement (tag, {
 		el.setAttribute('pathLength', pathLength.toString());
 	}
 
-	Object.entries(rest).forEach(([name, val]) => {
-		if (val instanceof URL) {
-			el.setAttribute(name, val.href);
-		} else if (typeof val === 'string') {
-			el.setAttribute(name, val);
-		} else if (typeof val === 'number' && ! Number.isNaN(val)) {
-			el.setAttribute(name, val.toString());
-		} else if (Array.isArray(val) && val.length !== 0) {
-			el.setAttribute(name, val.join(' '));
-		} else if (typeof val === 'boolean') {
-			el.toggleAttribute(name, val);
-		}
-	});
+	if (typeof rest.title === 'string') {
+		const title = createSVGElement('title');
+		title.textContent = rest.title;
+		el.prepend(title);
+	}
 
 	if (Array.isArray(keyframes) || isObject(keyframes) && el.animate instanceof Function) {
 		el.animate(keyframes, {
@@ -72,6 +77,22 @@ export function createSVGElement (tag, {
 	if (Array.isArray(children) && children.length !== 0) {
 		el.append(...children.filter(node => (typeof node === 'string') || (node instanceof Element)));
 	}
+
+	if (isObject(styles)) {
+		css(el, styles);
+	}
+
+	if (isObject(events)) {
+		Object.entries(events).forEach(
+			([event, callback]) => el.addEventListener(event, callback, { capture, passive, once, signal })
+		);
+	}
+
+	if (isObject(dataset)) {
+		data(el, dataset);
+	}
+
+	attr(el, rest);
 
 	return el;
 }
