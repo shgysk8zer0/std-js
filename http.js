@@ -3,6 +3,7 @@ import { signalAborted } from './abort.js';
 import { setURLParams, setUTMParams, isObject, isNullish } from './utility.js';
 import { createPolicy } from './trust.js';
 import { HTTPException } from './HTTPException.js';
+import TYPES from './types.js';
 
 /**
  * To be used when `integrity` is passed when `fetch()`ing HTML
@@ -135,7 +136,7 @@ export async function POST(url, {
 			body = JSON.stringify(body);
 
 			if (headers instanceof Headers && ! headers.has('Content-Type')) {
-				headers.set('Content-Type', 'application/json');
+				headers.set('Content-Type', TYPES.JSON);
 			}
 		}
 	}
@@ -187,7 +188,7 @@ export async function getHTML(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
-	headers = new Headers({ Accept: 'text/html' }),
+	headers = new Headers({ Accept: TYPES.HTML }),
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -219,7 +220,7 @@ export async function getText(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
-	headers = new Headers({ Accept: 'text/plain' }),
+	headers = new Headers({ Accept: TYPES.TEXT }),
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -239,7 +240,7 @@ export async function getJSON(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
-	headers = new Headers({ Accept: 'application/json' }),
+	headers = new Headers({ Accept: TYPES.JSON }),
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -339,7 +340,7 @@ export async function postHTML(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
-	headers = new Headers({ Accept: 'text/html' }),
+	headers = new Headers({ Accept: TYPES.HTML }),
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -370,7 +371,7 @@ export async function postJSON(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
-	headers = new Headers({ Accept: 'application/json' }),
+	headers = new Headers({ Accept: TYPES.JSON }),
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -390,7 +391,7 @@ export async function postText(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
-	headers = new Headers({ Accept: 'text/plain' }),
+	headers = new Headers({ Accept: TYPES.TEXT }),
 	integrity = undefined,
 	keepalive = undefined,
 	signal = undefined,
@@ -443,7 +444,7 @@ export function navigateTo(to, {
 
 export function postNav(url, data = {}, {
 	target = '_self' ,
-	enctype = 'application/x-www-form-urlencoded',
+	enctype = TYPES.FORM_URL_ENCODED,
 	signal,
 } = {}) {
 	if (! (signal instanceof AbortSignal && signal.aborted)) {

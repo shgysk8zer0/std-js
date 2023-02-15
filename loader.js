@@ -1,4 +1,5 @@
 import { loaded } from './events.js';
+import { JS } from './types.js';
 import { createScript, createImage, createLink } from './elements.js';
 
 /**
@@ -76,7 +77,7 @@ export async function loadScript(src, {
 	async = true,
 	defer = false,
 	noModule = false,
-	type = 'application/javascript',
+	type = JS,
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
 	integrity = null,

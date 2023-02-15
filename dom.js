@@ -2,6 +2,7 @@ import { signalAborted } from './abort.js';
 import { addListener, listen, loaded as whenLoaded } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
 import { isHTML, isTrustPolicy } from './trust.js';
+import { HTML } from './types.js';
 import { errorToEvent } from './utility.js';
 import { data as setData, css as setCss, attr as setAttr } from './attrs.js';
 
@@ -522,12 +523,12 @@ export async function whenPageHidden({ signal } = {}) {
 /**
  * @deprecated [will be removed in v3.0.0]
  */
-export function parseHTML(text, { type = 'text/html', asFrag = true, head = true, sanitizer, policy } = {}) {
+export function parseHTML(text, { type = HTML, asFrag = true, head = true, sanitizer, policy } = {}) {
 	console.warn('`parseHTML` is deprecated. Please use `parse` instead');
 	return parse(text, { type, asFrag, head, sanitizer, policy });
 }
 
-export function parse(text, { type = 'text/html', asFrag = true, sanitizer, policy } = {}) {
+export function parse(text, { type = HTML, asFrag = true, sanitizer, policy } = {}) {
 	const parser = new DOMParser();
 
 	if (asFrag) {
