@@ -52,6 +52,27 @@ export function createAlertIcon({
 	});
 }
 
+export  function createAppsIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0,24, 24],
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
+		children: [
+			createPath('M 15.9994,19.9981L 19.9994,19.9981L 19.9994,15.9981L 15.9994,15.9981M 15.9994,13.9981L 19.9994,13.9981L 19.9994,9.99807L 15.9994,9.99807M 9.99938,7.99807L 13.9994,7.99807L 13.9994,3.99807L 9.99938,3.99807M 15.9994,7.99807L 19.9994,7.99807L 19.9994,3.99807L 15.9994,3.99807M 9.99938,13.9981L 13.9994,13.9981L 13.9994,9.99807L 9.99938,9.99807M 3.99938,13.9981L 7.99938,13.9981L 7.99938,9.99807L 3.99938,9.99807M 3.99938,19.9981L 7.99938,19.9981L 7.99938,15.9981L 3.99938,15.9981M 9.99938,19.9981L 13.9994,19.9981L 13.9994,15.9981L 9.99938,15.9981M 3.99938,7.99807L 7.99938,7.99807L 7.99938,3.99807L 3.99938,3.99807L 3.99938,7.99807 Z', {
+				'stroke-width': 0.2,
+				'stroke-linejoin': 'round',
+			})
+		]
+	});
+}
+
 export function createBellIcon({
 	size = 16,
 	fill = 'currentColor',
@@ -316,7 +337,9 @@ export function createFileZipIcon({
 	});
 }
 
-export function createLinkIcon({
+
+
+export function createFindLocationIcon({
 	size = 16,
 	fill = 'currentColor',
 	classList = [],
@@ -329,9 +352,25 @@ export function createLinkIcon({
 		viewBox: [0, 0, 16, 16],
 		...rest, height: size, width: size, fill, classList, part, slot, animation,
 		children: [
-			createPath('M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z', {
-				'fill-rule': 'evenodd',
-			})
+			createPath('M7 0v1.031A6.514 6.514 0 0 0 1.062 7H0v1h1.063A6.514 6.514 0 0 0 7 13.969V15h1v-1.031c3.188-.234 5.724-2.78 5.969-5.969H15V7h-1.031C13.724 3.811 11.189 1.233 8 1V0zm.531 2.813c2.607 0 4.688 2.08 4.688 4.687s-2.081 4.688-4.688 4.688c-2.606 0-4.75-2.082-4.75-4.688s2.144-4.688 4.75-4.688zM7.5 4a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z')
+		]
+	});
+}
+
+export function createGrabberIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 8, 16],
+		...rest, height: size, width: parseInt(8 * (size / 16)), fill, classList, part, slot, animation,
+		children: [
+			createPath('M8 4v1H0V4h8zM0 8h8V7H0v1zm0 3h8v-1H0v1z', { 'fill-rule': 'evenodd' })
 		]
 	});
 }
@@ -396,6 +435,26 @@ export function createInfoIcon({
 	});
 }
 
+export function createLinkIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
+		children: [
+			createPath('M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z', {
+				'fill-rule': 'evenodd',
+			})
+		]
+	});
+}
+
 export function createLinkExternalIcon({
 	size = 16,
 	fill = 'currentColor',
@@ -412,6 +471,45 @@ export function createLinkExternalIcon({
 			createPath('M11 10h1v3c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h3v1H1v10h10v-3zM6 2l2.25 2.25L5 7.5 6.5 9l3.25-3.25L12 8V2H6z', {
 				'fill-rule': 'evenodd',
 			})
+		]
+	});
+}
+
+export function createMarkLocationIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
+		children: [
+			createPath('M8 0a5 5 0 0 0-5 5c0 .173.014.332.031.5.014.167.036.336.063.5C3.666 9.514 6 12.003 8 14.003c2-2 4.334-4.489 4.906-8.003a6.38 6.38 0 0 0 .063-.5c.017-.168.03-.327.03-.5a5 5 0 0 0-5-5zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4z')
+		]
+	});
+}
+
+/**
+ * Adwaita Icons
+ */
+export function createOpenMenuIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
+		children: [
+			createPath('M3 3h10v2H3zm0 4h10v2H3zm0 4h10v2H3z')
 		]
 	});
 }
@@ -437,26 +535,6 @@ export function createPublicShareIcon({
 			}),
 			createPath('M12.625 2.156L2.562 7.031.75 7.938l1.812.906 10.032 5.062.906-1.812-8.22-4.156 8.219-4-.875-1.782z', {
 				'overflow': 'visible',
-			})
-		]
-	});
-}
-
-export function createSignInIcon({
-	size = 16,
-	fill = 'currentColor',
-	classList = [],
-	part = [],
-	slot,
-	animation,
-	...rest
-} = {}) {
-	return createSVG({
-		viewBox: [0, 0, 14, 16],
-		...rest, height: size, width: parseInt(14 * (size / 16)), fill, classList, part, slot, animation,
-		children: [
-			createPath('M7 6.75V12h4V8h1v4c0 .55-.45 1-1 1H7v3l-5.45-2.72c-.33-.17-.55-.52-.55-.91V1c0-.55.45-1 1-1h9c.55 0 1 .45 1 1v3h-1V1H3l4 2v2.25L10 3v2h4v2h-4v2L7 6.75z', {
-				'fill-rule': 'evenodd',
 			})
 		]
 	});
@@ -498,6 +576,24 @@ export function createMailIcon({
 			createPath('M0 4v8c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1H1c-.55 0-1 .45-1 1zm13 0L7 9 1 4h12zM1 5.5l4 3-4 3v-6zM2 12l3.5-3L7 10.5 8.5 9l3.5 3H2zm11-.5l-4-3 4-3v6z', {
 				'fill-rule': 'evenodd',
 			})
+		]
+	});
+}
+
+export function createMapIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 48, 48],
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
+		children: [
+			createPath('M41 6c-.11 0-.21.01-.31.05L30 10.2 18 6 6.73 9.8c-.42.14-.73.5-.73.96V41c0 .55.45 1 1 1 .11 0 .21-.01.31-.05L18 37.8 30 42l11.28-3.79c.42-.15.72-.51.72-.97V7c0-.55-.45-1-1-1zM30 38l-12-4.21V10l12 4.21V38z')
 		]
 	});
 }
@@ -724,6 +820,26 @@ export function createSettingsIcon({
 
 export const createShareIcon = (...args) => createPublicShareIcon(...args);
 
+export function createSignInIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 14, 16],
+		...rest, height: size, width: parseInt(14 * (size / 16)), fill, classList, part, slot, animation,
+		children: [
+			createPath('M7 6.75V12h4V8h1v4c0 .55-.45 1-1 1H7v3l-5.45-2.72c-.33-.17-.55-.52-.55-.91V1c0-.55.45-1 1-1h9c.55 0 1 .45 1 1v3h-1V1H3l4 2v2.25L10 3v2h4v2h-4v2L7 6.75z', {
+				'fill-rule': 'evenodd',
+			})
+		]
+	});
+}
+
 export function createSignOutIcon({
 	size = 16,
 	fill = 'currentColor',
@@ -785,6 +901,26 @@ export function createSpinnerIcon({
 	});
 }
 
+export function createSyncIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 12, 16],
+		...rest, height: size, width: parseInt(12 * (size / 16)), fill, classList, part, slot, animation,
+		children: [
+			createPath('M10.24 7.4a4.15 4.15 0 0 1-1.2 3.6 4.346 4.346 0 0 1-5.41.54L4.8 10.4.5 9.8l.6 4.2 1.31-1.26c2.36 1.74 5.7 1.57 7.84-.54a5.876 5.876 0 0 0 1.74-4.46l-1.75-.34zM2.96 5a4.346 4.346 0 0 1 5.41-.54L7.2 5.6l4.3.6-.6-4.2-1.31 1.26c-2.36-1.74-5.7-1.57-7.85.54C.5 5.03-.06 6.65.01 8.26l1.75.35A4.17 4.17 0 0 1 2.96 5z', {
+				'fill-rule': 'evenodd',
+			})
+		]
+	});
+}
+
 export function createSystemSoftwareInstallIcon({
 	size = 16,
 	fill = 'currentColor',
@@ -803,26 +939,6 @@ export function createSystemSoftwareInstallIcon({
 			}),
 			createPath('M6.688 2.969a1 1 0 0 0-.657.375L3.22 6.812a1 1 0 0 0-.22.625v1a1 1 0 1 0 2 0v-.656l2.594-3.156a1 1 0 0 0-.907-1.656zm2.218 3a1 1 0 1 0-.031 2l2.156.375V8.5a1 1 0 1 0 2 0v-1a1 1 0 0 0-.812-1l-3-.5a1 1 0 0 0-.313-.031z', {
 				'overflow': 'visible',
-			})
-		]
-	});
-}
-
-export function createSyncIcon({
-	size = 16,
-	fill = 'currentColor',
-	classList = [],
-	part = [],
-	slot,
-	animation,
-	...rest
-} = {}) {
-	return createSVG({
-		viewBox: [0, 0, 12, 16],
-		...rest, height: size, width: parseInt(12 * (size / 16)), fill, classList, part, slot, animation,
-		children: [
-			createPath('M10.24 7.4a4.15 4.15 0 0 1-1.2 3.6 4.346 4.346 0 0 1-5.41.54L4.8 10.4.5 9.8l.6 4.2 1.31-1.26c2.36 1.74 5.7 1.57 7.84-.54a5.876 5.876 0 0 0 1.74-4.46l-1.75-.34zM2.96 5a4.346 4.346 0 0 1 5.41-.54L7.2 5.6l4.3.6-.6-4.2-1.31 1.26c-2.36-1.74-5.7-1.57-7.85.54C.5 5.03-.06 6.65.01 8.26l1.75.35A4.17 4.17 0 0 1 2.96 5z', {
-				'fill-rule': 'evenodd',
 			})
 		]
 	});
@@ -944,6 +1060,42 @@ export function createXIcon({
 			createPath('M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z', {
 				'fill-rule': 'evenodd',
 			})
+		]
+	});
+}
+
+export function createZoomInIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
+		children: [
+			createPath('M3.19 2c-.663 0-1.188.549-1.188 1.219v9.562c0 .67.525 1.22 1.188 1.22h9.625c.663 0 1.187-.55 1.187-1.22V3.22c0-.67-.524-1.219-1.187-1.219zm3.812 3h2v2h2v2h-2v2h-2V9h-2V7h2z')
+		]
+	});
+}
+
+export function createZoomOutIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 16, 16],
+		...rest, height: size, width: size, fill, classList, part, slot, animation,
+		children: [
+			createPath('M3.19 2c-.663 0-1.188.549-1.188 1.219v9.562c0 .67.525 1.22 1.188 1.22h9.625c.663 0 1.187-.55 1.187-1.22V3.22c0-.67-.524-1.219-1.187-1.219zm1.812 5h6v2h-6z')
 		]
 	});
 }

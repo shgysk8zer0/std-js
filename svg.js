@@ -2,9 +2,18 @@ import { SVG, XLINK } from './namespaces.js';
 import { isObject } from './utility.js';
 import { css, data, attr } from './attrs.js';
 
+export const TYPE = 'image/svg+xml';
 export const rotate = n => `rotate(${n})`;
 export const scale = n => `scale(${n})`;
 export const translate = (x, y) => `translate(${x}, ${y})`;
+
+export function createSVGFile(svg, { name = 'image.svg' } = {}) {
+	if (svg instanceof SVGElement) {
+		return new File([svg.outerHTML], name, { type: TYPE });
+	} else {
+		throw new TypeError('Expected an <svg>');
+	}
+}
 
 export function createSVGElement (tag, {
 	fill, stroke, width, height, pathLength, children = [], id, classList = [],
