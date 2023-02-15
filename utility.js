@@ -101,10 +101,20 @@ export function setUTMParams(url, {
 	campaign: utm_campaign,
 	term: utm_term,
 } = {}) {
-	if (! (url instanceof URL)) {
-		return setURLParams(url, { utm_source, utm_medium, utm_content, utm_campaign, utm_term });
+	if (isNullish(url)) {
+		return null;
+	} else if (! (url instanceof URL)) {
+		return setUTMParams(new URL(url, document.baseURI), {
+			source: utm_source,
+			medium: utm_medium,
+			content: utm_content,
+			campaign: utm_campaign,
+			term: utm_term,
+		});
+	} else if (typeof utm_source !== 'string') {
+		return url;
 	} else {
-		return new URL(url, document.baseURI);
+		return setURLParams(url, { utm_source, utm_medium, utm_content, utm_campaign, utm_term });
 	}
 }
 
