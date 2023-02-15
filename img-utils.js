@@ -1,15 +1,16 @@
 import { getDeferred } from './promises.js';
 import { createElement } from './elements.js';
+import { JPEG, PNG, GIF, WEBP, SVG } from './types.js';
 
 export const EXTENSIONS = {
-	'image/jpeg': '.jpg',
-	'image/png': '.png',
-	'image/webp': '.webp',
+	[JPEG]: '.jpg',
+	[PNG]: '.png',
+	[WEBP]: '.webp',
 };
 
-export const SUPPORTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+export const SUPPORTED_TYPES = [JPEG, PNG, GIF, WEBP, SVG];
 
-const DEFAULT_TYPE = 'image/jpeg';
+const DEFAULT_TYPE = JPEG;
 const DEFAULT_QUALITY = 0.8;
 const DEFAULT_HEIGHT = 480;
 
