@@ -3,7 +3,7 @@ import { signalAborted } from './abort.js';
 import { setURLParams, setUTMParams, isObject, isNullish } from './utility.js';
 import { createPolicy } from './trust.js';
 import { HTTPException } from './HTTPException.js';
-import TYPES from './types.js';
+import * as TYPES from './types.js';
 
 /**
  * To be used when `integrity` is passed when `fetch()`ing HTML
