@@ -10,24 +10,27 @@ export const between = (min, val, max) => isNumber(val) && val >= min && val <= 
 
 export const clamp = (min, value, max) => Math.min(max, Math.max(min, value));
 
-export function* range(start, end, step = 1) {
-	if (Number.range instanceof Function) {
-		return Number.range(start, end, step);
-	} else {
-		[start, end] = [Math.min(start, end), Math.max(start, end)];
+const supportsRange = () => 'Iterator' in globalThis && (globalThis.Iterator.range instanceof Function);
 
-		while (start <= end) {
-			yield start;
-			start += step;
-		}
+/**
+ * @deprecated
+ */
+export function range(start, end, step = 1) {
+	console.warn('range() is deprecated. Use `Iterator.range()` instead.');
+	if (supportsRange()) {
+		return Iterator.range(start, end, { step });
+	} else {
+		throw new DOMException('`Iterator.range()` not supported.');
 	}
 }
 
 /**
- * Note: Requires iterator helper methods & `Number.range()`
+ * Note: Requires iterator helper methods & `Iterator.range()`
  */
 export function isPrime(n) {
-	if (! Number.isSafeInteger(n) || n < 2) {
+	if (! supportsRange()) {
+		throw new DOMException('`Iterator.range()` not supported.');
+	} else if (! Number.isSafeInteger(n) || n < 2) {
 		return false;
 	} else if (n === 2 || n === 3 || n === 5 || n === 7) {
 		return true;
@@ -35,14 +38,14 @@ export function isPrime(n) {
 		return false;
 	} else {
 		const sqrtAndOne = Math.floor(Math.sqrt(n)) + 1;
-		return ! Number.range(3, sqrtAndOne, 2).some(f => n % f === 0);
+		return ! Iterator.range(3, sqrtAndOne, { step: 2 }).some(f => n % f === 0);
 	}
 }
 
 /**
- * Note: Requires iterator helper methods & `Number.range()`
+ * Note: Requires iterator helper methods & `Iterator.range()`
  */
-export const primes = (start = 2, end = Infinity) => Number.range(start, end).filter(isPrime);
+export const primes = (start = 2, end = Infinity) => Iterator.range(start, end).filter(isPrime);
 
 export function* fibonacci(terms = Number.MAX_SAFE_INTEGER) {
 	if (! (Number.isSafeInteger(terms) && terms > 0)) {

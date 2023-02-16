@@ -33,6 +33,7 @@
       "cookieStore": "readonly",
       "globalThis": "readonly",
       "Sanitizer": "readonly",
+      "Iterator": "readonly",
       "scheduler": "readonly"
     }
 }
