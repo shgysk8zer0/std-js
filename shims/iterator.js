@@ -12,6 +12,66 @@ if (! ('Iterator' in globalThis)) {
 
 const Iterator = globalThis.Iterator;
 
+if (! (Iterator.range instanceof Function)) {
+	Iterator.range = function* range(start, end, option) {
+		if (typeof option === 'number' || typeof option === 'bigint') {
+			for (const n of Iterator.range(start, end, { step: option })) {
+				yield n;
+			}
+		} else if (typeof option !== 'object' || Object.is(option, null)) {
+			for (const n of Iterator.range(start, end, {})) {
+				yield n;
+			}
+		} else {
+			const {
+				// Default to +/-, Number/BigInt based on start & end
+				step = typeof start === 'number'
+					? start < end ? 1 : -1
+					: start < end ? 1n : -1n,
+				inclusive = false,
+			} = option;
+
+			if (typeof start !== 'number' && typeof start !== 'bigint') {
+				throw new TypeError('Start must be a number');
+			} else if (Number.isNaN(start)) {
+				throw new RangeError('Invalid start');
+			} else if (typeof end !== 'number' && typeof end !== 'bigint') {
+				throw new TypeError('End must be a number');
+			} else if (Number.isNaN(end)) {
+				throw new RangeError('Invalid end');
+			} else if (typeof step !== 'number' && typeof step !== 'bigint') {
+				throw new TypeError('Step must be a number');
+			} else if (Number.isNaN(step)) {
+				throw new RangeError('Invalid step');
+			} else if (step === 0) {
+				throw new RangeError('Step must not be 0');
+			} else if ((step < 0 && start < end) || (step > 0 && start > end)) {
+				return;
+			} else if (inclusive) {
+				if (step > 0) {
+					for (let n = start; n <= end; n+= step) {
+						yield n;
+					}
+				} else {
+					for (let n = start; n >= end; n+= step) {
+						yield n;
+					}
+				}
+			} else {
+				if (step > 0) {
+					for (let n = start; n < end; n+= step) {
+						yield n;
+					}
+				} else {
+					for (let n = start; n > end; n+= step) {
+						yield n;
+					}
+				}
+			}
+		}
+	};
+}
+
 if (! (Iterator.prototype[Symbol.toStringTag])) {
 	Iterator.prototype[Symbol.toStringTag] = 'Iterator';
 }
