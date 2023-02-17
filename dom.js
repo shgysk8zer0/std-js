@@ -505,7 +505,7 @@ export const beforeInstallPrompt = callOnce(async function({ signal } = {}) {
 		listen(globalThis, 'beforeinstallprompt', resolve, { once: true, capture: true, signal });
 
 		if (signal instanceof AbortSignal) {
-			listen(signal, 'abort', ({ reason }) => rejcet(reason), { once: true });
+			listen(signal, 'abort', ({ reason }) => reject(reason), { once: true });
 		}
 	}
 
