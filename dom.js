@@ -3,7 +3,7 @@ import { addListener, listen, loaded as whenLoaded } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
 import { isHTML, isTrustPolicy } from './trust.js';
 import { HTML } from './types.js';
-import { errorToEvent } from './utility.js';
+import { errorToEvent, callOnce } from './utility.js';
 import { data as setData, css as setCss, attr as setAttr } from './attrs.js';
 
 export const readyStates = ['loading', 'interactive', 'complete'];
@@ -395,7 +395,7 @@ export async function when(what, events, { capture, passive, signal, base } = {}
 	return promise;
 }
 
-export async function ready({ signal } = {}) {
+export const ready = callOnce(async function ready({ signal } = {}) {
 	const { promise, resolve, reject } = getDeferred();
 
 	if (signal instanceof AbortSignal && signal.aborted) {
@@ -414,7 +414,7 @@ export async function ready({ signal } = {}) {
 	}
 
 	return promise;
-}
+});
 
 export async function whenReadyState(state, { signal } = {}) {
 	const { resolve, reject, promise } = getDeferred();
@@ -455,15 +455,15 @@ export async function whenReadyState(state, { signal } = {}) {
 	return promise;
 }
 
-export async function interactive({ signal } = {}) {
+export const interactive =  callOnce(async function interactive({ signal } = {}) {
 	await whenReadyState('interactive', { signal });
-}
+});
 
-export async function complete({ signal } = {}) {
+export const complete = callOnce(async function complete({ signal } = {}) {
 	await whenReadyState('complete', { signal });
-}
+});
 
-export async function loaded({ signal } = {}) {
+export const loaded =  callOnce(async function loaded({ signal } = {}) {
 	const { promise, resolve, reject } = getDeferred();
 
 	if (signal instanceof AbortSignal && signal.aborted) {
@@ -482,19 +482,35 @@ export async function loaded({ signal } = {}) {
 	}
 
 	return promise;
-}
+});
 
-export async function unloaded({ signal } = {}) {
+export const unloaded = callOnce(async function unloaded({ signal } = {}) {
 	const { promise, resolve } = getDeferred();
 	listen(globalThis, 'unload', resolve, { signal, once: true, capture: true });
 	return promise;
-}
+});
 
-export async function beforeUnload({ signal } = {}) {
+export const beforeUnload = callOnce(async function beforeUnload({ signal } = {}) {
 	const { promise, resolve } = getDeferred({ signal });
 	listen(globalThis, 'beforeunload', resolve, { signal, once: true, capture: true });
 	return promise;
-}
+});
+
+export const beforeInstallPrompt = callOnce(async function({ signal } = {}) {
+	const { promise, resolve, reject } = getDeferred();
+
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.reason);
+	} else if ('onbeforeinstallprompt' in globalThis) {
+		listen(globalThis, 'beforeinstallprompt', resolve, { once: true, capture: true, signal });
+
+		if (signal instanceof AbortSignal) {
+			listen(signal, 'abort', ({ reason }) => reject(reason), { once: true });
+		}
+	}
+
+	return await promise;
+});
 
 export async function whenPageVisible({ signal } = {}) {
 	const { promise, resolve } = getDeferred({ signal });
