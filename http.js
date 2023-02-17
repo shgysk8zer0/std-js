@@ -1,6 +1,6 @@
 import { parse, loaded } from './dom.js';
 import { signalAborted } from './abort.js';
-import { setURLParams, setUTMParams, isObject, isNullish } from './utility.js';
+import { setURLParams, setUTMParams, isObject, isNullish, callOnce } from './utility.js';
 import { createPolicy } from './trust.js';
 import { HTTPException } from './HTTPException.js';
 import * as TYPES from './types.js';
@@ -302,10 +302,10 @@ export async function submitForm(form) {
 	}
 }
 
-export async function getManifest({ timeout, signal } = {}) {
+export const getManifest = callOnce(async function getManifest({ timeout, signal } = {}) {
 	const resp = await getLink('link[rel="manifest"][href]', { timeout, signal });
 	return await resp.json();
-}
+});
 
 export async function getLink(link, { timeout, signal } = {}) {
 	if (typeof link === 'string') {

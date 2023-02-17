@@ -1,4 +1,5 @@
 import { randomInt } from './math.js';
+import { isAsyncFunction } from './promises.js';
 
 const funcs = new WeakMap();
 
@@ -51,17 +52,27 @@ export function errorToEvent(error, type = 'error') {
 
 
 export function callOnce(callback, thisArg) {
-	const func = function(...args) {
-		if (funcs.has(func)) {
-			return funcs.get(func);
-		} else {
-			const retVal = callback.apply(thisArg, args);
-			funcs.set(func, retVal);
-			return retVal;
-		}
-	};
+	if (callback.once instanceof Function) {
+		return callback.once(thisArg);
+	} else {
+		return function(...args) {
+			if (funcs.has(callback)) {
+				return funcs.get(callback);
+			} else if (isAsyncFunction(callback)) {
+				const retVal = callback.apply(thisArg || this, args).catch(err => {
+					funcs.delete(callback);
+					throw err;
+				});
 
-	return func;
+				funcs.set(callback, retVal);
+				return retVal;
+			} else if (callback instanceof Function) {
+				const retVal = callback.apply(thisArg || this, args);
+				funcs.set(callback, retVal);
+				return retVal;
+			}
+		};
+	}
 }
 
 export function setURLParams(forURL, params) {
