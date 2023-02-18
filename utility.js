@@ -27,7 +27,15 @@ export function isNullish(val) {
 			return true;
 
 		case 'object':
-			return Array.isArray(val) ? val.length === 0 : Object.is(val, null);
+			if (Object.is(val, null)) {
+				return true;
+			} else if (Array.isArray(val)) {
+				return val.length === 0;
+			} else if (val instanceof Date) {
+				return Number.isNaN(val.getTime());
+			} else {
+				return false;
+			}
 
 		case 'number':
 			return Number.isNaN(val);
