@@ -4,7 +4,7 @@ import { isAsyncFunction } from './promises.js';
 const funcs = new WeakMap();
 
 export function getURLResolver({ base = document.baseURI, path = './' } = {}) {
-	const url = new URL(path, base).href;
+	const url = new URL(path, base);
 
 	return path => new URL(path, url).href;
 }
@@ -22,7 +22,119 @@ export function isUndefined(val) {
 }
 
 export function isNullish(val) {
-	return isUndefined(val) || isNull(val) || Number.isNaN(val);
+	switch (typeof val) {
+		case 'undefined':
+			return true;
+
+		case 'object':
+			if (Object.is(val, null)) {
+				return true;
+			} else if (Array.isArray(val)) {
+				return val.length === 0;
+			} else if (val instanceof Date) {
+				return Number.isNaN(val.getTime());
+			} else {
+				return false;
+			}
+
+		case 'number':
+			return Number.isNaN(val);
+
+		case 'string':
+			return val.length === 0;
+
+		default:
+			return false;
+	}
+}
+
+export function getType(thing) {
+	switch (typeof thing) {
+		case 'undefined':
+			return 'Undefined';
+
+		case 'object':
+			return Object.is(thing, null) ? 'Null' : thing.constructor.name;
+
+		case 'string':
+			return 'String';
+
+		case 'number':
+			return Number.isNaN(thing) ? 'NaN' : 'Number';
+
+		case 'bigint':
+			return 'BigInt';
+
+		case 'boolean':
+			return 'Boolean';
+
+		case 'symbol':
+			return 'Symbol';
+
+		default:
+			return 'Unknown';
+	}
+}
+
+export function isA(thing, expectedType) {
+	return getType(thing) === expectedType;
+}
+
+export function sameType(thing1, thing2) {
+	return isA(thing1, getType(thing2));
+}
+
+export function deepEquals(thing1, thing2, { depth = 5 } = {}) {
+	const type1 = getType(thing1);
+	const type2 = getType(thing2);
+
+	if (! Number.isSafeInteger(depth)) {
+		throw new TypeError('`depth` must be an integer');
+	} else if (type1 !== type2) {
+		return false;
+	} else if (thing1 === thing2) {
+		return true;
+	} else {
+		depth--;
+		switch(type1) {
+			case 'NaN':
+				// Since NaN !== NaN
+				return true;
+
+			case 'BigInt':
+			case 'Number':
+			case 'String':
+			case 'Symbol':
+				// Already know not equal
+				return false;
+
+			case 'Object':
+				return depth < 0 || deepEquals(Object.entries(thing1), Object.entries(thing2), { depth });
+
+			case 'Array':
+				return depth < 0 || (
+					thing1.length === thing2.length
+					&& thing1.every((thing, i) => deepEquals(thing, thing2[i], { depth }))
+				);
+
+			case 'Map':
+			case 'Set':
+				return depth < 0 || deepEquals([...thing1], [...thing2], { depth });
+
+			case 'URL':
+				return thing1.href === thing2.href;
+
+			default:
+				if (thing1 instanceof Node) {
+					return thing1.isSameNode(thing2);
+				} else if (Symbol.iterator in thing1) {
+					return depth < 0 || deepEquals([...thing1], [...thing2], { depth });
+				} else {
+					// Since already not `===`
+					return false;
+				}
+		}
+	}
 }
 
 /* global define */
