@@ -84,6 +84,59 @@ export function sameType(thing1, thing2) {
 	return isA(thing1, getType(thing2));
 }
 
+export function deepEquals(thing1, thing2, { depth = 5 } = {}) {
+	const type1 = getType(thing1);
+	const type2 = getType(thing2);
+
+	if (! Number.isSafeInteger(depth)) {
+		throw new TypeError('`depth` must be an integer');
+	} else if (type1 !== type2) {
+		return false;
+	} else if (thing1 === thing2) {
+		return true;
+	} else {
+		depth--;
+		switch(type1) {
+			case 'NaN':
+				// Since NaN !== NaN
+				return true;
+
+			case 'BigInt':
+			case 'Number':
+			case 'String':
+			case 'Symbol':
+				// Already know not equal
+				return false;
+
+			case 'Object':
+				return depth < 0 || deepEquals(Object.entries(thing1), Object.entries(thing2), { depth });
+
+			case 'Array':
+				return depth < 0 || (
+					thing1.length === thing2.length
+					&& thing1.every((thing, i) => deepEquals(thing, thing2[i], { depth }))
+				);
+
+			case 'Map':
+			case 'Set':
+				return depth < 0 || deepEquals([...thing1], [...thing2], { depth });
+
+			case 'URL':
+				return thing1.href === thing2.href;
+
+			default:
+				if (thing1 instanceof Node) {
+					return thing1.isSameNode(thing2);
+				} else if (Symbol.iterator in thing1) {
+					return depth < 0 || deepEquals([...thing1], [...thing2], { depth });
+				} else {
+					// Since already not `===`
+					return false;
+				}
+		}
+	}
+}
+
 /* global define */
 export function amd(name, factory, requires = {}) {
 	if (typeof define === 'function' && define.amd) {
