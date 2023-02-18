@@ -4,7 +4,7 @@ import { isAsyncFunction } from './promises.js';
 const funcs = new WeakMap();
 
 export function getURLResolver({ base = document.baseURI, path = './' } = {}) {
-	const url = new URL(path, base).href;
+	const url = new URL(path, base);
 
 	return path => new URL(path, url).href;
 }
@@ -22,7 +22,58 @@ export function isUndefined(val) {
 }
 
 export function isNullish(val) {
-	return isUndefined(val) || isNull(val) || Number.isNaN(val);
+	switch (typeof val) {
+		case 'undefined':
+			return true;
+
+		case 'object':
+			return Array.isArray(val) ? val.length === 0 : Object.is(val, null);
+
+		case 'number':
+			return Number.isNaN(val);
+
+		case 'string':
+			return val.length === 0;
+
+		default:
+			return false;
+	}
+}
+
+export function getType(thing) {
+	switch (typeof thing) {
+		case 'undefined':
+			return 'Undefined';
+
+		case 'object':
+			return Object.is(thing, null) ? 'Null' : thing.constructor.name;
+
+		case 'string':
+			return 'String';
+
+		case 'number':
+			return 'Number';
+
+		case 'bigint':
+			return 'BigInt';
+
+		case 'boolean':
+			return 'Boolean';
+
+		case 'symbol':
+			return 'Symbol';
+
+		default:
+			return 'Unknown';
+	}
+}
+
+export function isA(thing, expectedType) {
+	return getType(thing) === expectedType;
+}
+
+export function sameType(thing1, thing2) {
+	return isA(thing1, getType(thing2));
 }
 
 /* global define */
