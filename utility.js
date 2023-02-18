@@ -60,7 +60,7 @@ export function getType(thing) {
 			return 'String';
 
 		case 'number':
-			return 'Number';
+			return Number.isNaN(thing) ? 'NaN' : 'Number';
 
 		case 'bigint':
 			return 'BigInt';
