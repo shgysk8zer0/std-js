@@ -9,15 +9,15 @@ export const infinitPromise = new Promise(() => {});
 
 //export const loadedPromise = loaded();
 
-export const manifestPromise = new Promise((resolve, reject) => {
-	ready().then(() => getManifest()).then(resolve).catch(reject);
-});
+// export const manifestPromise = new Promise((resolve, reject) => {
+// 	ready().then(() => getManifest()).then(resolve).catch(reject);
+// });
 
-export const beforeInstallPromptPromise = beforeInstallPrompt();
+// export const beforeInstallPromptPromise = beforeInstallPrompt();
 
-export function isAsyncFunction(what) {
-	return what instanceof Function && what.constructor.name === 'AsyncFunction';
-}
+// export function isAsyncFunction(what) {
+// 	return what instanceof Function && what.constructor.name === 'AsyncFunction';
+// }
 
 export function isAsync(what) {
 	return isAsyncFunction(what) || what instanceof  Promise;
