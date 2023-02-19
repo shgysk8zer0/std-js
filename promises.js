@@ -1,4 +1,4 @@
-import { when, ready, loaded, beforeInstallPrompt } from './dom.js';
+import { when, ready, beforeInstallPrompt } from './dom.js';
 import { signalAborted } from './abort.js';
 import { getManifest } from './http.js';
 import { listen, onKeypress } from './events.js';
@@ -10,7 +10,7 @@ export const infinitPromise = new Promise(() => {});
 //export const loadedPromise = loaded();
 
 export const manifestPromise = new Promise((resolve, reject) => {
-	readyPromise.then(() => getManifest()).then(resolve).catch(reject);
+	ready().then(() => getManifest()).then(resolve).catch(reject);
 });
 
 export const beforeInstallPromptPromise = beforeInstallPrompt();
