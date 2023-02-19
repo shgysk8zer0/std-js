@@ -1,6 +1,5 @@
-import { when, ready, beforeInstallPrompt } from './dom.js';
+import { when } from './dom.js';
 import { signalAborted } from './abort.js';
-import { getManifest } from './http.js';
 import { listen, onKeypress } from './events.js';
 import { checkSupport as locksSupported } from './LockManager.js';
 export const infinitPromise = new Promise(() => {});
@@ -15,9 +14,9 @@ export const infinitPromise = new Promise(() => {});
 
 // export const beforeInstallPromptPromise = beforeInstallPrompt();
 
-// export function isAsyncFunction(what) {
-// 	return what instanceof Function && what.constructor.name === 'AsyncFunction';
-// }
+export function isAsyncFunction(what) {
+	return what instanceof Function && what.constructor.name === 'AsyncFunction';
+}
 
 export function isAsync(what) {
 	return isAsyncFunction(what) || what instanceof  Promise;
