@@ -5,9 +5,9 @@ import { listen, onKeypress } from './events.js';
 import { checkSupport as locksSupported } from './LockManager.js';
 export const infinitPromise = new Promise(() => {});
 
-export const readyPromise = ready();
+//export const readyPromise = ready();
 
-export const loadedPromise = loaded();
+//export const loadedPromise = loaded();
 
 export const manifestPromise = new Promise((resolve, reject) => {
 	readyPromise.then(() => getManifest()).then(resolve).catch(reject);
