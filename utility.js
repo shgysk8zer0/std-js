@@ -53,8 +53,28 @@ export function getType(thing) {
 		case 'undefined':
 			return 'Undefined';
 
+		case 'function':
+			if ('prototype' in thing) {
+				return getType(thing.prototype);
+			} else if ('constructor' in thing) {
+				return thing.constructor.name;
+			} else {
+				return 'Function';
+			}
+
 		case 'object':
-			return Object.is(thing, null) ? 'Null' : thing.constructor.name;
+			if (Object.is(thing, null)) {
+				return 'Null';
+			} else if ('constructor' in thing) {
+				return thing.constructor.name;
+			} else if (Symbol.toStringTag in thing) {
+				return thing[Symbol.toStringTag];
+			} else if ('prototype' in thing) {
+				return  getType(thing.prototype);
+			} else {
+				console.log(thing);
+				return 'Unknown Object';
+			}
 
 		case 'string':
 			return 'String';
@@ -77,7 +97,13 @@ export function getType(thing) {
 }
 
 export function isA(thing, expectedType) {
-	return getType(thing) === expectedType;
+	if (typeof expectedType === 'string') {
+		return getType(thing) === expectedType;
+	} else if (isObject(expectedType) && 'constructor' in expectedType) {
+		return isA(thing, expectedType.constructor.name);
+	} else {
+		throw new TypeError('Invalid argument for `expectedType`');
+	}
 }
 
 export function sameType(thing1, thing2) {
