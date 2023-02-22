@@ -30,9 +30,10 @@
         "no-prototype-builtins": 0
     },
     "globals": {
+      "Sanitizer": "readonly",
+      "AggregateError": "readonly",
       "cookieStore": "readonly",
       "globalThis": "readonly",
-      "Sanitizer": "readonly",
       "Iterator": "readonly",
       "scheduler": "readonly"
     }
