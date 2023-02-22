@@ -48,7 +48,7 @@ export function isNullish(val) {
 	}
 }
 
-export function getType(thing) {s
+export function getType(thing) {
 	switch (typeof thing) {
 		case 'undefined':
 			return 'Undefined';
