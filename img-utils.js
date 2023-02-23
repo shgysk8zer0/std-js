@@ -1,6 +1,7 @@
 import { getDeferred } from './promises.js';
 import { createElement } from './elements.js';
 import { JPEG, PNG, GIF, WEBP, SVG } from './types.js';
+import { getType } from './utility.js';
 
 export const EXTENSIONS = {
 	[JPEG]: '.jpg',
@@ -17,6 +18,15 @@ const DEFAULT_HEIGHT = 480;
 export const supportsType = type => type.toLowerCase() in EXTENSIONS;
 export const getExtensionForType = type => EXTENSIONS[type.toLowerCase()];
 
+export async function getImageFileInfo(file) {
+	const img = await fileToImage(file);
+	const { naturalWidth: width, naturalHeight: height } = img;
+	const { name, type, size, lastModified } = file;
+	const modified = new Date(lastModified);
+	URL.revokeObjectURL(img.src);
+	return { width, height, name, type, size, modified };
+}
+
 export const resizeImageFiles = async (files, {
 	type    = DEFAULT_TYPE,
 	quality = DEFAULT_QUALITY,
@@ -26,7 +36,8 @@ export const resizeImageFiles = async (files, {
 	y = 0,
 	signal,
 } = {}) => await Promise.all(
-	files.map(file => resizeImageFile(file, { type, quality, height, x, y, priority, signal }))
+		files.map(file => resizeImageFile(file, { type, quality, height, x, y, priority, signal })
+	)
 );
 
 export async function resizeImageFile(file, {
@@ -180,9 +191,9 @@ export async function canvasToFile(canvas, {
 
 export async function fileToImage(file, { width, height } = {}) {
 	if (! (file instanceof File)) {
-		throw new TypeError('Expected a file');
+		throw new TypeError(`Expected a file but got a ${getType(file)}.`);
 	} else if (! file.type.startsWith('image/')) {
-		throw new TypeError('Expected an image file');
+		throw new TypeError(`Expected an image file but got ${file.type}.`);
 	} else {
 		const img = new Image(width, height);
 		img.src = URL.createObjectURL(file);
