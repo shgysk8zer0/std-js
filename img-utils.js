@@ -1,6 +1,7 @@
 import { getDeferred } from './promises.js';
 import { createElement } from './elements.js';
 import { JPEG, PNG, GIF, WEBP, SVG } from './types.js';
+import { getType } from './utility.js';
 
 export const EXTENSIONS = {
 	[JPEG]: '.jpg',
@@ -17,6 +18,57 @@ const DEFAULT_HEIGHT = 480;
 export const supportsType = type => type.toLowerCase() in EXTENSIONS;
 export const getExtensionForType = type => EXTENSIONS[type.toLowerCase()];
 
+/**
+ * Need to pass file in case it's an SVG with no given width/height
+ */
+async function getDimensions(img, file) {
+	if (! (img instanceof HTMLImageElement)) {
+		throw new TypeError(`Expected an <img> but got a ${getType(img)}.`);
+	} else if (! (file instanceof File)) {
+		throw new TypeError(`Expected a file but got a ${getType(file)}.`);
+	} else {
+		const { naturalWidth, naturalHeight } = img;
+		if (naturalWidth !== 0 && naturalHeight !== 0) {
+			return { naturalWidth, naturalHeight };
+		} else if (file.type === SVG) {
+			const { width, height } = await getSVGFileInfo(file);
+			return { naturalWidth: parseInt(width), naturalHeight: parseInt(height) };
+		} else {
+			throw new Error('Unable to determine width and height');
+		}
+	}
+}
+
+export async function getSVGFileInfo(file) {
+	const svg = await fileToSVG(file);
+	const { name, type, size, lastModified } = file;
+	const width = svg.width.baseVal.value;
+	const height = svg.height.baseVal.value;
+	const modified = new Date(lastModified);
+	return { width, height, name, type, size, modified };
+}
+
+export async function fileToSVG(file) {
+	if (! (file instanceof File)) {
+		throw new TypeError(`Expected a file but got a ${getType(file)}.`);
+	} else if (file.type !== SVG) {
+		throw new TypeError(`Expected an SVG file but got ${file.type}`);
+	} else {
+		const parser = new DOMParser();
+		const svg = parser.parseFromString(await file.text(), SVG);
+		return svg.documentElement;
+	}
+}
+
+export async function getImageFileInfo(file) {
+	const img = await fileToImage(file);
+	const { naturalWidth: width, naturalHeight: height } = await getDimensions(img, file);
+	const { name, type, size, lastModified } = file;
+	const modified = new Date(lastModified);
+	URL.revokeObjectURL(img.src);
+	return { width, height, name, type, size, modified };
+}
+
 export const resizeImageFiles = async (files, {
 	type    = DEFAULT_TYPE,
 	quality = DEFAULT_QUALITY,
@@ -25,9 +77,7 @@ export const resizeImageFiles = async (files, {
 	x = 0,
 	y = 0,
 	signal,
-} = {}) => await Promise.all(
-	files.map(file => resizeImageFile(file, { type, quality, height, x, y, priority, signal }))
-);
+} = {}) => await Promise.all(files.map(file => resizeImageFile(file, { type, quality, height, x, y, priority, signal })));
 
 export async function resizeImageFile(file, {
 	type    = DEFAULT_TYPE,
@@ -180,9 +230,9 @@ export async function canvasToFile(canvas, {
 
 export async function fileToImage(file, { width, height } = {}) {
 	if (! (file instanceof File)) {
-		throw new TypeError('Expected a file');
+		throw new TypeError(`Expected a file but got a ${getType(file)}.`);
 	} else if (! file.type.startsWith('image/')) {
-		throw new TypeError('Expected an image file');
+		throw new TypeError(`Expected an image file but got ${file.type}.`);
 	} else {
 		const img = new Image(width, height);
 		img.src = URL.createObjectURL(file);
@@ -193,13 +243,15 @@ export async function fileToImage(file, { width, height } = {}) {
 
 export async function fileToCanvas(file, { height = DEFAULT_HEIGHT, x = 0, y = 0 } = {}) {
 	const img = await fileToImage(file);
-	const { naturalWidth, naturalHeight } = img;
-	const width = naturalWidth * (height / naturalHeight);
+	const { naturalWidth, naturalHeight } = await getDimensions(img, file);
+	const width = parseInt(naturalWidth * (height / naturalHeight));
 	const canvas = createElement('canvas', { width, height });
 	const ctx = canvas.getContext('2d');
 
+	img.width = width;
+	img.height = height;
 	ctx.imageSmoothingEnabled = false;
 	ctx.drawImage(img, x, y, width, height);
-	canvas.dataset.blob = img.src;
+	URL.revokeObjectURL(img.src);
 	return canvas;
 }
