@@ -76,6 +76,7 @@ export async function prerender(href, { signal } = {}) {
 export async function loadScript(src, {
 	async = true,
 	defer = false,
+	blocking = null,
 	noModule = false,
 	type = JS,
 	crossOrigin = 'anonymous',
@@ -96,7 +97,7 @@ export async function loadScript(src, {
 		const controller = new AbortController();
 		const script = createScript(src, {
 			async, defer, noModule, type, crossOrigin, referrerPolicy, integrity,
-			nonce, fetchPriority, policy, dataset: data,
+			nonce, fetchPriority, policy, dataset: data, blocking,
 			events: {
 				load: ({ target }) => {
 					resolve(target);
@@ -140,6 +141,7 @@ export async function loadScript(src, {
 export async function loadStylesheet(href, {
 	rel = 'stylesheet',
 	media = 'all',
+	blocking = null,
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
 	integrity = null,
@@ -159,7 +161,7 @@ export async function loadStylesheet(href, {
 
 		const link = await createLink(href, {
 			rel, media, crossOrigin, referrerPolicy, integrity, disabled, fetchPriority,
-			title, nonce,
+			title, nonce, blocking,
 			events: {
 				load: ({ target }) => {
 					resolve(target);

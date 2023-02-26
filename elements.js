@@ -203,6 +203,7 @@ export function createElement(tag, {
 export function createScript(src, {
 	async = true,
 	defer = false,
+	blocking = null,
 	integrity = null,
 	nonce = null,
 	type = JS,
@@ -242,6 +243,12 @@ export function createScript(src, {
 
 	if (typeof nonce === 'string') {
 		script.nonce = nonce;
+	}
+
+	if (Array.isArray(blocking)) {
+		script.setAttribute('blocking', blocking.join(' '));
+	} else if (typeof blocking === 'string') {
+		script.setAttribute('blocking', blocking);
 	}
 
 	if (isTrustPolicy(policy)) {
@@ -340,6 +347,7 @@ export function createLink(href = null, {
 	rel = [],
 	type = null,
 	as = null,
+	blocking = null,
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
 	fetchPriority = 'auto',
@@ -394,6 +402,12 @@ export function createLink(href = null, {
 
 	if (typeof media === 'string') {
 		link.media = media;
+	}
+
+	if (Array.isArray(blocking)) {
+		link.setAttribute('blocking', blocking.join(' '));
+	} else if (typeof blocking === 'string') {
+		link.setAttribute('blocking', blocking);
 	}
 
 	if (typeof href === 'string') {
