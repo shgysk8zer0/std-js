@@ -450,6 +450,7 @@ export function createIframe(src, {
 	slot = null,
 	title = null,
 	animation,
+	policy = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : undefined,
 	events: { capture, passive, once, signal, ...events } = {},
 	...rest
 } = {}) {
@@ -519,15 +520,27 @@ export function createIframe(src, {
 	}
 
 	if (typeof srcdoc === 'string' && srcdoc.length !== 0) {
-		iframe.srcdoc = srcdoc;
+		if (isTrustPolicy(policy) && ! isHTML(srcdoc)) {
+			iframe.srcdoc = policy.createHTML(srcdoc);
+		} else {
+			iframe.srcdoc = srcdoc;
+		}
 	} else if (srcdoc instanceof Document) {
-		iframe.srcdoc = srcdoc.documentElement.outerHTML.replace(/\n/g, '');
+		if (isTrustPolicy(policy)) {
+			iframe.srcdoc = policy.createHTML(srcdoc.documentElement.outerHTML.replace(/\n/g, ''));
+		} else {
+			iframe.srcdoc = srcdoc.documentElement.outerHTML.replace(/\n/g, '');
+		}
 	}
 
 	if (typeof src === 'string' || src instanceof URL) {
 		iframe.src = src;
 	} else if (src instanceof Document) {
-		iframe.srcdoc = src.documentElement.outerHTML.replace(/\n/g,'');
+		if (isTrustPolicy(policy)) {
+			iframe.srcdoc = policy.createHTML(src.documentElement.outerHTML.replace(/\n/g, ''));
+		} else {
+			iframe.srcdoc = src.documentElement.outerHTML.replace(/\n/g, '');
+		}
 	}
 
 	return iframe;

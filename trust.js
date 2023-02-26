@@ -19,6 +19,14 @@ export function hasDefaultPolicy() {
 	return supported() && isTrustPolicy(globalThis.trustedTypes.defaultPolicy);
 }
 
+export function getAttributeType(tagName, attribute, elementNs) {
+	if (supported()) {
+		return globalThis.trustedTypes.getAttributeType(tagName, attribute, elementNs);
+	} else {
+		return null;
+	}
+}
+
 export function isHTML(input) {
 	if (supported()) {
 		return globalThis.trustedTypes.isHTML(input);
@@ -69,13 +77,13 @@ export function createScriptURL(input, { policy = getDefaultPolicy() } = {}) {
 
 export function createPolicy(name, {
 	createHTML = () => {
-		throw new DOMException('This policy does not provide `createHTML()`');
+		throw new TypeError('This policy does not provide `createHTML()`');
 	},
 	createScript = () => {
-		throw new DOMException('This policy does not provide `createScript()`');
+		throw new TypeError('This policy does not provide `createScript()`');
 	},
 	createScriptURL = () => {
-		throw new DOMException('This policy does not provide `createScriptURL()`');
+		throw new TypeError('This policy does not provide `createScriptURL()`');
 	},
 }) {
 	if (supported()) {

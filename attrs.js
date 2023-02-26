@@ -1,6 +1,44 @@
 import { clamp, between } from './math.js';
 import { isObject } from './utility.js';
-import { isScriptURL } from './trust.js';
+import { isScriptURL, getAttributeType, createScriptURL, createScript, createHTML } from './trust.js';
+
+export function setAttr(el, attr, val, {
+	elementNs,
+	policy,
+} = {}) {
+	switch(getAttributeType(el.tagName.toLowerCase(), attr, elementNs)) {
+		case 'TrustedScriptURL':
+			if (typeof elementNs === 'string') {
+				el.setAttributeNs(elementNs, attr, createScriptURL(val, { policy }));
+			} else {
+				el.setAttribute(attr, createScriptURL(val, { policy }));
+			}
+			break;
+
+		case 'TrustedScript':
+			if (typeof elementNs === 'string') {
+				el.setAttributeNS(elementNs, attr, createScript(val, { policy }));
+			} else {
+				el.setAttribute(attr, createScript(val, { policy }));
+			}
+			break;
+
+		case 'TrustedHTML':
+			if (typeof elementNs === 'string') {
+				el.setAttributeNS(elementNs, attr, createHTML(val, { policy }));
+			} else {
+				el.setAttribute(attr, createHTML(val, { policy }));
+			}
+			break;
+
+		default:
+			if (typeof elementNs === 'string') {
+				el.setAttributeNS(elementNs, attr, val);
+			} else {
+				el.setAttribute(attr, val);
+			}
+	}
+}
 
 export function getAttrs(el) {
 	if (typeof el === 'string') {
@@ -74,7 +112,10 @@ export function css(el, props = {}, { priority } = {}) {
 	}
 }
 
-export function attr(el, props = {}, { namespace = null } = {}) {
+export function attr(el, props = {}, {
+	namespace: elementNs = null,
+	policy,
+} = {}) {
 	if (! (el instanceof Element)) {
 		throw new TypeError('el must be an Element');
 	} if (! isObject(props)) {
@@ -82,39 +123,25 @@ export function attr(el, props = {}, { namespace = null } = {}) {
 	} else {
 		Object.entries(props).forEach(([p, v]) => {
 			if (typeof v === 'string' || typeof v === 'number' || isScriptURL(v)) {
-				if (typeof namespace === 'string') {
-					el.setAttributeNS(namespace, p, v);
-				} else {
-					el.setAttribute(p, v);
-				}
+				setAttr(el, p, v, { policy, elementNs });
 			} else if (typeof v === 'boolean') {
 				if (typeof namespace === 'string') {
-					v ? el.setAttributeNS(namespace, p, '') : el.removeAttributeNS(namespace, p);
+					v ? el.setAttributeNS(elementNs, p, '') : el.removeAttributeNS(elementNs, p);
 				} else {
 					el.toggleAttribute(p, v);
 				}
 			} else if (v instanceof Date) {
-				if (typeof namespace === 'string') {
-					el.setAttributeNS(namespace, p, v.toISOString());
-				} else {
-					el.setAttribute(p, v.toISOString());
-				}
+				setAttr(el, p, v.toISOString(), { policy, elementNs });
 			} else if (v instanceof URL) {
-				if (typeof namespace === 'string') {
-					el.setAttributeNS(namespace, p, v.href);
-				} else {
-					el.setAttribute(p, v.href);
-				}
+				setAttr(el, p, v.href, { policy, elementNs });
 			} else if (typeof v === 'undefined' || v === null) {
 				if (typeof namespace === 'string') {
-					el.removeAttributeNS(namespace, p);
+					el.removeAttributeNS(elementNs, p);
 				} else {
 					el.removeAttribute(p);
 				}
-			} else if (typeof namespace === 'string') {
-				el.setAttributeNS(namespace, p, JSON.stringify(v));
 			} else {
-				el.setAttribute(p, JSON.stringify(v));
+				setAttr(el, p, JSON.stringify(v), { policy, elementNs });
 			}
 		});
 	}
@@ -144,9 +171,10 @@ export function getInt(el, attr, {
 export function setInt(el, attr, val, {
 	min = Number.MIN_SAFE_INTEGER,
 	max = Number.MAX_SAFE_INTEGER,
+	policy,
 } = {}) {
 	if (Number.isInteger(val)) {
-		el.setAttribute(attr, clamp(min, val, max));
+		setAttr(el, attr, clamp(min, val, max), { policy });
 	} else if (typeof val === 'string') {
 		setInt(el, attr, parseInt(val), { min, max });
 	} else {
@@ -170,9 +198,10 @@ export function getFloat(el, attr, {
 export function setFloat(el, attr, val, {
 	min = Number.MIN_SAFE_INTEGER,
 	max = Number.MAX_SAFE_INTEGER,
+	policy,
 } = {}) {
 	if (typeof val === 'number' && ! Number.isNaN(val)) {
-		el.setAttribute(attr, clamp(min, val, max));
+		setAttr(el, attr, clamp(min, val, max), { policy });
 	} else if (typeof val === 'string') {
 		setFloat(el, attr, parseFloat(val), { min, max });
 	} else {
@@ -192,12 +221,14 @@ export function setString(el, attr, val, {
 	minLength = 1,
 	maxLength = Infinity,
 	pattern   = null,
+	policy,
 } = {}) {
 	if (
 		typeof val === 'string'
 		&& between(minLength, val.length, maxLength)
 		&& (!(pattern instanceof RegExp) || pattern.test(val))
 	) {
+		setAttr(el, attr, val, { policy });
 		el.setAttribute(attr, val);
 	} else {
 		el.removeAttribute(attr);
@@ -215,8 +246,10 @@ export function getURL(el, attr, { base = document.baseURI } = {}) {
 export function setURL(el, attr, val, {
 	base = document.baseURI,
 	requirePath = false,
+	policy,
 } = {}) {
 	if ((val instanceof URL) && (! requirePath || val.pathname.length > 1)) {
+		setAttr(el, attr, val.href, { policy });
 		el.setAttribute(attr, val.href);
 	} else if (typeof val === 'string' && val.length !== 0) {
 		setURL(el, attr, new URL(val, base), { requirePath });

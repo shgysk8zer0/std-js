@@ -123,8 +123,8 @@ export function data(what, props = {}, { base } = {}) {
 	return each(what, item => setData(item, props), { base });
 }
 
-export function attr(what, props = {}, { base, namespace = null } = {}) {
-	return each(what, item => setAttr(item, props, { namespace }), { base });
+export function attr(what, props = {}, { base, namespace = null, policy } = {}) {
+	return each(what, item => setAttr(item, props, { namespace, policy }), { base });
 }
 
 export function toggleAttr(what, attrs, { base, force, signal } = {}) {
@@ -225,7 +225,7 @@ export function text(what, text, { base } = {}) {
 export function html(what, text, {
 	base,
 	sanitizer,
-	policy = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : null,
+	policy = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : undefined,
 } = {}) {
 	if (typeof sanitizer !== 'undefined' && sanitizer.setHTML instanceof Function) {
 		return each(what, el => el.setHTML(text, sanitizer), base);
@@ -439,12 +439,23 @@ export async function whenPageHidden({ signal } = {}) {
 /**
  * @deprecated [will be removed in v3.0.0]
  */
-export function parseHTML(text, { type = HTML, asFrag = true, head = true, sanitizer, policy } = {}) {
+export function parseHTML(text, {
+	type = HTML,
+	asFrag = true,
+	head = true,
+	sanitizer,
+	policy,
+} = {}) {
 	console.warn('`parseHTML` is deprecated. Please use `parse` instead');
 	return parse(text, { type, asFrag, head, sanitizer, policy });
 }
 
-export function parse(text, { type = HTML, asFrag = true, sanitizer, policy } = {}) {
+export function parse(text, {
+	type = HTML,
+	asFrag = true,
+	sanitizer,
+	policy = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : undefined,
+} = {}) {
 	const parser = new DOMParser();
 
 	if (asFrag) {
@@ -465,7 +476,10 @@ export function documentToFragment(doc, { sanitizer } = {}) {
 		? sanitizer.sanitize(frag) : frag;
 }
 
-export function parseAsFragment(text, { sanitizer, policy } = {}) {
+export function parseAsFragment(text, {
+	sanitizer,
+	policy = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : undefined,
+} = {}) {
 	const tmp = document.createElement('template');
 
 	if (isTrustPolicy(policy) && ! isHTML(text)) {

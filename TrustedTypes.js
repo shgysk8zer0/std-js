@@ -162,7 +162,10 @@ export class TrustedTypePolicy {
 				configurable: false,
 				writable: false,
 				value: createHTML instanceof Function
-					? (...args) => new TrustedHTML(createHTML(...args), { key: symbols.trustedKey, policy: this })
+					? (input, ...args) => new TrustedHTML(
+						createHTML(input.toString(), ...args),
+						{ key: symbols.trustedKey, policy: this }
+					)
 					: getUnsetPolicyException(this, 'createHTML'),
 			},
 			createScript: {
@@ -170,7 +173,10 @@ export class TrustedTypePolicy {
 				configurable: false,
 				writable: false,
 				value: createScript instanceof Function
-					? (...args) => new TrustedScript(createScript(...args), { key: symbols.trustedKey, policy: this })
+					? (input, ...args) => new TrustedScript(
+						createScript(input.toString(), ...args),
+						{ key: symbols.trustedKey, policy: this }
+					)
 					: getUnsetPolicyException(this, 'createScript'),
 			},
 			createScriptURL: {
@@ -178,7 +184,10 @@ export class TrustedTypePolicy {
 				configurable: false,
 				writable: false,
 				value: createScriptURL instanceof Function
-					? (...args) => new TrustedScriptURL(createScriptURL(...args), { key: symbols.trustedKey, policy: this })
+					? (input, ...args) => new TrustedScriptURL(
+						createScriptURL(input.toString(), ...args),
+						{ key: symbols.trustedKey, policy: this }
+					)
 					: getUnsetPolicyException(this, 'createScriptURL'),
 			},
 		});
@@ -311,7 +320,7 @@ export class TrustedTypeFactory extends EventTarget {
 		 * @Todo handle namespaced attributes
 		 */
 		if (typeof elementNS === 'string' && elementNs.length !== 0) {
-			return null;
+			return events.includes(attribute) ? TrustedScript.name : null;
 		}
 
 		/**
@@ -445,6 +454,10 @@ export const trustedTypes = new TrustedTypeFactory(symbols.trustedKey);
  * @return {[type]}                       [description]
  */
 export function polyfill() {
+	if (! ('TrustedTypePolicy' in globalThis)) {
+		globalThis.TrustedTypePolicy = TrustedTypePolicy;
+	}
+
 	if (! ('TrustedHTML' in globalThis)) {
 		globalThis.TrustedHTML = TrustedHTML;
 	}
