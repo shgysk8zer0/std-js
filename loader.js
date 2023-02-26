@@ -1,6 +1,6 @@
-import { loaded } from './events.js';
 import { JS } from './types.js';
 import { createScript, createImage, createLink } from './elements.js';
+import { getDeferred } from './promises.js';
 
 /**
  * @deprecated
@@ -76,6 +76,7 @@ export async function prerender(href, { signal } = {}) {
 export async function loadScript(src, {
 	async = true,
 	defer = false,
+	blocking = null,
 	noModule = false,
 	type = JS,
 	crossOrigin = 'anonymous',
@@ -84,21 +85,54 @@ export async function loadScript(src, {
 	nonce = null,
 	fetchPriority = 'auto',
 	parent = document.head,
-	policy,
+	policy = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : null,
 	signal,
 	data = {},
 } = {}) {
-	const script = createScript(src, {
-		async, defer, noModule, type, crossOrigin, referrerPolicy, integrity,
-		nonce, fetchPriority, policy, data,
-	});
+	const { resolve, reject, promise } = getDeferred();
 
-	const promise = loaded(script, { signal });
-
-	if (parent instanceof Element) {
-		parent.append(script);
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.reason);
 	} else {
-		document.head.append(script);
+		const controller = new AbortController();
+		const script = createScript(src, {
+			async, defer, noModule, type, crossOrigin, referrerPolicy, integrity,
+			nonce, fetchPriority, policy, dataset: data, blocking,
+			events: {
+				load: ({ target }) => {
+					resolve(target);
+					controller.abort();
+				},
+				error: ({ target }) => {
+					const err = new DOMException(`Error loading <script src="${target.src}">`);
+					reject(err);
+					controller.abort(err);
+				},
+				signal: signal instanceof AbortSignal
+					? AbortSignal.any([signal, controller.signal])
+					: controller.signal,
+			}
+		});
+
+		if (parent instanceof Element) {
+			parent.append(script);
+		} else {
+			document.head.append(script);
+		}
+
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener(
+				'abort',
+				({ target }) => {
+					reject(target.reason);
+					controller.abort(target.reason);
+
+					if (script.parentElement instanceof Element) {
+						script.remove();
+					}
+				},
+				{ once: true, signal: controller.signal });
+		}
 	}
 
 	return await promise;
@@ -107,6 +141,7 @@ export async function loadScript(src, {
 export async function loadStylesheet(href, {
 	rel = 'stylesheet',
 	media = 'all',
+	blocking = null,
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
 	integrity = null,
@@ -117,14 +152,49 @@ export async function loadStylesheet(href, {
 	parent = document.head,
 	signal,
 } = {}) {
-	const link = await createLink(href, {
-		rel, media, crossOrigin, referrerPolicy, integrity, disabled, fetchPriority,
-		title, nonce,
-	});
+	const { resolve, reject, promise } = getDeferred();
 
-	const promise = loaded(link, { signal });
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.reason);
+	} else {
+		const controller = new AbortController();
 
-	parent.append(link);
+		const link = await createLink(href, {
+			rel, media, crossOrigin, referrerPolicy, integrity, disabled, fetchPriority,
+			title, nonce, blocking,
+			events: {
+				load: ({ target }) => {
+					resolve(target);
+					controller.abort();
+				},
+				error: ({ target }) => {
+					const err = new DOMException(`Error loading <link href="${target.href}">`);
+					reject(err);
+					controller.abort(err);
+				},
+				signal: signal instanceof AbortSignal
+					? AbortSignal.any([signal, controller.signal])
+					: controller.signal,
+			}
+		});
+
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener(
+				'abort',
+				({ target }) => {
+					reject(target.reason);
+					controller.abort(target.reason);
+
+					if (link.parentELement instanceof Element) {
+						link.disabled = true;
+						link.remove();
+					}
+				},
+				{ once: true, signal: controller.signal });
+		}
+
+		parent.append(link);
+	}
 
 	return await promise;
 }
@@ -160,7 +230,9 @@ export async function loadImage(src, {
 		width, slot, part, classList: [...classList, ...classes], role, alt, fetchPriority,
 	});
 
-	await loaded(img, { signal });
+	if (img.loading !== 'lazy') {
+		await img.decode();
+	}
 
 	return img;
 }

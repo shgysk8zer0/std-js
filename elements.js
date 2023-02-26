@@ -1,8 +1,10 @@
 import { data, attr, css, getAttrs } from './attrs.js';
 import { listen } from './events.js';
-import { isTrustPolicy } from './trust.js';
-import { isObject, isNullish } from './utility.js';
+import { getDeferred } from './promises.js';
+import { isTrustPolicy, isHTML } from './trust.js';
 import { REFERRER_POLICY } from './defaults.js';
+import { isObject, isNullish } from './utility.js';
+import { JS } from './types.js';
 
 export function copyAs(target, tag, {
 	includeAttributes = true,
@@ -65,6 +67,9 @@ export function createElement(tag, {
 	children                  = undefined,
 	styles                    = undefined,
 	text                      = undefined,
+	html                      = undefined,
+	policy                    = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : null,
+	sanitizer                 = undefined,
 	events: { capture, passive, once, signal, ...events } = {},
 	animation: {
 		keyframes,
@@ -126,6 +131,18 @@ export function createElement(tag, {
 
 		if (typeof text === 'string') {
 			el.textContent = text;
+		} else if (typeof html === 'string') {
+			if (
+				'Sanitizer' in globalThis
+				&& sanitizer instanceof globalThis.Sanitizer
+				&& Element.prototype.setHTML instanceof Function
+			) {
+				el.setHTML(html, { sanitizer });
+			} else if (isTrustPolicy(policy) && ! isHTML(html)) {
+				el.innerHTML = policy.createHTML(html);
+			} else {
+				el.innerHTML = html;
+			}
 		}
 
 		if (Array.isArray(children)) {
@@ -186,30 +203,39 @@ export function createElement(tag, {
 export function createScript(src, {
 	async = true,
 	defer = false,
+	blocking = null,
 	integrity = null,
 	nonce = null,
-	type = 'application/javascript',
+	type = JS,
 	crossOrigin = null,
 	referrerPolicy = REFERRER_POLICY,
 	noModule = false,
 	fetchPriority = 'auto',
 	dataset = null,
-	policy = null,
+	policy = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : null,
 	events: { capture, passive, once, signal, ...events } = {},
 	...attrs
 } = {}) {
+	if (! (src instanceof URL)) {
+		src = new URL(src, document.baseURI);
+	}
+
 	const script = createElement('script', {
 		dataset,
 		events: { capture, passive, once, signal, ...events },
 		...attrs,
 	});
+
 	script.type = type;
 	script.noModule = noModule;
 	script.async = async;
 	script.defer = defer;
-	script.crossOrigin = crossOrigin;
 	script.referrerPolicy = referrerPolicy;
 	script.fetchPriority = fetchPriority;
+
+	if (typeof crossOrigin === 'string' && src.origin !== location.origin) {
+		script.crossOrigin = crossOrigin;
+	}
 
 	if (typeof integrity === 'string') {
 		script.integrity = integrity;
@@ -217,6 +243,12 @@ export function createScript(src, {
 
 	if (typeof nonce === 'string') {
 		script.nonce = nonce;
+	}
+
+	if (Array.isArray(blocking)) {
+		script.setAttribute('blocking', blocking.join(' '));
+	} else if (typeof blocking === 'string') {
+		script.setAttribute('blocking', blocking);
 	}
 
 	if (isTrustPolicy(policy)) {
@@ -255,6 +287,10 @@ export function createImage(src, {
 	events: { capture, passive, once, signal, ...events } = {},
 	...attrs
 } = {}) {
+	if (! (src instanceof URL)) {
+		src = new URL(src, document.baseURI);
+	}
+
 	const img = createElement('img', {
 		id, classList, dataset, slot, part, styles,
 		itemtype, itemprop, itemscope, '@type': type, '@context': context,
@@ -280,7 +316,7 @@ export function createImage(src, {
 		img.role = role;
 	}
 
-	if (typeof crossOrigin === 'string') {
+	if (typeof crossOrigin === 'string' && location.origin !== src.origin) {
 		img.crossOrigin = crossOrigin;
 	}
 
@@ -311,6 +347,7 @@ export function createLink(href = null, {
 	rel = [],
 	type = null,
 	as = null,
+	blocking = null,
 	crossOrigin = 'anonymous',
 	referrerPolicy = 'no-referrer',
 	fetchPriority = 'auto',
@@ -365,6 +402,12 @@ export function createLink(href = null, {
 
 	if (typeof media === 'string') {
 		link.media = media;
+	}
+
+	if (Array.isArray(blocking)) {
+		link.setAttribute('blocking', blocking.join(' '));
+	} else if (typeof blocking === 'string') {
+		link.setAttribute('blocking', blocking);
 	}
 
 	if (typeof href === 'string') {
@@ -678,4 +721,55 @@ export function createSelect(name, options = [], {
 
 		return select;
 	}
+}
+
+export async function showDialog({ text, html, children = [], classList = [], animation, signal, ...rest }) {
+	const { resolve, reject, promise } = getDeferred();
+
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.reason);
+	} else {
+		const closeContainer = createElement('div', {
+			classList: ['flex', 'space-evenly'],
+			children: [
+				createElement('button', {
+					type: 'button',
+					classList: ['btn', 'btn-reject'],
+					text: 'Close',
+					events: {
+						signal,
+						click: ({ target }) => target.closest('dialog').close(),
+					}
+				})
+			]
+		});
+
+		const dialog = createElement('dialog', {
+			text, html, children: [...children, closeContainer], classList, animation, ...rest,
+			events: {
+				signal,
+				close: ({ target }) => {
+					resolve();
+					target.remove();
+				}
+			}
+		});
+
+		dialog.append();
+
+		document.body.append(dialog);
+		dialog.showModal();
+
+		if (signal instanceof AbortSignal) {
+			const abortHandler = ({ target }) => {
+				reject(target.reason);
+				dialog.close();
+			};
+
+			signal.addEventListener('abort', abortHandler);
+			dialog.addEventListener('close', () => signal.removeEventListener('abort', abortHandler));
+		}
+	}
+
+	await promise;
 }
