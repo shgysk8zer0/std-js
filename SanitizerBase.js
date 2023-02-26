@@ -1,13 +1,138 @@
-const protectedData = new WeakMap();
 import { SanitizerConfig as defaultConfig } from './SanitizerConfigBase.js';
 import { nativeSupport, getSantizerUtils } from './sanitizerUtils.js';
-import { parseAsFragment, documentToFragment } from './dom.js';
+import { documentToFragment } from './dom.js';
+import { isObject, getType } from './utility.js';
 import { createPolicy } from './trust.js';
 import { urls } from './attributes.js';
+
+const protectedData = new WeakMap();
 const allowProtocols = ['https:'];
 
 if (! allowProtocols.includes(location.protocol)) {
 	allowProtocols.push(location.protocol);
+}
+
+export function sanitizeNode(node, config = defaultConfig) {
+	try {
+		if (! (node instanceof Node)) {
+			throw new TypeError(`Expected a Node but got a ${getType(node)}.`);
+		} else if (! isObject(config)) {
+			throw new TypeError(`Expected config to be an object but got ${getType(config)}.`);
+		}
+
+		const {
+			allowElements, allowComments, allowAttributes, allowCustomElements,
+			blockElements, dropAttributes, dropElements
+		} = config;
+
+		switch(node.nodeType) {
+			case Node.TEXT_NODE:
+				break;
+
+			case Node.ELEMENT_NODE: {
+				if (! (node.parentNode instanceof Node)) {
+					break;
+				}
+
+				const tag = node.tagName.toLowerCase();
+
+				if (Array.isArray(dropElements) && dropElements.includes(tag)) {
+					node.remove();
+				} else if (Array.isArray(blockElements) && blockElements.includes(tag)) {
+					if (node.hasChildNodes()) {
+						[...node.childNodes].forEach(node => sanitizeNode(node, config));
+						node.replaceWith(...node.childNodes);
+					} else {
+						node.remove();
+					}
+				} else if (tag.includes('-') && ! allowCustomElements) {
+					node.remove();
+				} else if (Array.isArray(allowElements) && ! allowElements.includes(tag)) {
+					node.remove();
+				} else if (tag === 'template') {
+					sanitizeNode(node.content, config);
+				} else {
+					if (node.hasAttributes()) {
+						node.getAttributeNames()
+							.forEach(attr => sanitizeNode(node.getAttributeNode(attr), config));
+					}
+
+					if (node.hasChildNodes()) {
+						[...node.childNodes].forEach(node => sanitizeNode(node, config));
+					}
+				}
+
+				break;
+			}
+
+			case Node.ATTRIBUTE_NODE: {
+				const { value, ownerElement } = node;
+				const name = node.name.toLowerCase();
+				const tag = ownerElement.tagName.toLowerCase();
+
+				if (
+					urls.includes(name)
+					&& ! allowProtocols.includes(new URL(value, document.baseURI).protocol)
+				) {
+					ownerElement.removeAttributeNode(node);
+				} else if (isObject(dropAttributes)) {
+					if (
+						name in dropAttributes
+						&& ['*', tag].some(sel => dropAttributes[name].includes(sel))
+					) {
+						ownerElement.removeAttributeNode(node);
+
+						if (name.startsWith('on')) {
+							delete ownerElement[name];
+						}
+					}
+				} else if (isObject(allowAttributes)) {
+					if (
+						! name.startsWith('data-')
+						&& ! (name in allowAttributes
+						&& ['*', tag].some(sel => allowAttributes[name].includes(sel)))
+					) {
+						ownerElement.removeAttributeNode(node);
+
+						if (name.startsWith('on')) {
+							delete ownerElement[name];
+						}
+					}
+				}
+
+				break;
+			}
+
+			case Node.COMMENT_NODE: {
+				if (! allowComments) {
+					node.remove();
+				}
+
+				break;
+			}
+
+			case Node.DOCUMENT_NODE:
+			case Node.DOCUMENT_FRAGMENT_NODE: {
+				if (node.hasChildNodes()) {
+					[...node.childNodes].forEach(node => sanitizeNode(node, config));
+				}
+
+				break;
+			}
+
+			case Node.CDATA_SECTION_NODE:
+			case Node.PROCESSING_INSTRUCTION_NODE:
+			case Node.DOCUMENT_TYPE_NODE:
+			default: {
+				node.parentElement.removeChild(node);
+			}
+		}
+	} catch(err) {
+		node.parentElement.removeChild(node);
+		console.error(err);
+	}
+
+	return node;
 }
 
 /**
@@ -49,116 +174,7 @@ export class Sanitizer {
 		} else if (input instanceof DocumentFragment) {
 			/* It'd be great if this could be moved to a worker script... */
 			const frag = input.cloneNode(true);
-			const {
-				allowElements, allowComments, allowAttributes, allowCustomElements,
-				blockElements, dropAttributes, dropElements
-			} = this.getConfiguration();
-
-			const sanitizeNode = function sanitizeNode(node) {
-				try {
-					switch(node.nodeType) {
-						case Node.TEXT_NODE:
-							break;
-
-						case Node.ELEMENT_NODE: {
-							if (! (node.parentNode instanceof Node)) {
-								break;
-							}
-
-							const tag = node.tagName.toLowerCase();
-
-							if (Array.isArray(dropElements) && dropElements.includes(tag)) {
-								node.remove();
-							} else if (Array.isArray(blockElements) && blockElements.includes(tag)) {
-								if (node.hasChildNodes()) {
-									[...node.childNodes].forEach(sanitizeNode);
-									node.replaceWith(...node.childNodes);
-								} else {
-									node.remove();
-								}
-							} else if (tag.includes('-') && !allowCustomElements) {
-								node.remove();
-							} else if (Array.isArray(allowElements) && ! allowElements.includes(tag)) {
-								node.remove();
-							} else if (tag === 'template') {
-								sanitizeNode(node.content);
-							} else {
-								if (node.hasAttributes()) {
-									node.getAttributeNames().forEach(attr => sanitizeNode(node.getAttributeNode(attr)));
-								}
-
-								if (node.hasChildNodes()) {
-									[...node.childNodes].forEach(sanitizeNode);
-								}
-							}
-
-							break;
-						}
-
-						case Node.ATTRIBUTE_NODE: {
-							const { value, ownerElement } = node;
-							const name = node.name.toLowerCase();
-							const tag = ownerElement.tagName.toLowerCase();
-
-							if (
-								urls.includes(name)
-								&& !allowProtocols.includes(new URL(value, document.baseURI).protocol)
-							) {
-								ownerElement.removeAttributeNode(node);
-							} else if (typeof dropAttributes !== 'undefined') {
-								if (name in dropAttributes && ['*', tag].some(sel => dropAttributes[name].includes(sel))) {
-									ownerElement.removeAttributeNode(node);
-
-									if (name.startsWith('on')) {
-										delete ownerElement[name];
-									}
-								}
-							} else if (typeof allowAttributes !== 'undefined') {
-								if (! name.startsWith('data-') && ! (name in allowAttributes && ['*', tag].some(sel => allowAttributes[name].includes(sel)))) {
-									ownerElement.removeAttributeNode(node);
-
-									if (name.startsWith('on')) {
-										delete ownerElement[name];
-									}
-								}
-							}
-
-							break;
-						}
-
-						case Node.COMMENT_NODE: {
-							if (! allowComments) {
-								node.remove();
-							}
-
-							break;
-						}
-
-						case Node.DOCUMENT_NODE:
-						case Node.DOCUMENT_FRAGMENT_NODE: {
-							if (node.hasChildNodes()) {
-								[...node.childNodes].forEach(node => sanitizeNode(node));
-							}
-
-							break;
-						}
-
-						case Node.CDATA_SECTION_NODE:
-						case Node.PROCESSING_INSTRUCTION_NODE:
-						case Node.DOCUMENT_TYPE_NODE:
-						default: {
-							node.parentElement.removeChild(node);
-						}
-					}
-				} catch(err) {
-					node.parentElement.removeChild(node);
-					console.error(err);
-				}
-
-				return node;
-			};
-
-			sanitizeNode(frag);
+			sanitizeNode(frag, this.getConfiguration());
 
 			return frag;
 		}
@@ -166,7 +182,9 @@ export class Sanitizer {
 
 	sanitizeFor(tag, content) {
 		const el = document.createElement(tag);
-		el.append(this.sanitize(parseAsFragment(rawPolicy.createHTML(content))));
+		const temp = document.createElement('template');
+		temp.innerHTML = rawPolicy.createHTML(content);
+		el.append(this.sanitize(temp.content));
 		return el;
 	}
 
@@ -176,6 +194,7 @@ export class Sanitizer {
 }
 
 const { setHTML, polyfill } = getSantizerUtils(Sanitizer, defaultConfig);
+
 export const createHTML = input => rawPolicy.createHTML(input);
 export const trustPolicies = [rawPolicy.name];
 export { nativeSupport, setHTML, polyfill, allowProtocols };

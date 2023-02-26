@@ -5,6 +5,7 @@ import { isHTML, isTrustPolicy } from './trust.js';
 import { HTML } from './types.js';
 import { errorToEvent, callOnce } from './utility.js';
 import { data as setData, css as setCss, attr as setAttr } from './attrs.js';
+import { createElement } from './elements.js';
 
 export const readyStates = ['loading', 'interactive', 'complete'];
 
@@ -77,117 +78,12 @@ export function groupBy(what, callback, { base } = {}) {
 	return query(what, base).groupBy(callback);
 }
 
-export function create(tag, {
-	text = null,
-	id,
-	classList,
-	attrs = {},
-	dataset,
-	hidden,
-	title,
-	accessKey,
-	slot,
-	is,
-	part,
-	identifier,
-	'@context': context = 'https://schema.org',
-	'@type': type = null,
-	itemscope = '',
-	itemprop = null,
-	itemid,
-	itemref,
-	children,
-	styles,
-	events: {
-		capture,
-		once,
-		passive,
-		signal,
-		...events
-	} = {},
-	...rest
-} = {}) {
-	const el = document.createElement(tag, { is });
-
-	if (typeof is === 'string') {
-		attrs.is = is;
-	}
-
-	if (typeof id === 'string') {
-		el.id = id;
-	} else if (typeof identifier === 'string') {
-		el.id = identifier;
-	}
-
-	if (Array.isArray(classList)) {
-		el.classList.add(...classList);
-	}
-
-	if (typeof type === 'string') {
-		attr(el, {
-			itemtype: new URL(type, context).href,
-			itemscope,
-			itemid,
-		});
-	}
-
-	if (typeof title === 'string') {
-		el.title = title;
-	}
-
-	if (Array.isArray(accessKey)) {
-		el.accessKey = accessKey.join(' ');
-	} else if (typeof accesskey === 'string') {
-		el.accessKey = accessKey;
-	}
-
-	if (typeof text === 'string') {
-		el.textContent = text;
-	}
-
-	attr(el, { ...attrs, ...rest });
-
-	if (typeof dataset === 'object') {
-		data(el, dataset);
-	}
-
-	if (typeof itemprop === 'string') {
-		el.setAttribute('itemprop', itemprop);
-	} else if (Array.isArray(itemprop)) {
-		el.setAttribute('itemprop', itemprop.join(' '));
-	}
-
-	if (Array.isArray(children)) {
-		el.append(...children.filter(el => typeof el === 'string' || el instanceof Element));
-	}
-
-	if (typeof slot === 'string') {
-		el.slot = slot;
-	}
-
-	if (Array.isArray(part)) {
-		'part' in el ? el.part.add(...part) : el.setAttribute('part', part.join(' '));
-	}
-
-	if (typeof hidden === 'boolean') {
-		el.hidden = hidden;
-	}
-
-	if (typeof events === 'object' && Object.keys(events).length !== 0) {
-		on(el, events, { capture, once, passive, signal });
-	}
-
-	if (typeof itemref === 'string') {
-		el.setAttribute('itemref', itemref);
-	} else if (Array.isArray(itemref)) {
-		el.setAttribute('itemref', itemref.join(' '));
-	}
-
-	if (typeof styles === 'object') {
-		css(el, styles);
-	}
-
-	return el;
+/**
+ * @deprecated
+ */
+export function create(tag, { attrs = {}, ...rest } = {}) {
+	console.warn('`create()` is deprecated. Please use `createElement()` instead.');
+	return createElement(tag, { ...attrs, ...rest });
 }
 
 export function append(parent, ...nodes) {
@@ -326,7 +222,11 @@ export function text(what, text, { base } = {}) {
 	return each(what, el => el.textContent = text, { base });
 }
 
-export function html(what, text, { base, sanitizer, policy } = {}) {
+export function html(what, text, {
+	base,
+	sanitizer,
+	policy = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : null,
+} = {}) {
 	if (typeof sanitizer !== 'undefined' && sanitizer.setHTML instanceof Function) {
 		return each(what, el => el.setHTML(text, sanitizer), base);
 	} else if (typeof policy !== 'undefined' && policy.createHTML instanceof Function) {

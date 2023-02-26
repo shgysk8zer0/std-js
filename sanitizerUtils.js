@@ -1,4 +1,5 @@
 import { createHTML } from './SanitizerBase.js';
+
 export const supported = () => 'Sanitizer' in globalThis;
 export const nativeSupport = supported();
 
@@ -6,19 +7,22 @@ export function getSantizerUtils(Sanitizer, defaultConfig) {
 	const setHTML = function setHTML(el, input, { sanitizer = new Sanitizer() } = {}) {
 		const tmp = document.createElement('template');
 		tmp.innerHTML = createHTML(input);
-		el.replaceChildren(sanitizer.sanitize(tmp.content));
+		sanitizer.sanitize(tmp.content);
+		el.replaceChildren(tmp.content);
 	};
 
 	const polyfill = function polyfill() {
 		let polyfilled = false;
-		if (! ('Sanitizer' in globalThis)) {
+		if (! supported()) {
 			globalThis.Sanitizer = Sanitizer;
 			polyfilled = true;
 		} else {
 			if (! (globalThis.Sanitizer.prototype.sanitizeFor instanceof Function)) {
 				globalThis.Sanitizer.prototype.sanitizeFor = function(element, input) {
 					const el = document.createElement(element);
-					el.setHTML(input, { sanitizer: this });
+					const tmp = document.createElement('template');
+					tmp.innerHTML = createHTML(input);
+					el.append(this.sanitize(tmp.content));
 					return el;
 				};
 			}

@@ -11,10 +11,18 @@ import { description, keywords, robots, thumbnail } from '../meta.js';
 import { SanitizerConfig as sanitizerConfig } from '../SanitizerConfig.js';
 import { createPolicy } from '../trust.js';
 
-const sanitizer = new Sanitizer(sanitizerConfig);
+const sanitizer = new Sanitizer({
+	...sanitizerConfig,
+	allowCustomElements: true,
+	allowElements: [...sanitizerConfig.allowElements, 'krv-ad'],
+	allowAttributes: { ...sanitizerConfig.allowAttributes, 'url': ['krv-ad'] },
+});
+globalThis.sanitizer = sanitizer;
 
 createPolicy('default', {
 	createHTML: input => sanitizer.sanitizeFor('div', input).innerHTML,
+	createScriptURL: input => input,
+	createScript: () => globalThis.trustedTypes.emptyScript,
 });
 
 keywords(['javascript', 'ecmascript', 'es6', 'modules', 'library']);

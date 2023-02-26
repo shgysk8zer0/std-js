@@ -1,6 +1,6 @@
-import { loaded } from './events.js';
 import { JS } from './types.js';
 import { createScript, createImage, createLink } from './elements.js';
+import { getDeferred } from './promises.js';
 
 /**
  * @deprecated
@@ -84,21 +84,34 @@ export async function loadScript(src, {
 	nonce = null,
 	fetchPriority = 'auto',
 	parent = document.head,
-	policy,
+	policy = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : null,
 	signal,
 	data = {},
 } = {}) {
-	const script = createScript(src, {
-		async, defer, noModule, type, crossOrigin, referrerPolicy, integrity,
-		nonce, fetchPriority, policy, data,
-	});
+	const { resolve, reject, promise } = getDeferred();
 
-	const promise = loaded(script, { signal });
-
-	if (parent instanceof Element) {
-		parent.append(script);
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.reason);
 	} else {
-		document.head.append(script);
+		const script = createScript(src, {
+			async, defer, noModule, type, crossOrigin, referrerPolicy, integrity,
+			nonce, fetchPriority, policy, dataset: data,
+			events: {
+				load: ({ target }) => resolve(target),
+				error: ({ target }) => reject(new DOMException(`Error loading <script src="${target.src}">`)),
+				signal,
+			}
+		});
+
+		if (parent instanceof Element) {
+			parent.append(script);
+		} else {
+			document.head.append(script);
+		}
+
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener('abort', ({ target }) => reject(target.reason), { once: true });
+		}
 	}
 
 	return await promise;
@@ -117,14 +130,27 @@ export async function loadStylesheet(href, {
 	parent = document.head,
 	signal,
 } = {}) {
-	const link = await createLink(href, {
-		rel, media, crossOrigin, referrerPolicy, integrity, disabled, fetchPriority,
-		title, nonce,
-	});
+	const { resolve, reject, promise } = getDeferred();
 
-	const promise = loaded(link, { signal });
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.reason);
+	} else {
+		const link = await createLink(href, {
+			rel, media, crossOrigin, referrerPolicy, integrity, disabled, fetchPriority,
+			title, nonce,
+			events: {
+				load: ({ target }) => resolve(target),
+				error: ({ target }) => reject(new DOMException(`Error loading <link href="${target.href}">`)),
+				signal,
+			}
+		});
 
-	parent.append(link);
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener('abort', ({ target }) => reject(target.reason), { once: true });
+		}
+
+		parent.append(link);
+	}
 
 	return await promise;
 }
@@ -160,7 +186,9 @@ export async function loadImage(src, {
 		width, slot, part, classList: [...classList, ...classes], role, alt, fetchPriority,
 	});
 
-	await loaded(img, { signal });
+	if (img.loading !== 'lazy') {
+		await img.decode();
+	}
 
 	return img;
 }
