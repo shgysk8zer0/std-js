@@ -93,13 +93,23 @@ export async function loadScript(src, {
 	if (signal instanceof AbortSignal && signal.aborted) {
 		reject(signal.reason);
 	} else {
+		const controller = new AbortController();
 		const script = createScript(src, {
 			async, defer, noModule, type, crossOrigin, referrerPolicy, integrity,
 			nonce, fetchPriority, policy, dataset: data,
 			events: {
-				load: ({ target }) => resolve(target),
-				error: ({ target }) => reject(new DOMException(`Error loading <script src="${target.src}">`)),
-				signal,
+				load: ({ target }) => {
+					resolve(target);
+					controller.abort();
+				},
+				error: ({ target }) => {
+					const err = new DOMException(`Error loading <script src="${target.src}">`);
+					reject(err);
+					controller.abort(err);
+				},
+				signal: signal instanceof AbortSignal
+					? AbortSignal.any([signal, controller.signal])
+					: controller.signal,
 			}
 		});
 
@@ -110,7 +120,17 @@ export async function loadScript(src, {
 		}
 
 		if (signal instanceof AbortSignal) {
-			signal.addEventListener('abort', ({ target }) => reject(target.reason), { once: true });
+			signal.addEventListener(
+				'abort',
+				({ target }) => {
+					reject(target.reason);
+					controller.abort(target.reason);
+
+					if (script.parentElement instanceof Element) {
+						script.remove();
+					}
+				},
+				{ once: true, signal: controller.signal });
 		}
 	}
 
@@ -135,18 +155,40 @@ export async function loadStylesheet(href, {
 	if (signal instanceof AbortSignal && signal.aborted) {
 		reject(signal.reason);
 	} else {
+		const controller = new AbortController();
+
 		const link = await createLink(href, {
 			rel, media, crossOrigin, referrerPolicy, integrity, disabled, fetchPriority,
 			title, nonce,
 			events: {
-				load: ({ target }) => resolve(target),
-				error: ({ target }) => reject(new DOMException(`Error loading <link href="${target.href}">`)),
-				signal,
+				load: ({ target }) => {
+					resolve(target);
+					controller.abort();
+				},
+				error: ({ target }) => {
+					const err = new DOMException(`Error loading <link href="${target.href}">`);
+					reject(err);
+					controller.abort(err);
+				},
+				signal: signal instanceof AbortSignal
+					? AbortSignal.any([signal, controller.signal])
+					: controller.signal,
 			}
 		});
 
 		if (signal instanceof AbortSignal) {
-			signal.addEventListener('abort', ({ target }) => reject(target.reason), { once: true });
+			signal.addEventListener(
+				'abort',
+				({ target }) => {
+					reject(target.reason);
+					controller.abort(target.reason);
+
+					if (link.parentELement instanceof Element) {
+						link.disabled = true;
+						link.remove();
+					}
+				},
+				{ once: true, signal: controller.signal });
 		}
 
 		parent.append(link);
