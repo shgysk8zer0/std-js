@@ -35,6 +35,11 @@
       "cookieStore": "readonly",
       "globalThis": "readonly",
       "Iterator": "readonly",
-      "scheduler": "readonly"
+      "scheduler": "readonly",
+      "trustedTypes": "readonly",
+      "TrustedHTML": "readonly",
+      "TrustedScript": "readonly",
+      "TrustedScriptURL": "readonly",
+      "TrustedTypePolicy": "readonly"
     }
 }

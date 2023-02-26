@@ -1,7 +1,7 @@
 import { data, attr, css, getAttrs } from './attrs.js';
 import { listen } from './events.js';
 import { getDeferred } from './promises.js';
-import { isTrustPolicy, isHTML } from './trust.js';
+import { setProp } from './trust.js';
 import { REFERRER_POLICY } from './defaults.js';
 import { isObject, isNullish } from './utility.js';
 import { JS } from './types.js';
@@ -138,10 +138,8 @@ export function createElement(tag, {
 				&& Element.prototype.setHTML instanceof Function
 			) {
 				el.setHTML(html, { sanitizer });
-			} else if (isTrustPolicy(policy) && ! isHTML(html)) {
-				el.innerHTML = policy.createHTML(html);
 			} else {
-				el.innerHTML = html;
+				setProp(el, 'innerHTML', html, { policy });
 			}
 		}
 
@@ -251,11 +249,7 @@ export function createScript(src, {
 		script.setAttribute('blocking', blocking);
 	}
 
-	if (isTrustPolicy(policy)) {
-		script.src = policy.createScriptURL(src);
-	} else {
-		script.src = src;
-	}
+	setProp(script, 'src', src, { policy });
 
 	return script;
 }
@@ -520,27 +514,15 @@ export function createIframe(src, {
 	}
 
 	if (typeof srcdoc === 'string' && srcdoc.length !== 0) {
-		if (isTrustPolicy(policy) && ! isHTML(srcdoc)) {
-			iframe.srcdoc = policy.createHTML(srcdoc);
-		} else {
-			iframe.srcdoc = srcdoc;
-		}
+		setProp(iframe, 'srcdoc', srcdoc, { policy });
 	} else if (srcdoc instanceof Document) {
-		if (isTrustPolicy(policy)) {
-			iframe.srcdoc = policy.createHTML(srcdoc.documentElement.outerHTML.replace(/\n/g, ''));
-		} else {
-			iframe.srcdoc = srcdoc.documentElement.outerHTML.replace(/\n/g, '');
-		}
+		setProp(iframe, 'srcdoc'. srcdoc.documentElement.outerHTML.replace(/\n/g, ''), { policy });
 	}
 
 	if (typeof src === 'string' || src instanceof URL) {
 		iframe.src = src;
 	} else if (src instanceof Document) {
-		if (isTrustPolicy(policy)) {
-			iframe.srcdoc = policy.createHTML(src.documentElement.outerHTML.replace(/\n/g, ''));
-		} else {
-			iframe.srcdoc = src.documentElement.outerHTML.replace(/\n/g, '');
-		}
+		setProp(iframe, 'srcdoc'. src.documentElement.outerHTML.replace(/\n/g, ''), { policy });
 	}
 
 	return iframe;

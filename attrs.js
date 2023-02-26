@@ -1,44 +1,6 @@
 import { clamp, between } from './math.js';
 import { isObject } from './utility.js';
-import { isScriptURL, getAttributeType, createScriptURL, createScript, createHTML } from './trust.js';
-
-export function setAttr(el, attr, val, {
-	elementNs,
-	policy,
-} = {}) {
-	switch(getAttributeType(el.tagName.toLowerCase(), attr, elementNs)) {
-		case 'TrustedScriptURL':
-			if (typeof elementNs === 'string') {
-				el.setAttributeNs(elementNs, attr, createScriptURL(val, { policy }));
-			} else {
-				el.setAttribute(attr, createScriptURL(val, { policy }));
-			}
-			break;
-
-		case 'TrustedScript':
-			if (typeof elementNs === 'string') {
-				el.setAttributeNS(elementNs, attr, createScript(val, { policy }));
-			} else {
-				el.setAttribute(attr, createScript(val, { policy }));
-			}
-			break;
-
-		case 'TrustedHTML':
-			if (typeof elementNs === 'string') {
-				el.setAttributeNS(elementNs, attr, createHTML(val, { policy }));
-			} else {
-				el.setAttribute(attr, createHTML(val, { policy }));
-			}
-			break;
-
-		default:
-			if (typeof elementNs === 'string') {
-				el.setAttributeNS(elementNs, attr, val);
-			} else {
-				el.setAttribute(attr, val);
-			}
-	}
-}
+import { setAttr, isScriptURL } from './trust.js';
 
 export function getAttrs(el) {
 	if (typeof el === 'string') {
@@ -257,3 +219,5 @@ export function setURL(el, attr, val, {
 		el.removeAttribute(attr);
 	}
 }
+
+export { setAttr };
