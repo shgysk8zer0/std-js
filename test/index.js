@@ -21,8 +21,16 @@ globalThis.sanitizer = sanitizer;
 
 createPolicy('default', {
 	createHTML: input => sanitizer.sanitizeFor('div', input).innerHTML,
-	createScriptURL: input => input,
-	createScript: () => globalThis.trustedTypes.emptyScript,
+	createScriptURL: input => {
+		const url = new URL(input, document.baseURI);
+
+		if ([location.origin, 'https://cdn.kernvalley.us'].includes(url.origin)) {
+			return input;
+		} else {
+			return '';
+		}
+	},
+	createScript: () => globalThis.trustedTypes.emptyScript.toString(),
 });
 
 keywords(['javascript', 'ecmascript', 'es6', 'modules', 'library']);
