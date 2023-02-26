@@ -359,10 +359,9 @@ export class TrustedTypeFactory extends EventTarget {
 	 * @return {String}          [description]
 	 */
 	getPropertyType(tagName, property/*, elementNS*/) {
-		property = property.toLowerCase();
 		tagName = tagName.toLowerCase();
 
-		if (events.includes(property)) {
+		if (events.includes(property.toLowerCase())) {
 			return TrustedScript.name;
 		}
 
@@ -378,9 +377,9 @@ export class TrustedTypeFactory extends EventTarget {
 			case 'script': {
 				if (property === 'src') {
 					return TrustedScriptURL.name;
-				} else if (['text', 'innerText', 'textContent'].includes(property)) {
+				} else if (['text', 'innerText', 'textContent', 'innerHTML'].includes(property)) {
 					return TrustedScript.name;
-				} else if (['outerHTML', 'innerHTML'].includes(property)) {
+				} else if (['outerHTML'].includes(property)) {
 					return TrustedHTML.name;
 				} else {
 					return null;
@@ -389,7 +388,7 @@ export class TrustedTypeFactory extends EventTarget {
 
 			default: {
 				if (['innerHTML', 'outerHTML'].includes(property)) {
-					return 'TrustedHTML';
+					return TrustedHTML.name;
 				} else {
 					return null;
 				}
@@ -450,7 +449,6 @@ export const trustedTypes = new TrustedTypeFactory(symbols.trustedKey);
 
 /**
  * [polyfill description]
- * @param  {Boolean} [enableHarden=false]               [description]
  * @return {[type]}                       [description]
  */
 export function polyfill() {

@@ -1,14 +1,73 @@
 import { getDeferred } from './promises.js';
 import { listen } from './events.js';
 
+export function setProp(el, prop, val, {
+	policy,
+} = {}) {
+	switch(getPropertyType(el.tagName, prop)) {
+		case 'TrustedScript':
+			el[prop] = createScript(val, { policy });
+			break;
+
+		case 'TrustedScriptURL':
+			el[prop] = createScriptURL(val, { policy });
+			break;
+
+		case 'TrustedHTML':
+			el[prop] = createHTML(val, { policy });
+			break;
+
+		default:
+			el[prop] = val;
+	}
+}
+
+export function setAttr(el, attr, val, {
+	elementNs,
+	policy,
+} = {}) {
+	switch(getAttributeType(el.tagName, attr, elementNs)) {
+		case 'TrustedScriptURL':
+			if (typeof elementNs === 'string') {
+				el.setAttributeNs(elementNs, attr, createScriptURL(val, { policy }));
+			} else {
+				el.setAttribute(attr, createScriptURL(val, { policy }));
+			}
+			break;
+
+		case 'TrustedScript':
+			if (typeof elementNs === 'string') {
+				el.setAttributeNS(elementNs, attr, createScript(val, { policy }));
+			} else {
+				el.setAttribute(attr, createScript(val, { policy }));
+			}
+			break;
+
+		case 'TrustedHTML':
+			if (typeof elementNs === 'string') {
+				el.setAttributeNS(elementNs, attr, createHTML(val, { policy }));
+			} else {
+				el.setAttribute(attr, createHTML(val, { policy }));
+			}
+			break;
+
+		default:
+			if (typeof elementNs === 'string') {
+				el.setAttributeNS(elementNs, attr, val);
+			} else {
+				el.setAttribute(attr, val);
+			}
+	}
+}
+
 export function supported() {
 	return 'trustedTypes' in globalThis
-		&& globalThis.trustedTypes instanceof EventTarget
-		&& globalThis.trustedTypes.createPolicy instanceof Function;
+		&& trustedTypes instanceof EventTarget
+		&& trustedTypes.createPolicy instanceof Function;
 }
 
 export function isTrustPolicy(policy) {
-	if ('TrustedTypePolicy' in globalThis && policy instanceof globalThis.TrustedTypePolicy) {
+	if ('TrustedTypePolicy' in globalThis && policy instanceof TrustedTypePolicy) {
 		return true;
 	} else {
 		return policy != null && policy.createHTML instanceof Function;
@@ -16,12 +75,20 @@ export function isTrustPolicy(policy) {
 }
 
 export function hasDefaultPolicy() {
-	return supported() && isTrustPolicy(globalThis.trustedTypes.defaultPolicy);
+	return supported() && isTrustPolicy(trustedTypes.defaultPolicy);
 }
 
 export function getAttributeType(tagName, attribute, elementNs) {
 	if (supported()) {
-		return globalThis.trustedTypes.getAttributeType(tagName, attribute, elementNs);
+		return trustedTypes.getAttributeType(tagName.toLowerCase(), attribute, elementNs);
+	} else {
+		return null;
+	}
+}
+
+export function getPropertyType(tagName, property) {
+	if (supported()) {
+		return trustedTypes.getPropertyType(tagName.toLowerCase(), property);
 	} else {
 		return null;
 	}
@@ -29,7 +96,7 @@ export function getAttributeType(tagName, attribute, elementNs) {
 
 export function isHTML(input) {
 	if (supported()) {
-		return globalThis.trustedTypes.isHTML(input);
+		return trustedTypes.isHTML(input);
 	} else {
 		return typeof input === 'string';
 	}
@@ -37,7 +104,7 @@ export function isHTML(input) {
 
 export function isScript(input) {
 	if (supported()) {
-		return globalThis.trustedTypes.isScript(input);
+		return trustedTypes.isScript(input);
 	} else {
 		return typeof input === 'string';
 	}
@@ -45,14 +112,14 @@ export function isScript(input) {
 
 export function isScriptURL(input) {
 	if (supported()) {
-		return globalThis.trustedTypes.isScriptURL(input);
+		return trustedTypes.isScriptURL(input);
 	} else {
 		return typeof input === 'string' || input instanceof URL;
 	}
 }
 
 export function createHTML(input, { policy = getDefaultPolicy() } = {}) {
-	if (isTrustPolicy(policy)) {
+	if (isTrustPolicy(policy) && ! isHTML(input)) {
 		return policy.createHTML(input);
 	} else {
 		return input;
@@ -60,7 +127,7 @@ export function createHTML(input, { policy = getDefaultPolicy() } = {}) {
 }
 
 export function createScript(input, { policy = getDefaultPolicy() } = {}) {
-	if (isTrustPolicy(policy)) {
+	if (isTrustPolicy(policy) && ! isScript(input)) {
 		return policy.createScript(input);
 	} else {
 		return input;
@@ -68,7 +135,7 @@ export function createScript(input, { policy = getDefaultPolicy() } = {}) {
 }
 
 export function createScriptURL(input, { policy = getDefaultPolicy() } = {}) {
-	if (isTrustPolicy(policy)) {
+	if (isTrustPolicy(policy) && ! isScriptURL(input)) {
 		return policy.createScriptURL(input);
 	} else {
 		return input;
@@ -87,7 +154,7 @@ export function createPolicy(name, {
 	},
 }) {
 	if (supported()) {
-		return globalThis.trustedTypes.createPolicy(name, { createHTML, createScript, createScriptURL });
+		return trustedTypes.createPolicy(name, { createHTML, createScript, createScriptURL });
 	} else {
 		return Object.freeze({ name, createHTML, createScript, createScriptURL });
 	}
@@ -95,7 +162,7 @@ export function createPolicy(name, {
 
 export function getDefaultPolicy() {
 	if (supported()) {
-		return globalThis.trustedTypes.defaultPolicy;
+		return trustedTypes.defaultPolicy;
 	} else {
 		return null;
 	}
@@ -106,13 +173,13 @@ export async function whenPolicyCreated(name = 'default', { signal } = {}) {
 
 	if (! supported()) {
 		reject(new DOMException('TrustedTypes not supported'));
-	} else if (name === 'default' && isTrustPolicy(globalThis.trustedTypes.defaultPolicy)) {
-		resolve({ policyName: globalThis.trustedTypes.defaultPolicy.name });
+	} else if (name === 'default' && isTrustPolicy(trustedTypes.defaultPolicy)) {
+		resolve({ policyName: trustedTypes.defaultPolicy.name });
 	} else {
-		listen(globalThis.trustedTypes, 'beforecreatepolicy', function callback(event) {
+		listen(trustedTypes, 'beforecreatepolicy', function callback(event) {
 			if (event.policyName === name) {
 				requestIdleCallback(() => resolve(event));
-				globalThis.trustedTypes.removeEventListener('beforecreatepolicy', callback, { signal });
+				trustedTypes.removeEventListener('beforecreatepolicy', callback, { signal });
 			}
 		}, { signal });
 	}
