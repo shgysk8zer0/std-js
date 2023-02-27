@@ -1,6 +1,29 @@
 /*eslint strict: ["error", "never"]*/
 if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 	(function harden() {
+		const knownPolicies = [
+			'default', 'empty#html', 'empty#script', 'fetch#html', 'ga#script-url',
+			'goog#html', 'purify-raw#html', 'purify#html', 'sanitizer-raw#html',
+			'dompurify',
+		];
+
+		if (document.documentElement.dataset.hasOwnProperty('trustedPolicies')) {
+			for (const policy of document.documentElement.dataset.trustedPolicies.split(' ')) {
+				knownPolicies.push(policy);
+			}
+		}
+
+		Object.freeze(knownPolicies);
+
+		const symbols = { policy: Symbol.for('trust-policy') };
+
+		function isAllowedPolicy(type) {
+			if (symbols.policy in type) {
+				return knownPolicies.includes(type[symbols.policy]);
+			} else {
+				return false;
+			}
+		}
 		// function isStrict() {
 		// 	return typeof this === 'undefined';
 		// }
@@ -14,15 +37,15 @@ if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 		}
 
 		function isHTML(input) {
-			return supported() && trustedTypes.isHTML(input);
+			return supported() && trustedTypes.isHTML(input) && isAllowedPolicy(input);
 		}
 
 		function isScript(input) {
-			return supported() && trustedTypes.isScript(input);
+			return supported() && trustedTypes.isScript(input) && isAllowedPolicy(input);
 		}
 
 		function isScriptURL(input) {
-			return supported() && trustedTypes.isScriptURL(input);
+			return supported() && trustedTypes.isScriptURL(input) && isAllowedPolicy(input);
 		}
 
 		function createHTML(input) {
