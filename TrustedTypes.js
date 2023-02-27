@@ -362,13 +362,13 @@ export class TrustedTypeFactory extends EventTarget {
 		tagName = tagName.toLowerCase();
 
 		if (events.includes(property.toLowerCase())) {
-			return TrustedScript.name;
+			return 'TrustedScript';
 		}
 
 		switch(tagName) {
 			case 'embed': {
 				if (property === 'src') {
-					return TrustedScriptURL.name;
+					return 'TrustedScriptURL';
 				} else {
 					return null;
 				}
@@ -376,11 +376,11 @@ export class TrustedTypeFactory extends EventTarget {
 
 			case 'script': {
 				if (property === 'src') {
-					return TrustedScriptURL.name;
+					return 'TrustedScriptURL';
 				} else if (['text', 'innerText', 'textContent', 'innerHTML'].includes(property)) {
-					return TrustedScript.name;
+					return 'TrustedScript';
 				} else if (['outerHTML'].includes(property)) {
-					return TrustedHTML.name;
+					return 'TrustedHTML';
 				} else {
 					return null;
 				}
@@ -388,7 +388,7 @@ export class TrustedTypeFactory extends EventTarget {
 
 			default: {
 				if (['innerHTML', 'outerHTML'].includes(property)) {
-					return TrustedHTML.name;
+					return 'TrustedHTML';
 				} else {
 					return null;
 				}

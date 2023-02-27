@@ -1,38 +1,42 @@
-if (! (Object.hasOwn instanceof Function)) {
-	Object.hasOwn = function hasOwn(obj, prop) {
-		return Object.prototype.hasOwnProperty.call(obj, prop);
-	};
-}
+(function() {
+	'use strict';
 
-if (! (Object.keys instanceof Function)) {
-	Object.keys = function keys(obj) {
-		const arr = [];
+	if (! (Object.hasOwn instanceof Function)) {
+		Object.hasOwn = function hasOwn(obj, prop) {
+			return Object.prototype.hasOwnProperty.call(obj, prop);
+		};
+	}
 
-		for (const k in obj) {
-			arr.push(k);
-		}
+	if (! (Object.keys instanceof Function)) {
+		Object.keys = function keys(obj) {
+			const arr = [];
 
-		return arr;
-	};
-}
+			for (const k in obj) {
+				arr.push(k);
+			}
 
-if (! (Object.values instanceof Function)) {
-	Object.values = obj => Object.keys(obj).map(k => obj[k]);
-}
+			return arr;
+		};
+	}
 
-if (! (Object.entries instanceof Function)) {
-	Object.entries = obj => Object.keys(obj).map(k => [k, obj[k]]);
-}
+	if (! (Object.values instanceof Function)) {
+		Object.values = obj => Object.keys(obj).map(k => obj[k]);
+	}
 
-if (! (Object.fromEntries instanceof Function)) {
-	Object.fromEntries = function(arr) {
-		if (Array.isArray(arr)) {
-			return arr.reduce((obj, [key, val]) => {
-				obj[key] = val;
-				return obj;
-			}, {});
-		} else {
-			return Object.fromEntries(Array.from(arr));
-		}
-	};
-}
+	if (! (Object.entries instanceof Function)) {
+		Object.entries = obj => Object.keys(obj).map(k => [k, obj[k]]);
+	}
+
+	if (! (Object.fromEntries instanceof Function)) {
+		Object.fromEntries = function(arr) {
+			if (Array.isArray(arr)) {
+				return arr.reduce((obj, [key, val]) => {
+					obj[key] = val;
+					return obj;
+				}, {});
+			} else {
+				return Object.fromEntries(Array.from(arr));
+			}
+		};
+	}
+})();

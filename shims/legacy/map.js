@@ -1,164 +1,168 @@
-if (! ('WeakMap' in globalThis)) {
-	const symbols = {
-		keys: Symbol('keys'),
-		values: Symbol('values'),
-	};
+(function() {
+	'use strict';
 
-	globalThis.WeakMap = class WeakMap {
-		constructor(init) {
-			Object.defineProperties(this, {
-				[symbols.keys]: {
-					enumerable: false,
-					configurable: false,
-					writable: false,
-					value: [],
-				},
-				[symbols.values]: {
-					enumerable: false,
-					configurable: false,
-					writable: false,
-					value: [],
-				},
-			});
+	if (! ('WeakMap' in globalThis)) {
+		const symbols = {
+			keys: Symbol('keys'),
+			values: Symbol('values'),
+		};
 
-			if (typeof init !== 'undefined' && Symbol.iterator in init) {
-				for (const [key, value] of init) {
-					this.set(key, value);
+		globalThis.WeakMap = class WeakMap {
+			constructor(init) {
+				Object.defineProperties(this, {
+					[symbols.keys]: {
+						enumerable: false,
+						configurable: false,
+						writable: false,
+						value: [],
+					},
+					[symbols.values]: {
+						enumerable: false,
+						configurable: false,
+						writable: false,
+						value: [],
+					},
+				});
+
+				if (typeof init !== 'undefined' && Symbol.iterator in init) {
+					for (const [key, value] of init) {
+						this.set(key, value);
+					}
 				}
 			}
-		}
 
-		has(key) {
-			return this[symbols.keys].includes(key);
-		}
-
-		set(key, value) {
-			const existing = this[symbols.keys].indexOf(key);
-
-			if (existing !== -1) {
-				this[symbols.values][existing] = value;
-			} else {
-				this[symbols.keys].push(key);
-				this[symbols.values].push(value);
+			has(key) {
+				return this[symbols.keys].includes(key);
 			}
 
-			return this;
-		}
+			set(key, value) {
+				const existing = this[symbols.keys].indexOf(key);
 
-		get(key) {
-			const index = this[symbols.keys].indexOf(key);
-			return index === -1 ? undefined : this[symbols.values][index];
-		}
+				if (existing !== -1) {
+					this[symbols.values][existing] = value;
+				} else {
+					this[symbols.keys].push(key);
+					this[symbols.values].push(value);
+				}
 
-		delete(key) {
-			const index = this[symbols.keys].indexOf(key);
-			if (index === -1) {
-				return false;
-			} else {
-				this[symbols.keys].splice(index, 1);
-				this[symbols.values].splice(index, 1);
-				return true;
+				return this;
 			}
-		}
-	};
-}
 
-if (! ('Map' in globalThis)) {
-	const symbols = {
-		keys: Symbol('keys'),
-		values: Symbol('values'),
-	};
+			get(key) {
+				const index = this[symbols.keys].indexOf(key);
+				return index === -1 ? undefined : this[symbols.values][index];
+			}
 
-	globalThis.Map = class Map {
-		constructor(init) {
-			Object.defineProperties(this, {
-				[symbols.keys]: {
-					enumerable: false,
-					configurable: false,
-					writable: true,
-					value: [],
-				},
-				[symbols.values]: {
-					enumerable: false,
-					configurable: false,
-					writable: true,
-					value: [],
-				},
-			});
-
-			if (typeof init !== 'undefined' && Symbol.iterator in init) {
-				for (const [key, value] of init) {
-					this.set(key, value);
+			delete(key) {
+				const index = this[symbols.keys].indexOf(key);
+				if (index === -1) {
+					return false;
+				} else {
+					this[symbols.keys].splice(index, 1);
+					this[symbols.values].splice(index, 1);
+					return true;
 				}
 			}
-		}
+		};
+	}
 
-		get size() {
-			return this[symbols.keys].length;
-		}
+	if (! ('Map' in globalThis)) {
+		const symbols = {
+			keys: Symbol('keys'),
+			values: Symbol('values'),
+		};
 
-		clear() {
-			this[symbols.keys] = [];
-			this[symbols.values] = [];
-		}
+		globalThis.Map = class Map {
+			constructor(init) {
+				Object.defineProperties(this, {
+					[symbols.keys]: {
+						enumerable: false,
+						configurable: false,
+						writable: true,
+						value: [],
+					},
+					[symbols.values]: {
+						enumerable: false,
+						configurable: false,
+						writable: true,
+						value: [],
+					},
+				});
 
-		has(key) {
-			return this[symbols.keys].includes(key);
-		}
-
-		set(key, value) {
-			const existing = this[symbols.keys].indexOf(key);
-
-			if (existing !== -1) {
-				this[symbols.values][existing] = value;
-			} else {
-				this[symbols.keys].push(key);
-				this[symbols.values].push(value);
+				if (typeof init !== 'undefined' && Symbol.iterator in init) {
+					for (const [key, value] of init) {
+						this.set(key, value);
+					}
+				}
 			}
 
-			return this;
-		}
-
-		get(key) {
-			const index = this[symbols.keys].indexOf(key);
-			return index === -1 ? undefined : this[symbols.values][index];
-		}
-
-		delete(key) {
-			const index = this[symbols.keys].indexOf(key);
-			if (index === -1) {
-				return false;
-			} else {
-				this[symbols.keys].splice(index, 1);
-				this[symbols.values].splice(index, 1);
-				return true;
+			get size() {
+				return this[symbols.keys].length;
 			}
-		}
 
-		*keys() {
-			for (const key of this[symbols.keys]) {
-				yield key;
+			clear() {
+				this[symbols.keys] = [];
+				this[symbols.values] = [];
 			}
-		}
 
-		*values() {
-			for (const value of this[symbols.values]) {
-				yield value;
+			has(key) {
+				return this[symbols.keys].includes(key);
 			}
-		}
 
-		*entries() {
-			for (let n = 0; n < this.size; n++) {
-				yield [this[symbols.keys][n], this[symbols.values][n]];
+			set(key, value) {
+				const existing = this[symbols.keys].indexOf(key);
+
+				if (existing !== -1) {
+					this[symbols.values][existing] = value;
+				} else {
+					this[symbols.keys].push(key);
+					this[symbols.values].push(value);
+				}
+
+				return this;
 			}
-		}
 
-		[Symbol.iterator]() {
-			return this.entries();
-		}
+			get(key) {
+				const index = this[symbols.keys].indexOf(key);
+				return index === -1 ? undefined : this[symbols.values][index];
+			}
 
-		forEach(callback, thisArg = globalThis) {
-			[...this.entries()].forEach(([key, value]) => callback.call(thisArg, value, key, this));
-		}
-	};
-}
+			delete(key) {
+				const index = this[symbols.keys].indexOf(key);
+				if (index === -1) {
+					return false;
+				} else {
+					this[symbols.keys].splice(index, 1);
+					this[symbols.values].splice(index, 1);
+					return true;
+				}
+			}
+
+			*keys() {
+				for (const key of this[symbols.keys]) {
+					yield key;
+				}
+			}
+
+			*values() {
+				for (const value of this[symbols.values]) {
+					yield value;
+				}
+			}
+
+			*entries() {
+				for (let n = 0; n < this.size; n++) {
+					yield [this[symbols.keys][n], this[symbols.values][n]];
+				}
+			}
+
+			[Symbol.iterator]() {
+				return this.entries();
+			}
+
+			forEach(callback, thisArg = globalThis) {
+				[...this.entries()].forEach(([key, value]) => callback.call(thisArg, value, key, this));
+			}
+		};
+	}
+})();
