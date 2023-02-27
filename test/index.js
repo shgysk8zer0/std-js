@@ -51,7 +51,6 @@ const sanitizer = new Sanitizer({
 		'zoomcontrol': ['leaflet-map'],
 		'allowfullscreen': ['leaflet-map'],
 		'allowlocate': ['leaflet-map'],
-		'zoomcontrol': ['leaflet-map'],
 		'router': ['leaflet-map'],
 		'zoom': ['leflet-map'],
 		'minzoom': ['leaflet-map', 'leaflet-marker'],
@@ -60,7 +59,6 @@ const sanitizer = new Sanitizer({
 		'latitude': ['leaflet-marker'],
 		'longitude': ['leaflet-marker'],
 		'open': ['leaflet-marker'],
-		'video': ['youtube-player'],
 
 	},
 });

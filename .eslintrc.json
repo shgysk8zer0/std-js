@@ -7,7 +7,7 @@
     "parserOptions": {
         "sourceType": "module",
         "ecmaVersion": 2020,
-        "impliedStrict": false,
+        "impliedStrict": false
     },
     "plugins": [],
     "rules": {

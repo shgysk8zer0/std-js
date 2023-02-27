@@ -1,8 +1,8 @@
 /*eslint strict: ["error", "never"]*/
 (function harden() {
-	function isStrict() {
-		return typeof this === 'undefined';
-	}
+	// function isStrict() {
+	// 	return typeof this === 'undefined';
+	// }
 
 	function supported() {
 		return 'trustedTypes' in globalThis;
@@ -42,13 +42,13 @@
 		}
 	}
 
-	function getPropertyType(tag, prop, elementNs) {
-		if (supported()) {
-			return trustedTypes.getPropertyType(tag, prop, elementNs);
-		} else {
-			return null;
-		}
-	}
+	// function getPropertyType(tag, prop, elementNs) {
+	// 	if (supported()) {
+	// 		return trustedTypes.getPropertyType(tag, prop, elementNs);
+	// 	} else {
+	// 		return null;
+	// 	}
+	// }
 
 	function createScript(input) {
 		if (isScript(input)) {
@@ -237,14 +237,14 @@
 		console.error(err);
 	}
 
-	if (! isStrict()) {
-		try {
-			const { eval } = globalThis;
-			globalThis.eval = function(input) {
-				return eval.call(this, createScript(input).toString());
-			}
-		} catch(err) {
-			console.error(err);
-		}
-	}
+	// if (! isStrict()) {
+	// 	try {
+	// 		const { eval } = globalThis;
+	// 		globalThis.eval = function(input) {
+	// 			return eval.call(this, createScript(input).toString());
+	// 		}
+	// 	} catch(err) {
+	// 		console.error(err);
+	// 	}
+	// }
 })();
