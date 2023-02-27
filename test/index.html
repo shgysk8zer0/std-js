@@ -8,7 +8,7 @@
 		<meta name="description" content="A testing page for my JavaScript library" />
 		<meta name="robots" content="nofollow,noindex" />
 		<base href="/test/" />
-		<meta http-equiv="Content-Security-Policy" content="
+		<meta http-equiv="Content-Security-Policy-x" content="
 			default-src 'self';
 			base-uri 'self';
 			manifest-src 'self';
@@ -42,13 +42,10 @@
 		<link rel="import" name="article-template" href="components/article-template.html" async="" />
 		<link rel="import" name="keybase-user-template" href="components/keybase-user-template.html" async="" />
 		<link rel="import" name="address-template" href="components/address-template.html" async="" /> -->
-		<script type="module" src="../shims.js"></script>
-		<script type="module" src="../shims/trustedTypes.js" async=""></script>
-		<script type="module" src="../shims/sanitizer.js"></script>
-		<script type="module" src="../shims/locks.js"></script>
-		<script type="module" src="../shims/cookieStore.js"></script>
-		<script type="module" src="./index.js"></script>
-		<script type="application/javascript" src="./index.min.js" async="" nomodule=""></script>
+		<script src="../harden.js" referrerpolicy="no-referrer" defer=""></script>
+		<script type="module" src="../shims.js" referrerpolicy="no-referrer"></script>
+		<script type="module" src="./index.js" referrerpolicy="no-referrer"></script>
+		<script type="application/javascript" src="./index.min.js" defer="" nomodule=""></script>
 		<link rel="icon" type="image/svg+xml" href="./javascript.svg" sizes="any"/>
 		<link rel="stylesheet" type="text/css" href="./index.css" />
 	</head>

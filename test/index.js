@@ -11,11 +11,58 @@ import { description, keywords, robots, thumbnail } from '../meta.js';
 import { SanitizerConfig as sanitizerConfig } from '../SanitizerConfig.js';
 import { createPolicy } from '../trust.js';
 
+scheduler.postTask(() =>  Promise.allSettled([
+	import('https://cdn.kernvalley.us/components/leaflet/map.min.js'),
+	import('https://cdn.kernvalley.us/components/krv/ad.js'),
+	import('https://cdn.kernvalley.us/components/krv/events.js'),
+	import('https://cdn.kernvalley.us/components/github/user.js'),
+	import('https://cdn.kernvalley.us/components/github/repo.js'),
+	import('https://cdn.kernvalley.us/components/youtube/player.js'),
+	import('https://cdn.kernvalley.us/components/spotify/player.js'),
+	import('https://cdn.kernvalley.us/components/bacon-ipsum.js'),
+]), { priority: 'background' }).then(console.log);
+
 const sanitizer = new Sanitizer({
 	...sanitizerConfig,
 	allowCustomElements: true,
-	allowElements: [...sanitizerConfig.allowElements, 'krv-ad'],
-	allowAttributes: { ...sanitizerConfig.allowAttributes, 'url': ['krv-ad'] },
+	allowElements: [
+		...sanitizerConfig.allowElements, 'krv-ad', 'github-user', 'leaflet-map',
+		'leaflet-marker', 'krv-events', 'weather-current', 'weather-forecast',
+		'spotify-player', 'youtube-player', 'github-repo', 'bacon-ipsum',
+	],
+	allowAttributes: {
+		...sanitizerConfig.allowAttributes,
+		'url': ['krv-ad', 'spotify-player'],
+		'uri': ['spotify-player'],
+		'video': ['youtube-player'],
+		'theme': ['krv-ad', 'krv-events', 'weather-current', 'weather-forecast'],
+		'appid': ['weather-current', 'weather-forecast'],
+		'paras': ['bacon-ipsum'],
+		'postalcode': ['weather-current', 'weather-forecast'],
+		'source': ['krv-ad'],
+		'medium': ['krv-ad'],
+		'content': ['krv-ad'],
+		'campaign': ['krv-ad'],
+		'layout': ['krv-ad'],
+		'user': ['github-user', 'github-repo'],
+		'repo': ['github-repo'],
+		'bio': ['github-user'],
+		'loading': ['krv-ad', 'github-user'],
+		'zoomcontrol': ['leaflet-map'],
+		'allowfullscreen': ['leaflet-map'],
+		'allowlocate': ['leaflet-map'],
+		'zoomcontrol': ['leaflet-map'],
+		'router': ['leaflet-map'],
+		'zoom': ['leflet-map'],
+		'minzoom': ['leaflet-map', 'leaflet-marker'],
+		'maxzoom': ['leaflet-map', 'leaflet-marker'],
+		'center': ['leaflet-map'],
+		'latitude': ['leaflet-marker'],
+		'longitude': ['leaflet-marker'],
+		'open': ['leaflet-marker'],
+		'video': ['youtube-player'],
+
+	},
 });
 globalThis.sanitizer = sanitizer;
 
