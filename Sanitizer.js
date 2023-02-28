@@ -1,19 +1,15 @@
 import { Sanitizer as BaseSanitizer, trustPolicies } from './SanitizerBase.js';
-import { SanitizerConfig as defaultConfig } from './SanitizerConfig.js';
+import { SanitizerConfig as defaultConfig } from './SanitizerConfigW3C.js';
 import { getSantizerUtils, nativeSupport } from './sanitizerUtils.js';
 
 export class Sanitizer extends BaseSanitizer {
 	constructor({
-		allowElements       = defaultConfig.allowElements,
-		allowAttributes     = defaultConfig.allowAttributes,
-		blockElements       = defaultConfig.blockElements,
-		dropAttributes      = defaultConfig.dropAttributes,
-		dropElements        = defaultConfig.dropElements,
-		allowComments       = defaultConfig.allowComments,
-		allowCustomElements = defaultConfig.allowCustomElements,
-	} = {}) {
+		allowElements, allowAttributes, blockElements, dropAttributes,
+		dropElements, allowComments = defaultConfig.allowComments,
+		allowCustomElements, allowUnknownMarkup = defaultConfig.allowUnknownMarkup,
+	} = BaseSanitizer.getDefaultConfiguration()) {
 		super({ allowElements, allowAttributes, blockElements, dropAttributes,
-			dropElements, allowComments, allowCustomElements,
+			dropElements, allowComments, allowCustomElements, allowUnknownMarkup,
 		});
 	}
 }
