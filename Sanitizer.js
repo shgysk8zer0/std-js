@@ -16,10 +16,6 @@ export class Sanitizer extends BaseSanitizer {
 			dropElements, allowComments, allowCustomElements,
 		});
 	}
-
-	static getDefaultConfiguration() {
-		return defaultConfig;
-	}
 }
 
 const { setHTML, polyfill } = getSantizerUtils(Sanitizer, defaultConfig);

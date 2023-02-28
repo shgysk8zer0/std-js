@@ -468,7 +468,7 @@ export function parse(text, {
 }
 
 export function documentToFragment(doc, { sanitizer } = {}) {
-	const clone = document.cloneNode(true);
+	const clone = doc.cloneNode(true);
 	const frag = document.createDocumentFragment();
 	frag.append(...clone.head.childNodes, ...clone.body.childNodes);
 
