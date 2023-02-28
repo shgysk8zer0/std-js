@@ -1,5 +1,5 @@
 import { nativeSupport, getSantizerUtils, sanitize, sanitizeFor, trustPolicies } from './sanitizerUtils.js';
-import { SanitizerConfig as defaultConfig } from './SanitizerConfigBase.js';
+import { SanitizerConfig as defaultConfig } from './SanitizerConfigW3C.js';
 
 const protectedData = new WeakMap();
 
@@ -23,7 +23,8 @@ const protectedData = new WeakMap();
  *        as it may involve a lot of querying & modifying.
  */
 export class Sanitizer {
-	constructor({ allowElements, allowAttributes, blockElements, dropAttributes,
+	constructor({
+		allowElements, allowAttributes, blockElements, dropAttributes,
 		dropElements, allowComments = false, allowCustomElements = false,
 		allowUnknownMarkup = false,
 	} = Sanitizer.getDefaultConfiguration()) {

@@ -1,4 +1,4 @@
-import { SanitizerConfig as defaultConfig } from './SanitizerConfigBase.js';
+import { SanitizerConfig as defaultConfig } from './SanitizerConfigW3C.js';
 import { createPolicy } from './trust.js';
 import { isObject, getType } from './utility.js';
 import { urls } from './attributes.js';
@@ -61,7 +61,10 @@ export function sanitizeNode(node, { config = defaultConfig } = {}) {
 			case Node.ELEMENT_NODE: {
 				if (! (node.parentNode instanceof Node)) {
 					break;
-				} else if (! allowUnknownMarkup && node instanceof HTMLUnknownElement) {
+				} else if (
+					! allowUnknownMarkup
+					&& ( ! (node instanceof HTMLElement) || node instanceof HTMLUnknownElement)
+				) {
 					node.remove();
 					break;
 				}
@@ -188,9 +191,27 @@ export function getSantizerUtils(Sanitizer, defaultConfig) {
 			}
 
 			if (! (globalThis.Sanitizer.prototype.getConfiguration instanceof Function)) {
-				globalThis.Sanitizer.prototype.getConfiguration = function() {
-					console.warn('This Sanitizer does not nativly support `getConfiguration()`. Returning default config.');
-					return globalThis.Sanitizer.getDefaultConfiguration();
+				const configs = new WeakMap();
+				const SanitizerNative = globalThis.Sanitizer;
+
+				globalThis.Sanitizer = class Sanitizer extends SanitizerNative {
+					constructor({
+						allowAttributes, allowComments, allowElements, allowCustomElements,
+						blockElements, dropAttributes, dropElements, allowUnknownMarkup,
+					} = SanitizerNative.getDefaultConfiguration()) {
+						super({
+							allowAttributes, allowComments, allowElements, allowCustomElements,
+							blockElements, dropAttributes, dropElements, allowUnknownMarkup,
+						});
+						configs.set(this, {
+							allowAttributes, allowComments, allowElements, allowCustomElements,
+							blockElements, dropAttributes, dropElements, allowUnknownMarkup,
+						});
+					}
+
+					getConfiguration() {
+						return configs.get(this);
+					}
 				};
 				polyfilled = true;
 			}
