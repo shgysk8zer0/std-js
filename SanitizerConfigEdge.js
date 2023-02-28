@@ -211,6 +211,7 @@ export const SanitizerConfig = {
 		'wrap': ['*'],
 	},
 	allowCustomElements: false,
+	allowUnknownMarkup: false,
 	allowElements: [
 		'a',
 		'abbr',

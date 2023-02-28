@@ -51,7 +51,7 @@ export function sanitizeNode(node, { config = defaultConfig } = {}) {
 
 		const {
 			allowElements, allowComments, allowAttributes, allowCustomElements,
-			blockElements, dropAttributes, dropElements
+			blockElements, dropAttributes, dropElements, allowUnknownMarkup,
 		} = config;
 
 		switch(node.nodeType) {
@@ -60,6 +60,9 @@ export function sanitizeNode(node, { config = defaultConfig } = {}) {
 
 			case Node.ELEMENT_NODE: {
 				if (! (node.parentNode instanceof Node)) {
+					break;
+				} else if (! allowUnknownMarkup && node instanceof HTMLUnknownElement) {
+					node.remove();
 					break;
 				}
 

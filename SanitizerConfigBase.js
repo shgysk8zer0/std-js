@@ -7,8 +7,9 @@ export const allowElements = undefined;
 export const blockElements = ['frame'];
 export const dropAttributes = Object.fromEntries(events.map(event => [event, ['*']]));
 export const dropElements = ['script', 'link', 'title', 'noscript', 'head', 'body', 'object', 'embed', 'param', 'iframe','base'];
+export const allowUnknownMarkup = false;
 
 export const SanitizerConfig = {
 	allowAttributes, allowComments, allowElements, allowCustomElements,
-	blockElements, dropAttributes, dropElements,
+	blockElements, dropAttributes, dropElements, allowUnknownMarkup,
 };
