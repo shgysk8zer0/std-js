@@ -212,17 +212,22 @@ export function getSantizerUtils(Sanitizer, defaultConfig) {
 				globalThis.Sanitizer.prototype.sanitizeFor = function(element, input) {
 					const el = document.createElement(element);
 					el.setHTML(input, { sanitizer: this });
+					return el;
 				};
 				polyfilled = true;
 			} else if (! (globalThis.Sanitizer.prototype.sanitizeFor instanceof Function)) {
 				globalThis.Sanitizer.prototype.sanitizeFor = function(element, input) {
-					return sanitizeFor(element, input, { config: this.getConfiguration() });
+					const el = document.createElement(element);
+					const tmp = document.createElement('template');
+					tmp.innerHTML = rawPolicy.createHTML(input);
+					el.append(this.sanitize(tmp.content));
+					return el;
 				};
 				polyfilled = true;
 			}
 
 			if (! (Element.prototype.setHTML instanceof Function)) {
-				Element.prototype.setHTML = function(input, { sanitizer } = {}) {
+				Element.prototype.setHTML = function(input, { sanitizer = new globalThis.Sanitizer() } = {}) {
 					const el = sanitizer.sanitizeFor('div', input);
 					this.replaceChildren(...el.children);
 				};

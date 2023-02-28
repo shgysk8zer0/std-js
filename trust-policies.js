@@ -99,7 +99,7 @@ export const sanitizer = new Sanitizer(sanitizerConfig);
 export const getDefaultPolicy = callOnce(() => createPolicy('default', {
 	createHTML: input => {
 		if (sanitizer.sanitize instanceof Function && sanitizer.sanitizeFor instanceof Function) {
-			return sanitizer.sanitizeFor('div', input).innerHTML
+			return sanitizer.sanitizeFor('div', input).innerHTML;
 		} else if (Element.prototype.setHTML instanceof Function) {
 			const el = document.createElement('div');
 			el.setHTML(input, { sanitizer });
