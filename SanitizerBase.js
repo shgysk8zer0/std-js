@@ -25,10 +25,11 @@ const protectedData = new WeakMap();
 export class Sanitizer {
 	constructor({ allowElements, allowAttributes, blockElements, dropAttributes,
 		dropElements, allowComments = false, allowCustomElements = false,
+		allowUnknownMarkup = false,
 	} = Sanitizer.getDefaultConfiguration()) {
 		protectedData.set(this, {
 			allowElements, allowComments, allowAttributes, allowCustomElements,
-			blockElements, dropAttributes, dropElements
+			blockElements, dropAttributes, dropElements, allowUnknownMarkup,
 		});
 	}
 

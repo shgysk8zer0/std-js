@@ -1,4 +1,4 @@
-import { allowComments, blockElements, dropElements } from './SanitizerConfigBase.js';
+import { allowComments, blockElements, dropElements, allowUnknownMarkup } from './SanitizerConfigBase.js';
 import { events } from './attributes.js';
 export const allowAttributes = {
 	'abbr': ['*'],
@@ -342,4 +342,4 @@ export const SanitizerConfig = {
 	blockElements, dropAttributes, dropElements,
 };
 
-export { allowComments, blockElements, dropElements };
+export { allowComments, blockElements, dropElements, allowUnknownMarkup };
