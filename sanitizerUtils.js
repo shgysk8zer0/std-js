@@ -37,7 +37,7 @@ export function sanitizeFor(tag, content, { config = defaultConfig } = {}) {
 	const el = document.createElement(tag);
 	const temp = document.createElement('template');
 	temp.innerHTML = rawPolicy.createHTML(content);
-	el.append(sanitize(temp.content, config));
+	el.append(sanitize(temp.content, { config }));
 	return el;
 }
 
