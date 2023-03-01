@@ -637,4 +637,3 @@ export function createTable(data, { caption, header, footer } = {}) {
 }
 
 export { addListener, isAsync, errorToEvent };
-

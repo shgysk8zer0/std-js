@@ -88,7 +88,7 @@ class TrustedType {
 	 * @return {String} [description]
 	 */
 	toString() {
-		return this[symbols.trustedValue];
+		return this.valueOf();
 	}
 
 	/**
@@ -96,6 +96,10 @@ class TrustedType {
 	 * @return {String} [description]
 	 */
 	toJSON() {
+		return this.valueOf();
+	}
+
+	valueOf() {
 		return this[symbols.trustedValue];
 	}
 }
@@ -342,6 +346,8 @@ export class TrustedTypeFactory extends EventTarget {
 			case 'iframe': {
 				if (attribute === 'srcdoc') {
 					return TrustedHTML.name;
+				} else if (attribute === 'src') {
+					return TrustedScriptURL.name;
 				} else {
 					return null;
 				}
@@ -366,7 +372,8 @@ export class TrustedTypeFactory extends EventTarget {
 		}
 
 		switch(tagName) {
-			case 'embed': {
+			case 'embed':
+			case 'iframe': {
 				if (property === 'src') {
 					return 'TrustedScriptURL';
 				} else {

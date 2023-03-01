@@ -520,7 +520,7 @@ export function createIframe(src, {
 	}
 
 	if (typeof src === 'string' || src instanceof URL) {
-		iframe.src = src;
+		setProp(iframe, 'src', src.toString(), { policy });
 	} else if (src instanceof Document) {
 		setProp(iframe, 'srcdoc'. src.documentElement.outerHTML.replace(/\n/g, ''), { policy });
 	}

@@ -1,4 +1,6 @@
 import { createIframe } from '../elements.js';
+import { policy, trustedURLs, trustPolicies } from './policy.js';
+
 
 export function createKRVMaps({
 	width, height, markers = [], loading = 'lazy', locate, fullscreen,
@@ -7,7 +9,7 @@ export function createKRVMaps({
 	fetchPriority = 'auto', title, id, classList, referrerPolicy = 'no-referrer',
 	styles, dataset, slot, part,
 } = {}) {
-	const src = new URL('https://maps.kernvalley.us/embed');
+	const src = new URL(trustedURLs.maps);
 	const allow = [];
 	const sandbox = ['allow-scripts', 'allow-popups'];
 
@@ -63,9 +65,9 @@ export function createKRVMaps({
 		src.searchParams.set('tiles', tiles);
 	}
 
-	return createIframe(src, {
+	return createIframe(src.href, {
 		height, width, referrerPolicy, loading, title, classList, id,
-		fetchPriority, allow, sandbox, styles, dataset, slot, part,
+		fetchPriority, allow, sandbox, styles, dataset, slot, part, policy,
 	});
 }
 
@@ -74,7 +76,7 @@ export function createKRVEvents({
 	fetchPriority = 'auto', title, id, classList, referrerPolicy = 'no-referrer',
 	styles, dataset, slot, part,
 } = {}) {
-	const src = new URL('https://events.kernvalley.us/embed/');
+	const src = new URL(trustedURLs.events);
 
 	if (typeof theme === 'string') {
 		src.searchParams.set('t', theme);
@@ -84,9 +86,10 @@ export function createKRVEvents({
 		src.searchParams.set('s', source);
 	}
 
-	return createIframe(src, {
-		height, width, referrerPolicy, title, id, classList, fetchPriority, loading,
-		sandbox: ['allow-scripts', 'allow-popups'], styles, dataset, slot, part,
+	return createIframe(src.href, {
+		height, width, referrerPolicy, title, id, classList, fetchPriority,
+		loading, policy, sandbox: ['allow-scripts', 'allow-popups'], styles,
+		dataset, slot, part,
 	});
 }
 
@@ -95,7 +98,7 @@ export function createWFDEvents({
 	fetchPriority = 'auto', title, id, classList, referrerPolicy = 'no-referrer',
 	styles, dataset, slot, part,
 } = {}) {
-	const src = new URL('https://whiskeyflatdays.com/embed/');
+	const src = new URL(trustedURLs.wfdEvents.href);
 
 	if (typeof theme === 'string') {
 		src.searchParams.set('theme', theme);
@@ -109,8 +112,11 @@ export function createWFDEvents({
 		src.searchParams.set('images', '');
 	}
 
-	return createIframe(src, {
-		height, width, referrerPolicy, fetchPriority, loading, title, classList, id,
-		sandbox: ['allow-scripts', 'allow-popups'], styles, dataset, slot, part,
+	return createIframe(src.href, {
+		height, width, referrerPolicy, fetchPriority, loading, title, classList,
+		id, policy, sandbox: ['allow-scripts', 'allow-popups'], styles, dataset,
+		slot, part,
 	});
 }
+
+export { trustPolicies };

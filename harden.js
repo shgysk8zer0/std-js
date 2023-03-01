@@ -95,7 +95,7 @@ if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 		// }
 
 		try {
-			const { write, writeln } = Object.getOwnPropertyDescriptors(Document.prototype);
+			const { write, writeln, execCommand } = Object.getOwnPropertyDescriptors(Document.prototype);
 
 			Object.defineProperties(Document.prototype, {
 				write: {
@@ -113,7 +113,48 @@ if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 					enumerable: writeln.enumerable,
 					configurable: writeln.configurable,
 					writable: writeln.writable,
+				},
+				execCommand: {
+					value: function(aCommandName, aShowDefaultUI, aValueArgument) {
+						if (['insertHTML'].includes(aCommandName)) {
+							return execCommand.value.call(this, aCommandName, aShowDefaultUI, createHTML(aValueArgument));
+						} else {
+							return execCommand.value.call(this, aCommandName, aShowDefaultUI, aValueArgument);
+						}
+					},
+					enumerable: execCommand.enumerable,
+					configurable: execCommand.configurable,
 				}
+			});
+		} catch(err) {
+			console.error(err);
+		}
+
+		if ('ServiceWorkerContainer' in globalThis) {
+			try {
+				const register = Object.getOwnPropertyDescriptor(ServiceWorkerContainer.prototype, 'register');
+
+				Object.defineProperty(ServiceWorkerContainer.prototype, 'register', {
+					value: function(scriptURL, options) {
+						return register.value.call(this, createScriptURL(scriptURL), options);
+					},
+					enumerable: register.enumerable,
+					configurable: register.configurable,
+				});
+			} catch(err) {
+				console.error(err);
+			}
+		}
+
+		try {
+			const createContextualFragment = Object.getOwnPropertyDescriptor(Range.prototype, 'createContextualFragment');
+
+			Object.defineProperty(Range.prototype, 'createContextualFragment', {
+				value: function(tagString) {
+					return createContextualFragment.value.call(this, createHTML(tagString));
+				},
+				enumerable: createContextualFragment.enumerable,
+				configurable: createContextualFragment.configurable,
 			});
 		} catch(err) {
 			console.error(err);
@@ -171,7 +212,7 @@ if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 
 		try {
 			const {
-				setAttribute, setAttributeNS, innerHTML, outerHTML,
+				setAttribute, setAttributeNS, innerHTML, outerHTML, insertAdjacentHTML,
 			} = Object.getOwnPropertyDescriptors(Element.prototype);
 
 			Object.defineProperties(Element.prototype, {
@@ -238,6 +279,13 @@ if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 					},
 					enumerable: outerHTML.enumerable,
 					configurable: outerHTML.configurable,
+				},
+				insertAdjacentHTML: {
+					value: function(position, text) {
+						insertAdjacentHTML.value.call(this, position, createHTML(text));
+					},
+					enumerable: insertAdjacentHTML.enumerable,
+					configurable: insertAdjacentHTML.configurable,
 				}
 			});
 		} catch(err) {
@@ -245,7 +293,7 @@ if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 		}
 
 		try {
-			const { srcdoc } = Object.getOwnPropertyDescriptors(HTMLIFrameElement.prototype);
+			const { srcdoc, src } = Object.getOwnPropertyDescriptors(HTMLIFrameElement.prototype);
 
 			Object.defineProperties(HTMLIFrameElement.prototype, {
 				srcdoc: {
@@ -257,21 +305,97 @@ if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 					},
 					enumerable: srcdoc.enumerable,
 					configurable: srcdoc.configurable,
+				},
+				src: {
+					get: function() {
+						return src.get.call(this);
+					},
+					set: function(val) {
+						src.set.call(this, createScriptURL(val));
+					},
+					enumerable: src.enumerable,
+					configurable: src.configurable,
 				}
 			});
 		} catch(err) {
 			console.error(err);
 		}
 
-		// if (! isStrict()) {
-		// 	try {
-		// 		const { eval } = globalThis;
-		// 		globalThis.eval = function(input) {
-		// 			return eval.call(this, createScript(input).toString());
-		// 		}
-		// 	} catch(err) {
-		// 		console.error(err);
-		// 	}
-		// }
+		try {
+			const { data, codeBase } = Object.getOwnPropertyDescriptors(HTMLObjectElement.prototype);
+
+			Object.defineProperties(HTMLObjectElement.prototype, {
+				data: {
+					get: function() {
+						return data.get.call(this);
+					},
+					set: function(val) {
+						data.set.call(this, createScriptURL(val));
+					},
+					enumerable: data.enumerable,
+					configurable: data.configurable,
+				},
+				codeBase: {
+					get: function() {
+						return codeBase.get.call(this);
+					},
+					set: function(val) {
+						codeBase.set.call(this, createScriptURL(val));
+					},
+					enumerable: codeBase.enumerable,
+					configurable: codeBase.configurable,
+				},
+			});
+		} catch(err) {
+			console.error(err);
+		}
+
+		try {
+			const {
+				eval: nativeEval,
+				setTimeout: nativeSTO,
+				setInterval: nativeIntverval,
+			} = globalThis;
+
+			globalThis.eval = function(script) {
+				return nativeEval(createScript(script).toString());
+			};
+
+			globalThis.setTimeout = function(func, delay, ...args) {
+				if (typeof func === 'string') {
+					return nativeSTO(createScript(func), delay, ...args);
+				} else {
+					return nativeSTO(func, delay, ...args);
+				}
+			};
+
+			globalThis.setInterval = function(func, delay, ...args) {
+				if (typeof func === 'string') {
+					return nativeIntverval(createScript(func), delay, ...args);
+				} else {
+					return nativeIntverval(func, delay, ...args);
+				}
+			};
+
+			try {
+				const NativeFunction = globalThis.Function;
+
+				globalThis.Function = function Function(...args) {
+					if (args.length === 0) {
+						return NativeFunction();
+					} else {
+						const funcBody = createScript(args.pop());
+						return NativeFunction( ...args, funcBody.toString());
+					}
+				};
+
+				globalThis.Function.prototype = NativeFunction.prototype;
+				NativeFunction.prototype.constructor = globalThis.Function;
+			} catch(err) {
+				console.error(err);
+			}
+		} catch(err) {
+			console.error(err);
+		}
 	})();
 }
