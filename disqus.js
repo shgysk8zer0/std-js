@@ -1,10 +1,22 @@
 import { createScript } from './elements.js';
 import { loaded } from './events.js';
+import { createPolicy } from './trust.js';
+
+const disqusPolicy = createPolicy('disqus#script', {
+	createScriptURL: input => {
+		if (input.endsWith('.disqus.com/embed.js')) {
+			return input;
+		} else {
+			throw new TypeError(`${input} is not a valid Disqus script URL`);
+		}
+	}
+});
 
 const TYPE = 'application/javascript';
 const REFERRER_POLICY = 'origin';
 const FETCH_PRIORITY = 'auto';
 export const ID = 'disqus_thread';
+export const trustPolicies = [disqusPolicy.name];
 
 export function getSiteURL(site) {
 	return new URL('/embed.js', `https://${site}.disqus.com/`).href;
@@ -37,21 +49,21 @@ export function preload(site, {
 export function getScript(site, {
 	referrerPolicy = REFERRER_POLICY,
 	timestamp = Date.now(),
-	policy = null,
+	policy = disqusPolicy,
 	nonce = null,
 	type = TYPE,
 	noModule = false,
 	fetchPriority = FETCH_PRIORITY,
 } = {}) {
 	return createScript(getSiteURL(site), {
-		referrerPolicy, type, nonce, noModule,policy, fetchPriority, dataset: { timestamp },
+		referrerPolicy, type, nonce, noModule, policy, fetchPriority, dataset: { timestamp },
 	});
 }
 
 export async function loadScript(site, {
 	referrerPolicy = REFERRER_POLICY,
 	timestamp = Date.now(),
-	policy = null,
+	policy = disqusPolicy,
 	nonce = null,
 	type = TYPE,
 	noModule = false,
