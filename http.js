@@ -1,7 +1,7 @@
 import { parse, loaded } from './dom.js';
 import { signalAborted } from './abort.js';
 import { setURLParams, setUTMParams, isObject, isNullish, callOnce } from './utility.js';
-import { createPolicy } from './trust.js';
+import { createPolicy, isTrustPolicy } from './trust.js';
 import { HTTPException } from './HTTPException.js';
 import * as TYPES from './types.js';
 
@@ -202,7 +202,9 @@ export async function getHTML(url, {
 	const html = await getText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
 
-	if (typeof integrity === 'string' && typeof policy === 'undefined') {
+	if (isTrustPolicy(policy)) {
+		return parse(policy.createHTML(html), { asFrag, head });
+	} else if (typeof integrity === 'string' && typeof policy === 'undefined') {
 		const fetchPolicy = await fetchPolicyPromise;
 		return parse(fetchPolicy.createHTML(html), { sanitizer });
 	} else {
