@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.7.1] - 2023-03-03
+### Added
+- Add handling of `Trusted*` in addition to strings
+- Add support for `TrustedHTML` in `elements.js` & `dom.js`
+- Add `isTrustedType` to `trusts.js`
+
+### Changed
+- Avoid converting attributes to strings or URLs
+- Provide a set of trust policies
+- Update `youtube.js` to use its own policy
+- Do not require parent node when sanitizing nodes
+- Update creation of various elements
+- A whole chain of passing trusted types along instead of converting
+
 ## [v2.7.0] - 2023-02-06
 
 ### Changed
