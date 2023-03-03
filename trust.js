@@ -118,6 +118,14 @@ export function isScriptURL(input) {
 	}
 }
 
+export function isTrustedType(input) {
+	if (supported()) {
+		return input instanceof globalThis.TrustedType;
+	} else {
+		return true;
+	}
+}
+
 export function createHTML(input, { policy = getDefaultPolicy() } = {}) {
 	if (isTrustPolicy(policy) && ! isHTML(input)) {
 		return policy.createHTML(input);

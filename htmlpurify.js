@@ -1,118 +1,39 @@
 import { createPolicy } from './trust.js';
-import { events, urls } from './attributes.js';
+import { events } from './attributes.js';
+import { sanitize } from './sanitizerUtils.js';
 
 /**
  * TrustedTypePolicy for internal use
  * @type {TrustedTypePolicy}
  */
 const nullPolicy = createPolicy('purify-raw#html', { createHTML: input => input });
-const tags = [
-	'script', 'object', 'embed', 'param', 'head', 'body', 'frame', 'noscript',
-	'base', 'iframe',
-];
-const attributes = [...events, 'ping', 'style'];
-const protocols = ['https:'];
 
-if (! protocols.includes(location.protocol)) {
-	protocols.push(location.protocol);
-}
-
-/**
- * [sanitize description]
- * @param  {Node} node               [description]
- * @return {void}      [description]
- */
-function sanitize(node) {
-	switch(node.nodeType) {
-		case Node.TEXT_NODE:
-			break;
-
-		case Node.ELEMENT_NODE: {
-			const tag = node.tagName.toLowerCase();
-			if (tags.includes(tag)) {
-				node.remove();
-			} else {
-				if (tag === 'template') {
-					sanitize(node.content);
-				}
-
-				if (node.hasAttributes()) {
-					node.getAttributeNames().forEach(attr => sanitize(node.getAttributeNode(attr)));
-				}
-
-				if (node.hasChildNodes()) {
-					[...node.childNodes].forEach(sanitize);
-				}
-			}
-
-			break;
-		}
-
-		case Node.ATTRIBUTE_NODE: {
-			const { value, ownerElement } = node;
-			const name = node.name.toLowerCase();
-
-			if (
-				urls.includes(name)
-				&& !protocols.includes(new URL(value, document.baseURI).protocol)
-			) {
-				ownerElement.removeAttributeNode(node);
-			} else if (attributes.includes(name)) {
-				ownerElement.removeAttributeNode(node);
-			}
-
-			break;
-		}
-
-		case Node.COMMENT_NODE: {
-			node.remove();
-
-			break;
-		}
-
-		case Node.DOCUMENT_NODE:
-		case Node.DOCUMENT_FRAGMENT_NODE: {
-			if (node.hasChildNodes()) {
-				[...node.childNodes].forEach(sanitize);
-			}
-
-			break;
-		}
-
-		case Node.CDATA_SECTION_NODE:
-		case Node.PROCESSING_INSTRUCTION_NODE:
-		case Node.DOCUMENT_TYPE_NODE:
-		default: {
-			node.parentElement.removeChild(node);
-		}
-	}
-}
-
-/**
- * [purifyToFragment description]
- * @param  {string} input               [description]
- * @return {DocumentFragment}       [description]
- */
-export function createFragment(input) {
-	const tmp = document.createElement('template');
-	// Set `innerHTML` to `TrustedHTML`
-	tmp.innerHTML = nullPolicy.createHTML(input);
-	sanitize(tmp.content);
-	return tmp.content;
-}
-
-export function createElement(tag, input) {
-	const el = document.createElement(tag);
-	el.append(createFragment(input));
-	return el;
-}
+const config = {
+	allowElements: null,
+	allowAttributes: null,
+	allowComments: false,
+	allowCustomElements: true,
+	allowUnknownMarkup: true,
+	blockElements: null,
+	dropElements: [
+		'script', 'object', 'embed', 'param', 'head', 'body', 'frame', 'noscript',
+		'base', 'iframe',
+	],
+	dropAttributes: Object.fromEntries([...events, 'ping', 'style'].map(attr => [attr, ['*']])),
+};
 
 /**
  * [trustPolicy description]
  * @type {TrustedTypePolicy}
  */
 export const purify = createPolicy('purify#html', {
-	createHTML: input => createElement('div', input).innerHTML,
+	createHTML: input => {
+		const div = document.createElement('div');
+		const tmp = document.createElement('template');
+		tmp.innerHTML = nullPolicy.createHTML(input);
+		div.append(sanitize(tmp.content, { config }));
+		return div.innerHTML;
+	},
 });
 
 /**

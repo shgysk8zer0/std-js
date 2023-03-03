@@ -205,12 +205,9 @@ export async function getHTML(url, {
 	if (typeof integrity === 'string' && typeof policy === 'undefined') {
 		const fetchPolicy = await fetchPolicyPromise;
 		return parse(fetchPolicy.createHTML(html), { sanitizer });
-	} else if (policy != null && policy.createHTML instanceof Function) {
-		return parse(policy.createHTML(html, { sanitizer }));
 	} else {
 		return parse(html, { head, asFrag, sanitizer, policy });
 	}
-
 }
 
 export async function getText(url, {
@@ -357,8 +354,6 @@ export async function postHTML(url, {
 	if (typeof integrity === 'string' && typeof policy === 'undefined') {
 		const fetchPolicy = await fetchPolicyPromise;
 		return parse(fetchPolicy.createHTML(html), { sanitizer });
-	} else if (policy != null && policy.createHTML instanceof Function) {
-		return parse(policy.createHTML(html), { sanitizer });
 	} else {
 		return parse(html, { head, asFrag, sanitizer, policy });
 	}

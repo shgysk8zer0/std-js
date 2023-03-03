@@ -463,6 +463,10 @@ export function polyfill() {
 		globalThis.TrustedTypePolicy = TrustedTypePolicy;
 	}
 
+	if (! ('TrustedType' in globalThis)) {
+		globalThis.TrustedType = TrustedType;
+	}
+
 	if (! ('TrustedHTML' in globalThis)) {
 		globalThis.TrustedHTML = TrustedHTML;
 	}

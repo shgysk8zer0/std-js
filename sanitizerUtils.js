@@ -59,9 +59,7 @@ export function sanitizeNode(node, { config = defaultConfig } = {}) {
 				break;
 
 			case Node.ELEMENT_NODE: {
-				if (! (node.parentNode instanceof Node)) {
-					break;
-				} else if (
+				if (
 					! allowUnknownMarkup
 					&& ( ! (node instanceof HTMLElement) || node instanceof HTMLUnknownElement)
 				) {

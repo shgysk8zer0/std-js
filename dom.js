@@ -227,8 +227,10 @@ export function html(what, text, {
 	sanitizer,
 	policy = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : undefined,
 } = {}) {
-	if (typeof sanitizer !== 'undefined' && sanitizer.setHTML instanceof Function) {
-		return each(what, el => el.setHTML(text, sanitizer), base);
+	if (typeof sanitizer !== 'undefined' && Element.prototype.setHTML instanceof Function) {
+		return each(what, el => el.setHTML(text, { sanitizer }), { base });
+	} else if (isHTML(text)) {
+		return each(what, el => el.innerHTML = text, { base });
 	} else if (typeof policy !== 'undefined' && policy.createHTML instanceof Function) {
 		text = policy.createHTML(text);
 		return each(what, el => el.innerHTML = text, { base });
