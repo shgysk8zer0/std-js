@@ -1,17 +1,28 @@
 /*eslint strict: ["error", "never"]*/
 if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 	(function harden() {
-		const knownPolicies = [
-			'default', 'empty#html', 'empty#script', 'fetch#html', 'ga#script-url',
-			'goog#html', 'purify-raw#html', 'purify#html', 'sanitizer-raw#html',
-			'dompurify',
-		];
+		function getPolicies() {
+			const policies = new Set([
+				'default', 'empty#html', 'empty#script', 'fetch#html', 'ga#script-url',
+				'goog#html', 'sanitizer-raw#html', 'purify-raw#html', 'purify#html',
+			]);
 
-		if (document.documentElement.dataset.hasOwnProperty('trustedPolicies')) {
-			for (const policy of document.documentElement.dataset.trustedPolicies.split(' ')) {
-				knownPolicies.push(policy);
+			if (document.documentElement.dataset.hasOwnProperty('trustedPolicies')) {
+				for (const policy of document.documentElement.dataset.trustedPolicies.split(' ')) {
+					policies.add(policy);
+				}
 			}
+
+			if (document.documentElement.dataset.hasOwnProperty('untrustedPolicies')) {
+				for (const policy of document.documentElement.dataset.untrustedPolicies.split(' ')) {
+					policies.delete(policy);
+				}
+			}
+
+			return Array.from(policies);
 		}
+
+		const knownPolicies = getPolicies();
 
 		Object.freeze(knownPolicies);
 

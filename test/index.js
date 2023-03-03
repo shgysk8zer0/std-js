@@ -1,31 +1,35 @@
-import '../shims.js';
 import '../deprefixer.js';
-import '../shims/trustedTypes.js';
-import '../shims/sanitizer.js';
 import '../theme-cookie.js';
 import { loadHandler } from './funcs.js';
 import { sleep } from '../promises.js';
 import { toggleClass, on, replaceClass, data, attr, ready } from '../dom.js';
+import { loadScript } from '../loader.js';
 import { init } from '../data-handlers.js';
 import { description, keywords, robots, thumbnail } from '../meta.js';
 import { getDefaultPolicy } from '../trust-policies.js';
 
 getDefaultPolicy();
 
-scheduler.postTask(() =>  Promise.allSettled([
-	import('https://cdn.kernvalley.us/components/leaflet/map.min.js'),
-	import('https://cdn.kernvalley.us/components/krv/ad.js'),
-	import('https://cdn.kernvalley.us/components/krv/events.js'),
-	import('https://cdn.kernvalley.us/components/github/user.js'),
-	import('https://cdn.kernvalley.us/components/github/repo.js'),
-	import('https://cdn.kernvalley.us/components/youtube/player.js'),
-	import('https://cdn.kernvalley.us/components/spotify/player.js'),
-	import('https://cdn.kernvalley.us/components/bacon-ipsum.js'),
-	import('https://cdn.kernvalley.us/components/github/gist.js'),
-	import('https://cdn.kernvalley.us/components/codepen-embed.js'),
-	import('https://cdn.kernvalley.us/components/weather/current.js'),
-	import('https://cdn.kernvalley.us/components/weather/forecast.js'),
-]), { priority: 'background' }).then(console.log);
+scheduler.postTask(async () => {
+	const policy = trustedTypes.defaultPolicy;
+	const type = 'module';
+	await Promise.all([
+		loadScript('https://cdn.kernvalley.us/components/leaflet/map.min.js', { policy }),
+		loadScript('https://cdn.kernvalley.us/components/krv/ad.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/krv/events.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/github/user.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/github/repo.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/youtube/player.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/spotify/player.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/bacon-ipsum.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/github/gist.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/codepen-embed.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/weather/current.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/weather/forecast.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/share-button.js', { policy, type }),
+		loadScript('https://cdn.kernvalley.us/components/toast-message.js', { policy, type }),
+	]).catch(console.error);
+}, { priority: 'background' });
 
 keywords(['javascript', 'ecmascript', 'es6', 'modules', 'library']);
 description('This is a JavaScript library testing page');

@@ -5,6 +5,7 @@ import { setProp } from './trust.js';
 import { REFERRER_POLICY } from './defaults.js';
 import { isObject, isNullish } from './utility.js';
 import { JS } from './types.js';
+import { isScriptURL, isHTML } from './trust.js';
 
 export function copyAs(target, tag, {
 	includeAttributes = true,
@@ -131,7 +132,7 @@ export function createElement(tag, {
 
 		if (typeof text === 'string') {
 			el.textContent = text;
-		} else if (typeof html === 'string') {
+		} else if (typeof html === 'string' || isHTML(html)) {
 			if (
 				'Sanitizer' in globalThis
 				&& sanitizer instanceof globalThis.Sanitizer
@@ -214,10 +215,6 @@ export function createScript(src, {
 	events: { capture, passive, once, signal, ...events } = {},
 	...attrs
 } = {}) {
-	if (! (src instanceof URL)) {
-		src = new URL(src, document.baseURI);
-	}
-
 	const script = createElement('script', {
 		dataset,
 		events: { capture, passive, once, signal, ...events },
@@ -513,13 +510,13 @@ export function createIframe(src, {
 		iframe.allow = allow;
 	}
 
-	if (typeof srcdoc === 'string' && srcdoc.length !== 0) {
+	if ((typeof srcdoc === 'string' && srcdoc.length !== 0) || isHTML(srcdoc)) {
 		setProp(iframe, 'srcdoc', srcdoc, { policy });
 	} else if (srcdoc instanceof Document) {
 		setProp(iframe, 'srcdoc'. srcdoc.documentElement.outerHTML.replace(/\n/g, ''), { policy });
 	}
 
-	if (typeof src === 'string' || src instanceof URL) {
+	if (typeof src === 'string' || src instanceof URL || isScriptURL(src)) {
 		setProp(iframe, 'src', src.toString(), { policy });
 	} else if (src instanceof Document) {
 		setProp(iframe, 'srcdoc'. src.documentElement.outerHTML.replace(/\n/g, ''), { policy });

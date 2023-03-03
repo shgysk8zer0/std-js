@@ -1,6 +1,6 @@
 import { clamp, between } from './math.js';
 import { isObject } from './utility.js';
-import { setAttr, isScriptURL } from './trust.js';
+import { setAttr, isScriptURL, isTrustedType } from './trust.js';
 
 export function getAttrs(el) {
 	if (typeof el === 'string') {
@@ -84,8 +84,14 @@ export function attr(el, props = {}, {
 		throw new TypeError('props must be an object');
 	} else {
 		Object.entries(props).forEach(([p, v]) => {
-			if (typeof v === 'string' || typeof v === 'number' || isScriptURL(v)) {
+			if (typeof v === 'string' || typeof v === 'number') {
 				setAttr(el, p, v, { policy, elementNs });
+			} else if (isTrustedType(v)) {
+				if (v.toString().length === 0) {
+					el.removeAttribute(p);
+				} else {
+					setAttr(el, p, v, { policy, elementNs });
+				}
 			} else if (typeof v === 'boolean') {
 				if (typeof namespace === 'string') {
 					v ? el.setAttributeNS(elementNs, p, '') : el.removeAttributeNS(elementNs, p);
@@ -188,10 +194,20 @@ export function setString(el, attr, val, {
 	if (
 		typeof val === 'string'
 		&& between(minLength, val.length, maxLength)
-		&& (!(pattern instanceof RegExp) || pattern.test(val))
+		&& (! (pattern instanceof RegExp) || pattern.test(val))
 	) {
 		setAttr(el, attr, val, { policy });
-		el.setAttribute(attr, val);
+	} else if(isTrustedType(val)) {
+		const str = val.toString();
+
+		if (
+			between(minLength, str.length, maxLength)
+			&& (! (pattern instanceof RegExp) || pattern.test(str))
+		) {
+			setAttr(el, attr, val, { policy });
+		} else {
+			el.removeAttribute(attr);
+		}
 	} else {
 		el.removeAttribute(attr);
 	}
@@ -212,9 +228,16 @@ export function setURL(el, attr, val, {
 } = {}) {
 	if ((val instanceof URL) && (! requirePath || val.pathname.length > 1)) {
 		setAttr(el, attr, val.href, { policy });
-		el.setAttribute(attr, val.href);
 	} else if (typeof val === 'string' && val.length !== 0) {
 		setURL(el, attr, new URL(val, base), { requirePath });
+	} else if (isScriptURL(val)) {
+		const url = new URL(val.toString(), document.baseURI);
+
+		if (! requirePath || url.pathname.length > 1) {
+			setAttr(el, attr, val, { policy });
+		} else {
+			el.removeAttribute(attr);
+		}
 	} else {
 		el.removeAttribute(attr);
 	}
