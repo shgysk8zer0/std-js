@@ -166,9 +166,10 @@ export const getYouTubePolicy = callOnce(() => createPolicy('youtube#embed', {
 		}
 	}
 }));
+
 export const getGooglePolicy = callOnce(() => createPolicy('ga#script-url', {
 	createHTML: () => trustedTypes.emptyHTML,
-	createScript: trustedTypes.emptyScript,
+	createScript: () => trustedTypes.emptyScript,
 	createScriptURL: input => {
 		const url = new URL(input, document.baseURI);
 
@@ -179,3 +180,5 @@ export const getGooglePolicy = callOnce(() => createPolicy('ga#script-url', {
 		}
 	}
 }));
+
+export const getDefaultNoOpPolicy = callOnce(() => createPolicy('default', {}));
