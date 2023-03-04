@@ -5,13 +5,18 @@
 import { supported as isSupported } from './trust.js';
 import { events } from './attributes.js';
 
-export const trustPolicies = ['empty#html', 'empty#script'];
+// Maps to `trusted-types 'allow-duplicates'`
+const allowDuplicates = document.documentElement.dataset.allowDuplicates === '1';
+
+// Maps to headers: `trusted-types <policy-name>`
+const allowedPolicies = new Set([
+	'empty#html', 'empty#script',
+	...document.documentElement.dataset.trustedPolicies.split(' '),
+]);
 /**
  * [supported description]
  */
 export const supported = isSupported();
-
-let allowDuplicates = true;
 
 /**
  * [symbols description]
@@ -148,55 +153,52 @@ export class TrustedTypePolicy {
 	 * @param {String} key              [description]
 	 */
 	constructor(name, { createHTML, createScript, createScriptURL }, { key }) {
+		// @TODO: Chrome seems to allow any same-origin scripts creating policies
 		if (key !== symbols.trustedKey) {
 			throw new TypeError('Invalid constructor');
-		} else if (! name.toString().match(/^[-#a-zA-Z0-9=_/@.%]+$/g)) {
-			throw new TypeError(`Policy ${name} contains invalid characters.`);
+		} else {
+			Object.defineProperties(this, {
+				name: {
+					enumerable: true,
+					configurable: false,
+					writable: false,
+					value: name.toString(),
+				},
+				createHTML: {
+					enumerable: true,
+					configurable: false,
+					writable: false,
+					value: createHTML instanceof Function
+						? (input, ...args) => new TrustedHTML(
+							createHTML(input.toString(), ...args),
+							{ key: symbols.trustedKey, policy: this }
+						)
+						: getUnsetPolicyException(this, 'createHTML'),
+				},
+				createScript: {
+					enumerable: true,
+					configurable: false,
+					writable: false,
+					value: createScript instanceof Function
+						? (input, ...args) => new TrustedScript(
+							createScript(input.toString(), ...args),
+							{ key: symbols.trustedKey, policy: this }
+						)
+						: getUnsetPolicyException(this, 'createScript'),
+				},
+				createScriptURL: {
+					enumerable: true,
+					configurable: false,
+					writable: false,
+					value: createScriptURL instanceof Function
+						? (input, ...args) => new TrustedScriptURL(
+							createScriptURL(input.toString(), ...args),
+							{ key: symbols.trustedKey, policy: this }
+						)
+						: getUnsetPolicyException(this, 'createScriptURL'),
+				},
+			});
 		}
-
-		Object.defineProperties(this, {
-			name: {
-				enumerable: true,
-				configurable: false,
-				writable: false,
-				value: name.toString(),
-			},
-			createHTML: {
-				enumerable: true,
-				configurable: false,
-				writable: false,
-				value: createHTML instanceof Function
-					? (input, ...args) => new TrustedHTML(
-						createHTML(input.toString(), ...args),
-						{ key: symbols.trustedKey, policy: this }
-					)
-					: getUnsetPolicyException(this, 'createHTML'),
-			},
-			createScript: {
-				enumerable: true,
-				configurable: false,
-				writable: false,
-				value: createScript instanceof Function
-					? (input, ...args) => new TrustedScript(
-						createScript(input.toString(), ...args),
-						{ key: symbols.trustedKey, policy: this }
-					)
-					: getUnsetPolicyException(this, 'createScript'),
-			},
-			createScriptURL: {
-				enumerable: true,
-				configurable: false,
-				writable: false,
-				value: createScriptURL instanceof Function
-					? (input, ...args) => new TrustedScriptURL(
-						createScriptURL(input.toString(), ...args),
-						{ key: symbols.trustedKey, policy: this }
-					)
-					: getUnsetPolicyException(this, 'createScriptURL'),
-			},
-		});
-
-		policies.push(Object.freeze(this));
 	}
 }
 
@@ -295,7 +297,14 @@ export class TrustedTypeFactory extends EventTarget {
 	 * @param  {Function} createScriptURL               [description]
 	 */
 	createPolicy(name, { createHTML, createScript, createScriptURL }) {
-		if (TrustedTypeFactory.allowDuplicates || ! hasPolicy(name)) {
+		console.log({ policies, allowDuplicates, allowedPolicies, name });
+		if (! name.toString().match(/^[-#a-zA-Z0-9=_/@.%]+$/g)) {
+			throw new TypeError(`Failed to execute 'createPolicy' on 'TrustedTypePolicyFactory': Policy: "${name}" contains invalid characters.`);
+		} else if (allowedPolicies.size > 2 && ! allowedPolicies.has(name)) {
+			throw new TypeError(`Failed to execute 'createPolicy' on 'TrustedTypePolicyFactory': Policy: "${name}" disallowed.`);
+		} else if(! allowDuplicates && hasPolicy(name)) {
+			throw new TypeError(`Failed to execute 'createPolicy' on 'TrustedTypePolicyFactory': Policy: "${name}" already exists.`);
+		} else {
 			const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, { key: symbols.trustedKey });
 			this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', { policy, key: symbols.trustedKey }));
 
@@ -303,9 +312,9 @@ export class TrustedTypeFactory extends EventTarget {
 				this[symbols.defaultPolicy] = policy;
 			}
 
+			policies.push(policy);
+
 			return policy;
-		} else {
-			throw new DOMException(`TrustedTypePolicy ${name} already set`);
 		}
 	}
 
@@ -438,14 +447,6 @@ export class TrustedTypeFactory extends EventTarget {
 	static get allowDuplicates() {
 		return allowDuplicates;
 	}
-
-	static set allowDuplicates(val) {
-		if (typeof val === 'boolean') {
-			allowDuplicates = val;
-		} else {
-			throw new TypeError('`allowDuplicates()` requires a boolean');
-		}
-	}
 }
 
 /**
@@ -496,3 +497,5 @@ export function polyfill() {
 		}
 	}
 }
+
+export const trustPolicies = [...allowedPolicies];

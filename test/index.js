@@ -7,6 +7,8 @@ import { loadScript } from '../loader.js';
 import { init } from '../data-handlers.js';
 import { description, keywords, robots, thumbnail } from '../meta.js';
 import { getDefaultPolicy } from '../trust-policies.js';
+import { errorHandler } from '../err-modal-report.js';
+globalThis.addEventListener('error', errorHandler);
 
 getDefaultPolicy();
 

@@ -1,6 +1,6 @@
 {
   "name": "std-js",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "description": "A JavaScript library for making front-end development sane!",
   "config": {
     "serve": {
@@ -20,13 +20,14 @@
     "ECMAScript2015",
     "ES6",
     "DOM",
-    "esQuery",
     "JavaScript",
     "modules",
     "front-end",
     "polyfill",
     "shim",
-    "async"
+    "async",
+    "TrustedTypes",
+    "Sanitizer"
   ],
   "author": {
     "name": "Chris Zuber",
@@ -44,7 +45,7 @@
     "url": "https://github.com/shgysk8zer0/std-js/issues"
   },
   "engines": {
-    "npm": ">=8.19.3"
+    "npm": ">=9.4.2"
   },
   "scripts": {
     "test": "npm run lint:js && npm run lint:html",

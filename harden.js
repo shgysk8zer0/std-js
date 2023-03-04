@@ -1,44 +1,6 @@
 /*eslint strict: ["error", "never"]*/
 if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 	(function harden() {
-		function getPolicies() {
-			const policies = new Set([
-				'default', 'empty#html', 'empty#script', 'fetch#html', 'ga#script-url',
-				'goog#html', 'sanitizer-raw#html', 'purify-raw#html', 'purify#html',
-			]);
-
-			if (document.documentElement.dataset.hasOwnProperty('trustedPolicies')) {
-				for (const policy of document.documentElement.dataset.trustedPolicies.split(' ')) {
-					policies.add(policy);
-				}
-			}
-
-			if (document.documentElement.dataset.hasOwnProperty('untrustedPolicies')) {
-				for (const policy of document.documentElement.dataset.untrustedPolicies.split(' ')) {
-					policies.delete(policy);
-				}
-			}
-
-			return Array.from(policies);
-		}
-
-		const knownPolicies = getPolicies();
-
-		Object.freeze(knownPolicies);
-
-		const symbols = { policy: Symbol.for('trust-policy') };
-
-		function isAllowedPolicy(type) {
-			if (symbols.policy in type) {
-				return knownPolicies.includes(type[symbols.policy]);
-			} else {
-				return false;
-			}
-		}
-		// function isStrict() {
-		// 	return typeof this === 'undefined';
-		// }
-
 		function supported() {
 			return 'trustedTypes' in globalThis;
 		}
@@ -48,15 +10,15 @@ if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 		}
 
 		function isHTML(input) {
-			return supported() && trustedTypes.isHTML(input) && isAllowedPolicy(input);
+			return supported() && trustedTypes.isHTML(input);
 		}
 
 		function isScript(input) {
-			return supported() && trustedTypes.isScript(input) && isAllowedPolicy(input);
+			return supported() && trustedTypes.isScript(input);
 		}
 
 		function isScriptURL(input) {
-			return supported() && trustedTypes.isScriptURL(input) && isAllowedPolicy(input);
+			return supported() && trustedTypes.isScriptURL(input);
 		}
 
 		function createHTML(input) {
@@ -96,14 +58,6 @@ if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 				return null;
 			}
 		}
-
-		// function getPropertyType(tag, prop, elementNs) {
-		// 	if (supported()) {
-		// 		return trustedTypes.getPropertyType(tag, prop, elementNs);
-		// 	} else {
-		// 		return null;
-		// 	}
-		// }
 
 		try {
 			const { write, writeln, execCommand } = Object.getOwnPropertyDescriptors(Document.prototype);
