@@ -7,7 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.7.2] - 2023-03-03
+
+### Added
+- `TrustedTypes` now internally handles duplicates & allowed policies using `document.documentElement.dataset`
+- `isStrictMode()` function in `utility.js`
+
+### Removed
+- `harden.js` no longer checks for allowed policies
+- `SanitizerBase.js`
+- No more `"fetch#html"` policy for `getHTML()` with `integrity` set
+
+### Changed
+- Just one `Sanitizer` class
+
+### Fixed
+- Avoid creating duplicate policies for `"sanitizer-raw#html"` using `callOnce()`
+
 ## [v2.7.1] - 2023-03-03
+
 ### Added
 - Add handling of `Trusted*` in addition to strings
 - Add support for `TrustedHTML` in `elements.js` & `dom.js`

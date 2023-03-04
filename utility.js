@@ -3,6 +3,11 @@ import { isAsyncFunction } from './promises.js';
 
 const funcs = new WeakMap();
 
+export function isStrictMode() {
+	// Probably always true
+	return typeof this === 'undefined';
+}
+
 export function getURLResolver({ base = document.baseURI, path = './' } = {}) {
 	const url = new URL(path, base);
 

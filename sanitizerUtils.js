@@ -1,6 +1,6 @@
 import { SanitizerConfig as defaultConfig } from './SanitizerConfigW3C.js';
 import { createPolicy } from './trust.js';
-import { isObject, getType } from './utility.js';
+import { isObject, getType, callOnce } from './utility.js';
 import { urls } from './attributes.js';
 
 export const supported = () => 'Sanitizer' in globalThis;
@@ -11,8 +11,9 @@ const allowProtocols = ['https:'];
 if (! allowProtocols.includes(location.protocol)) {
 	allowProtocols.push(location.protocol);
 }
-
-let rawPolicy = createPolicy('sanitizer-raw#html', { createHTML: input => input });
+const policyName = 'sanitizer-raw#html';
+const getPolicy = callOnce(() => createPolicy(policyName, { createHTML: input => input }));
+const createHTML = input => getPolicy().createHTML(input);
 
 function documentToFragment(doc) {
 	const frag = document.createDocumentFragment();
@@ -36,7 +37,7 @@ export function sanitize(input, { config = defaultConfig } = {}) {
 export function sanitizeFor(tag, content, { config = defaultConfig } = {}) {
 	const el = document.createElement(tag);
 	const temp = document.createElement('template');
-	temp.innerHTML = rawPolicy.createHTML(content);
+	temp.innerHTML = createHTML(content);
 	el.append(sanitize(temp.content, { config }));
 	return el;
 }
@@ -241,7 +242,7 @@ export function getSantizerUtils(Sanitizer, defaultConfig) {
 				globalThis.Sanitizer.prototype.sanitizeFor = function(element, input) {
 					const el = document.createElement(element);
 					const tmp = document.createElement('template');
-					tmp.innerHTML = rawPolicy.createHTML(input);
+					tmp.innerHTML = createHTML(input);
 					el.append(this.sanitize(tmp.content));
 					return el;
 				};
@@ -263,4 +264,4 @@ export function getSantizerUtils(Sanitizer, defaultConfig) {
 	return { setHTML, polyfill };
 }
 
-export const trustPolicies = [rawPolicy.name];
+export const trustPolicies = [policyName];

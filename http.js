@@ -1,7 +1,7 @@
-import { parse, loaded } from './dom.js';
+import { parse } from './dom.js';
 import { signalAborted } from './abort.js';
 import { setURLParams, setUTMParams, isObject, isNullish, callOnce } from './utility.js';
-import { createPolicy, isTrustPolicy } from './trust.js';
+import { isTrustPolicy } from './trust.js';
 import { HTTPException } from './HTTPException.js';
 import * as TYPES from './types.js';
 
@@ -10,14 +10,6 @@ import * as TYPES from './types.js';
  * @type {TrustedTypePolicy}
  */
 export const trustPolicies = ['fetch#html'];
-
-const fetchPolicyPromise = new Promise(async resolve => {
-	if (! ('trustedTypes' in globalThis)) {
-		await loaded();
-	}
-
-	resolve(createPolicy(trustPolicies[0], { createHTML: input => input }));
-});
 
 function filename(src) {
 	if (typeof src === 'string') {
@@ -204,9 +196,6 @@ export async function getHTML(url, {
 
 	if (isTrustPolicy(policy)) {
 		return parse(policy.createHTML(html), { asFrag, head });
-	} else if (typeof integrity === 'string' && typeof policy === 'undefined') {
-		const fetchPolicy = await fetchPolicyPromise;
-		return parse(fetchPolicy.createHTML(html), { sanitizer });
 	} else {
 		return parse(html, { head, asFrag, sanitizer, policy });
 	}
@@ -353,12 +342,7 @@ export async function postHTML(url, {
 	const html = await postText(url, { body, mode, credentials, referrerPolicy, headers,
 		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
 
-	if (typeof integrity === 'string' && typeof policy === 'undefined') {
-		const fetchPolicy = await fetchPolicyPromise;
-		return parse(fetchPolicy.createHTML(html), { sanitizer });
-	} else {
-		return parse(html, { head, asFrag, sanitizer, policy });
-	}
+	return parse(html, { head, asFrag, sanitizer, policy });
 }
 
 export async function postJSON(url, {
