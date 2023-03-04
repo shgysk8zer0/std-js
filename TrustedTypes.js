@@ -297,7 +297,6 @@ export class TrustedTypeFactory extends EventTarget {
 	 * @param  {Function} createScriptURL               [description]
 	 */
 	createPolicy(name, { createHTML, createScript, createScriptURL }) {
-		console.log({ policies, allowDuplicates, allowedPolicies, name });
 		if (! name.toString().match(/^[-#a-zA-Z0-9=_/@.%]+$/g)) {
 			throw new TypeError(`Failed to execute 'createPolicy' on 'TrustedTypePolicyFactory': Policy: "${name}" contains invalid characters.`);
 		} else if (allowedPolicies.size > 2 && ! allowedPolicies.has(name)) {
