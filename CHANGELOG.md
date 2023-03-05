@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- By default attempts to load CSP from `<meta http-equiv>`
+- Has option to fetch page and look at CSP headers
+- Fallback is still using `[data-trusted-policies]`
+- Rewrite disqus module to use current `disqus#script-url` policy
+
+### Added
+- Add new pre-made policies
+- Add helper methods for creating polices
+- Add methods to get CSP in `http.js`
+
+### Removed
+- Remove obsolete `fetch#html` policy from `http.js`
+
 ## [v2.7.2] - 2023-03-03
 
 ### Added

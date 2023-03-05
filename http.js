@@ -5,12 +5,6 @@ import { isTrustPolicy } from './trust.js';
 import { HTTPException } from './HTTPException.js';
 import * as TYPES from './types.js';
 
-/**
- * To be used when `integrity` is passed when `fetch()`ing HTML
- * @type {TrustedTypePolicy}
- */
-export const trustPolicies = ['fetch#html'];
-
 function filename(src) {
 	if (typeof src === 'string') {
 		return new URL(src, location.origin).pathname.split('/').at(-1);
@@ -68,6 +62,49 @@ export async function fetch(url, opts = {}) {
 		]).then(resp => handleResponse(resp, { message: opts.errorMessage }), handleError);
 	} else {
 		return await globalThis.fetch(url, opts).then(resp => handleResponse(resp, { message: opts.errorMessage }), handleError);
+	}
+}
+
+export const getHTTPCSP = callOnce(async function getHTTPCSP() {
+	const { ok, headers } = await fetch(location.href, { method: 'HEAD' });
+
+	if (ok && headers.has('Content-Security-Policy')) {
+		const directives = headers.get('Content-Security-Policy').trim().split(';').filter(str => str.length !== 0);
+
+		return Object.fromEntries(directives.map(directive => {
+			const [key, ...rest] = directive.trim().split(' ').filter(part => part.length !== 0);
+			return [key, rest];
+		}));
+	}
+});
+
+export const getCSP = callOnce(async function getCSP() {
+	try {
+		const csp = await getHTTPCSP();
+
+		if (typeof csp === 'object' && ! Object.is(csp, null)) {
+			return csp;
+		} else {
+			return getMetaCSP();
+		}
+	} catch(err) {
+		console.error(err);
+		return getMetaCSP();
+	}
+});
+
+export function getMetaCSP() {
+	const meta = document.head.querySelector('meta[http-equiv="Content-Security-Policy"][content]');
+
+	if (meta instanceof HTMLMetaElement) {
+		const directives = meta.content.trim().split(';').filter(str => str.length !== 0);
+
+		return Object.fromEntries(directives.map(directive => {
+			const [key, ...rest] = directive.trim().split(' ').filter(part => part.length !== 0);
+			return [key, rest];
+		}));
+	} else {
+		return {};
 	}
 }
 
@@ -200,6 +237,8 @@ export async function getHTML(url, {
 		return parse(html, { head, asFrag, sanitizer, policy });
 	}
 }
+
+export const createTemplateGetter = (...args) => callOnce(() => getHTML(...args));
 
 export async function getText(url, {
 	body = undefined,

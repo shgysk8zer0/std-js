@@ -6,11 +6,11 @@ import { toggleClass, on, replaceClass, data, attr, ready } from '../dom.js';
 import { loadScript } from '../loader.js';
 import { init } from '../data-handlers.js';
 import { description, keywords, robots, thumbnail } from '../meta.js';
-import { getDefaultPolicy } from '../trust-policies.js';
+import { getDefaultPolicyWithDisqus } from '../trust-policies.js';
 import { errorHandler } from '../err-modal-report.js';
 globalThis.addEventListener('error', errorHandler);
 
-getDefaultPolicy();
+getDefaultPolicyWithDisqus();
 
 scheduler.postTask(async () => {
 	const policy = trustedTypes.defaultPolicy;
@@ -43,7 +43,7 @@ toggleClass(document.documentElement, {
 	'no-details': document.createElement('details') instanceof HTMLUnknownElement,
 	'js': true,
 	'no-js': false,
-	'no-custom-elements': !('customElements' in window),
+	'no-custom-elements': !('customElements' in globalThis),
 });
 
 init();

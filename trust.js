@@ -1,5 +1,6 @@
 import { getDeferred } from './promises.js';
 import { listen } from './events.js';
+import { callOnce } from './utility.js';
 
 export function setProp(el, prop, val, {
 	policy,
@@ -194,3 +195,9 @@ export async function whenPolicyCreated(name = 'default', { signal } = {}) {
 
 	return promise;
 }
+
+export const createHTMLPolicyGetter = (name, cb) => callOnce(() => createPolicy(name, { createHTML: cb }));
+
+export const createScriptPolicyGetter = (name, cb) => callOnce(() => createPolicy(name, { createScript: cb }));
+
+export const createScriptURLPolicyGetter = (name, cb) => callOnce(() => createPolicy(name, { createScriptURL: cb }));
