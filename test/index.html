@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="no-js" data-foo-bar="remove" itemtype="http://schema.org/WebPage" itemscope="" data-trusted-policies="empty#html empty#script default sanitizer-raw#html loader#html purify-raw#html purify#html loader#html weather-forecast#html weather-current#html youtube#embed github#gist codepen#script-url">
+<html class="no-js" data-foo-bar="remove" itemtype="http://schema.org/WebPage" itemscope="">
 	<head>
 		<title>std-js test</title>
 		<meta charset="utf-8"/>
@@ -8,7 +8,7 @@
 		<meta name="description" content="A testing page for my JavaScript library" />
 		<meta name="robots" content="nofollow,noindex" />
 		<base href="/test/" />
-		<meta http-equiv-x="Content-Security-Policy" content="
+		<meta http-equiv="Content-Security-Policy" content="
 			default-src 'self';
 			base-uri 'self';
 			manifest-src 'self';
@@ -26,7 +26,7 @@
 			connect-src 'self' cdn.kernvalley.us api.github.com/users/ api.pwnedpasswords.com/range/ maps.kernvalley.us/places/ events.kernvalley.us/events.json;
 			img-src * data: blob:;
 			require-trusted-types-for 'script';
-			trusted-types empty#html empty#script default sanitizer-raw#html loader#html purify-raw#html purify#html loader#html weather-forecast#html weather-current#html youtube#embed github#gist codepen#script-url;
+			trusted-types empty#html empty#script default sanitizer-raw#html loader#html purify-raw#html purify#html loader#html weather-forecast#html weather-current#html youtube#embed github#gist codepen#script-url krv-events#html disqus#script-url 'allow-duplicates';
 			upgrade-insecure-requests;"
 		/>
 		<!-- <link rel="import" name="contextmenu" href="components/contentextment.html" async="" />

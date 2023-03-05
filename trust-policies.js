@@ -16,10 +16,55 @@ export const googleOrigins = [
 	'https://www.google-analytics.com',
 ];
 
+export const youtubeEmbedOrigins = [
+	'https://www.youtube.com',
+	'https://www.youtube-nocookie.com',
+];
+
 export const youtubeEmbeds = [
 	'https://www.youtube.com/embed/',
 	'https://www.youtube-nocookie.com/embed/',
 ];
+
+export function isTrustedScriptOrigin(input) {
+	const { origin } = new URL(input, document.baseURI);
+	return trustedOrigins.includes(origin);
+}
+
+export function isGoogleOrigin(input) {
+	const { origin } = new URL(input, document.baseURI);
+	return googleOrigins.includes(origin);
+}
+
+export function isYouTubeEmbed(input) {
+	const { origin, pathname } = new URL(input, document.baseURI);
+	return youtubeEmbedOrigins.includes(origin) && pathname.startsWith('/embed/');
+}
+
+export function isDisqusEmbedScript(input) {
+	return /^https:\/\/[\w-]+\.disqus\.com\/embed\.js$/.test(input);
+}
+
+export function isDisqusEmbed(input) {
+	return input.startsWith('https://disqus.com/embed/comments/');
+}
+
+function createSanitizerCallback(sanitizer = new Sanitizer(Sanitizer.getDefaultConfiguration())) {
+	if (Sanitizer.prototype.sanitizeFor instanceof Function) {
+		return input => sanitizer.sanitizeFor('div', input).innerHTML;
+	} else if (Element.prototype.setHTML instanceof Function) {
+		return input => {
+			const el = document.createElement('div');
+			el.setHTML(input, { sanitizer });
+			return el.innerHTML;
+		};
+	} else {
+		return input => input;
+	}
+}
+
+export const createEmptyHTML = () => trustedTypes.emptyHTML;
+export const createEmptyScript = () => trustedTypes.emptyScript;
 
 /**
  * @TODO: Add support for SVG
@@ -103,53 +148,45 @@ export const getDefaultPolicy = callOnce(() => {
 	const sanitizer = new Sanitizer(sanitizerConfig);
 
 	return createPolicy('default', {
-		createHTML: input => {
-			if (Sanitizer.prototype.sanitizeFor instanceof Function) {
-				return sanitizer.sanitizeFor('div', input).innerHTML;
-			} else if (Element.prototype.setHTML instanceof Function) {
-				const el = document.createElement('div');
-				el.setHTML(input, { sanitizer });
-				return el.innerHTML;
-			} else {
-				return input;
-			}
-		},
-		createScript: () => trustedTypes.emptyScript.toString(),
+		createHTML: createSanitizerCallback(sanitizer),
+		createScript: createEmptyScript,
 		createScriptURL: input => {
-			const url = new URL(input, document.baseURI);
-
-			if (trustedOrigins.includes(url.origin)) {
-				return url.href;
+			if (isTrustedScriptOrigin(input)) {
+				return input;
 			} else {
-				throw new TypeError(`Disallowed script origin: ${url.origin}`);
+				throw new TypeError(`Disallowed script origin: ${input}`);
+			}
+		}
+	});
+});
+
+export const getDefaultPolicyWithDisqus = callOnce(() => {
+	const sanitizer = new Sanitizer(Sanitizer.getDefaultConfiguration());
+
+	return createPolicy('default', {
+		createHTML: createSanitizerCallback(sanitizer),
+		createScript: createEmptyScript,
+		createScriptURL: input => {
+			if (isTrustedScriptOrigin(input) || isDisqusEmbed(input)) {
+				return input;
+			} else {
+				throw new TypeError(`Disallowed script origin: ${input}`);
 			}
 		}
 	});
 });
 
 export const getKRVPolicy = callOnce(() => {
-	const sanitizer = new Sanitizer(Sanitizer.getDefaultConfiguration());
+	const sanitizer = new Sanitizer(sanitizerConfig);
 
 	return createPolicy('krv', {
-		createHTML: input => {
-			if (sanitizer.sanitize instanceof Function && sanitizer.sanitizeFor instanceof Function) {
-				return sanitizer.sanitizeFor('div', input).innerHTML;
-			} else if (Element.prototype.setHTML instanceof Function) {
-				const el = document.createElement('div');
-				el.setHTML(input, { sanitizer });
-				return el.innerHTML;
-			} else {
-				return input;
-			}
-		},
-		createScript: () => trustedTypes.emptyScript.toString(),
+		createHTML: createSanitizerCallback(sanitizer),
+		createScript: createEmptyScript,
 		createScriptURL: input => {
-			const url = new URL(input, document.baseURI);
-
-			if (trustedOrigins.includes(url.origin)) {
-				return url.href;
+			if (isTrustedScriptOrigin(input)) {
+				return input;
 			} else {
-				throw new TypeError(`Disallowed script origin: ${url.origin}`);
+				throw new TypeError(`Disallowed script origin: ${input}`);
 			}
 		}
 	});
@@ -157,10 +194,8 @@ export const getKRVPolicy = callOnce(() => {
 
 export const getYouTubePolicy = callOnce(() => createPolicy('youtube#embed', {
 	createScriptURL: input => {
-		const url = new URL(input).href;
-
-		if (youtubeEmbeds.some(yt => url.startsWith(yt))) {
-			return url;
+		if (isYouTubeEmbed(input)) {
+			return input;
 		} else {
 			throw new TypeError(`Invalid YouTube URL: ${input}`);
 		}
@@ -168,15 +203,23 @@ export const getYouTubePolicy = callOnce(() => createPolicy('youtube#embed', {
 }));
 
 export const getGooglePolicy = callOnce(() => createPolicy('ga#script-url', {
-	createHTML: () => trustedTypes.emptyHTML,
-	createScript: () => trustedTypes.emptyScript,
+	createHTML: createEmptyHTML,
+	createScript: createEmptyScript,
 	createScriptURL: input => {
-		const url = new URL(input, document.baseURI);
-
-		if (googleOrigins.includes(url.origin)) {
-			return url.href;
+		if (isGoogleOrigin(input)) {
+			return input;
 		} else {
-			throw new TypeError(`${url.origin} is not a known Google origin.`);
+			throw new TypeError(`${input} is not a known Google origin.`);
+		}
+	}
+}));
+
+export const getDisqusPolicy = callOnce(() => createPolicy('disqus#script-url', {
+	createScriptURL: input => {
+		if (isDisqusEmbedScript(input)) {
+			return input;
+		} else {
+			throw new TypeError(`Invalid Disqus URL: ${input}`);
 		}
 	}
 }));

@@ -2,10 +2,11 @@ import { $ } from '../esQuery.js';
 import { getJSON } from '../http.js';
 import handleJSON from '../json_response.js';
 import { on, data } from '../dom.js';
-import * as mutations from '../mutations.js';
+import { events, options, filter, init } from '../mutations.js';
 import { DAYS } from '../date-consts.js';
 import { alert, prompt } from '../asyncDialog.js';
-import { createPolicy } from '../trust.js';
+import { createHTMLPolicyGetter } from '../trust.js';
+
 export const trustPolicies = ['loader#html'];
 
 export async function loadHandler() {
@@ -13,13 +14,11 @@ export async function loadHandler() {
 		expires: new Date(Date.now() + 2 * DAYS),
 	});
 
-	const policy = createPolicy('loader#html', {
-		createHTML: input => input
-	});
+	const policy = createHTMLPolicyGetter('loader#html', input => input)();
 
-	mutations.init();
+	init();
 
-	$(document.body).watch(mutations.events, mutations.options, mutations.filter);
+	$(document.body).watch(events, options, filter);
 
 	on('#set-cookie', 'click', async () => {
 		const name = await prompt('Enter cookie name');

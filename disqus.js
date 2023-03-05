@@ -1,22 +1,13 @@
 import { createScript } from './elements.js';
-import { loaded } from './events.js';
-import { createPolicy } from './trust.js';
+import { getDeferred } from './promises.js';
+import { JS } from './types.js';
+import { getDisqusPolicy } from './trust-policies.js';
 
-const disqusPolicy = createPolicy('disqus#script', {
-	createScriptURL: input => {
-		if (input.endsWith('.disqus.com/embed.js')) {
-			return input;
-		} else {
-			throw new TypeError(`${input} is not a valid Disqus script URL`);
-		}
-	}
-});
-
-const TYPE = 'application/javascript';
+const policyName = 'disqus#script-url';
 const REFERRER_POLICY = 'origin';
 const FETCH_PRIORITY = 'auto';
 export const ID = 'disqus_thread';
-export const trustPolicies = [disqusPolicy.name];
+export const trustPolicies = [policyName];
 
 export function getSiteURL(site) {
 	return new URL('/embed.js', `https://${site}.disqus.com/`).href;
@@ -29,7 +20,7 @@ export function getPreload(site, {
 	const link = document.createElement('link');
 	link.rel = 'preload';
 	link.as = 'script';
-	link.type = TYPE;
+	link.type = JS;
 	link.referrerPolicy = referrerPolicy;
 	link.fetchPriority = fetchPriority;
 	link.href = getSiteURL(site);
@@ -49,33 +40,53 @@ export function preload(site, {
 export function getScript(site, {
 	referrerPolicy = REFERRER_POLICY,
 	timestamp = Date.now(),
-	policy = disqusPolicy,
-	nonce = null,
-	type = TYPE,
-	noModule = false,
+	policy = getDisqusPolicy(),
 	fetchPriority = FETCH_PRIORITY,
+	events,
 } = {}) {
-	return createScript(getSiteURL(site), {
-		referrerPolicy, type, nonce, noModule, policy, fetchPriority, dataset: { timestamp },
+	return createScript(policy.createScriptURL(getSiteURL(site)), {
+		referrerPolicy, fetchPriority, dataset: { timestamp }, events,
 	});
 }
 
 export async function loadScript(site, {
 	referrerPolicy = REFERRER_POLICY,
 	timestamp = Date.now(),
-	policy = disqusPolicy,
-	nonce = null,
-	type = TYPE,
-	noModule = false,
+	policy = getDisqusPolicy(),
 	fetchPriority = FETCH_PRIORITY,
 	parent = document.head,
 	signal,
 } = {}) {
-	const script = getScript(site, {
-		referrerPolicy, timestamp, policy, nonce, type, noModule, fetchPriority,
-	});
+	const { resolve, reject, promise } = getDeferred();
 
-	const promise = loaded(script, { signal });
-	parent.append(script);
-	return await promise;
+	if (signal instanceof AbortSignal && signal.aborted) {
+		reject(signal.reason);
+	} else {
+		const controller = new AbortController();
+
+		const script = getScript(site, {
+			referrerPolicy, timestamp, policy, fetchPriority,
+			events: {
+				load: ({ target }) => {
+					resolve(target);
+					controller.abort();
+				},
+				error: () => {
+					reject(new DOMException(`Error loading Disqus script for ${site}`));
+				},
+				signal: controller.signal,
+			}
+		});
+
+		if (signal instanceof AbortSignal) {
+			signal.addEventListener('abort', ({ target }) => {
+				reject(target.reason);
+				controller.abort(target.reason);
+			}, { once: true, signal: controller.signal });
+		}
+
+		parent.append(script);
+
+		return await promise;
+	}
 }
