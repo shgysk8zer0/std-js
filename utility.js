@@ -1,11 +1,37 @@
 import { randomInt } from './math.js';
-import { isAsyncFunction } from './promises.js';
+import { isAsyncFunction, getDeferred } from './promises.js';
+import { isScriptURL, isTrustPolicy } from './trust.js';
 
 const funcs = new WeakMap();
 
 export function isStrictMode() {
 	// Probably always true
 	return typeof this === 'undefined';
+}
+
+export async function registerServiceWorker(source, {
+	scope,
+	policy = 'trustedTypes' in globalThis ? trustedTypes.defaultPolicy : null,
+	type = 'classic',
+	updateViaCache = 'none',
+} = {}) {
+	const { resolve, reject, promise } = getDeferred();
+
+	if (! ('serviceWorker' in navigator && navigator.serviceWorker.register instanceof Function)) {
+		reject(new DOMException('Service worker not supported'));
+	} else if (! (typeof source === 'string' || isScriptURL(source) || source instanceof URL)) {
+		reject(new TypeError('Invalid Service worker registration source'));
+	} else if (isTrustPolicy(policy)) {
+		navigator.serviceWorker.register(
+			policy.createScriptURL(source),
+			{ scope, type, updateViaCache }
+		).then(resolve).catch(reject);
+	} else {
+		navigator.serviceWorker.register(source, { scope, type, updateViaCache })
+			.then(resolve).catch(reject);
+	}
+
+	return await promise;
 }
 
 export function getURLResolver({ base = document.baseURI, path = './' } = {}) {

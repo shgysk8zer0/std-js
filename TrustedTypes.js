@@ -286,24 +286,6 @@ export class TrustedTypePolicy {
 }
 
 /**
- * [policyName description]
- * @type {[BeforeCreatePolicyEvent]}
- */
-export class BeforeCreatePolicyEvent extends Event {
-	constructor(type, { policy, key }) {
-		super(type);
-
-		if (key !== symbols.trustedKey) {
-			throw new TypeError('Invalid constructor');
-		} else if (! (policy instanceof TrustedTypePolicy)) {
-			throw new TypeError('Not a TrustedTypePolicy');
-		}
-
-		this.policyName = policy.name;
-	}
-}
-
-/**
  * [enumerable description]
  * @type {TrustedTypePolicyFactory}
  */
@@ -390,7 +372,6 @@ export class TrustedTypePolicyFactory extends EventTarget {
 	 */
 	createPolicy(name, { createHTML, createScript, createScriptURL } = {}) {
 		const policy = new TrustedTypePolicy(name, { createHTML, createScript, createScriptURL }, { key: symbols.trustedKey });
-		this.dispatchEvent(new BeforeCreatePolicyEvent('beforecreatepolicy', { policy, key: symbols.trustedKey }));
 
 		if (! name.toString().match(/^[-#a-zA-Z0-9=_/@.%]+$/g)) {
 			throw new TypeError(`Failed to execute 'createPolicy' on 'TrustedTypePolicyFactory': Policy: "${name}" contains invalid characters.`);
