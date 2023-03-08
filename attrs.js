@@ -141,7 +141,9 @@ export function setInt(el, attr, val, {
 	max = Number.MAX_SAFE_INTEGER,
 	policy,
 } = {}) {
-	if (Number.isInteger(val)) {
+	if (val instanceof Date) {
+		setAttr(el, attr, val.getTime(), { min, max, policy});
+	} else if (Number.isInteger(val)) {
 		setAttr(el, attr, clamp(min, val, max), { policy });
 	} else if (typeof val === 'string') {
 		setInt(el, attr, parseInt(val), { min, max });
