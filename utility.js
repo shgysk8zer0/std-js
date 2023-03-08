@@ -9,17 +9,17 @@ export function isStrictMode() {
 	return typeof this === 'undefined';
 }
 
-export const autoServiceWorkerRegistration = callOnce(async ({ policy, } = {}) => {
+export const autoServiceWorkerRegistration = callOnce(async ({
+	policy = 'trustedTypes' in globalThis ? trustedTypes.defaultPolicy : null,
+} = {}) => {
 	if ('serviceWorker' in navigator && 'serviceWorker' in document.documentElement.dataset) {
-		const { serviceWorker, scope = '/' } = document.documentElement.dataset;
+		const { serviceWorker, scope = '/', updateViaCache } = document.documentElement.dataset;
 
 		try {
 			if (isTrustPolicy(policy)) {
-				await navigator.serviceWorker.register(policy.createScriptURL(serviceWorker), { scope });
-			} else if('trustedTypes' in globalThis && isTrustPolicy(trustedTypes.defaultPolicy)) {
-				await navigator.serviceWorker.register(trustedTypes.defaultPolicy.createScriptURL(serviceWorker), { scope });
+				await registerServiceWorker(policy.createScriptURL(serviceWorker), { scope, updateViaCache });
 			} else {
-				await navigator.serviceWorker.register(serviceWorker, { scope });
+				await registerServiceWorker(serviceWorker, { scope, updateViaCache });
 			}
 
 			await reloadOnUpdate();
