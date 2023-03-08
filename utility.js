@@ -9,6 +9,62 @@ export function isStrictMode() {
 	return typeof this === 'undefined';
 }
 
+export const autoServiceWorkerRegistration = callOnce(async ({
+	policy = 'trustedTypes' in globalThis ? trustedTypes.defaultPolicy : null,
+} = {}) => {
+	if ('serviceWorker' in navigator && 'serviceWorker' in document.documentElement.dataset) {
+		const { serviceWorker, scope = '/', updateViaCache } = document.documentElement.dataset;
+
+		try {
+			if (isTrustPolicy(policy)) {
+				await registerServiceWorker(policy.createScriptURL(serviceWorker), { scope, updateViaCache });
+			} else {
+				await registerServiceWorker(serviceWorker, { scope, updateViaCache });
+			}
+
+			await reloadOnUpdate();
+		} catch(err) {
+			console.error(err);
+		}
+	}
+});
+
+export async function reloadOnUpdate() {
+	if ('serviceWorker' in navigator && 'reloadOnUpdate' in document.documentElement.dataset) {
+		const reg = await navigator.serviceWorker.ready;
+
+		reg.addEventListener('updatefound', async ({ target }) => {
+			target.update();
+
+			const HTMLNotificationElement = await customElements.whenDefined('html-notification');
+			const notification = new HTMLNotificationElement('Update available', {
+				body: 'App updated in background. Would you like to reload to see updates?',
+				requireInteraction: true,
+				actions: [{
+					title: 'Reload',
+					action: 'reload',
+				}, {
+					title: 'Dismiss',
+					action: 'dismiss',
+				}]
+			});
+
+			notification.addEventListener('notificationclick', ({ target, action }) => {
+				switch(action) {
+					case 'dismiss':
+						target.close();
+						break;
+
+					case 'reload':
+						target.close();
+						location.reload();
+						break;
+				}
+			});
+		});
+	}
+}
+
 export async function registerServiceWorker(source, {
 	scope,
 	policy = 'trustedTypes' in globalThis ? trustedTypes.defaultPolicy : null,
