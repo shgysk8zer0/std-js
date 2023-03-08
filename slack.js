@@ -13,37 +13,27 @@ const successObj = Object.seal({
 	status: 204,
 });
 
-export async function signatureHeaders({ uuid }) {
+export async function signatureHeaders({ uuid, origin = location.origin }) {
 	const date = new Date().toISOString();
 
 	return new Headers({
 		'x-message-id': uuid,
 		'x-message-time': date,
-		'x-message-origin': location.origin,
-		'x-message-sig': await sha256(JSON.stringify({ uuid, date, origin: location.origin })),
+		'x-message-origin': origin,
+		'x-message-sig': await sha256(JSON.stringify({ uuid, date, origin })),
 		'x-message-algo': 'sha256',
+		'Content-Type': 'application/json',
 	});
 }
 
 export async function send(endpoint, { name, email, phone, subject, body, url }, { signal } = {}) {
 	try {
 		const uuid = crypto.randomUUID();
-		const data = new FormData();
+		const origin = location.origin;
+		const headers = await signatureHeaders({ uuid, origin });
+		const data = JSON.stringify({ name, email, phone, subject, url, origin, body });
 
-		data.set('name', name);
-		data.set('email', email);
-		data.set('phone', phone);
-		data.set('subject', subject);
-		data.set('body', body);
-		data.set('url', url);
-		data.set('origin', location.origin);
-
-		const resp = await POST(endpoint, {
-			mode: 'cors',
-			body: data,
-			headers: await signatureHeaders({ uuid }),
-			signal,
-		});
+		const resp = await POST(endpoint, { mode: 'cors', body: data, headers, signal });
 
 		return Object.seal({
 			status: resp.status,
