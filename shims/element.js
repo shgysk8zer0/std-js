@@ -76,3 +76,17 @@ if (
 		}
 	};
 }
+
+if (! HTMLTemplateElement.prototype.hasOwnProperty('shadowRootMode')) {
+	function attachShadows(base = document) {
+		base.querySelectorAll('template[shadowrootmode]').forEach(tmp => {
+			const mode = tmp.getAttribute('shadowrootmode');
+			const shadow = tmp.parentElement.attachShadow({ mode });
+			shadow.append(tmp.content);
+			tmp.remove();
+			attachShadows(shadow);
+		});
+	}
+	
+	attachShadows(document);
+}
