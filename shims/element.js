@@ -78,7 +78,7 @@ if (
 }
 
 if (! HTMLTemplateElement.prototype.hasOwnProperty('shadowRootMode')) {
-	function attachShadows(base = document) {
+	(function attachShadows(base = document) {
 		base.querySelectorAll('template[shadowrootmode]').forEach(tmp => {
 			const mode = tmp.getAttribute('shadowrootmode');
 			const shadow = tmp.parentElement.attachShadow({ mode });
@@ -86,7 +86,5 @@ if (! HTMLTemplateElement.prototype.hasOwnProperty('shadowRootMode')) {
 			tmp.remove();
 			attachShadows(shadow);
 		});
-	}
-	
-	attachShadows(document);
+	})(document);
 }
