@@ -88,12 +88,21 @@ if (HTMLElement.prototype.attachInternals instanceof Function && ! ('CustomState
 	Object.defineProperty(HTMLElement.prototype, 'attachInternals', {
 		value: function() {
 			const internals = value.call(this);
+			console.log({ el: this, internals, shadow: this.shadowRoot });
 
 			Object.defineProperty(internals, 'states', {
 				value: new CustomStateSet(this, symbols.key),
 				configurable: true,
 				enumberable: true,
 			});
+
+			if (Object.is(internals.shadowRoot, null) && ! Object.is(this.shadowRoot, null)) {
+				Object.defineProperty(internals, 'shadowRoot', {
+					value: this.shadowRoot,
+					configurable: true,
+					enumerable: true,
+				});
+			}
 
 			return internals;
 		},
