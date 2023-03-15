@@ -78,13 +78,29 @@ if (
 }
 
 if (! HTMLTemplateElement.prototype.hasOwnProperty('shadowRootMode')) {
-	(function attachShadows(base = document) {
+	Object.defineProperty(HTMLTemplateElement.prototype, 'shadowRootMode', {
+		get: function() {
+			return this.getAttribute('shadowrootmode');
+		},
+		set: function(val) {
+			this.setAttribute('shadowrootmode', val);
+		},
+		enumerable: true,
+		configurable: true,
+	});
+
+	const attachShadows = (base = document) => {
 		base.querySelectorAll('template[shadowrootmode]').forEach(tmp => {
-			const mode = tmp.getAttribute('shadowrootmode');
-			const shadow = tmp.parentElement.attachShadow({ mode });
+			const shadow = tmp.parentElement.attachShadow({ mode: tmp.shadowRootMode });
 			shadow.append(tmp.content);
 			tmp.remove();
 			attachShadows(shadow);
 		});
-	})(document);
+	};
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('readystatechange', () => attachShadows(document), { once: true });
+	} else {
+		attachShadows(document);
+	}
 }
