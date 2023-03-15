@@ -1,3 +1,4 @@
+import './shims/symbols.js';
 import './shims/array.js';
 import './shims/globalThis.js';
 import './shims/function.js';
@@ -23,3 +24,4 @@ import './shims/map.js';
 import './shims/weakMap.js';
 import './shims/window.js';
 import './shims/scheduler.js';
+import './shims/elementInternals.js';
