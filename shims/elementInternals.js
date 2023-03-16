@@ -88,7 +88,6 @@ if (HTMLElement.prototype.attachInternals instanceof Function && ! ('CustomState
 	Object.defineProperty(HTMLElement.prototype, 'attachInternals', {
 		value: function() {
 			const internals = value.call(this);
-			console.log({ el: this, internals, shadow: this.shadowRoot });
 
 			Object.defineProperty(internals, 'states', {
 				value: new CustomStateSet(this, symbols.key),
