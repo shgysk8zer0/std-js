@@ -2,6 +2,16 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals
  * @see https://caniuse.com/mdn-api_formdataevent
  * @see https://caniuse.com/mdn-api_elementinternals
+ * @todo: Use MutationObserver to deal with `disabled` on custom els & their fieldsets
+ *
+ * This polyfill needs a bit of extra work from the custom element to work.
+ * Check if `internals._polyfilled` to see if extra steps are necessary:
+ * - Call `internals._associateForm(form, this)` in `connectedCallback()`
+ * - Add `disabled` to `observedAttributes()`
+ * - Call `this.formDisabledCallback(typeof newVal === 'string')` from `attributeChangedCallback()`
+ *
+ * Additionally, if `internals.states._polyfilled`
+ * - Use `._state--*` in addition to `:--*` to query element internals states
  */
 if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEvent' in globalThis) {
 	const symbols = {
