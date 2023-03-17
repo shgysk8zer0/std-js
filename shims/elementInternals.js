@@ -1,4 +1,327 @@
 /**
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals
+ * @see https://caniuse.com/mdn-api_formdataevent
+ * @see https://caniuse.com/mdn-api_elementinternals
+ */
+if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEvent' in globalThis) {
+	const symbols = {
+		key: Symbol('key'),
+		internals: Symbol('element-internals'),
+		form: Symbol('form'),
+		element: Symbol('element'),
+		validity: Symbol('validity'),
+		validationMessage: Symbol('validation-message'),
+		value: Symbol('value'),
+		state: Symbol('state'),
+		formController: Symbol('form-controller'),
+	};
+
+	const validationObject = {
+		valueMissing: false, typeMismatch: false, patternMismatch: false, tooLong: false,
+		tooShort: false, rangeUnderflow: false, rangeOverflow: false, stepMismatch: false,
+		badInput: false, customError: false, valid: true,
+	};
+
+	const isFormAssociated = (component) => {
+		return component instanceof HTMLElement
+			&& customElements.get(component.tagName.toLowerCase()).formAssociated;
+	};
+
+	const getFormDataHandler = (component, internals) => {
+		return function(event) {
+			if (! event.target.reportValidity()) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+			} else if (event.formData instanceof FormData) {
+				const value = internals[symbols.value];
+
+				if (value instanceof FormData) {
+					value.entries().forEach(([k, v]) => event.formData.set(k, v));
+				} else if (component.hasAttribute('name')) {
+					event.formData.set(component.getAttribute('name'), internals[symbols.value]);
+				}
+			}
+		};
+	};
+
+	const css = (el, rules) => {
+		Object.entries(rules).forEach(([k, v]) => el.style.setProperty(k, v));
+	};
+
+	const findAssociatedForm = (component) => {
+		if (component.hasAttribute('form')) {
+			return document.forms[component.getAttribute('form')] || component.closest('form');
+		} else {
+			return component.closest('form');
+		}
+	};
+
+	// To be used in/after `connectedCallback`
+	// @TODO: Handle `disable` change on el & fieldset
+	const associateForm = (form, internals, component) => {
+		if (! (form instanceof HTMLFormElement)) {
+			if (internals[symbols.formController] instanceof AbortController) {
+				internals[symbols.formController].abort();
+			}
+
+			internals[symbols.form] = null;
+			internals[symbols.formController] = null;
+		} else if (! (component instanceof HTMLElement && component.tagName.includes('-'))) {
+			throw new TypeError('Not a custom element');
+		} else if (! (internals instanceof ElementInternals || internals instanceof globalThis.ElementInternals)) {
+			throw new TypeError('Invalid ElementInternals');
+		} else if (! isFormAssociated(component)) {
+			throw new TypeError(`${component.tagName} is not form associated.`);
+		} else if (! (component.formAssociatedCallback instanceof Function)) {
+			throw new TypeError(`${component.tagName} is missing a formAssociatedCallback method.`);
+		} else {
+			const controller = new AbortController();
+			internals[symbols.form] = form;
+			internals[symbols.formController] = controller;
+
+			const { checkValidity, reportValidity } = form;
+
+			form.reportValidity = function() {
+				if (! reportValidity.call(this)) {
+					return false;
+				} else {
+					return internals.reportValidity();
+				}
+			};
+
+			form.checkValidity = function() {
+				if (! checkValidity.call(this)) {
+					return false;
+				} else {
+					return internals.checkValidity();
+				}
+			};
+
+			controller.signal.addEventListener('abort', () => {
+				form.reportValidity = reportValidity;
+				form.checkValidity = checkValidity;
+			}, { once: true });
+
+			form.addEventListener('formdata', getFormDataHandler(component, internals), { signal: controller.signal });
+			form.addEventListener('submit', event => {
+				if (! event.target.reportValidity()) {
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					event.stopPropagation();
+				}
+			}, { signal: controller.signal });
+
+			if (component.formResetCallback instanceof Function) {
+				form.addEventListener('reset', () => component.formResetCallback(), { signal: controller.signal });
+			}
+		}
+	};
+
+	class ElementInternals {
+		constructor(element, key) {
+			if (key !== symbols.key) {
+				throw new TypeError('Illegal constructor');
+			} else if (! (element instanceof HTMLElement)) {
+				throw new TypeError('Must be called on an HTMLElement');
+			} else if (! element.tagName.includes('-')) {
+				throw new DOMException('Cannot attach internals to a built-in element.');
+			} else {
+				const configurable = true;
+				const enumerable = false;
+				const writable = true;
+
+				Object.defineProperties(this, {
+					[symbols.element]: { value: element, configurable, enumerable, writable },
+					[symbols.form]: { value: null, configurable, enumerable, writable },
+					[symbols.validity]: { value: validationObject, configurable, enumerable, writable },
+					[symbols.validationMessage]: { value: '', configurable, enumerable, writable },
+					[symbols.value]: { value: null, configurable, enumerable, writable },
+					[symbols.state]: { value: null, configurable, enumerable, writable },
+					[symbols.formController]: { value: null, configurable, enumerable, writable },
+				});
+
+				Object.defineProperty(element, symbols.internals, {
+					value: this,
+					enumerable: false,
+					configurable: false,
+					writable: false,
+				});
+			}
+		}
+
+		get form() {
+			return this[symbols.form];
+		}
+
+		get labels() {
+			const form = this.form;
+
+			if (form instanceof HTMLFormElement && this[symbols.element].id.length !== 0) {
+				return form.querySelectorAll(`label[for="${this[symbols.element].id}"]`);
+			} else {
+				return document.createDocumentFragment().childNodes;
+			}
+		}
+
+		get _polyfilled() {
+			return true;
+		}
+
+		get shadowRoot() {
+			const el = this[symbols.element];
+			return el.shadowRoot;
+		}
+
+		get validity() {
+			if (isFormAssociated(this[symbols.element])) {
+				return this[symbols.validity];
+			} else {
+				return undefined;
+			}
+		}
+
+		get validationMessage() {
+			if (isFormAssociated(this[symbols.element])) {
+				return this[symbols.validationMessage] || '';
+			} else {
+				return undefined;
+			}
+		}
+
+		get willValidate() {
+			const element = this[symbols.element];
+
+			return isFormAssociated(element)
+				&& ! ['disabed', 'readonly'].some(attr => element.hasAttribute(attr));
+		}
+
+		checkValidity() {
+			if (! this.willValidate) {
+				return true;
+			} else if (! this.validity.valid) {
+				this[symbols.element].dispatchEvent(new Event('invalid'));
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		reportValidity() {
+			if (! this.checkValidity()) {
+				const message = this.validationMessage;
+
+				if (typeof message === 'string' && message.length !== 0) {
+					this[symbols.element].scrollIntoView({ block: 'start' });
+					const { bottom, left } = this[symbols.element].getBoundingClientRect();
+					const el = document.createElement('div');
+					el.textContent = message;
+
+					css(el, {
+						'position': 'fixed',
+						'background-color': '#2b2a33',
+						'color': '#fafafa',
+						'top': `${bottom + 2}px`,
+						'left': `${left}px`,
+						'z-index': 2147483647,
+						'color-scheme': 'light-dark',
+						'font-family': 'system-ui, serif',
+						'font-size': '18px',
+						'display': 'inline-block',
+						'padding': '0.6em 0.8em',
+						'border': '1px solid #1a1a1a',
+						'border-radius': '6px',
+					});
+
+					this[symbols.element].insertAdjacentElement('afterend', el);
+					setTimeout(() => el.remove(), 3000);
+				}
+
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		setFormValue(value, state) {
+			if (isFormAssociated(this[symbols.element])) {
+				this[symbols.value] = value;
+				this[symbols.state] = state;
+			} else {
+				throw new DOMException('Not form associated');
+			}
+		}
+
+		setValidity({
+			valueMissing = false,
+			typeMismatch = false,
+			patternMismatch = false,
+			tooLong = false,
+			tooShort = false,
+			rangeUnderflow = false,
+			rangeOverflow = false,
+			stepMismatch = false,
+			badInput = false,
+			customError = false,
+		}, message = '',/*, anchor*/) {
+			if (! isFormAssociated(this[symbols.element])) {
+				throw new DOMException('Not form associated');
+			} else if (
+				(typeof message !== 'string' || message.length === 0)
+				&& (
+					valueMissing || typeMismatch || patternMismatch || tooLong || tooShort
+					|| rangeUnderflow || rangeOverflow || stepMismatch || badInput || customError
+				)
+			) {
+				throw new DOMException('Message required if any flags are true.');
+			} else {
+				const valid = [
+					valueMissing, typeMismatch, patternMismatch, tooLong, tooShort,
+					rangeUnderflow, rangeOverflow, stepMismatch, badInput, customError,
+				].every(val => val === false);
+
+				this[symbols.validity] = {
+					valueMissing, typeMismatch, patternMismatch, tooLong, tooShort,
+					rangeUnderflow, rangeOverflow, stepMismatch, badInput, customError,
+					valid,
+				};
+
+				this[symbols.validationMessage] = message;
+
+				if (! valid) {
+					this.states.add('--invalid');
+					this.states.delete('--valid');
+					this[symbols.element].dispatchEvent(new Event('invalid'));
+				} else {
+					this.states.delete('--invalid');
+					this.states.add('--valid');
+				}
+			}
+		}
+
+		_associateForm(form, component) {
+			associateForm(form, this, component);
+		}
+
+		_findAssociatedForm(component) {
+			return findAssociatedForm(component);
+		}
+	}
+
+	HTMLElement.prototype.attachInternals = function attachInternals() {
+		if (this.hasOwnProperty(symbols.internals)) {
+			throw new DOMException('Invalid operation');
+		} else if (! this.tagName.includes('-')) {
+			throw new DOMException('Cannot call attachInternals on built-in elements.');
+		} else {
+			return new ElementInternals(this, symbols.key);
+		}
+	};
+
+	globalThis.ElementInternal = ElementInternals;
+}
+
+/**
  * Add `states` to `ElementInternals`
  * Uses `._state--foo` instead of `:--foo` though
  * Requires Iterator Helpers (`./iterator.js`)
@@ -28,6 +351,10 @@ if (HTMLElement.prototype.attachInternals instanceof Function && ! ('CustomState
 			} else {
 				protectedData.set(this, el);
 			}
+		}
+
+		get _polyfilled() {
+			return true;
 		}
 
 		get size() {
