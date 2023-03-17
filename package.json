@@ -50,7 +50,7 @@
   "scripts": {
     "test": "npm run lint:js && npm run lint:html",
     "preversion": "npm test",
-    "start": "http-server ${npm_package_config_serve_path} --port ${npm_package_config_serve_port} --gzip true --brotli true -a ${npm_package_config_serve_domain} -o /test/",
+    "start": "http-server ${npm_package_config_serve_path} -c-1 --port ${npm_package_config_serve_port} --gzip true --brotli true -a ${npm_package_config_serve_domain} -o /test/",
     "fix": "npm run fix:js",
     "fix:js": "eslint . --fix",
     "lint:js": "eslint .",
