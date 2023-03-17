@@ -2,7 +2,7 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals
  * @see https://caniuse.com/mdn-api_formdataevent
  * @see https://caniuse.com/mdn-api_elementinternals
- * @todo: Use MutationObserver to deal with `disabled` on custom els & their fieldsets
+ * @todo: Use MutationObserver to deal with `disabled` on custom els & their fieldsets?
  *
  * This polyfill needs a bit of extra work from the custom element to work.
  * Check if `internals._polyfilled` to see if extra steps are necessary:
@@ -24,6 +24,51 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 		value: Symbol('value'),
 		state: Symbol('state'),
 		formController: Symbol('form-controller'),
+		anchor: Symbol('anchor'),
+	};
+
+	const aria = {
+		ariaAtomic: 'aria-atomic',
+		ariaAutoComplete: 'aria-autocomplete',
+		ariaBusy: 'aria-busy',
+		ariaChecked: 'aria-checked',
+		ariaColCount: 'aria-colcount',
+		ariaColIndex: 'aria-colindex',
+		ariaColIndexText: 'aria-colindextext',
+		ariaColSpan: 'aria-colspan',
+		ariaCurrent: 'aria-current',
+		ariaDisabled: 'aria-disabled',
+		ariaExpanded: 'aria-expanded',
+		ariaHasPopup: 'aria-haspopup',
+		ariaHidden: 'aria-hidden',
+		ariaInvalid: 'aria-invalid',
+		ariaKeyShortcuts: 'aria-keyshortcuts',
+		ariaLabel: 'aria-label',
+		ariaLevel: 'aria-level',
+		ariaLive: 'aria-live',
+		ariaModal: 'aria-modal',
+		ariaMultiLine: 'aria-multiline',
+		ariaMultiSelectable: 'aria-multiselectable',
+		ariaOrientation: 'aria-orientation',
+		ariaPlaceholder: 'aria-placeholder',
+		ariaPosInSet: 'aria-posinset',
+		ariaPressed: 'aria-pressed',
+		ariaReadOnly: 'aria-readonly',
+		ariaRelevant: 'aria-relevant',
+		ariaRequired: 'aria-required',
+		ariaRoleDescription: 'aria-roledescription',
+		ariaRowCount: 'aria-rowcount',
+		ariaRowIndex: 'aria-rowindex',
+		ariaRowIndexText: 'aria-rowindextext',
+		ariaRowSpan: 'aria-rowspan',
+		ariaSelected: 'aria-selected',
+		ariaSetSize: 'aria-setsize',
+		ariaSort: 'aria-sort',
+		ariaValueMax: 'aria-valuemax',
+		ariaValueMin: 'aria-valuemin',
+		ariaValueNow: 'aria-valuenow',
+		ariaValueText: 'aria-valuetext',
+		role: 'role'
 	};
 
 	const validationObject = {
@@ -144,6 +189,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 				Object.defineProperties(this, {
 					[symbols.element]: { value: element, configurable, enumerable, writable },
 					[symbols.form]: { value: null, configurable, enumerable, writable },
+					[symbols.anchor]: { value: null, configurable, enumerable, writable },
 					[symbols.validity]: { value: validationObject, configurable, enumerable, writable },
 					[symbols.validationMessage]: { value: '', configurable, enumerable, writable },
 					[symbols.value]: { value: null, configurable, enumerable, writable },
@@ -213,6 +259,11 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 				this[symbols.element].dispatchEvent(new Event('invalid'));
 				return false;
 			} else {
+				const next = this[symbols.element].nextElementSibling;
+
+				if (next instanceof HTMLElement && next.classList.contains('_element-internals-popup')) {
+					next.remove();
+				}
 				return true;
 			}
 		}
@@ -222,7 +273,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 				const message = this.validationMessage;
 
 				if (typeof message === 'string' && message.length !== 0) {
-					this[symbols.element].scrollIntoView({ block: 'start' });
+					// this[symbols.element].scrollIntoView({ block: 'start' });
 					const { bottom, left } = this[symbols.element].getBoundingClientRect();
 					const el = document.createElement('div');
 					el.textContent = message;
@@ -243,8 +294,27 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 						'border-radius': '6px',
 					});
 
+					el.classList.add('_element-internals-popup');
+
+					this[symbols.element].focus();
+
+					const next = this[symbols.element].nextElementSibling;
+
+					if (next instanceof Element && next.classList.contains('_element-internals-popup')) {
+						next.remove();
+					}
+
 					this[symbols.element].insertAdjacentElement('afterend', el);
-					setTimeout(() => el.remove(), 3000);
+
+					if (this[symbols.anchor] instanceof Element) {
+						this[symbols.anchor].focus();
+					}
+
+					setTimeout(() => {
+						if (el.isConnected) {
+							el.remove();
+						}
+					}, 3000);
 				}
 
 				return false;
@@ -273,7 +343,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 			stepMismatch = false,
 			badInput = false,
 			customError = false,
-		}, message = '',/*, anchor*/) {
+		}, message = '', anchor) {
 			if (! isFormAssociated(this[symbols.element])) {
 				throw new DOMException('Not form associated');
 			} else if (
@@ -297,6 +367,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 				};
 
 				this[symbols.validationMessage] = message;
+				this[symbols.anchor] = anchor;
 
 				if (! valid) {
 					this.states.add('--invalid');
@@ -318,6 +389,23 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 		}
 	}
 
+	Object.entries(aria).forEach(([prop, attr]) => {
+		Object.defineProperty(ElementInternals.prototype, prop, {
+			get: function() {
+				return this[symbols.element].getAttribute(attr);
+			},
+			set: function(val) {
+				if (typeof val === 'string') {
+					this[symbols.element].setAttribute(attr, val);
+				} else {
+					this[symbols.element].removeAttribute(attr);
+				}
+			},
+			enumerable: false,
+			configurable: true,
+		});
+	});
+
 	HTMLElement.prototype.attachInternals = function attachInternals() {
 		if (this.hasOwnProperty(symbols.internals)) {
 			throw new DOMException('Invalid operation');
@@ -328,7 +416,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 		}
 	};
 
-	globalThis.ElementInternal = ElementInternals;
+	globalThis.ElementInternals = ElementInternals;
 }
 
 /**
