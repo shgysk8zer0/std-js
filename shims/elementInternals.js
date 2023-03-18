@@ -21,6 +21,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 		key: Symbol('key'),
 		internals: Symbol('element-internals'),
 		form: Symbol('form'),
+		fieldset: Symbol('fieldset'),
 		element: Symbol('element'),
 		validity: Symbol('validity'),
 		validationMessage: Symbol('validation-message'),
@@ -81,6 +82,10 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 		badInput: false, customError: false, valid: true,
 	};
 
+	const hasDisabledFieldset = component => component.hasOwnProperty(symbols.fieldset)
+		&& components[symbols.fieldset] instanceof HTMLFieldSetElement
+		&& components[symbols.fieldset].disabled;
+
 	const isFormAssociated = (component) => {
 		return component instanceof HTMLElement
 			&& customElements.get(component.tagName.toLowerCase()).formAssociated;
@@ -125,6 +130,19 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 
 			internals[symbols.form] = null;
 			internals[symbols.formController] = null;
+
+			if (component.hasOwnProperty(symbols.fieldset)) {
+				const fieldset = component[symbols.fieldset];
+
+				if (fieldset.hasOwnProperty(symbols.customInputs)) {
+					fieldset[symbols.customInputs].delete(component);
+
+					if (fieldset[symbols.customInputs.size] === 0) {
+						delete fieldset[symbols.customInputs];
+					}
+				}
+				component[symbols.fieldset] = null;
+			}
 		} else if (! (component instanceof HTMLElement && component.tagName.includes('-'))) {
 			throw new TypeError('Not a custom element');
 		} else if (! (internals instanceof ElementInternals || internals instanceof globalThis.ElementInternals)) {
@@ -138,6 +156,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 			const fieldset = component.closest('fieldset');
 
 			if (fieldset instanceof Element) {
+				component[symbols.fieldset] = fieldset;
 				if (! fieldset.hasOwnProperty(symbols.customInputs)) {
 					fieldset[symbols.customInputs] = new Set();
 				}
@@ -189,30 +208,41 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 
 	const observer = new MutationObserver((mutations) => {
 		mutations.forEach(({ target, type, attributeName }) => {
-			if (type === 'attributes' && attributeName === 'disabled') {
+			if (type === 'attributes' && attributeName === 'disabled' && target.hasOwnProperty(symbols.internals)) {
 				const disabled = target.hasAttribute('disabled');
+				const internals = target[symbols.internals];
+				const isDisabled = internals.states.has('--disabled');
 
 				if (
-					target.tagName.includes('-')
+					disabled !== isDisabled
+					&& target.tagName.includes('-')
 					&& isFormAssociated(target)
 					&& target.hasOwnProperty(symbols.internals)
 					&& target.formDisabledCallback instanceof Function
 				) {
-					const internals = target[symbols.internals];
-
 					if (disabled) {
 						internals.states.add('--disabled');
 					} else {
 						internals.states.delete('--disabled');
 					}
 
-					if (target.formDisabledCallback instanceof Function) {
+					if (
+						target.formDisabledCallback instanceof Function
+						&& ! hasDisabledFieldset(target)
+					) {
 						target.formDisabledCallback(disabled);
 					}
-				} else if (target.tagName === 'FIELDSET' && target.hasOwnProperty(symbols.customInputs)) {
+				} else if (
+					disabled !== isDisabled
+					&& target.tagName === 'FIELDSET'
+					&& target.hasOwnProperty(symbols.customInputs)
+				) {
 					target[symbols.customInputs].forEach(el => {
-						if (el.isConnected) {
-							if (el.formDisabledCallback instanceof Function && ! el.hasAttribute('disabled')) {
+						if (el.isConnected && el.hasOwnProperty(symbols.internals)) {
+							if (
+								el.formDisabledCallback instanceof Function
+								&& el.hasAttribute('disabled') !== disabled
+							) {
 								el.formDisabledCallback(disabled);
 							}
 						} else {
@@ -243,6 +273,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 				Object.defineProperties(this, {
 					[symbols.element]: { value: element, configurable, enumerable, writable },
 					[symbols.form]: { value: null, configurable, enumerable, writable },
+					[symbols.fieldset]: { value: null, configurable, enumerable, writable },
 					[symbols.anchor]: { value: null, configurable, enumerable, writable },
 					[symbols.validity]: { value: validationObject, configurable, enumerable, writable },
 					[symbols.validationMessage]: { value: '', configurable, enumerable, writable },
@@ -522,7 +553,7 @@ if (HTMLElement.prototype.attachInternals instanceof Function && ! ('CustomState
 		}
 
 		has(state) {
-			return protectedData.get(this).classList.includes(getCName(state));
+			return protectedData.get(this).classList.contains(getCName(state));
 		}
 
 		delete(state) {
