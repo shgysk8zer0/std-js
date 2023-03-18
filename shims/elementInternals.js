@@ -83,11 +83,12 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 	};
 
 	const hasDisabledFieldset = component => component.hasOwnProperty(symbols.fieldset)
-		&& components[symbols.fieldset] instanceof HTMLFieldSetElement
-		&& components[symbols.fieldset].disabled;
+		&& component[symbols.fieldset] instanceof HTMLFieldSetElement
+		&& component[symbols.fieldset].disabled;
 
 	const isFormAssociated = (component) => {
 		return component instanceof HTMLElement
+			&& component.tagName.includes('-')
 			&& customElements.get(component.tagName.toLowerCase()).formAssociated;
 	};
 
@@ -97,7 +98,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 				event.preventDefault();
 				event.stopImmediatePropagation();
 				event.stopPropagation();
-			} else if (event.formData instanceof FormData) {
+			} else if (internals.willValidate && event.formData instanceof FormData) {
 				const value = internals[symbols.value];
 
 				if (value instanceof FormData) {
@@ -208,42 +209,63 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 
 	const observer = new MutationObserver((mutations) => {
 		mutations.forEach(({ target, type, attributeName }) => {
-			if (type === 'attributes' && attributeName === 'disabled' && target.hasOwnProperty(symbols.internals)) {
+			if (type === 'attributes' && attributeName === 'disabled') {
 				const disabled = target.hasAttribute('disabled');
-				const internals = target[symbols.internals];
-				const isDisabled = internals.states.has('--disabled');
 
+				/**
+				 * Check that target is a valid candiate and not a child of a
+				 * `<fieldset disabled>`, unless they are both being toggled
+				 * together to the same value.
+				 */
 				if (
-					disabled !== isDisabled
-					&& target.tagName.includes('-')
-					&& isFormAssociated(target)
+					isFormAssociated(target)
 					&& target.hasOwnProperty(symbols.internals)
-					&& target.formDisabledCallback instanceof Function
+					&& target[symbols.internals].states.has('--disabled') !== disabled
+					&& (
+						mutations.length === 1
+							// target is not a descendant of a `<fieldset disabled>`
+							? ! hasDisabledFieldset(target)
+							: (
+								// target & `<fieldset>` are being enabled/disabled together
+								target.hasAttribute('disabled') === hasDisabledFieldset(target)
+								&& mutations.some((m) =>
+									m.target.isSameNode(target[symbols.fieldset])
+								)
+							)
+					)
 				) {
+					const internals = target[symbols.internals];
+
 					if (disabled) {
 						internals.states.add('--disabled');
 					} else {
 						internals.states.delete('--disabled');
 					}
 
-					if (
-						target.formDisabledCallback instanceof Function
-						&& ! hasDisabledFieldset(target)
-					) {
+					if (target.formDisabledCallback instanceof Function) {
 						target.formDisabledCallback(disabled);
 					}
 				} else if (
-					disabled !== isDisabled
-					&& target.tagName === 'FIELDSET'
+					target.tagName === 'FIELDSET'
 					&& target.hasOwnProperty(symbols.customInputs)
+					&& (
+						mutations.length === 1
+						|| ! mutations.some(m => target[symbols.customInputs].has(m.target))
+					)
 				) {
 					target[symbols.customInputs].forEach(el => {
 						if (el.isConnected && el.hasOwnProperty(symbols.internals)) {
-							if (
-								el.formDisabledCallback instanceof Function
-								&& el.hasAttribute('disabled') !== disabled
-							) {
-								el.formDisabledCallback(disabled);
+							// Do not toggle disabled on elements that are `disabled`
+							if (! el.hasAttribute('disabled')) {
+								if (disabled) {
+									el[symbols.internals].states.add('--disabled');
+								} else {
+									el[symbols.internals].states.delete('--disabled');
+								}
+
+								if (el.formDisabledCallback instanceof Function) {
+									el.formDisabledCallback(disabled);
+								}
 							}
 						} else {
 							target[symbols.customInputs].delete(el);
@@ -292,6 +314,8 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 					configurable: false,
 					writable: false,
 				});
+
+				setTimeout(() => this.states.add('--element-internals-polyfilled'), 10);
 			}
 		}
 
@@ -338,7 +362,8 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 			const element = this[symbols.element];
 
 			return isFormAssociated(element)
-				&& ! ['disabed', 'readonly'].some(attr => element.hasAttribute(attr));
+				&& ! hasDisabledFieldset(element)
+				&& ! ['disabled', 'readonly'].some(attr => element.hasAttribute(attr));
 		}
 
 		checkValidity() {
@@ -537,6 +562,7 @@ if (HTMLElement.prototype.attachInternals instanceof Function && ! ('CustomState
 				throw new TypeError('el must be an HTMLElement');
 			} else {
 				protectedData.set(this, el);
+				this.add('--custom-states-polyfilled');
 			}
 		}
 
