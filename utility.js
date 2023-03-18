@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { randomInt } from './math.js';
 import { isAsyncFunction, getDeferred } from './promises.js';
 import { isScriptURL, isTrustPolicy } from './trust.js';

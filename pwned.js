@@ -1,3 +1,6 @@
+/**
+ * @copyright 2021-2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { sha1, HEX } from './hash.js';
 import { getText } from './http.js';
 import { listen } from './events.js';

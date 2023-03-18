@@ -1,3 +1,6 @@
+/**
+ * @copyright 2022-2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { nativeSupport, getSantizerUtils, sanitize, sanitizeFor, trustPolicies } from './sanitizerUtils.js';
 import { SanitizerConfig as defaultConfig } from './SanitizerConfigW3C.js';
 

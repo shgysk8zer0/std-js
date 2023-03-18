@@ -1,17 +1,20 @@
 /**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
  * @see https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals
  * @see https://caniuse.com/mdn-api_formdataevent
  * @see https://caniuse.com/mdn-api_elementinternals
- * @todo: Use MutationObserver to deal with `disabled` on custom els & their fieldsets?
+ * @todo: Figure out how to cleanup MutationObserver for removed inputs
+ * @todo: Can I add a MutationObserver to automatically set/unset forms,
+ * even in `ShadowRoot`s?
  *
  * This polyfill needs a bit of extra work from the custom element to work.
  * Check if `internals._polyfilled` to see if extra steps are necessary:
  * - Call `internals._associateForm(form, this)` in `connectedCallback()`
- * - Add `disabled` to `observedAttributes()`
- * - Call `this.formDisabledCallback(typeof newVal === 'string')` from `attributeChangedCallback()`
+ * - Call again with `(null, this)` in `disconnectedCallback()` to disassociate
  *
  * Additionally, if `internals.states._polyfilled`
  * - Use `._state--*` in addition to `:--*` to query element internals states
+ * - This includes `:disabled` -> `._state--disabled` & `:invalid` -> `._state--invalid`
  */
 if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEvent' in globalThis) {
 	const symbols = {
@@ -25,6 +28,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 		state: Symbol('state'),
 		formController: Symbol('form-controller'),
 		anchor: Symbol('anchor'),
+		customInputs: Symbol('custom-inputs'),
 	};
 
 	const aria = {
@@ -113,7 +117,6 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 	};
 
 	// To be used in/after `connectedCallback`
-	// @TODO: Handle `disable` change on el & fieldset
 	const associateForm = (form, internals, component) => {
 		if (! (form instanceof HTMLFormElement)) {
 			if (internals[symbols.formController] instanceof AbortController) {
@@ -132,6 +135,17 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 			throw new TypeError(`${component.tagName} is missing a formAssociatedCallback method.`);
 		} else {
 			const controller = new AbortController();
+			const fieldset = component.closest('fieldset');
+
+			if (fieldset instanceof Element) {
+				if (! fieldset.hasOwnProperty(symbols.customInputs)) {
+					fieldset[symbols.customInputs] = new Set();
+				}
+
+				fieldset[symbols.customInputs].add(component);
+				observer.observe(fieldset, observerOpts);
+			}
+
 			internals[symbols.form] = form;
 			internals[symbols.formController] = controller;
 
@@ -173,6 +187,45 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 		}
 	};
 
+	const observer = new MutationObserver((mutations) => {
+		mutations.forEach(({ target, type, attributeName }) => {
+			if (type === 'attributes' && attributeName === 'disabled') {
+				const disabled = target.hasAttribute('disabled');
+
+				if (
+					target.tagName.includes('-')
+					&& isFormAssociated(target)
+					&& target.hasOwnProperty(symbols.internals)
+					&& target.formDisabledCallback instanceof Function
+				) {
+					const internals = target[symbols.internals];
+
+					if (disabled) {
+						internals.states.add('--disabled');
+					} else {
+						internals.states.delete('--disabled');
+					}
+
+					if (target.formDisabledCallback instanceof Function) {
+						target.formDisabledCallback(disabled);
+					}
+				} else if (target.tagName === 'FIELDSET' && target.hasOwnProperty(symbols.customInputs)) {
+					target[symbols.customInputs].forEach(el => {
+						if (el.isConnected) {
+							if (el.formDisabledCallback instanceof Function && ! el.hasAttribute('disabled')) {
+								el.formDisabledCallback(disabled);
+							}
+						} else {
+							target[symbols.customInputs].delete(el);
+						}
+					});
+				}
+			}
+		});
+	});
+
+	const observerOpts = { attributes :true, attributeFilter: ['disabled'] };
+
 	class ElementInternals {
 		constructor(element, key) {
 			if (key !== symbols.key) {
@@ -182,6 +235,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 			} else if (! element.tagName.includes('-')) {
 				throw new DOMException('Cannot attach internals to a built-in element.');
 			} else {
+				// internals.add(this);
 				const configurable = true;
 				const enumerable = false;
 				const writable = true;
@@ -196,6 +250,10 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 					[symbols.state]: { value: null, configurable, enumerable, writable },
 					[symbols.formController]: { value: null, configurable, enumerable, writable },
 				});
+
+				if (isFormAssociated(element)) {
+					observer.observe(element, observerOpts);
+				}
 
 				Object.defineProperty(element, symbols.internals, {
 					value: this,

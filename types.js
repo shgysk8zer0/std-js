@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 export const TEXT = 'text/plain';
 export const HTML = 'text/html';
 export const CSS = 'text/css';

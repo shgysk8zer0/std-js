@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { createPolicy } from './trust.js';
 import { callOnce } from './utility.js';
 import {

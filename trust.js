@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { getDeferred } from './promises.js';
 import { listen } from './events.js';
 import { callOnce } from './utility.js';

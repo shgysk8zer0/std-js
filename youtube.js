@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { createIframe } from './elements.js';
 import { getYouTubePolicy } from './trust-policies.js';
 
