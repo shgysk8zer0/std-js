@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { data, attr, css, getAttrs } from './attrs.js';
 import { listen } from './events.js';
 import { getDeferred } from './promises.js';

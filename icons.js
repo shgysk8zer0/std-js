@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import {
 	createSVG, createPath, createGroup, createCircle, createRect, translate, rotate,
 } from './svg.js';

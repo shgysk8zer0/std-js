@@ -1,3 +1,6 @@
+/**
+ * @copyright 2021-2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { loadScript } from './loader.js';
 export const trustPolicies = ['goog#html'];
 

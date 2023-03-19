@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { randomInt } from './math.js';
 import { isAsyncFunction, getDeferred } from './promises.js';
 import { isScriptURL, isTrustPolicy } from './trust.js';
@@ -218,6 +221,7 @@ export function deepEquals(thing1, thing2, { depth = 5 } = {}) {
 			case 'Number':
 			case 'String':
 			case 'Symbol':
+			case 'Boolean':
 				// Already know not equal
 				return false;
 

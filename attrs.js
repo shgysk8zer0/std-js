@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { clamp, between } from './math.js';
 import { isObject } from './utility.js';
 import { setAttr, isScriptURL, isTrustedType } from './trust.js';

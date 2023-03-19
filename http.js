@@ -1,3 +1,6 @@
+/**
+ * @copyright 2021-2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { parse } from './dom.js';
 import { signalAborted } from './abort.js';
 import { setURLParams, setUTMParams, isObject, isNullish, callOnce } from './utility.js';

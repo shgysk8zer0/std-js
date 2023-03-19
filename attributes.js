@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 export const events = Object.keys(
 	Object.getOwnPropertyDescriptors(HTMLElement.prototype)
 ).filter(desc => desc.startsWith('on'));

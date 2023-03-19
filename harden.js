@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 /*eslint strict: ["error", "never"]*/
 if (! ('trustedTypes' in globalThis) || globalThis.trustedTypes._isPolyfill_) {
 	(function harden() {
