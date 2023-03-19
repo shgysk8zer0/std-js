@@ -221,6 +221,7 @@ export function deepEquals(thing1, thing2, { depth = 5 } = {}) {
 			case 'Number':
 			case 'String':
 			case 'Symbol':
+			case 'Boolean':
 				// Already know not equal
 				return false;
 
