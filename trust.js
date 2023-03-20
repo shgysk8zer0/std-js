@@ -122,7 +122,7 @@ export function isScriptURL(input) {
 
 export function isTrustedType(input) {
 	if (supported()) {
-		return typeof input === 'object' && input instanceof globalThis.TrustedType;
+		return trustedTypes.isHTML(input) || trustedTypes.isScript(input) || trustedTypes.isScriptURL(input);
 	} else {
 		return true;
 	}
