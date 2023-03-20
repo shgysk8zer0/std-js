@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { sha256 } from './hash.js';
 import { POST } from './http.js';
 

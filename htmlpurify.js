@@ -1,3 +1,6 @@
+/**
+ * @copyright 2022-2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { createPolicy } from './trust.js';
 import { events } from './attributes.js';
 import { sanitize } from './sanitizerUtils.js';

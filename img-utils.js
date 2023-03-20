@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { getDeferred } from './promises.js';
 import { createElement } from './elements.js';
 import { JPEG, PNG, GIF, WEBP, SVG } from './types.js';

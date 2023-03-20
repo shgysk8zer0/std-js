@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { JS } from './types.js';
 import { createScript, createImage, createLink } from './elements.js';
 import { getDeferred } from './promises.js';

@@ -1,3 +1,6 @@
+/**
+ * @copyright 2021-2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { getDeferred } from './promises.js';
 
 export const supported = 'geolocation' in navigator;

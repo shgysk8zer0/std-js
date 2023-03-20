@@ -1,3 +1,6 @@
+/**
+ * @copyright 2022-2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { SVG, XLINK } from './namespaces.js';
 import { isObject } from './utility.js';
 import { css, data, attr } from './attrs.js';

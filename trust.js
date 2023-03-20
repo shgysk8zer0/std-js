@@ -1,3 +1,6 @@
+/**
+ * @copyright 2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { callOnce } from './utility.js';
 
 export function setProp(el, prop, val, {

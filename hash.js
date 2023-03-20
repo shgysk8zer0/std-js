@@ -1,3 +1,6 @@
+/**
+ * @copyright 2021-2023 Chris Zuber <admin@kernvalley.us>
+ */
 export const SHA_1          = 'SHA-1';
 export const SHA_256        = 'SHA-256';
 export const SHA_384        = 'SHA-384';

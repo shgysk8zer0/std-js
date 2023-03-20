@@ -1,3 +1,6 @@
+/**
+ * @copyright 2021-2023 Chris Zuber <admin@kernvalley.us>
+ */
 import { signalAborted } from './abort.js';
 import { addListener, listen, loaded as whenLoaded } from './events.js';
 import { getDeferred, isAsync } from './promises.js';
