@@ -77,7 +77,7 @@ export function* rng({ length = 32 } = {}) {
 }
 
 export function sigma(start, end, callback) {
-	return Array.from(range(start, end)).reduce((sum, num) => sum + callback(num));
+	return Iterator.range(start, end).map(callback).reduce((sum, n) => sum + n);
 }
 
 export function sum(...nums) {
