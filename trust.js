@@ -165,7 +165,12 @@ export function createPolicy(name, {
 	if (supported()) {
 		return trustedTypes.createPolicy(name, { createHTML, createScript, createScriptURL });
 	} else {
-		return Object.freeze({ name, createHTML, createScript, createScriptURL });
+		return Object.freeze({
+			name,
+			createHTML: (input, ...args) => createHTML(input.toString(), ...args),
+			createScript: (input, ...args) => createScript(input.toString(), ...args),
+			createScriptURL: (input, ...args) => createScriptURL(input.toString(), ...args),
+		});
 	}
 }
 
@@ -175,25 +180,6 @@ export function getDefaultPolicy() {
 	} else {
 		return null;
 	}
-}
-
-export async function whenPolicyCreated(name = 'default', { signal } = {}) {
-	const { resolve, reject, promise } = getDeferred();
-
-	if (! supported()) {
-		reject(new DOMException('TrustedTypes not supported'));
-	} else if (name === 'default' && isTrustPolicy(trustedTypes.defaultPolicy)) {
-		resolve({ policyName: trustedTypes.defaultPolicy.name });
-	} else {
-		listen(trustedTypes, 'beforecreatepolicy', function callback(event) {
-			if (event.policyName === name) {
-				requestIdleCallback(() => resolve(event));
-				trustedTypes.removeEventListener('beforecreatepolicy', callback, { signal });
-			}
-		}, { signal });
-	}
-
-	return promise;
 }
 
 export const createHTMLPolicyGetter = (name, cb) => callOnce(() => createPolicy(name, { createHTML: cb }));
