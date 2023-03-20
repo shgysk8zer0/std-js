@@ -1,5 +1,3 @@
-import { getDeferred } from './promises.js';
-import { listen } from './events.js';
 import { callOnce } from './utility.js';
 
 export function setProp(el, prop, val, {
