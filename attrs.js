@@ -89,7 +89,7 @@ export function attr(el, props = {}, {
 		Object.entries(props).forEach(([p, v]) => {
 			if (typeof v === 'string' || typeof v === 'number') {
 				setAttr(el, p, v, { policy, elementNs });
-			} else if (isTrustedType(v)) {
+			} else if ('trustedTypes' in globalThis && isTrustedType(v)) {
 				if (v.toString().length === 0) {
 					el.removeAttribute(p);
 				} else {
