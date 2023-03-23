@@ -57,4 +57,17 @@
 		 */
 		Promise.try = callback => new Promise(resolve => resolve(callback()));
 	}
+
+	if ('Promise' in globalThis && ! (Promise.withResolvers instanceof Function)) {
+		Promise.withResolvers = function() {
+			const obj = {};
+
+			obj.promise = new Promise((resolve, reject) => {
+				obj.resolve = resolve;
+				obj.reject = reject;
+			});
+
+			return Object.seal(obj);
+		};
+	}
 })();

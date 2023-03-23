@@ -23,22 +23,17 @@ export function isAsync(what) {
 }
 
 export function getDeferred({ signal } = {}) {
-	const deferred = {};
+	const { promise, resolve, reject } = Promise.withResolvers();
 
-	deferred.promise = new Promise((resolve, reject) => {
-		deferred.resolve = resolve;
-		deferred.reject = reject;
-	});
-
-	if (signal instanceof EventTarget && signal.throwIfAborted instanceof Function) {
+	if (signal instanceof AbortSignal) {
 		if (signal.aborted) {
-			deferred.reject(signal.reason);
+			reject(signal.reason);
 		} else {
-			signal.addEventListener('abort', ({ target }) => deferred.reject(target.reason), { once: true });
+			signal.addEventListener('abort', ({ target }) => reject(target.reason), { once: true });
 		}
 	}
 
-	return Object.seal(deferred);
+	return { promise, resolve, reject };
 }
 
 export async function callAsAsync(callback, args = [], { thisArg = globalThis, signal } = {}) {
