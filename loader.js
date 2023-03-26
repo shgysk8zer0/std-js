@@ -4,6 +4,9 @@
 import { JS } from './types.js';
 import { createScript, createImage, createLink } from './elements.js';
 import { getDeferred } from './promises.js';
+import { getHTML } from './http.js';
+import { callOnce } from './utility.js';
+import { REFERRER_POLICY } from './defaults.js';
 
 /**
  * @deprecated
@@ -11,6 +14,20 @@ import { getDeferred } from './promises.js';
 export async function loadLink(...args) {
 	console.warn('`loadLink()` is deprecated. Please us `createLink()` instead');
 	return createLink(...args);
+}
+
+export function getTemplateLoader(url, {
+	policy = 'trustedTypes' in globalThis ? trustedTypes.defaultPolicy : null,
+	cache = 'default',
+	redirect = 'follow',
+	integrity = undefined,
+	referrerPolicy = REFERRER_POLICY,
+	priority = 'auto',
+	sanitizer,
+} = {}) {
+	return callOnce(async ({ signal } = {}) => getHTML(url, {
+		signal, policy, sanitizer, cache, redirect, integrity, referrerPolicy, priority,
+	}));
 }
 
 export async function preload(href, {
