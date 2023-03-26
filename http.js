@@ -117,6 +117,7 @@ export async function GET(url, {
 	cache = 'default',
 	credentials = 'omit',
 	redirect = 'follow',
+	priority  ='auto',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers(),
 	integrity = undefined,
@@ -138,7 +139,7 @@ export async function GET(url, {
 	}
 
 	return await fetch(url, { method: 'GET', mode, credentials, referrerPolicy,
-		headers, cache, redirect, integrity, keepalive, signal, errorMessage });
+		headers, cache, redirect, priority, integrity, keepalive, signal, errorMessage });
 }
 
 export async function POST(url, {
@@ -146,6 +147,7 @@ export async function POST(url, {
 	mode = 'cors',
 	cache = 'default',
 	credentials = 'omit',
+	priority = 'auto',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers(),
@@ -180,7 +182,7 @@ export async function POST(url, {
 	}
 
 	return await fetch(url, { method: 'POST', body, mode, credentials, referrerPolicy,
-		headers, cache, redirect, integrity, keepalive, signal, errorMessage });
+		headers, cache, redirect, priority, integrity, keepalive, signal, errorMessage });
 }
 
 export async function DELETE(url, {
@@ -189,6 +191,7 @@ export async function DELETE(url, {
 	cache = 'default',
 	credentials = 'omit',
 	redirect = 'follow',
+	priority = 'auto',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers(),
 	integrity = undefined,
@@ -210,7 +213,7 @@ export async function DELETE(url, {
 	}
 
 	return await fetch(url, { method: 'DELETE', mode, credentials, referrerPolicy,
-		headers, cache, redirect, integrity, keepalive, signal, errorMessage });
+		headers, cache, redirect, priority, integrity, keepalive, signal, errorMessage });
 }
 
 export async function getHTML(url, {
@@ -219,6 +222,7 @@ export async function getHTML(url, {
 	cache = 'default',
 	credentials = 'omit',
 	redirect = 'follow',
+	priority = 'auto',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers({ Accept: TYPES.HTML }),
 	integrity = undefined,
@@ -232,7 +236,7 @@ export async function getHTML(url, {
 	errorMessage,
 } = {}) {
 	const html = await getText(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
+		cache, redirect, priority, integrity, keepalive, signal, timeout, errorMessage });
 
 	if (isTrustPolicy(policy)) {
 		return parse(policy.createHTML(html), { asFrag, head });
@@ -249,6 +253,7 @@ export async function getText(url, {
 	cache = 'default',
 	credentials = 'omit',
 	redirect = 'follow',
+	priority = 'auto',
 	referrerPolicy = 'no-referrer',
 	headers = new Headers({ Accept: TYPES.TEXT }),
 	integrity = undefined,
@@ -258,7 +263,7 @@ export async function getText(url, {
 	errorMessage,
 } = {}) {
 	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
+		cache, redirect, priority, integrity, keepalive, signal, timeout, errorMessage });
 
 	return await resp.text();
 }
@@ -270,6 +275,7 @@ export async function getJSON(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
+	priority = 'auto',
 	headers = new Headers({ Accept: TYPES.JSON }),
 	integrity = undefined,
 	keepalive = undefined,
@@ -278,7 +284,7 @@ export async function getJSON(url, {
 	errorMessage,
 } = {}) {
 	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
+		cache, redirect, priority, integrity, keepalive, signal, timeout, errorMessage });
 
 	return await resp.json();
 }
@@ -291,6 +297,7 @@ export async function getFile(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
+	priority = 'auto',
 	headers = new Headers(),
 	integrity = undefined,
 	keepalive = undefined,
@@ -303,7 +310,7 @@ export async function getFile(url, {
 	}
 
 	const resp = await GET(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
+		cache, redirect, priority, integrity, keepalive, signal, timeout, errorMessage });
 
 	const type = getType(resp);
 	return new File([await resp.blob()], name, { type });
@@ -370,6 +377,7 @@ export async function postHTML(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
+	priority = 'auto',
 	headers = new Headers({ Accept: TYPES.HTML }),
 	integrity = undefined,
 	keepalive = undefined,
@@ -382,7 +390,7 @@ export async function postHTML(url, {
 	errorMessage,
 } = {}) {
 	const html = await postText(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
+		cache, redirect, priority, integrity, keepalive, signal, timeout, errorMessage });
 
 	return parse(html, { head, asFrag, sanitizer, policy });
 }
@@ -394,6 +402,7 @@ export async function postJSON(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
+	priority = 'auto',
 	headers = new Headers({ Accept: TYPES.JSON }),
 	integrity = undefined,
 	keepalive = undefined,
@@ -402,7 +411,7 @@ export async function postJSON(url, {
 	errorMessage,
 } = {}) {
 	const resp = await POST(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
+		cache, redirect, priority, integrity, keepalive, signal, timeout, errorMessage });
 
 	return await resp.json();
 }
@@ -414,6 +423,7 @@ export async function postText(url, {
 	credentials = 'omit',
 	redirect = 'follow',
 	referrerPolicy = 'no-referrer',
+	priority = 'auto',
 	headers = new Headers({ Accept: TYPES.TEXT }),
 	integrity = undefined,
 	keepalive = undefined,
@@ -422,7 +432,7 @@ export async function postText(url, {
 	errorMessage,
 } = {}) {
 	const resp = await POST(url, { body, mode, credentials, referrerPolicy, headers,
-		cache, redirect, integrity, keepalive, signal, timeout, errorMessage });
+		cache, redirect, priority, integrity, keepalive, signal, timeout, errorMessage });
 
 	return await resp.text();
 }
