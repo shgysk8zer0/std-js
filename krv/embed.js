@@ -1,7 +1,6 @@
 import { createIframe } from '../elements.js';
 import { policy, trustedURLs, trustPolicies } from './policy.js';
 
-
 export function createKRVMaps({
 	width, height, markers = [], loading = 'lazy', locate, fullscreen,
 	latitude = NaN, longitude = NaN, popup, tiles, target,

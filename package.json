@@ -44,9 +44,6 @@
   "bugs": {
     "url": "https://github.com/shgysk8zer0/std-js/issues"
   },
-  "engines": {
-    "npm": ">=9.4.2"
-  },
   "scripts": {
     "test": "npm run lint:js && npm run lint:html",
     "preversion": "npm test",
