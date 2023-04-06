@@ -2,8 +2,9 @@
  * @copyright 2023 Chris Zuber <admin@kernvalley.us>
  */
 import { clamp, between } from './math.js';
-import { isObject } from './utility.js';
+import { isObject, isNullish } from './utility.js';
 import { setAttr, isScriptURL, isTrustedType } from './trust.js';
+import { COLOR } from './patterns.js';
 
 export function getAttrs(el) {
 	if (typeof el === 'string') {
@@ -194,6 +195,7 @@ export function setString(el, attr, val, {
 	minLength = 1,
 	maxLength = Infinity,
 	pattern   = null,
+	fallback,
 	policy,
 } = {}) {
 	if (
@@ -213,6 +215,8 @@ export function setString(el, attr, val, {
 		} else {
 			el.removeAttribute(attr);
 		}
+	} else if (typeof fallback === 'string' || isTrustedType(fallback)) {
+		setString(el, attr, fallback, { pattern, policy, minLength, maxLength });
 	} else {
 		el.removeAttribute(attr);
 	}
@@ -246,6 +250,44 @@ export function setURL(el, attr, val, {
 	} else {
 		el.removeAttribute(attr);
 	}
+}
+
+export function getEnum(el, attr, {
+	allowed  = [],
+	fallback = undefined,
+}) {
+	if (! Array.isArray(allowed) || allowed.length === 0) {
+		throw new TypeError('`allowed` must be a non-empty array.');
+	} else if (el.hasAttribute(attr)) {
+		const val = el.getAttribute(attr);
+		return allowed.includes(val) ? val : fallback;
+	} else {
+		return fallback;
+	}
+}
+
+export function setEnum(el, attr, val, {
+	allowed = [],
+	fallback = undefined,
+}) {
+	if (! Array.isArray(allowed) || allowed.length === 0) {
+		throw new TypeError('`allowed` must be a non-empty array.');
+	} else if (allowed.includes(val)) {
+		setAttr(el, attr, val);
+	} else if (! isNullish(fallback)) {
+		setAttr(el, attr, fallback);
+	} else {
+		el.removeAttribute(attr);
+	}
+}
+
+export function getColor(el, attr, { fallback } = {}) {
+	const val = getString(el, attr);
+	return typeof val === 'string' && COLOR.test(val) ? val : fallback;
+}
+
+export function setColor(el, attr, val, { fallback } = {}) {
+	setString(el, attr, val, { fallback, minLength: 3, maxLength: 9, pattern: COLOR });
 }
 
 export { setAttr };

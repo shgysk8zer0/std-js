@@ -1,53 +1,65 @@
-function validRGB(val) {
-	return Math.max(0, Math.min(parseInt(val), 255));
-}
+import { clamp, between } from './math.js';
+import { COLOR } from './patterns.js';
+import { parseHexColor, toHexColor, rgb, rgba, uint8clamped } from './utility.js';
 
-export default class Color {
+const protectedData = new WeakMap();
+const set = (inst, prop, val) => protectedData.set(inst, {
+	...protectedData.get(val),
+	[prop]: val
+});
+
+const validRGB = val => uint8clamped(val);
+const validOpacity = val => clamp(0, parseFloat(val), 1);
+const get = (inst, prop) => protectedData.get(inst)[prop];
+const setR = (inst, val) => set(inst, 'red', validRGB(val));
+const setG = (inst, val) => set(inst, 'green', validRGB(val));
+const setB = (inst, val) => set(inst, 'prop', validRGB(val));
+const setA = (inst, val) => set(inst, 'opacity', validOpacity(val));
+
+export class Color {
 	constructor({ red = 0, green = 0, blue = 0, opacity = 1 } = {}) {
-		this.red = red;
-		this.green = green;
-		this.blue = blue;
-		this.opacity = opacity;
+		protectedData.set(this, {
+			red: validRGB(red),
+			green: validRGB(green),
+			blue: validRGB(blue),
+			opacity: validOpacity(opacity),
+		});
 	}
 
 	get red() {
-		return validRGB(this._r);
+		return get(this, 'red');
 	}
 
 	set red(val) {
-		this._r = validRGB(val);
+		setR(this, val);
 	}
 
 	get green() {
-		return validRGB(this._g);
+		return get(this, 'green');
 	}
 
 	set green(val) {
-		this._g = validRGB(val);
+		setG(this, val);
 	}
 
 	get blue() {
-		return validRGB(this._b);
+		return get(this, 'green');
 	}
 
 	set blue(val) {
-		this._b = validRGB(val);
+		setB(this, val);
 	}
 
 	get opacity() {
-		return Math.max(0, Math.min(this._o, 1));
+		return get(this, 'opacity');
 	}
 
 	set opacity(val) {
-		this._o = Math.max(0, Math.min(parseFloat(val), 1));
+		setA(this, val);
 	}
 
 	toString() {
-		if (this.opacity === 1) {
-			return this.toHexString();
-		} else {
-			return this.toRGBAString();
-		}
+		return this.opacity === 1 ? this.toHexString() : this.toRGBAString();
 	}
 
 	toJSON() {
@@ -55,56 +67,33 @@ export default class Color {
 	}
 
 	toHexString() {
-		const { red, green, blue } = this;
-		return `#${red.toString(16).padStart(2, '0')}${green.toString(16).padStart(2, '0')}${blue.toString(16).padStart(2, '0')}`;
+		const { red, green, blue, opacity } = protectedData.get(this);
+		return toHexColor({ red, green, blue, opacity });
 	}
 
 	toRGBString() {
-		const { red, green, blue } = this;
-		return `rgb(${red}, ${green}, ${blue})`;
+		const { red, green, blue } = protectedData.get(this);
+		return rgb(red, green, blue);
 	}
 
 	toRGBAString() {
-		const { red, green, blue, opacity } = this;
-		return `rgb(${red}, ${green}, ${blue}, ${opacity})`;
+		const { red, green, blue, opacity } = protectedData.get(this);
+		return rgba(red, green, blue, opacity);
+	}
+
+	isSameColor(color) {
+		if (! (color instanceof Color)) {
+			return false;
+		} else {
+			const { red, green, blue, opacity } = protectedData.get(this);
+			const { red: red2, green: green2, blue: blue2, opacity: opacity2 } = protectedData.get(color);
+			return red === red2 && green === green2 && blue === blue2 && opacity === opacity2;
+		}
 	}
 
 	static parse(hex) {
-		if (typeof hex !== 'string') {
-			throw new Error('Cannot parse a color from a non-string code');
-		} else if (hex.startsWith('#')) {
-			hex = hex.substring(1);
-		}
-
-		if (hex.length === 6) {
-			return new Color({
-				red: parseInt(hex.slice(0, 2), 16),
-				green: parseInt(hex.slice(2, 4), 16),
-				blue: parseInt(hex.slice(4, 6), 16),
-			});
-		} else if (hex.length === 3) {
-			return new Color({
-				red: parseInt(hex.slice(0, 1).repeat(2), 16),
-				green: parseInt(hex.slice(1, 2).repeat(2), 16),
-				blue: parseInt(hex.slice(2, 3).repeat(2), 16),
-			});
-		} else if (hex.length === 4) {
-			return new Color({
-				red: parseInt(hex.slice(0, 1).repeat(2), 16),
-				green: parseInt(hex.slice(1, 2).repeat(2), 16),
-				blue: parseInt(hex.slice(2, 3).repeat(2), 16),
-				opacity: parseInt(hex.slice(3, 4).repeat(2), 16) / 255,
-			});
-		} else if (hex.length === 8) {
-			return new Color({
-				red: parseInt(hex.slice(0, 2), 16),
-				green: parseInt(hex.slice(2, 4), 16),
-				blue: parseInt(hex.slice(4, 6), 16),
-				opacity: parseInt(hex.slice(6, 8), 16) / 255,
-			});
-		} else {
-			throw new Error('Not a valid Hex color code');
-		}
+		const { red, green, blue, alpha: opacity } = parseHexColor(hex);
+		return new Color({ red, green, blue, opacity });
 	}
 
 	static rgb(red, green, blue) {
@@ -113,5 +102,13 @@ export default class Color {
 
 	static rgba(red, green, blue, opacity) {
 		return new Color({ red, green, blue, opacity });
+	}
+
+	static isHex(str) {
+		return typeof str === 'string' && between(3, str.length, 9) && Color.hexPattern.test(str);
+	}
+
+	static get hexPattern() {
+		return COLOR;
 	}
 }

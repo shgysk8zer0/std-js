@@ -1,11 +1,15 @@
 /**
  * @copyright 2023 Chris Zuber <admin@kernvalley.us>
  */
-import { randomInt } from './math.js';
+import { randomInt, between, clamp } from './math.js';
 import { isAsyncFunction, getDeferred } from './promises.js';
 import { isScriptURL, isTrustPolicy } from './trust.js';
+import { COLOR } from './patterns.js';
 
 const funcs = new WeakMap();
+
+export const uint8clamped = n => clamp(0, parseInt(n), 255);
+export const toHex = val => uint8clamped(val).toString(16).padStart(2, '0');
 
 export function isStrictMode() {
 	// Probably always true
@@ -396,3 +400,60 @@ export function random(arr) {
 		return arr[randomInt(0, arr.length)];
 	}
 }
+
+export function parseHexColor(hex) {
+	if (! (typeof hex === 'string' && between(3, hex.length, 9) && COLOR.test(hex))) {
+		throw new TypeError(`${hex} is not a valid hex color.`);
+	} else if (hex.startsWith('#')) {
+		hex = hex.substr(1);
+	}
+
+	switch (hex.length) {
+		case 6:
+			return {
+				red: clamp(0, parseInt(hex.slice(0, 2), 16), 255),
+				green: clamp(0, parseInt(hex.slice(2, 4), 16), 255),
+				blue: clamp(0, parseInt(hex.slice(4, 6), 16), 255),
+				alpha: 1,
+			};
+
+		case 3:
+			return {
+				red: clamp(0, parseInt(hex.slice(0, 1).repeat(2), 16), 255),
+				green: clamp(0, parseInt(hex.slice(1, 2).repeat(2), 16), 255),
+				blue: clamp(0, parseInt(hex.slice(2, 3).repeat(2), 16), 255),
+				alpha: 1,
+			};
+
+		case 4:
+			return {
+				red: clamp(0, parseInt(hex.slice(0, 1).repeat(2), 16), 255),
+				green: clamp(0, parseInt(hex.slice(1, 2).repeat(2), 16), 255),
+				blue: clamp(0, parseInt(hex.slice(2, 3).repeat(2), 16), 255),
+				alpha: clamp(0, parseInt(hex.slice(3, 4).repeat(2), 16) / 255, 1),
+			};
+
+		case 8:
+			return {
+				red: clamp(0, parseInt(hex.slice(0, 2), 16), 255),
+				green: clamp(0, parseInt(hex.slice(2, 4), 16), 255),
+				blue: clamp(0, parseInt(hex.slice(4, 6), 16), 255),
+				alpha: clamp(0, parseInt(hex.slice(6, 8), 16) / 255, 1),
+			};
+
+		default:
+			throw new TypeError(`${hex} is not a valid hex color.`);
+
+	}
+}
+
+export function toHexColor({ red, green, blue, opacity = 1 }) {
+	if (opacity === 1) {
+		return `#${toHex(red)}${toHex(green)}${toHex(blue)}`;
+	} else {
+		return `#${toHex(red)}${toHex(green)}${toHex(blue)}${toHex(parseInt(opacity * 255))}`;
+	}
+}
+
+export const rgb = (red, green, blue) => `rgb(${clamp(0, red, 255)}, ${clamp(0, green, 255)}, ${clamp(0, blue, 255)})`;
+export const rgba = (red, green, blue, alpha = 1) => `rgba(${clamp(0, red, 255)}, ${clamp(0, green, 255)}, ${clamp(0, blue, 255)}, ${clamp(0, alpha, 1)})`;
