@@ -67,8 +67,8 @@ export class Color {
 	}
 
 	toHexString() {
-		const { red, green, blue, opacity } = protectedData.get(this);
-		return toHexColor({ red, green, blue, opacity });
+		const { red, green, blue, opacity: alpha } = protectedData.get(this);
+		return toHexColor({ red, green, blue, alpha });
 	}
 
 	toRGBString() {

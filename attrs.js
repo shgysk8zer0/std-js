@@ -2,7 +2,7 @@
  * @copyright 2023 Chris Zuber <admin@kernvalley.us>
  */
 import { clamp, between } from './math.js';
-import { isObject, isNullish } from './utility.js';
+import { isObject, isNullish, toHexColor, parseHexColor } from './utility.js';
 import { setAttr, isScriptURL, isTrustedType } from './trust.js';
 import { COLOR } from './patterns.js';
 
@@ -288,6 +288,24 @@ export function getColor(el, attr, { fallback } = {}) {
 
 export function setColor(el, attr, val, { fallback } = {}) {
 	setString(el, attr, val, { fallback, minLength: 3, maxLength: 9, pattern: COLOR });
+}
+
+export function getRGB(el, attr, { fallback = '#000000' } = {}) {
+	const { red = 0, green = 0, blue = 0 } = parseHexColor(getColor(el, attr, { fallback }));
+	return { red, green, blue };
+}
+
+export function setRGB(el, attr, { red = 0, green = 0, blue = 0 } = {}) {
+	setColor(el, attr, toHexColor({ red, green, blue }));
+}
+
+export function getRGBA(el, attr, { fallback = '#000000' } = {}) {
+	const { red = 0, green = 0, blue = 0, alpha = 1 } = parseHexColor(getColor(el, attr, { fallback }));
+	return { red, green, blue, alpha };
+}
+
+export function setRGBA(el, attr, { red = 0, green = 0, blue = 0, alpha = 1 } = {}) {
+	setColor(el, attr, toHexColor({ red, green, blue, alpha }));
 }
 
 export { setAttr };

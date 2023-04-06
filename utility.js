@@ -447,13 +447,23 @@ export function parseHexColor(hex) {
 	}
 }
 
-export function toHexColor({ red, green, blue, opacity = 1 }) {
-	if (opacity === 1) {
+export function toHexColor({ red, green, blue, alpha = 1 }) {
+	if (alpha === 1) {
 		return `#${toHex(red)}${toHex(green)}${toHex(blue)}`;
 	} else {
-		return `#${toHex(red)}${toHex(green)}${toHex(blue)}${toHex(parseInt(opacity * 255))}`;
+		return `#${toHex(red)}${toHex(green)}${toHex(blue)}${toHex(parseInt(alpha * 255))}`;
 	}
 }
 
 export const rgb = (red, green, blue) => `rgb(${clamp(0, red, 255)}, ${clamp(0, green, 255)}, ${clamp(0, blue, 255)})`;
 export const rgba = (red, green, blue, alpha = 1) => `rgba(${clamp(0, red, 255)}, ${clamp(0, green, 255)}, ${clamp(0, blue, 255)}, ${clamp(0, alpha, 1)})`;
+
+export function hexToRGB(hex) {
+	const { red = 0, green = 0, blue = 0 } = parseHexColor(hex);
+	return rgb(red, green, blue);
+}
+
+export function hexToRGBA(hex) {
+	const { red = 0, green = 0, blue = 0, alpha = 1 } = parseHexColor(hex);
+	return rgb(red, green, blue, alpha);
+}
