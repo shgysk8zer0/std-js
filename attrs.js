@@ -71,6 +71,8 @@ export function css(el, props = {}, { priority } = {}) {
 				el.style.setProperty(p, v, priority);
 			} else if (v instanceof URL) {
 				el.type.setProperty(p, v.href, priority);
+			} else if (typeof v === 'object' && ! Object.is(v, null) && v.toString instanceof Function) {
+				el.style.setProperty(p, v.toString(), priority);
 			} else {
 				el.style.removeProperty(p);
 			}
