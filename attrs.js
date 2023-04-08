@@ -2,7 +2,8 @@
  * @copyright 2023 Chris Zuber <admin@kernvalley.us>
  */
 import { clamp, between } from './math.js';
-import { isObject, isNullish, toHexColor, parseHexColor } from './utility.js';
+import { isObject, isNullish } from './utility.js';
+import { toHexColor, parseHexColor } from './color-utils.js';
 import { setAttr, isScriptURL, isTrustedType } from './trust.js';
 import { COLOR } from './patterns.js';
 

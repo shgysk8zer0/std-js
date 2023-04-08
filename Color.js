@@ -1,6 +1,6 @@
-import { clamp, between } from './math.js';
+import { clamp, between, uint8clamped } from './math.js';
 import { COLOR } from './patterns.js';
-import { parseHexColor, toHexColor, rgb, rgba, uint8clamped } from './utility.js';
+import { parseHexColor, toHexColor, hslaToRGBA, rgbaToHSLA, rgb, rgba, hsl, hsla, complimentaryColor } from './color-utils.js';
 
 const protectedData = new WeakMap();
 const set = (inst, prop, val) => protectedData.set(inst, {
@@ -58,6 +58,48 @@ export class Color {
 		setA(this, val);
 	}
 
+	get hue() {
+		return this.hsl.hue;
+	}
+
+	set hue(val) {
+		const { saturation, lightness } = this.hsl;
+		const { red, green, blue } = hslaToRGBA({ hue: val, saturation, lightness });
+		protectedData.set(this, { red, green, blue, opacity: this.opacity });
+	}
+
+	get saturation() {
+		return this.hsl.saturation;
+	}
+
+	set saturation(val) {
+		const { hue, lightness } = this.hsl;
+		const { red, green, blue } = hslaToRGBA({ hue, saturation: val, lightness });
+		protectedData.set(this, { red, green, blue, opacity: this.opacity });
+	}
+
+	get lightness() {
+		return this.hsl.lightness;
+	}
+
+	set lightness(val) {
+		const { hue, saturation } = this.hsl;
+		const { red, green, blue } = hslaToRGBA({ hue, saturation, lightness: val });
+		protectedData.set(this, { red, green, blue, opacity: this.opacity });
+	}
+
+	get hsl() {
+		const { red, green, blue } = protectedData.get(this);
+		const { hue, saturation, lightness} = rgbaToHSLA({ red, green, blue });
+		return { hue, saturation, lightness };
+	}
+
+	get complimentary() {
+		const hex = this.toHexString();
+		const comp = complimentaryColor(hex);
+		return Color.parse(comp);
+	}
+
 	toString() {
 		return this.opacity === 1 ? this.toHexString() : this.toRGBAString();
 	}
@@ -81,6 +123,18 @@ export class Color {
 		return rgba(red, green, blue, opacity);
 	}
 
+	toHSLString() {
+		const { red, green, blue } = protectedData.get(this);
+		const { hue, saturation, lightness } = rgbaToHSLA({ red, green, blue });
+		return hsl(hue, saturation, lightness);
+	}
+
+	toHSLAString() {
+		const { red, green, blue, opacity: alpha } = protectedData.get(this);
+		const { hue, saturation, lightness, alpha: opacity } = rgbaToHSLA({ red, green, blue, alpha });
+		return hsla(hue, saturation, lightness, opacity);
+	}
+
 	isSameColor(color) {
 		if (! (color instanceof Color)) {
 			return false;
@@ -91,6 +145,36 @@ export class Color {
 		}
 	}
 
+	rotateHue(val) {
+		const { hue, saturation, lightness } = this.hsl;
+		return Color.hsla(
+			hue + parseInt(val) % 360,
+			saturation,
+			lightness,
+			this.opacity,
+		);
+	}
+
+	saturate(val) {
+		const { hue, saturation, lightness } = this.hsl;
+		return Color.hsla(
+			hue,
+			clamp(0, saturation + parseInt(val), 100),
+			lightness,
+			this.opacity,
+		);
+	}
+
+	lighten(val) {
+		const { hue, saturation, lightness } = this.hsl;
+		return Color.hsla(
+			hue,
+			saturation,
+			clamp(0, lightness + parseInt(val), 100),
+			this.opacity,
+		);
+	}
+
 	static parse(hex) {
 		const { red, green, blue, alpha: opacity } = parseHexColor(hex);
 		return new Color({ red, green, blue, opacity });
@@ -98,6 +182,16 @@ export class Color {
 
 	static rgb(red, green, blue) {
 		return new Color({ red, green, blue });
+	}
+
+	static hsl(hue, saturation, lightness) {
+		const { red, green, blue } = hslaToRGBA({ hue, saturation, lightness });
+		return new Color({ red, green, blue });
+	}
+
+	static hsla(hue, saturation, lightness, alpha) {
+		const { red, green, blue, alpha: opacity } = hslaToRGBA({ hue, saturation, lightness, alpha });
+		return new Color({ red, green, blue, opacity });
 	}
 
 	static rgba(red, green, blue, opacity) {
