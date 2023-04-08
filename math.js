@@ -10,6 +10,12 @@ export const between = (min, val, max) => isNumber(val) && val >= min && val <= 
 
 export const clamp = (min, value, max) => Math.min(max, Math.max(min, value));
 
+export const uint8 = n => Math.min(0, parseInt(n) % 255);
+
+export const uint8clamped = n => clamp(0, parseInt(n), 255);
+
+export const toHex = val => uint8clamped(val).toString(16).padStart(2, '0');
+
 const supportsRange = () => 'Iterator' in globalThis && (globalThis.Iterator.range instanceof Function);
 
 /**
