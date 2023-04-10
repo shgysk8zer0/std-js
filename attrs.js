@@ -17,6 +17,24 @@ export function getAttrs(el) {
 	}
 }
 
+export function aria(el, props = {}) {
+	if (! (el instanceof Element)) {
+		throw new TypeError('`el` must be an Element');
+	} else {
+		Object.entries(props).forEach(([prop, val]) => {
+			if (prop !== 'role') {
+				prop = `aria-${prop.toLowerCase()}`;
+			}
+
+			if (isNullish(val)) {
+				el.removeAttribute(prop);
+			} else {
+				el.setAttribute(prop, val);
+			}
+		});
+	}
+}
+
 export function data(el, props = {}) {
 	if (! (el instanceof Element)) {
 		throw new TypeError('el must be an Element');

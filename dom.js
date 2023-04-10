@@ -7,7 +7,7 @@ import { getDeferred, isAsync } from './promises.js';
 import { isHTML, isTrustPolicy } from './trust.js';
 import { HTML } from './types.js';
 import { errorToEvent, callOnce } from './utility.js';
-import { data as setData, css as setCss, attr as setAttr } from './attrs.js';
+import { data as setData, css as setCss, attr as setAttr, aria as setAria } from './attrs.js';
 import { createElement } from './elements.js';
 
 export const readyStates = ['loading', 'interactive', 'complete'];
@@ -120,6 +120,10 @@ export function meta({ name, itemprop, property, charset, content }) {
 
 export function css(what, props = {}, { base, priority } = {}) {
 	return each(what, item => setCss(item, props, { priority }), { base });
+}
+
+export function aria(what, props ={}, { base } = {}) {
+	each(what, item => setAria(item, props), { base });
 }
 
 export function data(what, props = {}, { base } = {}) {

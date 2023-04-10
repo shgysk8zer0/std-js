@@ -1,7 +1,7 @@
 /**
  * @copyright 2023 Chris Zuber <admin@kernvalley.us>
  */
-import { data, attr, css, getAttrs } from './attrs.js';
+import { data, attr, css, getAttrs, aria as setAria } from './attrs.js';
 import { listen } from './events.js';
 import { getDeferred } from './promises.js';
 import { setProp } from './trust.js';
@@ -74,6 +74,7 @@ export function createElement(tag, {
 	html                      = undefined,
 	policy                    = 'trustedTypes' in globalThis ? globalThis.trustedTypes.defaultPolicy : null,
 	sanitizer                 = undefined,
+	aria                      = undefined,
 	events: { capture, passive, once, signal, ...events } = {},
 	animation: {
 		keyframes,
@@ -190,6 +191,10 @@ export function createElement(tag, {
 		}
 
 		attr(el, attrs);
+
+		if (isObject(aria)) {
+			setAria(el, aria);
+		}
 
 		if (Array.isArray(keyframes) || isObject(keyframes) && el.animate instanceof Function) {
 			el.animate(keyframes, {
