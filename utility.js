@@ -396,3 +396,11 @@ export function random(arr) {
 		return arr[randomInt(0, arr.length)];
 	}
 }
+
+export const toSpinalCase = str => str.replace(/[A-Z]/g, (m, i) => i === 0
+	? m.toLowerCase()
+	: `-${m.toLowerCase()}`);
+
+export const toCamelCase = str => str.replace(/-[a-z\d]/g, m => m.substr(1).toUpperCase());
+
+export const ucFirst = str => str.substr(0, 1).toUpperCase() + str.substr(1);
