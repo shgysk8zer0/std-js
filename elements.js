@@ -193,7 +193,7 @@ export function createElement(tag, {
 		attr(el, attrs);
 
 		if (isObject(aria)) {
-			Object.entries(aria).forEach(([prop, val]) => setAria(el, prop, val));
+			setAria(el, aria);
 		}
 
 		if (Array.isArray(keyframes) || isObject(keyframes) && el.animate instanceof Function) {

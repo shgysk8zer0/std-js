@@ -17,15 +17,21 @@ export function getAttrs(el) {
 	}
 }
 
-export function aria(el, prop, val) {
-	if (typeof prop !== 'string') {
-		throw new TypeError('`prop` must be a string');
-	} else if (! (el instanceof Element)) {
+export function aria(el, props = {}) {
+	if (! (el instanceof Element)) {
 		throw new TypeError('`el` must be an Element');
-	} else if (isNullish(val)) {
-		prop === 'role' ? el.removeAttribute('role') : el.removeAttribute(`aria-${prop.toLowerCase()}`);
 	} else {
-		prop === 'role' ? el.setAttribute('role', val) : el.setAttribute(`aria-${prop.toLowerCase()}`, val);
+		Object.entries(props).forEach(([prop, val]) => {
+			if (prop !== 'role') {
+				prop = `aria-${prop.toLowerCase()}`;
+			}
+
+			if (isNullish(val)) {
+				el.removeAttribute(prop);
+			} else {
+				el.setAttribute(prop, val);
+			}
+		});
 	}
 }
 
