@@ -123,7 +123,7 @@ export function css(what, props = {}, { base, priority } = {}) {
 }
 
 export function aria(what, props ={}, { base } = {}) {
-	each(what, item => setAria(item, props));
+	each(what, item => setAria(item, props), { base });
 }
 
 export function data(what, props = {}, { base } = {}) {
