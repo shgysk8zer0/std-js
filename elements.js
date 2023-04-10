@@ -202,6 +202,29 @@ export function createElement(tag, {
 	}
 }
 
+export function createSlot(name, {
+	id        = undefined,
+	classList = undefined,
+	hidden    = undefined,
+	dataset   = undefined,
+	children  = undefined,
+	styles    = undefined,
+	text      = undefined,
+	html      = undefined,
+	policy    = undefined,
+	sanitizer = undefined,
+	events: { capture, passive, once, signal, ...events } = {},
+	...attrs
+} = {}) {
+	const slot = createElement('slot', {
+		id, classList, hidden, dataset, children, styles, text, html, policy,
+		sanitizer, events: { capture, passive, once, signal, ...events }, ...attrs,
+	});
+
+	slot.name = name;
+	return slot;
+}
+
 export function createScript(src, {
 	async = true,
 	defer = false,
