@@ -42,6 +42,7 @@
       "TrustedScript": "readonly",
       "TrustedScriptURL": "readonly",
       "TrustedTypePolicy": "readonly",
+      "ElementInternals": "readonly",
       "queueMicrotask": "readonly"
     }
 }

@@ -904,6 +904,26 @@ export function createSpinnerIcon({
 	});
 }
 
+export function createStarIcon({
+	size = 16,
+	fill = 'currentColor',
+	classList = [],
+	part = [],
+	slot,
+	animation,
+	...rest
+} = {}) {
+	return createSVG({
+		viewBox: [0, 0, 14, 16],
+		...rest, height: size, width: parseInt(14 * (size / 16)), fill, classList, part, slot, animation,
+		children: [
+			createPath('M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74L14 6z', {
+				'fill-rule': 'evenodd',
+			})
+		]
+	});
+}
+
 export function createSyncIcon({
 	size = 16,
 	fill = 'currentColor',
