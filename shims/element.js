@@ -1,4 +1,5 @@
 import './dialog.js';
+import { aria } from './aom.js';
 
 if (! (HTMLScriptElement.supports instanceof Function)) {
 	HTMLScriptElement.supports = function supports(type) {
@@ -19,6 +20,27 @@ if (! (HTMLScriptElement.supports instanceof Function)) {
 				return false;
 		}
 	};
+}
+
+if (! Element.prototype.hasOwnProperty(aria.role)) {
+	const enumerable = true;
+	const configurable = true;
+
+	const props = Object.fromEntries(Object.entries(aria).map(([prop, attr]) => [prop, {
+		get: function() {
+			return this.getAttribute(attr);
+		},
+		set: function(val) {
+			if (typeof val === 'string') {
+				this.setAttribute(attr, val);
+			} else {
+				this.removeAttribute(attr);
+			}
+		},
+		enumerable, configurable,
+	}]));
+
+	Object.defineProperties(Element.prototype, props);
 }
 
 if (! HTMLImageElement.prototype.hasOwnProperty('complete')) {

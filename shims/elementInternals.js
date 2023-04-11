@@ -16,66 +16,40 @@
  * - Use `._state--*` in addition to `:--*` to query element internals states
  * - This includes `:disabled` -> `._state--disabled` & `:invalid` -> `._state--invalid`
  */
+import { aria } from './aom.js';
+
+const symbols = {
+	key: Symbol('key'),
+	internals: Symbol('element-internals'),
+	form: Symbol('form'),
+	fieldset: Symbol('fieldset'),
+	element: Symbol('element'),
+	validity: Symbol('validity'),
+	validationMessage: Symbol('validation-message'),
+	value: Symbol('value'),
+	state: Symbol('state'),
+	formController: Symbol('form-controller'),
+	anchor: Symbol('anchor'),
+	customInputs: Symbol('custom-inputs'),
+};
+
+function shimAria(prototype) {
+	const enumerable = true;
+	const configurable = true;
+	const props = Object.fromEntries(Object.keys(aria).map(prop => [prop, {
+		get: function() {
+			return this[symbols.element][prop];
+		},
+		set: function(val) {
+			this[symbols.element][prop] = val;
+		},
+		enumerable, configurable,
+	}]));
+
+	Object.defineProperties(prototype, props);
+}
+
 if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEvent' in globalThis) {
-	const symbols = {
-		key: Symbol('key'),
-		internals: Symbol('element-internals'),
-		form: Symbol('form'),
-		fieldset: Symbol('fieldset'),
-		element: Symbol('element'),
-		validity: Symbol('validity'),
-		validationMessage: Symbol('validation-message'),
-		value: Symbol('value'),
-		state: Symbol('state'),
-		formController: Symbol('form-controller'),
-		anchor: Symbol('anchor'),
-		customInputs: Symbol('custom-inputs'),
-	};
-
-	const aria = {
-		ariaAtomic: 'aria-atomic',
-		ariaAutoComplete: 'aria-autocomplete',
-		ariaBusy: 'aria-busy',
-		ariaChecked: 'aria-checked',
-		ariaColCount: 'aria-colcount',
-		ariaColIndex: 'aria-colindex',
-		ariaColIndexText: 'aria-colindextext',
-		ariaColSpan: 'aria-colspan',
-		ariaCurrent: 'aria-current',
-		ariaDisabled: 'aria-disabled',
-		ariaExpanded: 'aria-expanded',
-		ariaHasPopup: 'aria-haspopup',
-		ariaHidden: 'aria-hidden',
-		ariaInvalid: 'aria-invalid',
-		ariaKeyShortcuts: 'aria-keyshortcuts',
-		ariaLabel: 'aria-label',
-		ariaLevel: 'aria-level',
-		ariaLive: 'aria-live',
-		ariaModal: 'aria-modal',
-		ariaMultiLine: 'aria-multiline',
-		ariaMultiSelectable: 'aria-multiselectable',
-		ariaOrientation: 'aria-orientation',
-		ariaPlaceholder: 'aria-placeholder',
-		ariaPosInSet: 'aria-posinset',
-		ariaPressed: 'aria-pressed',
-		ariaReadOnly: 'aria-readonly',
-		ariaRelevant: 'aria-relevant',
-		ariaRequired: 'aria-required',
-		ariaRoleDescription: 'aria-roledescription',
-		ariaRowCount: 'aria-rowcount',
-		ariaRowIndex: 'aria-rowindex',
-		ariaRowIndexText: 'aria-rowindextext',
-		ariaRowSpan: 'aria-rowspan',
-		ariaSelected: 'aria-selected',
-		ariaSetSize: 'aria-setsize',
-		ariaSort: 'aria-sort',
-		ariaValueMax: 'aria-valuemax',
-		ariaValueMin: 'aria-valuemin',
-		ariaValueNow: 'aria-valuenow',
-		ariaValueText: 'aria-valuetext',
-		role: 'role'
-	};
-
 	const validationObject = {
 		valueMissing: false, typeMismatch: false, patternMismatch: false, tooLong: false,
 		tooShort: false, rangeUnderflow: false, rangeOverflow: false, stepMismatch: false,
@@ -503,23 +477,6 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
 		}
 	}
 
-	Object.entries(aria).forEach(([prop, attr]) => {
-		Object.defineProperty(ElementInternals.prototype, prop, {
-			get: function() {
-				return this[symbols.element].getAttribute(attr);
-			},
-			set: function(val) {
-				if (typeof val === 'string') {
-					this[symbols.element].setAttribute(attr, val);
-				} else {
-					this[symbols.element].removeAttribute(attr);
-				}
-			},
-			enumerable: false,
-			configurable: true,
-		});
-	});
-
 	HTMLElement.prototype.attachInternals = function attachInternals() {
 		if (this.hasOwnProperty(symbols.internals)) {
 			throw new DOMException('Invalid operation');
@@ -540,7 +497,7 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
  */
 if (HTMLElement.prototype.attachInternals instanceof Function && ! ('CustomStateSet' in globalThis)) {
 	const prefix = '_state';
-	const symbols = { key: Symbol.for('key') };
+	// const symbols = { key: Symbol.for('key') };
 	const protectedData = new WeakMap();
 	const getCName = state => {
 		if (! state.toString().startsWith('--')) {
@@ -629,6 +586,13 @@ if (HTMLElement.prototype.attachInternals instanceof Function && ! ('CustomState
 		value: function() {
 			const internals = value.call(this);
 
+			Object.defineProperty(internals, symbols.element, {
+				value: this,
+				enumerable: false,
+				writable: false,
+				configurable: false,
+			});
+
 			Object.defineProperty(internals, 'states', {
 				value: new CustomStateSet(this, symbols.key),
 				configurable: true,
@@ -649,4 +613,5 @@ if (HTMLElement.prototype.attachInternals instanceof Function && ! ('CustomState
 	});
 
 	globalThis.CustomStateSet = CustomStateSet;
+	shimAria(ElementInternals.prototype);
 }
