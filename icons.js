@@ -921,7 +921,7 @@ export function createStarIcon({
 				'fill-rule': 'evenodd',
 			})
 		]
-	})
+	});
 }
 
 export function createSyncIcon({

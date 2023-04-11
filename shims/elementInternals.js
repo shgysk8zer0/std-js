@@ -495,9 +495,8 @@ if (! (HTMLElement.prototype.attachInternals instanceof Function) && 'FormDataEv
  * Uses `._state--foo` instead of `:--foo` though
  * Requires Iterator Helpers (`./iterator.js`)
  */
-if (HTMLElement.prototype.attachInternals instanceof Function && ! ('CustomStateSet' in globalThis)) {
+if ('ElementInternals' in globalThis && ! ('CustomStateSet' in globalThis)) {
 	const prefix = '_state';
-	// const symbols = { key: Symbol.for('key') };
 	const protectedData = new WeakMap();
 	const getCName = state => {
 		if (! state.toString().startsWith('--')) {
