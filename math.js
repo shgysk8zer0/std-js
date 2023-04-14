@@ -77,8 +77,26 @@ export function randomInt(min = 0, max = 100) {
 }
 
 export function* rng({ length = 32 } = {}) {
-	for (const num of crypto.getRandomValues(new Uint8ClampedArray(length))) {
-		yield num;
+	while(true) {
+		for (const num of crypto.getRandomValues(new Uint8Array(length))) {
+			yield num;
+		}
+	}
+}
+
+export function* rng16({ length = 32 } = {}) {
+	while(true) {
+		for (const num of crypto.getRandomValues(new Uint16Array(length))) {
+			yield num;
+		}
+	}
+}
+
+export function* rng32({ length = 32 } = {}) {
+	while(true) {
+		for (const num of crypto.getRandomValues(new Uint32Array(length))) {
+			yield num;
+		}
 	}
 }
 
