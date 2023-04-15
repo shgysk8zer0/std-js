@@ -80,7 +80,7 @@ export async function registerServiceWorker(source, {
 		reject(new DOMException('Service worker not supported'));
 	} else if (! (typeof source === 'string' || isScriptURL(source) || source instanceof URL)) {
 		reject(new TypeError('Invalid Service worker registration source'));
-	} else if (isTrustPolicy(policy)) {
+	} else if (! isScriptURL(source) && isTrustPolicy(policy)) {
 		navigator.serviceWorker.register(
 			policy.createScriptURL(source),
 			{ scope, type, updateViaCache }
