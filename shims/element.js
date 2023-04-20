@@ -43,6 +43,49 @@ if (! Element.prototype.hasOwnProperty(aria.role)) {
 	Object.defineProperties(Element.prototype, props);
 }
 
+if (! HTMLElement.prototype.hasOwnProperty('inert')) {
+	// CSS will handle pointer events
+	const previous = new WeakMap();
+	const restoreTabIndex = el => {
+		if (previous.has(el)) {
+			el.tabIndex = previous.get(el);
+		}
+
+		if (el.hasChildNodes()) {
+			[...el.children].forEach(restoreTabIndex);
+		}
+	};
+
+	const setTabIndex = el => {
+		if (el.tabIndex !== -1) {
+			previous.set(el, el.tabIndex);
+			el.tabIndex = -1;
+		}
+
+		if (el.hasChildNodes()) {
+			[...el.children].forEach(setTabIndex);
+		}
+	};
+
+	Object.defineProperty(HTMLElement.prototype, 'inert', {
+		get: function() {
+			return this.hasAttribute('inert');
+		},
+		set: function(val) {
+			if (val) {
+				this.setAttribute('aria-hidden', 'true');
+				this.setAttribute('inert', '');
+				setTabIndex(this);
+			} else {
+				this.removeAttribute('aria-hidden');
+				this.removeAttribute('inert');
+				restoreTabIndex(this);
+			}
+		},
+		enumerable: true, configurable: true,
+	});
+}
+
 if (! HTMLImageElement.prototype.hasOwnProperty('complete')) {
 	/**
 	 * Note: This shim cannot detect if an image has an error while loading
