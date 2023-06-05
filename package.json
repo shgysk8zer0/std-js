@@ -59,7 +59,7 @@
     "version:bump:major": "npm version --no-git-tag-version major"
   },
   "devDependencies": {
-    "eslint": "^8.41.0",
+    "eslint": "^8.42.0",
     "htmlhint": "^1.0.0",
     "http-server": "^14.0.0"
   },
